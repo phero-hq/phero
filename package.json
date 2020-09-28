@@ -1,0 +1,19 @@
+{
+  "name": "samen",
+  "version": "1.0.0",
+  "description": "Samen builds and deploys serverless backend services and databases",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samen-io/samen.git"
+  },
+  "author": "Press Play Development",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/samen-io/samen/issues"
+  },
+  "homepage": "https://github.com/samen-io/samen#readme"
+}
