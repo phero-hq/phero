@@ -1,0 +1,11 @@
+{
+  "name": "@samen/core",
+  "version": "0.0.0",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "rm -rf build && tsc"
+  },
+  "devDependencies": {
+    "typescript": "^4.1.2"
+  }
+}
