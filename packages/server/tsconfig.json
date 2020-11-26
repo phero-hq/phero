@@ -3,5 +3,5 @@
   "compilerOptions": {
     "outDir": "./build"
   },
-  "files": ["src/index.ts"]
+  "include": ["src"]
 }

@@ -1,7 +1,10 @@
 {
   "name": "@samen/client",
   "version": "0.0.0",
-  "main": "build/index.js",
+  "main": "build/sdk/index.js",
+  "bin": {
+    "samen-client": "build/cli.js"
+  },
   "scripts": {
     "build": "rm -rf build && tsc"
   },
