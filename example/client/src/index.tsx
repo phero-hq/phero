@@ -1,3 +1,7 @@
-import { Sjaak } from "@samen/client";
+import { Sjaak, add } from "@samen/client";
 
-console.log(Sjaak);
+async function run() {
+  const result = await add(42);
+}
+
+run();

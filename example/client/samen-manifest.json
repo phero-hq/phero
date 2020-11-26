@@ -1,4 +1,30 @@
 {
-  "rpcFunctions": [],
-  "models": {}
+  "rpcFunctions": [
+    {
+      "name": "add",
+      "parameters": [
+        {
+          "name": "sjaak",
+          "index": 0,
+          "value": {
+            "type": "number"
+          }
+        }
+      ],
+      "returnType": {
+        "type": "number"
+      },
+      "modelIds": ["Sjaak"]
+    }
+  ],
+  "models": {
+    "Sjaak": {
+      "id": "Sjaak",
+      "ts": "type Sjaak = number",
+      "value": {
+        "type": "array",
+        "elementType": "number"
+      }
+    }
+  }
 }

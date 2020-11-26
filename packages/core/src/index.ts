@@ -1,1 +1,1 @@
-export { default as buildClient } from "./buildClient";
+export { default as buildClientSDK } from "./buildClientSDK";
