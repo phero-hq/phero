@@ -1,1 +1,2 @@
-export { default as buildClientSDK } from "./buildClientSDK";
+export { default as generate } from "./generate";
+export { default as generateClientSDK } from "./generateClientSDK";

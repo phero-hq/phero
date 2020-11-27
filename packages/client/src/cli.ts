@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import path from "path";
-import { buildClientSDK } from "@samen/core";
+import { generate, generateClientSDK } from "@samen/core";
 
 switch (process.argv[2]) {
   case "build":
@@ -18,6 +18,6 @@ async function build(): Promise<void> {
   const sdkPath = path.join(cwd, "node_modules/@samen/client/build/sdk");
 
   console.log("Building Samen SDK...");
-  await buildClientSDK(manifestPath, sdkPath);
+  await generate(manifestPath, sdkPath, generateClientSDK);
   console.log("Done!");
 }

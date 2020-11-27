@@ -1,31 +1,17 @@
-import { promises as fs } from "fs";
-import { Project } from "ts-morph";
 import { JSType, JSValue, RPCFunction, SamenFile } from "./tmp";
 import { formatCode } from "./utils";
 
-export default async function buildClientSDK(
-  manifestPath: string,
-  targetPath: string
-): Promise<void> {
-  const project = new Project({
-    compilerOptions: { declaration: true, outDir: targetPath },
-  });
-  const manifest = JSON.parse(await fs.readFile(manifestPath, "utf-8"));
-  const source = formatCode(genSource(manifest));
-  console.log(source);
-  project.createSourceFile("index.ts", source);
-  await project.emit();
+export default function buildClientSDK(manifest: SamenFile): string {
+  return formatCode(`
+    import request from './request';
+
+    ${Object.keys(manifest.models).map(
+      (modelId) => `export ${manifest.models[modelId].ts}`
+    )}
+
+    ${manifest.rpcFunctions.map(genRPC)}
+  `);
 }
-
-const genSource = (manifest: SamenFile): string => `
-  import request from './request';
-
-  ${Object.keys(manifest.models).map(
-    (modelId) => `export ${manifest.models[modelId].ts}`
-  )}
-
-  ${manifest.rpcFunctions.map(genRPC)}
-`;
 
 const genRPC = (rpc: RPCFunction): string => {
   const { name } = rpc;
@@ -54,7 +40,7 @@ const genType = (value: JSValue): string => {
       return value.id;
 
     case JSType.array:
-      return `${value.elementType}[]`;
+      return `${value.elementType.type}[]`;
 
     case JSType.tuple:
       return `[${value.elementTypes.map(genType).join(", ")}]`;
@@ -70,7 +56,7 @@ const genType = (value: JSValue): string => {
         .map((p) => `${p.name}: ${genType(p)}`)
         .join(";")}}`;
 
-    case JSType.untyped: // TODO: any? unknown?
-      throw new Error(`Not implemented: ${value.type}`);
+    case JSType.untyped:
+      return "void";
   }
 };
