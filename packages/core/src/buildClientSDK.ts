@@ -12,6 +12,7 @@ export default async function buildClientSDK(
   });
   const manifest = JSON.parse(await fs.readFile(manifestPath, "utf-8"));
   const source = formatCode(genSource(manifest));
+  console.log(source);
   project.createSourceFile("index.ts", source);
   await project.emit();
 }
@@ -28,9 +29,9 @@ const genSource = (manifest: SamenFile): string => `
 
 const genRPC = (rpc: RPCFunction): string => {
   const { name } = rpc;
-  const params = rpc.parameters.map((p) => `${p.name}: ${genJsValue(p.value)}`);
+  const params = rpc.parameters.map((p) => `${p.name}: ${genType(p.value)}`);
   const body = `{${rpc.parameters.map((p) => p.name).join(",")}}`;
-  const returnType = genJsValue(rpc.returnType);
+  const returnType = genType(rpc.returnType);
   const isVoid = rpc.returnType.type === JSType.untyped ? "true" : "false";
 
   return `
@@ -40,7 +41,7 @@ const genRPC = (rpc: RPCFunction): string => {
   `;
 };
 
-const genJsValue = (value: JSValue): string => {
+const genType = (value: JSValue): string => {
   switch (value.type) {
     case JSType.number:
     case JSType.string:
@@ -49,13 +50,27 @@ const genJsValue = (value: JSValue): string => {
     case JSType.undefined:
       return value.type;
 
-    case JSType.untyped:
-    case JSType.object:
-    case JSType.array:
-    case JSType.date:
-    case JSType.oneOfTypes:
-    case JSType.tuple:
     case JSType.modelRef:
+      return value.id;
+
+    case JSType.array:
+      return `${value.elementType}[]`;
+
+    case JSType.tuple:
+      return `[${value.elementTypes.map(genType).join(", ")}]`;
+
+    case JSType.date:
+      return "Date";
+
+    case JSType.oneOfTypes:
+      return `${value.oneOfTypes.map(genType).join(" | ")}`;
+
+    case JSType.object:
+      return `{${value.properties
+        .map((p) => `${p.name}: ${genType(p)}`)
+        .join(";")}}`;
+
+    case JSType.untyped: // TODO: any? unknown?
       throw new Error(`Not implemented: ${value.type}`);
   }
 };
