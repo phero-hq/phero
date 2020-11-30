@@ -27,15 +27,6 @@ export async function something(a: Date): Promise<void> {
 "
 `;
 
-exports[`rpcFunctions parameters modelRef 1`] = `
-"import request from \\"./request\\";
-
-export async function something(a: Something): Promise<void> {
-  return request(\\"something\\", { a }, true);
-}
-"
-`;
-
 exports[`rpcFunctions parameters multiple parameters 1`] = `
 "import request from \\"./request\\";
 
@@ -85,6 +76,19 @@ exports[`rpcFunctions parameters oneOfTypes 1`] = `
 "import request from \\"./request\\";
 
 export async function something(a: boolean | number): Promise<void> {
+  return request(\\"something\\", { a }, true);
+}
+"
+`;
+
+exports[`rpcFunctions parameters ref 1`] = `
+"import request from \\"./request\\";
+
+export interface Something {
+  x: boolean;
+}
+
+export async function something(a: Something): Promise<void> {
   return request(\\"something\\", { a }, true);
 }
 "
@@ -144,15 +148,6 @@ export async function something(): Promise<Date> {
 "
 `;
 
-exports[`rpcFunctions return type modelRef 1`] = `
-"import request from \\"./request\\";
-
-export async function something(): Promise<Something> {
-  return request(\\"something\\", {}, false);
-}
-"
-`;
-
 exports[`rpcFunctions return type null 1`] = `
 "import request from \\"./request\\";
 
@@ -184,6 +179,19 @@ exports[`rpcFunctions return type oneOfTypes 1`] = `
 "import request from \\"./request\\";
 
 export async function something(): Promise<boolean | string> {
+  return request(\\"something\\", {}, false);
+}
+"
+`;
+
+exports[`rpcFunctions return type ref 1`] = `
+"import request from \\"./request\\";
+
+export interface Something {
+  x: boolean;
+}
+
+export async function something(): Promise<Something> {
   return request(\\"something\\", {}, false);
 }
 "

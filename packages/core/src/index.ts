@@ -1,2 +1,1 @@
-export { default as generate } from "./generate";
-export { default as generateClientSDK } from "./generateClientSDK";
+export { default as generateClientSDK } from "./generateClientSDK"

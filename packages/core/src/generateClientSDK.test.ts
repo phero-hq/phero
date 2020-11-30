@@ -1,32 +1,34 @@
-import generateClientSDK from "./generateClientSDK";
-import { JSType, JSValue, RPCFunctionParameter } from "./tmp";
+import generateClientSDK, { transformToClientSDK } from "./generateClientSDK"
+import { RPCFunctionParameter } from "./domain/manifest"
+import { JSType, JSValue } from "./domain/JSValue"
 
 describe("rpcFunctions", () => {
   describe("return type", () => {
     const gen = (returnType: JSValue): string =>
-      generateClientSDK({
+      transformToClientSDK({
+        models: {},
+        refs: {},
         rpcFunctions: [
           {
             name: "something",
             parameters: [],
             returnType,
-            modelIds: ["Something"],
+            modelIds: [],
           },
         ],
-        models: {}, // TODO
-      });
+      })
 
     test("string", () => {
-      expect(gen({ type: JSType.string })).toMatchSnapshot();
-    });
+      expect(gen({ type: JSType.string })).toMatchSnapshot()
+    })
 
     test("number", () => {
-      expect(gen({ type: JSType.number })).toMatchSnapshot();
-    });
+      expect(gen({ type: JSType.number })).toMatchSnapshot()
+    })
 
     test("boolean", () => {
-      expect(gen({ type: JSType.boolean })).toMatchSnapshot();
-    });
+      expect(gen({ type: JSType.boolean })).toMatchSnapshot()
+    })
 
     test("object", () => {
       expect(
@@ -36,36 +38,36 @@ describe("rpcFunctions", () => {
             { name: "a", type: JSType.boolean },
             { name: "b", type: JSType.string },
           ],
-        })
-      ).toMatchSnapshot();
-    });
+        }),
+      ).toMatchSnapshot()
+    })
 
     test("array", () => {
       expect(
-        gen({ type: JSType.array, elementType: { type: JSType.number } })
-      ).toMatchSnapshot();
-    });
+        gen({ type: JSType.array, elementType: { type: JSType.number } }),
+      ).toMatchSnapshot()
+    })
 
     test("date", () => {
-      expect(gen({ type: JSType.date })).toMatchSnapshot();
-    });
+      expect(gen({ type: JSType.date })).toMatchSnapshot()
+    })
 
     test("null", () => {
-      expect(gen({ type: JSType.null })).toMatchSnapshot();
-    });
+      expect(gen({ type: JSType.null })).toMatchSnapshot()
+    })
 
     test("undefined", () => {
-      expect(gen({ type: JSType.undefined })).toMatchSnapshot();
-    });
+      expect(gen({ type: JSType.undefined })).toMatchSnapshot()
+    })
 
     test("oneOfTypes", () => {
       expect(
         gen({
           type: JSType.oneOfTypes,
           oneOfTypes: [{ type: JSType.boolean }, { type: JSType.string }],
-        })
-      ).toMatchSnapshot();
-    });
+        }),
+      ).toMatchSnapshot()
+    })
 
     test("tuple", () => {
       expect(
@@ -75,55 +77,83 @@ describe("rpcFunctions", () => {
             { type: JSType.date },
             { type: JSType.array, elementType: { type: JSType.number } },
           ],
-        })
-      ).toMatchSnapshot();
-    });
+        }),
+      ).toMatchSnapshot()
+    })
 
-    test("modelRef", () => {
-      expect(
-        gen({
-          type: JSType.modelRef,
-          id: "Something",
-        })
-      ).toMatchSnapshot(); // TODO: Interface is missing
-    });
+    test("ref", () => {
+      const code = transformToClientSDK({
+        models: {
+          Something: {
+            id: "Something",
+            ts: "interface Something { x: boolean }",
+          },
+        },
+        refs: {
+          Something: {
+            id: "Something",
+            modelId: "Something",
+            value: {
+              type: JSType.object,
+              properties: [
+                {
+                  name: "x",
+                  type: JSType.boolean,
+                },
+              ],
+            },
+          },
+        },
+        rpcFunctions: [
+          {
+            name: "something",
+            parameters: [],
+            returnType: { type: JSType.ref, id: "Something" },
+            modelIds: [],
+          },
+        ],
+      })
+
+      expect(code).toMatchSnapshot()
+    })
 
     test("untyped", () => {
-      expect(gen({ type: JSType.untyped })).toMatchSnapshot();
-    });
-  });
+      expect(gen({ type: JSType.untyped })).toMatchSnapshot()
+    })
+  })
 
   describe("parameters", () => {
     const gen = (parameters: RPCFunctionParameter[]): string =>
-      generateClientSDK({
+      transformToClientSDK({
         rpcFunctions: [
           {
             name: "something",
             parameters,
             returnType: { type: JSType.untyped },
-            modelIds: ["Something"],
+            modelIds: [],
           },
         ],
         models: {},
-      });
+        refs: {},
+      })
 
     test("string", () => {
       expect(
-        gen([{ name: "a", index: 0, value: { type: JSType.string } }])
-      ).toMatchSnapshot();
-    });
+        gen([{ name: "a", index: 0, value: { type: JSType.string } }]),
+      ).toMatchSnapshot()
+    })
 
     test("number", () => {
       expect(
-        gen([{ name: "a", index: 0, value: { type: JSType.number } }])
-      ).toMatchSnapshot();
-    });
+        gen([{ name: "a", index: 0, value: { type: JSType.number } }]),
+      ).toMatchSnapshot()
+    })
 
     test("boolean", () => {
       expect(
-        gen([{ name: "a", index: 0, value: { type: JSType.boolean } }])
-      ).toMatchSnapshot();
-    });
+        gen([{ name: "a", index: 0, value: { type: JSType.boolean } }]),
+      ).toMatchSnapshot()
+    })
 
     test("object", () => {
       expect(
@@ -136,9 +166,9 @@ describe("rpcFunctions", () => {
               properties: [{ name: "a", type: JSType.number }],
             },
           },
-        ])
-      ).toMatchSnapshot();
-    });
+        ]),
+      ).toMatchSnapshot()
+    })
 
     test("array", () => {
       expect(
@@ -148,27 +178,27 @@ describe("rpcFunctions", () => {
             index: 0,
             value: { type: JSType.array, elementType: { type: JSType.number } },
           },
-        ])
-      ).toMatchSnapshot();
-    });
+        ]),
+      ).toMatchSnapshot()
+    })
 
     test("date", () => {
       expect(
-        gen([{ name: "a", index: 0, value: { type: JSType.date } }])
-      ).toMatchSnapshot();
-    });
+        gen([{ name: "a", index: 0, value: { type: JSType.date } }]),
+      ).toMatchSnapshot()
+    })
 
     test("null", () => {
       expect(
-        gen([{ name: "a", index: 0, value: { type: JSType.null } }])
-      ).toMatchSnapshot();
-    });
+        gen([{ name: "a", index: 0, value: { type: JSType.null } }]),
+      ).toMatchSnapshot()
+    })
 
     test("undefined", () => {
       expect(
-        gen([{ name: "a", index: 0, value: { type: JSType.undefined } }])
-      ).toMatchSnapshot();
-    });
+        gen([{ name: "a", index: 0, value: { type: JSType.undefined } }]),
+      ).toMatchSnapshot()
+    })
 
     test("oneOfTypes", () => {
       expect(
@@ -181,9 +211,9 @@ describe("rpcFunctions", () => {
               oneOfTypes: [{ type: JSType.boolean }, { type: JSType.number }],
             },
           },
-        ])
-      ).toMatchSnapshot();
-    });
+        ]),
+      ).toMatchSnapshot()
+    })
 
     test("tuple", () => {
       expect(
@@ -196,33 +226,65 @@ describe("rpcFunctions", () => {
               elementTypes: [{ type: JSType.date }, { type: JSType.boolean }],
             },
           },
-        ])
-      ).toMatchSnapshot();
-    });
+        ]),
+      ).toMatchSnapshot()
+    })
 
-    test("modelRef", () => {
-      expect(
-        gen([
-          {
-            name: "a",
-            index: 0,
-            value: { type: JSType.modelRef, id: "Something" },
+    test("ref", () => {
+      const code = transformToClientSDK({
+        models: {
+          Something: {
+            id: "Something",
+            ts: "interface Something { x: boolean }",
           },
-        ])
-      ).toMatchSnapshot();
-    });
+        },
+        refs: {
+          Something: {
+            id: "Something",
+            modelId: "Something",
+            value: {
+              type: JSType.object,
+              properties: [
+                {
+                  name: "x",
+                  type: JSType.boolean,
+                },
+              ],
+            },
+          },
+        },
+        rpcFunctions: [
+          {
+            name: "something",
+            parameters: [
+              {
+                index: 0,
+                name: "a",
+                value: {
+                  type: JSType.ref,
+                  id: "Something",
+                },
+              },
+            ],
+            returnType: { type: JSType.untyped },
+            modelIds: ["Something"],
+          },
+        ],
+      })
+      expect(code).toMatchSnapshot()
+    })
 
     test("no parameters", () => {
-      expect(gen([])).toMatchSnapshot();
-    });
+      expect(gen([])).toMatchSnapshot()
+    })
 
     test("multiple parameters", () => {
       expect(
         gen([
           { name: "a", index: 0, value: { type: JSType.number } },
           { name: "b", index: 1, value: { type: JSType.string } },
-        ])
-      ).toMatchSnapshot();
-    });
-  });
-});
+        ]),
+      ).toMatchSnapshot()
+    })
+  })
+})

@@ -1,4 +1,4 @@
-import prettier from "prettier";
+import prettier from "prettier"
 
 export const formatCode = (s: string) =>
-  prettier.format(s, { parser: "typescript" });
+  prettier.format(s, { parser: "typescript" })
