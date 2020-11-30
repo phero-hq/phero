@@ -17,8 +17,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "pregenerate-client": "cd ../../samen-rpc-cli && npm run build",
-    "generate-client": "samen-rpc generate-client --server http://localhost:4000"
+    "samen": "samen"
   },
   "eslintConfig": {
     "extends": "react-app"

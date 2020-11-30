@@ -1,7 +1,7 @@
 import { Project } from "ts-morph"
 import generateManifest from "./generateManifest"
-import { JSType } from "./domain/JSValue"
-import { RPCFunction, SamenManifest } from "./domain/manifest"
+import { JSType } from "../domain/JSValue"
+import { RPCFunction, SamenManifest } from "../domain/manifest"
 
 function getCompiledSamenFile(tsContent: string): SamenManifest {
   const project = new Project()
@@ -760,7 +760,7 @@ describe("compile SamenFile", () => {
     test("extracts type alias models from parameters", () => {
       const r = getCompiledSamenFile(`
     type SomeDataStructure = {
-      prop: number 
+      prop: number
       size: Size
     }
     enum Size { S, M, L }
@@ -795,7 +795,7 @@ describe("compile SamenFile", () => {
     test("extracts indirect enum models from parameters", () => {
       const r = getCompiledSamenFile(`
     interface SomeDataStructure {
-      prop: number 
+      prop: number
       size: Size
     }
     enum Size { S, M, L }
@@ -892,11 +892,11 @@ describe("compile SamenFile", () => {
       B,
       C
     }
-    
+
     interface SomeInterface {
       propA: SomeEnum
     }
-    
+
     export async function myFirstFunction(a: SomeInterface): Promise<number> {
       return 1;
     }
@@ -905,7 +905,7 @@ describe("compile SamenFile", () => {
       prop1: SomeInterface
       d: Date
     }
-    
+
     interface ResultType {
       resultProp: string
     }

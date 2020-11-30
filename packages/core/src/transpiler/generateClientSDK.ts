@@ -1,5 +1,5 @@
-import { RPCFunction, SamenManifest } from "./domain/manifest"
-import { JSType, JSValue } from "./domain/JSValue"
+import { RPCFunction, SamenManifest } from "../domain/manifest"
+import { JSType, JSValue } from "../domain/JSValue"
 import { formatCode } from "./utils"
 import transformManifest from "./transformManifest"
 
@@ -12,7 +12,7 @@ export default function generateClientSDK(
 
 export function transformToClientSDK(manifest: SamenManifest): string {
   return formatCode(`
-    import request from './request';
+    ${requestFunction}
 
     ${Object.keys(manifest.models).map(
       (modelId) => `export ${manifest.models[modelId].ts}`,
@@ -21,6 +21,36 @@ export function transformToClientSDK(manifest: SamenManifest): string {
     ${manifest.rpcFunctions.map(genRPC)}
   `)
 }
+
+const requestFunction = `
+  // TODO: Get from manifest
+  const ENDPOINT = "http://localhost:4000/"
+
+  async function request<T>(
+    name: string,
+    body: object,
+    isVoid: boolean,
+  ): Promise<T | void> {
+    try {
+      const result = await fetch(ENDPOINT + name, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+      if (!result.ok) {
+        throw new Error(\`Call failed with status \${result.status}\`)
+      }
+      if (!isVoid) {
+        const data = await result.json()
+        return data as T
+      }
+    } catch (err) {
+      console.error(err)
+      throw new Error("Network error")
+    }
+  }
+`
+
 const genRPC = (rpc: RPCFunction): string => {
   const { name } = rpc
   const params = rpc.parameters.map((p) => `${p.name}: ${genType(p.value)}`)

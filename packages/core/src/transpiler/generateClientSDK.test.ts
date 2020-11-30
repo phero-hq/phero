@@ -1,6 +1,6 @@
+import { RPCFunctionParameter } from "../domain/manifest"
+import { JSType, JSValue } from "../domain/JSValue"
 import generateClientSDK, { transformToClientSDK } from "./generateClientSDK"
-import { RPCFunctionParameter } from "./domain/manifest"
-import { JSType, JSValue } from "./domain/JSValue"
 
 describe("rpcFunctions", () => {
   describe("return type", () => {

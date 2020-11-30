@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "main": "build/sdk/index.js",
   "bin": {
-    "samen-client": "build/cli.js"
+    "samen": "build/cli.js"
   },
   "scripts": {
     "clean": "rm -rf build",
