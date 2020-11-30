@@ -68,4 +68,4 @@ And you're ready to go :)
 
 ## Credits
 
-Built with ♥️ by [Pres Play](https://pressplay.dev)
+Built with ♥️ by [Press Play](https://pressplay.dev)
