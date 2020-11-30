@@ -11,6 +11,10 @@ export interface RPCFunction {
   parameters: RPCFunctionParameter[]
   returnType: JSValue
   modelIds: string[]
+  filePath: {
+    sourceFile: string
+    outputFile: string
+  }
 }
 
 export interface RPCFunctionParameter {

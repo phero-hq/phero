@@ -68,6 +68,14 @@ export default function generateManifest(
           functionDeclaration,
         ),
         modelIds,
+        filePath: {
+          sourceFile: functionDeclaration.getSourceFile().getFilePath(),
+          outputFile: functionDeclaration
+            .getSourceFile()
+            .getEmitOutput()
+            .getOutputFiles()[0]
+            .getFilePath(),
+        },
       }
 
       samenFile.rpcFunctions.push(rpcFunction)

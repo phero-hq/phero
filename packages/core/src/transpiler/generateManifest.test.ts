@@ -28,7 +28,7 @@ describe("compile SamenFile", () => {
       return 1;
     }
   `)
-    expect(r).toEqual({
+    expect(r).toMatchObject({
       name: "myFunction",
       parameters: [],
       returnType: { type: JSType.number },
@@ -43,7 +43,7 @@ describe("compile SamenFile", () => {
       return 1;
     }
   `)
-      const func: RPCFunction = {
+      const func = {
         name: "myFunction",
         parameters: [
           {
@@ -60,7 +60,7 @@ describe("compile SamenFile", () => {
         returnType: { type: JSType.number },
         modelIds: [],
       }
-      expect(r).toEqual(func)
+      expect(r).toMatchObject(func)
     })
 
     test("extracts interface typed parameters with correct JSValue", () => {
@@ -204,7 +204,7 @@ describe("compile SamenFile", () => {
       return 1;
     }
   `)
-      const func: RPCFunction = {
+      const func = {
         name: "myFunction",
         parameters: [
           {
@@ -219,7 +219,7 @@ describe("compile SamenFile", () => {
         returnType: { type: JSType.number },
         modelIds: [],
       }
-      expect(r).toEqual(func)
+      expect(r).toMatchObject(func)
     })
 
     test("extracts literal string parameters with correct JSValue", () => {
@@ -228,7 +228,7 @@ describe("compile SamenFile", () => {
       return 1;
     }
   `)
-      const func: RPCFunction = {
+      const func = {
         name: "myFunction",
         parameters: [
           {
@@ -243,7 +243,7 @@ describe("compile SamenFile", () => {
         returnType: { type: JSType.number },
         modelIds: [],
       }
-      expect(r).toEqual(func)
+      expect(r).toMatchObject(func)
     })
 
     test("extracts literal boolean parameters with correct JSValue", () => {
@@ -252,7 +252,7 @@ describe("compile SamenFile", () => {
       return 1;
     }
   `)
-      const func: RPCFunction = {
+      const func = {
         name: "myFunction",
         parameters: [
           {
@@ -267,7 +267,7 @@ describe("compile SamenFile", () => {
         returnType: { type: JSType.number },
         modelIds: [],
       }
-      expect(r).toEqual(func)
+      expect(r).toMatchObject(func)
     })
 
     test("extracts undefined parameters with correct JSValue", () => {
@@ -276,7 +276,7 @@ describe("compile SamenFile", () => {
       return 1;
     }
   `)
-      const func: RPCFunction = {
+      const func = {
         name: "myFunction",
         parameters: [
           {
@@ -290,7 +290,7 @@ describe("compile SamenFile", () => {
         returnType: { type: JSType.number },
         modelIds: [],
       }
-      expect(r).toEqual(func)
+      expect(r).toMatchObject(func)
     })
 
     test("extracts null parameters with correct JSValue", () => {
@@ -299,7 +299,7 @@ describe("compile SamenFile", () => {
       return 1;
     }
   `)
-      const func: RPCFunction = {
+      const func = {
         name: "myFunction",
         parameters: [
           {
@@ -313,7 +313,7 @@ describe("compile SamenFile", () => {
         returnType: { type: JSType.number },
         modelIds: [],
       }
-      expect(r).toEqual(func)
+      expect(r).toMatchObject(func)
     })
 
     test("extracts unknown parameters with correct JSValue", () => {
@@ -322,7 +322,7 @@ describe("compile SamenFile", () => {
       return 1;
     }
   `)
-      const func: RPCFunction = {
+      const func = {
         name: "myFunction",
         parameters: [
           {
@@ -336,7 +336,7 @@ describe("compile SamenFile", () => {
         returnType: { type: JSType.number },
         modelIds: [],
       }
-      expect(r).toEqual(func)
+      expect(r).toMatchObject(func)
     })
 
     test("extracts tuple parameters with correct JSValue", () => {
@@ -345,7 +345,7 @@ describe("compile SamenFile", () => {
       return 1;
     }
   `)
-      const func: RPCFunction = {
+      const func = {
         name: "myFunction",
         parameters: [
           {
@@ -360,7 +360,7 @@ describe("compile SamenFile", () => {
         returnType: { type: JSType.number },
         modelIds: [],
       }
-      expect(r).toEqual(func)
+      expect(r).toMatchObject(func)
     })
 
     test("extracts generic tuple parameters with correct JSValue", () => {
@@ -621,7 +621,7 @@ describe("compile SamenFile", () => {
       return 1;
     }
   `)
-      const func: RPCFunction = {
+      const func = {
         name: "myFunction",
         parameters: [
           {
@@ -635,7 +635,7 @@ describe("compile SamenFile", () => {
         returnType: { type: JSType.number },
         modelIds: [],
       }
-      expect(r).toEqual(func)
+      expect(r).toMatchObject(func)
     })
   })
 
@@ -646,14 +646,13 @@ describe("compile SamenFile", () => {
       return 'str';
     }
   `)
-      const func: RPCFunction = {
+      const func = {
         name: "myFunction",
         parameters: [],
         returnType: { type: JSType.string },
         modelIds: [],
       }
-      expect(r).toEqual(func)
-    })
+      expect(r).toMatchObject(func) })
 
     test("extracts object return type with correct JSValue", () => {
       const r = getCompiledSamenFile(`
