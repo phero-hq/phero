@@ -8,14 +8,14 @@ import {
   Type,
   Symbol,
 } from "ts-morph"
-import { JSType, JSValue } from "./domain/JSValue"
+import { JSType, JSValue } from "../domain/JSValue"
 import {
   ModelMap,
   RefMap,
   RPCFunction,
   RPCFunctionParameter,
   SamenManifest,
-} from "./domain/manifest"
+} from "../domain/manifest"
 
 export class SamenFileCompileError extends Error {}
 

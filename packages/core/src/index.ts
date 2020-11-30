@@ -1,2 +1,2 @@
-export { default as generateClientSDK } from "./generateClientSDK"
-export { default as generateManifest } from "./generateManifest"
+export { default as generateClientSDK } from "./transpiler/generateClientSDK"
+export { default as generateManifest } from "./transpiler/generateManifest"

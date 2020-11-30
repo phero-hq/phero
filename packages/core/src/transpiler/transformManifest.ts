@@ -1,6 +1,6 @@
 import { promises as fs } from "fs"
 import { Project } from "ts-morph"
-import { SamenManifest } from "./domain/manifest"
+import { SamenManifest } from "../domain/manifest"
 
 export default async function transformManifest(
   manifestPath: string,
