@@ -1,35 +1,29 @@
 {
-  "rpcFunctions": [
-    {
-      "name": "add",
-      "parameters": [
+    "rpcFunctions": [
         {
-          "name": "sjaak",
-          "index": 0,
-          "value": {
-            "type": "object",
-            "properties": [
-              { "name": "number", "type": "number" },
-              { "name": "string", "type": "string" },
-              { "name": "date", "type": "date" }
-            ]
-          }
+            "name": "add",
+            "parameters": [
+                {
+                    "index": 0,
+                    "name": "a",
+                    "value": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "index": 1,
+                    "name": "b",
+                    "value": {
+                        "type": "number"
+                    }
+                }
+            ],
+            "returnType": {
+                "type": "number"
+            },
+            "modelIds": []
         }
-      ],
-      "returnType": {
-        "type": "number"
-      },
-      "modelIds": ["Sjaak"]
-    }
-  ],
-  "models": {
-    "Sjaak": {
-      "id": "Sjaak",
-      "ts": "type Sjaak = number",
-      "value": {
-        "type": "array",
-        "elementType": "number"
-      }
-    }
-  }
+    ],
+    "models": {},
+    "refs": {}
 }

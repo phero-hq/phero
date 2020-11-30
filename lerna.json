@@ -1,4 +1,4 @@
 {
-  "packages": ["packages/core", "packages/server", "packages/client"],
+  "packages": ["packages/core", "packages/samen", "packages/client"],
   "version": "0.0.0"
 }

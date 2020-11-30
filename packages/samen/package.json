@@ -1,15 +1,20 @@
 {
-  "name": "@samen/server",
+  "name": "@samen/samen",
   "version": "0.0.0",
   "main": "build/index.js",
+  "bin": {
+    "samen": "build/cli.js"
+  },
   "scripts": {
-    "build": "rm -rf build && tsc"
+    "clean": "rm -rf build",
+    "build": "tsc"
   },
   "dependencies": {
     "@samen/core": "^0.0.0",
     "@types/jest": "^26.0.15",
     "jest": "^26.6.3",
-    "ts-jest": "^26.4.4"
+    "ts-jest": "^26.4.4",
+    "ts-morph": "^9.1.0"
   },
   "devDependencies": {
     "typescript": "^4.1.2"

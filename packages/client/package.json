@@ -6,7 +6,8 @@
     "samen-client": "build/cli.js"
   },
   "scripts": {
-    "build": "rm -rf build && tsc"
+    "clean": "rm -rf build",
+    "build": "tsc"
   },
   "dependencies": {
     "@samen/core": "^0.0.0",
