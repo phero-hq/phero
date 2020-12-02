@@ -34,7 +34,7 @@ function generateCode(
     export default async function(${params}): ${returnType} {
       // TODO: Validate parameters
 
-      const result = await ${rpc.name}(arguments)
+      const result = await ${rpc.name}(...arguments)
 
       // TODO: Validate result
 
