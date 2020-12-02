@@ -44,7 +44,7 @@ export default async function build(): Promise<void> {
   const samenConfig = await readSamenConfig(userProjectPath)
 
   if (samenConfig) {
-    // await buildClientSDKs(userProjectPath, samenConfig.clients)
+    await buildClientSDKs(userProjectPath, samenConfig.clients)
     await generateApiEndpoints(manifest, samenSourceFile, rpcsPath)
   }
 }

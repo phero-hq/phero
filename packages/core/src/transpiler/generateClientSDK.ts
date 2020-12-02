@@ -18,7 +18,7 @@ export function transformToClientSDK(manifest: SamenManifest): string {
       (modelId) => `export ${manifest.models[modelId].ts}`,
     )}
 
-    ${manifest.rpcFunctions.map(genRPC)}
+    ${manifest.rpcFunctions.map(genRPC).join("\n")}
   `)
 }
 

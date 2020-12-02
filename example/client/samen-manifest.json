@@ -5,16 +5,23 @@
             "parameters": [
                 {
                     "index": 0,
-                    "name": "a",
+                    "name": "aad",
                     "value": {
-                        "type": "string"
+                        "type": "ref",
+                        "id": "import(\"/Users/Jasper/Code/Press Play/samen/example/server/src/samen\").Aad"
                     }
                 }
             ],
             "returnType": {
                 "type": "boolean"
             },
-            "modelIds": []
+            "modelIds": [
+                "\"/Users/Jasper/Code/Press Play/samen/example/server/src/samen\".Aad"
+            ],
+            "filePath": {
+                "sourceFile": "/Users/Jasper/Code/Press Play/samen/example/server/src/samen.ts",
+                "outputFile": "/Users/Jasper/Code/Press Play/samen/example/server/build/samen.js"
+            }
         },
         {
             "name": "add",
@@ -37,9 +44,34 @@
             "returnType": {
                 "type": "number"
             },
-            "modelIds": []
+            "modelIds": [
+                "\"/Users/Jasper/Code/Press Play/samen/example/server/src/samen\".Aad"
+            ],
+            "filePath": {
+                "sourceFile": "/Users/Jasper/Code/Press Play/samen/example/server/src/calc.ts",
+                "outputFile": "/Users/Jasper/Code/Press Play/samen/example/server/build/calc.js"
+            }
         }
     ],
-    "models": {},
-    "refs": {}
+    "models": {
+        "\"/Users/Jasper/Code/Press Play/samen/example/server/src/samen\".Aad": {
+            "id": "\"/Users/Jasper/Code/Press Play/samen/example/server/src/samen\".Aad",
+            "ts": "export interface Aad {\n  x: boolean\n}"
+        }
+    },
+    "refs": {
+        "import(\"/Users/Jasper/Code/Press Play/samen/example/server/src/samen\").Aad": {
+            "id": "import(\"/Users/Jasper/Code/Press Play/samen/example/server/src/samen\").Aad",
+            "modelId": "\"/Users/Jasper/Code/Press Play/samen/example/server/src/samen\".Aad",
+            "value": {
+                "type": "object",
+                "properties": [
+                    {
+                        "name": "x",
+                        "type": "boolean"
+                    }
+                ]
+            }
+        }
+    }
 }

@@ -1,4 +1,4 @@
-// export { add } from "./calc"
+export { add } from "./calc"
 
 export interface Aad {
   x: boolean
