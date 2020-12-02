@@ -14,6 +14,10 @@ describe("rpcFunctions", () => {
             parameters: [],
             returnType,
             modelIds: [],
+            filePath: {
+              sourceFile: "src/something.ts",
+              outputFile: "build/something.js",
+            },
           },
         ],
       })
@@ -110,6 +114,10 @@ describe("rpcFunctions", () => {
             parameters: [],
             returnType: { type: JSType.ref, id: "Something" },
             modelIds: [],
+            filePath: {
+              sourceFile: "src/something.ts",
+              outputFile: "build/something.js",
+            },
           },
         ],
       })
@@ -131,6 +139,10 @@ describe("rpcFunctions", () => {
             parameters,
             returnType: { type: JSType.untyped },
             modelIds: [],
+            filePath: {
+              sourceFile: "src/something.ts",
+              outputFile: "build/something.js",
+            },
           },
         ],
         models: {},
@@ -268,6 +280,10 @@ describe("rpcFunctions", () => {
             ],
             returnType: { type: JSType.untyped },
             modelIds: ["Something"],
+            filePath: {
+              sourceFile: "src/something.ts",
+              outputFile: "build/something.js",
+            },
           },
         ],
       })

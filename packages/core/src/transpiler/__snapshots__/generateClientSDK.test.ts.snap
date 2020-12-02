@@ -1,0 +1,859 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`rpcFunctions parameters array 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(a: number[]): Promise<void> {
+  return request(\\"something\\", { a }, true);
+}
+"
+`;
+
+exports[`rpcFunctions parameters boolean 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(a: boolean): Promise<void> {
+  return request(\\"something\\", { a }, true);
+}
+"
+`;
+
+exports[`rpcFunctions parameters date 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(a: Date): Promise<void> {
+  return request(\\"something\\", { a }, true);
+}
+"
+`;
+
+exports[`rpcFunctions parameters multiple parameters 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(a: number, b: string): Promise<void> {
+  return request(\\"something\\", { a, b }, true);
+}
+"
+`;
+
+exports[`rpcFunctions parameters no parameters 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(): Promise<void> {
+  return request(\\"something\\", {}, true);
+}
+"
+`;
+
+exports[`rpcFunctions parameters null 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(a: null): Promise<void> {
+  return request(\\"something\\", { a }, true);
+}
+"
+`;
+
+exports[`rpcFunctions parameters number 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(a: number): Promise<void> {
+  return request(\\"something\\", { a }, true);
+}
+"
+`;
+
+exports[`rpcFunctions parameters object 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(a: { a: number }): Promise<void> {
+  return request(\\"something\\", { a }, true);
+}
+"
+`;
+
+exports[`rpcFunctions parameters oneOfTypes 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(a: boolean | number): Promise<void> {
+  return request(\\"something\\", { a }, true);
+}
+"
+`;
+
+exports[`rpcFunctions parameters ref 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export interface Something {
+  x: boolean;
+}
+
+export async function something(a: Something): Promise<void> {
+  return request(\\"something\\", { a }, true);
+}
+"
+`;
+
+exports[`rpcFunctions parameters string 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(a: string): Promise<void> {
+  return request(\\"something\\", { a }, true);
+}
+"
+`;
+
+exports[`rpcFunctions parameters tuple 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(a: [Date, boolean]): Promise<void> {
+  return request(\\"something\\", { a }, true);
+}
+"
+`;
+
+exports[`rpcFunctions parameters undefined 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(a: undefined): Promise<void> {
+  return request(\\"something\\", { a }, true);
+}
+"
+`;
+
+exports[`rpcFunctions return type array 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(): Promise<number[]> {
+  return request(\\"something\\", {}, false);
+}
+"
+`;
+
+exports[`rpcFunctions return type boolean 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(): Promise<boolean> {
+  return request(\\"something\\", {}, false);
+}
+"
+`;
+
+exports[`rpcFunctions return type date 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(): Promise<Date> {
+  return request(\\"something\\", {}, false);
+}
+"
+`;
+
+exports[`rpcFunctions return type null 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(): Promise<null> {
+  return request(\\"something\\", {}, false);
+}
+"
+`;
+
+exports[`rpcFunctions return type number 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(): Promise<number> {
+  return request(\\"something\\", {}, false);
+}
+"
+`;
+
+exports[`rpcFunctions return type object 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(): Promise<{ a: boolean; b: string }> {
+  return request(\\"something\\", {}, false);
+}
+"
+`;
+
+exports[`rpcFunctions return type oneOfTypes 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(): Promise<boolean | string> {
+  return request(\\"something\\", {}, false);
+}
+"
+`;
+
+exports[`rpcFunctions return type ref 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export interface Something {
+  x: boolean;
+}
+
+export async function something(): Promise<Something> {
+  return request(\\"something\\", {}, false);
+}
+"
+`;
+
+exports[`rpcFunctions return type string 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(): Promise<string> {
+  return request(\\"something\\", {}, false);
+}
+"
+`;
+
+exports[`rpcFunctions return type tuple 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(): Promise<[Date, number[]]> {
+  return request(\\"something\\", {}, false);
+}
+"
+`;
+
+exports[`rpcFunctions return type undefined 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(): Promise<undefined> {
+  return request(\\"something\\", {}, false);
+}
+"
+`;
+
+exports[`rpcFunctions return type untyped 1`] = `
+"// TODO: Get from manifest
+const ENDPOINT = \\"http://localhost:4000/\\";
+
+async function request<T>(
+  name: string,
+  body: object,
+  isVoid: boolean
+): Promise<T | void> {
+  try {
+    const result = await fetch(ENDPOINT + name, {
+      method: \\"POST\\",
+      headers: { \\"Content-Type\\": \\"application/json\\" },
+      body: JSON.stringify(body),
+    });
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`);
+    }
+    if (!isVoid) {
+      const data = await result.json();
+      return data as T;
+    }
+  } catch (err) {
+    console.error(err);
+    throw new Error(\\"Network error\\");
+  }
+}
+
+export async function something(): Promise<void> {
+  return request(\\"something\\", {}, true);
+}
+"
+`;
