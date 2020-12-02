@@ -5,7 +5,8 @@
   "scripts": {
     "clean": "rm -rf build",
     "build": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "npm run build"
   },
   "devDependencies": {
     "@types/prettier": "^2.1.5",
