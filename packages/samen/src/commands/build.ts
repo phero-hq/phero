@@ -4,14 +4,21 @@ import path from "path"
 import { exec } from "child_process"
 import util from "util"
 import { promises as fs } from "fs"
-import { generateManifest } from "@samen/core"
-import { Project } from "ts-morph"
+import { generateManifest, generateApiEndpoints } from "@samen/core"
+import {
+  FunctionDeclaration,
+  Project,
+  SourceFile,
+  SymbolFlags,
+  SyntaxKind,
+} from "ts-morph"
 
 const execAsync = util.promisify(exec)
+const buildPath = path.join(__dirname, "../../build")
+const rpcsPath = path.join(buildPath, "rpcs")
+const manifestPath = path.join(buildPath, "samen-manifest.json")
 
-export async function runDevServer(): Promise<void> {}
-
-export async function build(): Promise<void> {
+export default async function build(): Promise<void> {
   const userProjectPath = process.cwd()
 
   const project = new Project({
@@ -32,26 +39,13 @@ export async function build(): Promise<void> {
     process.exit(1)
   }
 
-  const samenManifest = generateManifest(
-    samenSourceFile,
-    project.getTypeChecker(),
-  )
-
-  const samenManifestPath = path.join(__dirname, "../build/samen-manifest.json")
-  const samenManifestJSON = JSON.stringify(samenManifest, null, 4)
-  await fs.writeFile(samenManifestPath, samenManifestJSON)
-
+  const manifest = generateManifest(samenSourceFile, project.getTypeChecker())
+  await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 4))
   const samenConfig = await readSamenConfig(userProjectPath)
 
   if (samenConfig) {
-    for (const relOrAbsClientPath of samenConfig.clients) {
-      const clientPath = path.resolve(userProjectPath, relOrAbsClientPath)
-      const clientManifestPath = path.join(clientPath, "./samen-manifest.json")
-      await fs.writeFile(clientManifestPath, samenManifestJSON)
-      await execAsync(`./node_modules/.bin/samen-client build`, {
-        cwd: clientPath,
-      })
-    }
+    // await buildClientSDKs(userProjectPath, samenConfig.clients)
+    await generateApiEndpoints(manifest, samenSourceFile, rpcsPath)
   }
 }
 
@@ -75,5 +69,18 @@ async function readSamenConfig(
       return null
     }
     throw e
+  }
+}
+
+async function buildClientSDKs(
+  userProjectPath: string,
+  clientPaths: string[],
+): Promise<void> {
+  for (const relOrAbsClientPath of clientPaths) {
+    const clientPath = path.resolve(userProjectPath, relOrAbsClientPath)
+    await execAsync(`cp "${manifestPath}" "${clientPath}/samen-manifest.json"`)
+    await execAsync(`./node_modules/.bin/samen build`, {
+      cwd: clientPath,
+    })
   }
 }

@@ -1,6 +1,22 @@
 {
     "rpcFunctions": [
         {
+            "name": "isSjaak",
+            "parameters": [
+                {
+                    "index": 0,
+                    "name": "a",
+                    "value": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returnType": {
+                "type": "boolean"
+            },
+            "modelIds": []
+        },
+        {
             "name": "add",
             "parameters": [
                 {
