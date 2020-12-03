@@ -12,7 +12,8 @@ export default async function generateApiEndpoints(
   })
 
   for (const rpc of manifest.rpcFunctions) {
-    const fileName = `${rpc.name}.ts`
+    const pathParts = rpc.filePath.sourceFile.split("/")
+    const fileName = pathParts[pathParts.length - 1]
     const code = generateCode(manifest, samenFile, rpc)
     project.createSourceFile(fileName, code)
   }
@@ -29,6 +30,8 @@ function generateCode(
   const returnType = `Promise<${generateType(rpc.returnType)}>`
 
   return formatCode(`
+    import ${rpc.name} from '${rpc.filePath.sourceFile}';
+
     ${rpc.modelIds.map((modelId) => manifest.models[modelId].ts).join("\n")}
 
     export default async function(${params}): ${returnType} {
@@ -40,32 +43,5 @@ function generateCode(
 
       return result
     }
-
-    ${getFunctionText(samenFile, rpc.name)}
   `)
-}
-
-function getFunctionText(samenFile: SourceFile, functionName: string): string {
-  const foundFunction = samenFile
-    .getExportSymbols()
-    .reduce((result, exportSymbol) => {
-      if (result) return result
-
-      const symbol = exportSymbol.isAlias()
-        ? exportSymbol.getAliasedSymbolOrThrow()
-        : exportSymbol
-
-      if (
-        symbol.getFlags() & SymbolFlags.Function &&
-        symbol.getName() === functionName
-      ) {
-        return symbol.getValueDeclarationOrThrow() as FunctionDeclaration
-      }
-    }, undefined as FunctionDeclaration | undefined)
-
-  if (!foundFunction) {
-    throw new Error(`Function not found by name: ${functionName}`)
-  }
-
-  return foundFunction.getText()
 }

@@ -24,5 +24,4 @@ async function build(): Promise<void> {
 
   console.log("Building Samen SDK...")
   await generateClientSDK(manifestPath, sdkPath)
-  console.log("Done!")
 }

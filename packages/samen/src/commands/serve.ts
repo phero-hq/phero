@@ -1,40 +1,64 @@
+import { RPCFunction, SamenManifest } from "@samen/core/build/domain/manifest"
+import { promises as fs } from "fs"
 import http from "http"
 import path from "path"
-import { promises as fs } from "fs"
-import { RPCFunction, SamenManifest } from "@samen/core/build/domain/manifest"
+import build from "./build"
 
 const PORT = parseInt(process.env.PORT || "") || 4000
+const IS_PROD = process.env.NODE_ENV === "production"
 
-type Routes = Record<string, RPCFunction>
+interface Route {
+  definition: RPCFunction
+  importedFunction: any // TODO
+  argumentNames: string[]
+}
+type Routes = Record<string, Route>
 let routes: Routes = {}
 
+const buildPath = path.join(process.cwd(), "node_modules/@samen/samen/build")
+
 export default async function serve() {
+  if (!IS_PROD) {
+    await build()
+  }
+
   const server = http.createServer()
   const manifest = await getManifest()
-
-  routes = manifest.rpcFunctions.reduce(
-    (result, rpc) => ({ ...result, [`/${rpc.name}`]: rpc }),
-    {},
-  )
+  routes = getRoutes(manifest)
 
   server.on("request", requestListener())
   server.on("listening", () => {
-    console.log(`SamenRPC listening on port ${PORT}`)
-    console.log({ routes })
+    console.log(`Samen is listening on port ${PORT}`)
   })
 
   server.listen(PORT)
 }
 
 async function getManifest(): Promise<SamenManifest> {
-  const manifestPath = path.join(__dirname, "../build/samen-manifest.json")
+  const manifestPath = path.join(buildPath, "samen-manifest.json")
   const manifestFile = await fs.readFile(manifestPath)
 
   if (!manifestFile) {
     throw new Error(`Manifest file not found at ${manifestPath}`)
   }
 
-  return (manifestFile as unknown) as SamenManifest
+  const manifest = JSON.parse(manifestFile.toString())
+  return (manifest as unknown) as SamenManifest
+}
+
+function getRoutes(manifest: SamenManifest): Routes {
+  return manifest.rpcFunctions.reduce((routes, rpcFunction) => {
+    return {
+      ...routes,
+      [`/${rpcFunction.name}`]: {
+        definition: rpcFunction,
+        importedFunction: require(rpcFunction.filePath.outputFile),
+        argumentNames: rpcFunction.parameters
+          .sort((a, b) => a.index - b.index)
+          .map((r) => r.name),
+      },
+    }
+  }, {} as Routes)
 }
 
 function requestListener() {
@@ -54,21 +78,18 @@ function requestListener() {
       res.setHeader("Content-Type", "application/json")
 
       if (req.url) {
-        const rpcDef = routes[req.url]
-        if (rpcDef) {
+        const route = routes[req.url]
+        if (route) {
           try {
             const body = await readBody(req)
-            console.log({ body })
-            // delete require.cache[require.resolve(rpcDef.buildPath)]
-            // const rpc = require(rpcDef.buildPath)[rpcDef.name]
-            // const responseData = await rpc(body && JSON.parse(body))
-            // console.log("responseData", responseData)
-            // if (responseData) {
-            //   res.statusCode = 200
-            //   res.write(JSON.stringify(responseData))
-            // } else {
-            res.statusCode = 204
-            // }
+            const parameters = buildParameters(route, body)
+            const responseData = await route.importedFunction(...parameters)
+            if (responseData) {
+              res.statusCode = 200
+              res.write(JSON.stringify(responseData))
+            } else {
+              res.statusCode = 204
+            }
           } catch (e) {
             res.statusCode = 500
             console.error(e)
@@ -86,6 +107,13 @@ function requestListener() {
     res.end()
   }
 }
+
+function buildParameters(route: Route, body?: string): unknown[] {
+  if (!body) return []
+  const parsedBody = JSON.parse(body)
+  return route.argumentNames.map((argumentName) => parsedBody[argumentName])
+}
+
 function readBody(request: http.IncomingMessage): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     const chunks: Buffer[] = []

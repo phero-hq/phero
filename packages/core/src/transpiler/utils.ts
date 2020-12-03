@@ -16,7 +16,6 @@ export function generateType(value: JSValue): string {
       return value.type
 
     case JSType.ref:
-      console.log("generateType", value)
       return value.id
 
     case JSType.array:

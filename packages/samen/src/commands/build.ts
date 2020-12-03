@@ -1,22 +1,19 @@
 #!/usr/bin/env node
 
-import path from "path"
-import { exec } from "child_process"
-import util from "util"
-import { promises as fs } from "fs"
-import { generateManifest, generateApiEndpoints } from "@samen/core"
 import {
-  FunctionDeclaration,
-  Project,
-  SourceFile,
-  SymbolFlags,
-  SyntaxKind,
-} from "ts-morph"
+  generateApiEndpoints,
+  generateManifest,
+  SamenManifest,
+} from "@samen/core"
+import { exec } from "child_process"
+import { promises as fs } from "fs"
+import path from "path"
+import { Project } from "ts-morph"
+import util from "util"
 
 const execAsync = util.promisify(exec)
 const buildPath = path.join(__dirname, "../../build")
 const rpcsPath = path.join(buildPath, "rpcs")
-const manifestPath = path.join(buildPath, "samen-manifest.json")
 
 export default async function build(): Promise<void> {
   const userProjectPath = process.cwd()
@@ -40,12 +37,25 @@ export default async function build(): Promise<void> {
   }
 
   const manifest = generateManifest(samenSourceFile, project.getTypeChecker())
-  await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 4))
+  await writeManifestFile(manifest, buildPath)
   const samenConfig = await readSamenConfig(userProjectPath)
 
   if (samenConfig) {
-    await buildClientSDKs(userProjectPath, samenConfig.clients)
-    await generateApiEndpoints(manifest, samenSourceFile, rpcsPath)
+    console.log("Building client SDK's...")
+    try {
+      await buildClientSDKs(userProjectPath, samenConfig.clients, manifest)
+    } catch (error) {
+      console.error(error)
+      process.exit(1)
+    }
+
+    console.log("Building API endpoints...")
+    try {
+      await generateApiEndpoints(manifest, samenSourceFile, rpcsPath)
+    } catch (error) {
+      console.error(error)
+      process.exit(1)
+    }
   }
 }
 
@@ -75,12 +85,36 @@ async function readSamenConfig(
 async function buildClientSDKs(
   userProjectPath: string,
   clientPaths: string[],
+  manifest: SamenManifest,
 ): Promise<void> {
   for (const relOrAbsClientPath of clientPaths) {
     const clientPath = path.resolve(userProjectPath, relOrAbsClientPath)
-    await execAsync(`cp "${manifestPath}" "${clientPath}/samen-manifest.json"`)
-    await execAsync(`./node_modules/.bin/samen build`, {
-      cwd: clientPath,
-    })
+    console.log(` Client path: ${clientPath}`)
+
+    console.log(` Writing manifest file...`)
+    await writeManifestFile(manifest, clientPath)
+
+    console.log(` Building client SDK...`)
+    try {
+      await fs.stat(`${clientPath}/node_modules/.bin/samen`)
+      await fs.stat(`${clientPath}/node_modules/@samen/client`)
+    } catch (error) {
+      console.log(
+        ` @samen/client does not seem to be installed in ${clientPath}`,
+      )
+      // TODO: Prompt for running `npm i @samen/client` in clientPath
+      process.exit(1)
+    }
+    await execAsync(`./node_modules/.bin/samen build`, { cwd: clientPath })
   }
+}
+
+async function writeManifestFile(
+  manifest: SamenManifest,
+  dir: string,
+): Promise<void> {
+  await fs.writeFile(
+    `${dir}/samen-manifest.json`,
+    JSON.stringify(manifest, null, 4),
+  )
 }
