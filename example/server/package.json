@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "clean": "rm -rf ./build",
+    "build": "tsc",
     "samen": "samen"
   },
   "author": "",
