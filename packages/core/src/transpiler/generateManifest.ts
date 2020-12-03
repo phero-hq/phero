@@ -202,12 +202,14 @@ function getJSValue(
       return getJsObjectValue()
     }
 
-    const symbolName = type.getText()
-    const modelNode = symbol.getDeclarations()[0]
-    const modelId = modelNode?.getSymbolOrThrow().getFullyQualifiedName()
+    const symbolName: string | undefined = cleanSymbolName(type.getText())
+    const modelNode: Node<ts.Node> = symbol.getDeclarations()[0]
+    const modelId: string | undefined = cleanModelId(
+      modelNode.getSymbolOrThrow().getFullyQualifiedName(),
+    )
 
-    if (!modelId) {
-      throw new SamenFileCompileError("Expected modelId")
+    if (!modelId || !symbolName) {
+      throw new SamenFileCompileError("Expected modelId and symbolName")
     }
 
     if (!refValues[symbolName]) {
@@ -240,6 +242,14 @@ function getJSValue(
   }
 
   throw new SamenFileCompileError(`Can't compile this yet: ${type}`)
+}
+
+function cleanModelId(modelId: string): string | undefined {
+  return modelId.match(/(^"[^"]+"\.)?(.+)/)?.[2]
+}
+
+function cleanSymbolName(symbolName: string): string | undefined {
+  return symbolName.match(/(^import\([^)]+\)\.)?(.+)/)?.[2]
 }
 
 function mergeUnionTypes(jsValues: JSValue[]): JSValue[] {
@@ -300,7 +310,13 @@ function extractModels(func: FunctionDeclaration, models: ModelMap): ModelMap {
       const node = symbol.getDeclarations()[0]
 
       const modelAsText = node.getFullText().trim()
-      const modelId = node.getSymbolOrThrow().getFullyQualifiedName()
+      const modelId = cleanModelId(
+        node.getSymbolOrThrow().getFullyQualifiedName(),
+      )
+
+      if (!modelId) {
+        throw new SamenFileCompileError("Expected modelId")
+      }
 
       if (models[modelId] === undefined) {
         models[modelId] = {
