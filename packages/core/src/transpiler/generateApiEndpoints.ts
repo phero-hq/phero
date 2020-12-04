@@ -23,7 +23,7 @@ export default async function generateApiEndpoints(
 
   for (const rpcFunction of manifest.rpcFunctions) {
     const code = generateCode(manifest, relativeSamenFilePath, rpcFunction)
-    project.createSourceFile(rpcFunction.fileName, code)
+    project.createSourceFile(`${rpcFunction.name}.ts`, code)
   }
 
   console.log(

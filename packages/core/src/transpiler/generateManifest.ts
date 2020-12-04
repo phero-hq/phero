@@ -75,7 +75,6 @@ export default function generateManifest(
           functionDeclaration,
         ),
         modelIds,
-        fileName: `${name}.ts`,
         filePath: {
           sourceFile: path.relative(
             userProjectPath,

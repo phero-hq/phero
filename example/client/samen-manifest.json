@@ -18,7 +18,6 @@
             "modelIds": [
                 "Aad"
             ],
-            "fileName": "isSjaak.ts",
             "filePath": {
                 "sourceFile": "src/samen.ts",
                 "outputFile": "build/src/samen.js"
@@ -48,7 +47,6 @@
             "modelIds": [
                 "Aad"
             ],
-            "fileName": "add.ts",
             "filePath": {
                 "sourceFile": "src/calc.ts",
                 "outputFile": "build/src/samen.js"
