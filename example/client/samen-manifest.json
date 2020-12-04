@@ -20,8 +20,8 @@
             ],
             "fileName": "isSjaak.ts",
             "filePath": {
-                "sourceFile": "/Users/Jasper/Code/Press Play/samen/example/server/src/samen.ts",
-                "outputFile": "/Users/Jasper/Code/Press Play/samen/example/server/build/samen.js"
+                "sourceFile": "src/samen.ts",
+                "outputFile": "build/src/samen.js"
             }
         },
         {
@@ -50,8 +50,8 @@
             ],
             "fileName": "add.ts",
             "filePath": {
-                "sourceFile": "/Users/Jasper/Code/Press Play/samen/example/server/src/calc.ts",
-                "outputFile": "/Users/Jasper/Code/Press Play/samen/example/server/build/samen.js"
+                "sourceFile": "src/calc.ts",
+                "outputFile": "build/src/samen.js"
             }
         }
     ],

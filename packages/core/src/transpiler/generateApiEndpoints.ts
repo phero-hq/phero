@@ -8,28 +8,28 @@ export default async function generateApiEndpoints(
   samenFilePath: string,
   rpcFunctionsPath: string,
 ): Promise<void> {
-  const userProject = new Project({
-    // compilerOptions: { outDir: rpcFunctionsPath, declaration: true },
-    tsConfigFilePath:
-      "/Users/Jasper/Code/Press Play/samen/example/server/tsconfig.json",
-  })
-  console.log("building user project")
+  const userProjectPath = process.cwd()
 
-  await userProject.emit()
-  console.log(
-    "builded user project",
-    userProject.getPreEmitDiagnostics().length,
-  )
+  const relativeSamenFilePath = `./${path
+    .relative(userProjectPath, samenFilePath)
+    .replace(/(.+)\..+$/, "$1")}`
+
   const project = new Project({
-    compilerOptions: { outDir: rpcFunctionsPath, declaration: true },
+    compilerOptions: {
+      outDir: rpcFunctionsPath,
+      declaration: true,
+    },
   })
 
   for (const rpcFunction of manifest.rpcFunctions) {
-    const code = generateCode(manifest, samenFilePath, rpcFunction)
-    // project.addSourceFileAtPath(samenFilePath)
+    const code = generateCode(manifest, relativeSamenFilePath, rpcFunction)
     project.createSourceFile(rpcFunction.fileName, code)
   }
 
+  console.log(
+    "COMPILE ERRORS",
+    project.getPreEmitDiagnostics().map((x) => x.getMessageText()),
+  )
   await project.emit()
 }
 
@@ -43,11 +43,12 @@ function generateCode(
   const returnType = `Promise<${generateType(rpcFunction.returnType)}>`
 
   return formatCode(`
-   import { ${rpcFunction.name} } from '${rpcFunction.filePath.outputFile}';
+   import { ${rpcFunction.name} } from '${samenFilePath}';
 
-    ${rpcFunction.modelIds
-      .map((modelId) => manifest.models[modelId].ts)
-      .join("\n")}
+  ${rpcFunction.modelIds
+    .map((modelId) => manifest.models[modelId].ts)
+    .join("\n")}
+  
 
     export async function rpc_${rpcFunction.name}(${params}): ${returnType} {
       // TODO: Validate parameters

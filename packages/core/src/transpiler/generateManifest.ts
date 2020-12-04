@@ -21,11 +21,15 @@ import {
 export class SamenFileCompileError extends Error {}
 
 export default function generateManifest(
+  userProjectPath: string,
   samenSourceFile: SourceFile,
   typeChecker: TypeChecker,
-  rpcFunctionsPath: string,
 ): SamenManifest {
-  const samenFile: SamenManifest = { rpcFunctions: [], models: {}, refs: {} }
+  const manifest: SamenManifest = {
+    rpcFunctions: [],
+    models: {},
+    refs: {},
+  }
 
   for (const exportSymbol of samenSourceFile.getExportSymbols()) {
     const symbol = exportSymbol.isAlias()
@@ -42,11 +46,11 @@ export default function generateManifest(
         : returnType
 
       const modelIds: string[] = []
-      const newModels = extractModels(functionDeclaration, samenFile.models)
+      const newModels = extractModels(functionDeclaration, manifest.models)
 
       for (const model of Object.values(newModels)) {
-        if (samenFile.models[model.id] === undefined) {
-          samenFile.models[model.id] = model
+        if (manifest.models[model.id] === undefined) {
+          manifest.models[model.id] = model
         }
         modelIds.push(model.id)
       }
@@ -61,32 +65,34 @@ export default function generateManifest(
               param,
               index,
               typeChecker,
-              samenFile.refs,
+              manifest.refs,
             ),
           ),
         returnType: getJSValue(
           useReturnType,
           typeChecker,
-          samenFile.refs,
+          manifest.refs,
           functionDeclaration,
         ),
         modelIds,
         fileName: `${name}.ts`,
         filePath: {
-          sourceFile: functionDeclaration.getSourceFile().getFilePath(),
-          // outputFile: path.join(rpcFunctionsPath, `${name}.js`),
-          outputFile: samenSourceFile
-            .getEmitOutput()
-            .getOutputFiles()[0]
-            .getFilePath(),
+          sourceFile: path.relative(
+            userProjectPath,
+            functionDeclaration.getSourceFile().getFilePath(),
+          ),
+          outputFile: path.relative(
+            userProjectPath,
+            samenSourceFile.getEmitOutput().getOutputFiles()[0].getFilePath(),
+          ),
         },
       }
 
-      samenFile.rpcFunctions.push(rpcFunction)
+      manifest.rpcFunctions.push(rpcFunction)
     }
   }
 
-  return samenFile
+  return manifest
 }
 
 function compileParameterDeclaration(

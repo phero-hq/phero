@@ -13,8 +13,6 @@ export const serverConfigPath = path.join(
   "samen-config.json",
 )
 
-export const serverSamenFilePath = path.join(serverProjectPath, "src/samen.ts")
-
 export const serverRpcFunctionsPath = path.join(serverBuildPath, "rpcFunctions")
 
 export const clientProjectPath = (relativeOrAbsoluteClientPath: string) =>

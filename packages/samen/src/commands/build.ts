@@ -18,7 +18,6 @@ import {
   serverConfigPath,
   serverProjectPath,
   serverRpcFunctionsPath,
-  serverSamenFilePath,
 } from "../paths"
 
 const execAsync = util.promisify(exec)
@@ -35,6 +34,8 @@ export default async function build(): Promise<void> {
     process.exit(1)
   }
 
+  const serverSamenFilePath = samenSourceFile.getFilePath()
+
   const diagnostics = project.getPreEmitDiagnostics()
   if (diagnostics.length > 0) {
     for (const diagnostic of diagnostics) {
@@ -44,9 +45,9 @@ export default async function build(): Promise<void> {
   }
 
   const manifest = generateManifest(
+    serverProjectPath,
     samenSourceFile,
     project.getTypeChecker(),
-    serverRpcFunctionsPath,
   )
   await writeManifestFile(manifest, serverBuildPath)
   const samenConfig = await readSamenConfig()
