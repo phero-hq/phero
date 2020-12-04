@@ -39,7 +39,7 @@ function generateCode(
   rpcFunction: RPCFunction,
 ): string {
   const params = generateParameters(rpcFunction.parameters)
-  const args = rpcFunction.parameters.map((p) => p.name).join(", ")
+  const args = rpcFunction.parameters.map((p) => p.name)
   const returnType = `Promise<${generateType(rpcFunction.returnType)}>`
 
   return formatCode(`
@@ -49,11 +49,26 @@ function generateCode(
     .map((modelId) => manifest.models[modelId].ts)
     .join("\n")}
   
+    export async function handler(event: any) {
+      const body = JSON.parse(event.body)
+      const result = await ${rpcFunction.name}(${args
+    .map((a) => `body.${a}`)
+    .join(", ")})
+      return {
+        isBase64Encoded: false,
+        statusCode: 200,
+        body: result && JSON.stringify(result, null, 4),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    }
+
 
     export async function rpc_${rpcFunction.name}(${params}): ${returnType} {
       // TODO: Validate parameters
 
-      const result = await ${rpcFunction.name}(${args})
+      const result = await ${rpcFunction.name}(${args.join(", ")})
 
       // TODO: Validate result
 
