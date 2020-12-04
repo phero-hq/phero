@@ -1,3 +1,4 @@
+import path from "path"
 import {
   ts,
   SourceFile,
@@ -22,6 +23,7 @@ export class SamenFileCompileError extends Error {}
 export default function generateManifest(
   samenSourceFile: SourceFile,
   typeChecker: TypeChecker,
+  rpcFunctionsPath: string,
 ): SamenManifest {
   const samenFile: SamenManifest = { rpcFunctions: [], models: {}, refs: {} }
 
@@ -49,8 +51,9 @@ export default function generateManifest(
         modelIds.push(model.id)
       }
 
+      const name = symbol.getName()
       const rpcFunction: RPCFunction = {
-        name: symbol.getName(),
+        name,
         parameters: functionDeclaration
           .getParameters()
           .map((param, index) =>
@@ -68,10 +71,11 @@ export default function generateManifest(
           functionDeclaration,
         ),
         modelIds,
+        fileName: `${name}.ts`,
         filePath: {
           sourceFile: functionDeclaration.getSourceFile().getFilePath(),
-          outputFile: functionDeclaration
-            .getSourceFile()
+          // outputFile: path.join(rpcFunctionsPath, `${name}.js`),
+          outputFile: samenSourceFile
             .getEmitOutput()
             .getOutputFiles()[0]
             .getFilePath(),

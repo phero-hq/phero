@@ -8,7 +8,7 @@
                     "name": "aad",
                     "value": {
                         "type": "ref",
-                        "id": "import(\"/Users/Jasper/Code/Press Play/samen/example/server/src/samen\").Aad"
+                        "id": "Aad"
                     }
                 }
             ],
@@ -16,8 +16,9 @@
                 "type": "boolean"
             },
             "modelIds": [
-                "\"/Users/Jasper/Code/Press Play/samen/example/server/src/samen\".Aad"
+                "Aad"
             ],
+            "fileName": "isSjaak.ts",
             "filePath": {
                 "sourceFile": "/Users/Jasper/Code/Press Play/samen/example/server/src/samen.ts",
                 "outputFile": "/Users/Jasper/Code/Press Play/samen/example/server/build/samen.js"
@@ -45,24 +46,25 @@
                 "type": "number"
             },
             "modelIds": [
-                "\"/Users/Jasper/Code/Press Play/samen/example/server/src/samen\".Aad"
+                "Aad"
             ],
+            "fileName": "add.ts",
             "filePath": {
                 "sourceFile": "/Users/Jasper/Code/Press Play/samen/example/server/src/calc.ts",
-                "outputFile": "/Users/Jasper/Code/Press Play/samen/example/server/build/calc.js"
+                "outputFile": "/Users/Jasper/Code/Press Play/samen/example/server/build/samen.js"
             }
         }
     ],
     "models": {
-        "\"/Users/Jasper/Code/Press Play/samen/example/server/src/samen\".Aad": {
-            "id": "\"/Users/Jasper/Code/Press Play/samen/example/server/src/samen\".Aad",
+        "Aad": {
+            "id": "Aad",
             "ts": "export interface Aad {\n  x: boolean\n}"
         }
     },
     "refs": {
-        "import(\"/Users/Jasper/Code/Press Play/samen/example/server/src/samen\").Aad": {
-            "id": "import(\"/Users/Jasper/Code/Press Play/samen/example/server/src/samen\").Aad",
-            "modelId": "\"/Users/Jasper/Code/Press Play/samen/example/server/src/samen\".Aad",
+        "Aad": {
+            "id": "Aad",
+            "modelId": "Aad",
             "value": {
                 "type": "object",
                 "properties": [

@@ -1,7 +1,8 @@
+import path from "path"
 import { RPCFunction, SamenManifest } from "@samen/core/build/domain/manifest"
 import { promises as fs } from "fs"
 import http from "http"
-import path from "path"
+import { manifestPath, serverBuildPath, serverRpcFunctionsPath } from "../paths"
 import build from "./build"
 
 const PORT = parseInt(process.env.PORT || "") || 4000
@@ -14,8 +15,6 @@ interface Route {
 }
 type Routes = Record<string, Route>
 let routes: Routes = {}
-
-const buildPath = path.join(process.cwd(), "node_modules/@samen/samen/build")
 
 export default async function serve() {
   if (!IS_PROD) {
@@ -35,8 +34,7 @@ export default async function serve() {
 }
 
 async function getManifest(): Promise<SamenManifest> {
-  const manifestPath = path.join(buildPath, "samen-manifest.json")
-  const manifestFile = await fs.readFile(manifestPath)
+  const manifestFile = await fs.readFile(manifestPath(serverBuildPath))
 
   if (!manifestFile) {
     throw new Error(`Manifest file not found at ${manifestPath}`)
@@ -52,7 +50,10 @@ function getRoutes(manifest: SamenManifest): Routes {
       ...routes,
       [`/${rpcFunction.name}`]: {
         definition: rpcFunction,
-        importedFunction: require(rpcFunction.filePath.outputFile),
+        importedFunction: require(path.join(
+          serverRpcFunctionsPath,
+          rpcFunction.name,
+        ))[`rpc_${rpcFunction.name}`],
         argumentNames: rpcFunction.parameters
           .sort((a, b) => a.index - b.index)
           .map((r) => r.name),

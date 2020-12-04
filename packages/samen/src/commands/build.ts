@@ -10,7 +10,6 @@ import { promises as fs } from "fs"
 import path from "path"
 import { Project } from "ts-morph"
 import util from "util"
-
 import {
   clientBinPath,
   clientProjectPath,
@@ -18,7 +17,8 @@ import {
   serverBuildPath,
   serverConfigPath,
   serverProjectPath,
-  serverRpcPath,
+  serverRpcFunctionsPath,
+  serverSamenFilePath,
 } from "../paths"
 
 const execAsync = util.promisify(exec)
@@ -35,21 +35,26 @@ export default async function build(): Promise<void> {
     process.exit(1)
   }
 
-  if (project.getPreEmitDiagnostics().length > 0) {
-    console.error(
-      `Sorry, your project doesn't compile my friend ${serverProjectPath}`,
-    )
+  const diagnostics = project.getPreEmitDiagnostics()
+  if (diagnostics.length > 0) {
+    for (const diagnostic of diagnostics) {
+      console.error(diagnostic.getMessageText())
+    }
     process.exit(1)
   }
 
-  const manifest = generateManifest(samenSourceFile, project.getTypeChecker())
+  const manifest = generateManifest(
+    samenSourceFile,
+    project.getTypeChecker(),
+    serverRpcFunctionsPath,
+  )
   await writeManifestFile(manifest, serverBuildPath)
   const samenConfig = await readSamenConfig()
 
   if (samenConfig) {
     console.log("Building client SDK's...")
     try {
-      await buildClientSDKs(samenConfig.clients, manifest)
+      await buildClientSDKs(manifest, samenConfig.clients)
     } catch (error) {
       console.error(error)
       process.exit(1)
@@ -57,7 +62,11 @@ export default async function build(): Promise<void> {
 
     console.log("Building API endpoints...")
     try {
-      await generateApiEndpoints(manifest, samenSourceFile, serverRpcPath)
+      await generateApiEndpoints(
+        manifest,
+        serverSamenFilePath,
+        serverRpcFunctionsPath,
+      )
     } catch (error) {
       console.error(error)
       process.exit(1)
@@ -83,8 +92,8 @@ async function readSamenConfig(): Promise<SamenConfig | null> {
 }
 
 async function buildClientSDKs(
-  clientPaths: string[],
   manifest: SamenManifest,
+  clientPaths: string[],
 ): Promise<void> {
   for (const cp of clientPaths) {
     const clientPath = clientProjectPath(cp)

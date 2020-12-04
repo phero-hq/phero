@@ -5,5 +5,5 @@ export interface Aad {
 }
 
 export async function isSjaak(aad: Aad): Promise<boolean> {
-  return aad.x
+  return aad.x === true
 }

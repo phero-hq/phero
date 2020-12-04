@@ -1,5 +1,6 @@
 import path from "path"
 
+// TODO: Rename to user*
 export const serverProjectPath = process.cwd()
 
 export const serverBuildPath = path.join(
@@ -12,7 +13,9 @@ export const serverConfigPath = path.join(
   "samen-config.json",
 )
 
-export const serverRpcPath = path.join(serverBuildPath, "rpcs")
+export const serverSamenFilePath = path.join(serverProjectPath, "src/samen.ts")
+
+export const serverRpcFunctionsPath = path.join(serverBuildPath, "rpcFunctions")
 
 export const clientProjectPath = (relativeOrAbsoluteClientPath: string) =>
   path.resolve(serverProjectPath, relativeOrAbsoluteClientPath)
@@ -23,5 +26,6 @@ export const clientBuildPath = (clientProjectPath: string) =>
 export const clientBinPath = (clientProjectPath: string) =>
   path.join(clientProjectPath, "node_modules/.bin/samen")
 
+// TODO: Seperate these out for server and client
 export const manifestPath = (buildPath: string) =>
   path.join(buildPath, "samen-manifest.json")
