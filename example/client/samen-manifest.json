@@ -20,7 +20,7 @@
             ],
             "filePath": {
                 "sourceFile": "src/samen.ts",
-                "outputFile": "build/src/samen.js"
+                "outputFile": "build/samen.js"
             }
         },
         {
@@ -49,7 +49,7 @@
             ],
             "filePath": {
                 "sourceFile": "src/calc.ts",
-                "outputFile": "build/src/samen.js"
+                "outputFile": "build/samen.js"
             }
         }
     ],
