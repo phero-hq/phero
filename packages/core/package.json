@@ -5,7 +5,7 @@
   "scripts": {
     "clean": "rm -rf build",
     "build": "tsc",
-    "test": "jest",
+    "test": "jest src",
     "postinstall": "npm run build"
   },
   "devDependencies": {

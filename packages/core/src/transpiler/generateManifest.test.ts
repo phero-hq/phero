@@ -652,7 +652,8 @@ describe("compile SamenFile", () => {
         returnType: { type: JSType.string },
         modelIds: [],
       }
-      expect(r).toMatchObject(func) })
+      expect(r).toMatchObject(func)
+    })
 
     test("extracts object return type with correct JSValue", () => {
       const r = getCompiledSamenFile(`
