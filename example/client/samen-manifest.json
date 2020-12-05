@@ -48,6 +48,46 @@
             }
         },
         {
+            "name": "x",
+            "parameters": [],
+            "returnType": {
+                "type": "untyped"
+            },
+            "modelIds": [
+                "Sjaak",
+                "Aad"
+            ],
+            "filePath": {
+                "sourceFile": "src/samen.ts",
+                "outputFile": "build/samen.js"
+            }
+        },
+        {
+            "name": "answer",
+            "parameters": [
+                {
+                    "index": 0,
+                    "name": "y",
+                    "value": {
+                        "type": "ref",
+                        "id": "Y"
+                    }
+                }
+            ],
+            "returnType": {
+                "type": "untyped"
+            },
+            "modelIds": [
+                "Sjaak",
+                "Aad",
+                "Y"
+            ],
+            "filePath": {
+                "sourceFile": "src/samen.ts",
+                "outputFile": "build/samen.js"
+            }
+        },
+        {
             "name": "add",
             "parameters": [
                 {
@@ -70,7 +110,8 @@
             },
             "modelIds": [
                 "Sjaak",
-                "Aad"
+                "Aad",
+                "Y"
             ],
             "filePath": {
                 "sourceFile": "src/calc.ts",
@@ -81,11 +122,15 @@
     "models": {
         "Sjaak": {
             "id": "Sjaak",
-            "ts": "export interface Sjaak {\n  x: boolean\n}"
+            "ts": "export interface Sjaak {\n  x: boolean\n  y: number\n}"
         },
         "Aad": {
             "id": "Aad",
             "ts": "export interface Aad {\n  x: boolean\n}"
+        },
+        "Y": {
+            "id": "Y",
+            "ts": "export interface Y {\n  answer: [number, number]\n}"
         }
     },
     "refs": {
@@ -98,6 +143,10 @@
                     {
                         "name": "x",
                         "type": "boolean"
+                    },
+                    {
+                        "name": "y",
+                        "type": "number"
                     }
                 ]
             }
@@ -111,6 +160,27 @@
                     {
                         "name": "x",
                         "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "Y": {
+            "id": "Y",
+            "modelId": "Y",
+            "value": {
+                "type": "object",
+                "properties": [
+                    {
+                        "name": "answer",
+                        "type": "tuple",
+                        "elementTypes": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "number"
+                            }
+                        ]
                     }
                 ]
             }

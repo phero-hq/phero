@@ -1,9 +1,9 @@
-import { Project } from "ts-morph"
 import path from "path"
-import { RPCFunction, SamenManifest } from "../domain/manifest"
-import { formatCode, generateParameters, generateType } from "./utils"
-import * as paths from "../paths"
+import { Project } from "ts-morph"
+import { SamenManifest } from "../domain/manifest"
 import { ApiEndpointCompilerError, validateProject } from "../errors"
+import * as paths from "../paths"
+import apiEndpoint from "./templates/apiEndpoint"
 
 export default async function generateApiEndpoints(
   manifest: SamenManifest,
@@ -24,7 +24,7 @@ export default async function generateApiEndpoints(
     })
 
     for (const rpcFunction of manifest.rpcFunctions) {
-      const code = generateCode(manifest, relativeSamenFilePath, rpcFunction)
+      const code = apiEndpoint({ manifest, relativeSamenFilePath, rpcFunction })
       project.createSourceFile(`${rpcFunction.name}.ts`, code)
     }
 
@@ -34,48 +34,4 @@ export default async function generateApiEndpoints(
   } catch (error) {
     throw new ApiEndpointCompilerError(error)
   }
-}
-
-function generateCode(
-  manifest: SamenManifest,
-  samenFilePath: string,
-  rpcFunction: RPCFunction,
-): string {
-  const params = generateParameters(rpcFunction.parameters)
-  const args = rpcFunction.parameters.map((p) => p.name)
-  const returnType = `Promise<${generateType(rpcFunction.returnType)}>`
-
-  return formatCode(`
-   import { ${rpcFunction.name} } from '${samenFilePath}';
-
-  ${rpcFunction.modelIds
-    .map((modelId) => manifest.models[modelId].ts)
-    .join("\n")}
-
-    export async function handler(event: any) {
-      const body = JSON.parse(event.body)
-      const result = await ${rpcFunction.name}(${args
-    .map((a) => `body.${a}`)
-    .join(", ")})
-      return {
-        isBase64Encoded: false,
-        statusCode: 200,
-        body: result && JSON.stringify(result, null, 4),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    }
-
-
-    export async function rpc_${rpcFunction.name}(${params}): ${returnType} {
-      // TODO: Validate parameters
-
-      const result = await ${rpcFunction.name}(${args.join(", ")})
-
-      // TODO: Validate result
-
-      return result
-    }
-  `)
 }
