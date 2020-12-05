@@ -1,5 +1,11 @@
 import { Diagnostic, Project, ts, Type } from "ts-morph"
 
+export class ManifestMissingError extends Error {
+  constructor(filePath: string) {
+    super(`Manifest missing at: ${filePath}`)
+  }
+}
+
 export class PropertyMissingError extends Error {
   constructor(property: string) {
     super(`Property missing: ${property}`)

@@ -1,9 +1,10 @@
-import path from "path"
-import { RPCFunction, SamenManifest } from "@samen/core/build/domain/manifest"
+import { paths } from "@samen/core"
 import { promises as fs } from "fs"
 import http from "http"
-import { paths } from "@samen/core"
+import path from "path"
+import { RPCFunction, SamenManifest } from "@samen/core/build/domain/manifest"
 import build from "./build"
+import buildClients from "./buildClients"
 
 const PORT = parseInt(process.env.PORT || "") || 4000
 const IS_PROD = process.env.NODE_ENV === "production"
@@ -19,6 +20,7 @@ let routes: Routes = {}
 export default async function serve() {
   if (!IS_PROD) {
     await build()
+    await buildClients()
   }
 
   const server = http.createServer()

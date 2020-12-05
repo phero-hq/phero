@@ -4,6 +4,7 @@ import { handleError } from "@samen/core"
 
 import serve from "./commands/serve"
 import build from "./commands/build"
+import buildClients from "./commands/buildClients"
 
 process.on("unhandledRejection", handleError)
 
@@ -16,6 +17,10 @@ function run() {
 
       case "build":
         build()
+        break
+
+      case "buildClients":
+        buildClients()
         break
 
       default:
