@@ -3,14 +3,15 @@
 import {
   generateApiEndpoints,
   generateManifest,
+  paths,
+  SamenClientNotInstalledError,
   SamenManifest,
+  validateProject,
 } from "@samen/core"
 import { exec } from "child_process"
 import { promises as fs } from "fs"
-import path from "path"
 import { Project } from "ts-morph"
 import util from "util"
-import { paths } from "@samen/core"
 
 const execAsync = util.promisify(exec)
 
@@ -26,15 +27,9 @@ export default async function build(): Promise<void> {
     process.exit(1)
   }
 
-  const serverSamenFilePath = samenSourceFile.getFilePath()
+  const samenFilePath = samenSourceFile.getFilePath()
 
-  const diagnostics = project.getPreEmitDiagnostics()
-  if (diagnostics.length > 0) {
-    for (const diagnostic of diagnostics) {
-      console.error(diagnostic.getMessageText())
-    }
-    process.exit(1)
-  }
+  validateProject(project)
 
   const manifest = generateManifest(samenSourceFile, project.getTypeChecker())
   await writeManifestFile(manifest, paths.userManifestFile)
@@ -42,20 +37,10 @@ export default async function build(): Promise<void> {
 
   if (samenConfig) {
     console.log("Building client SDK's...")
-    try {
-      await buildClientSDKs(manifest, samenConfig.clients)
-    } catch (error) {
-      console.error(error)
-      process.exit(1)
-    }
+    await buildClientSDKs(manifest, samenConfig.clients)
 
     console.log("Building API endpoints...")
-    try {
-      await generateApiEndpoints(manifest, serverSamenFilePath)
-    } catch (error) {
-      console.error(error)
-      process.exit(1)
-    }
+    await generateApiEndpoints(manifest, samenFilePath)
   }
 }
 
@@ -82,7 +67,7 @@ async function buildClientSDKs(
 ): Promise<void> {
   for (const configuredClientPath of clientPaths) {
     const clientPath = paths.clientProjectDir(configuredClientPath)
-    console.log(` Client path: ${clientPath}`)
+    console.log(` Building client for: "${configuredClientPath}"`)
 
     console.log(` Writing manifest file...`)
     await writeManifestFile(manifest, paths.clientManifestFile(clientPath))
@@ -92,11 +77,7 @@ async function buildClientSDKs(
     try {
       await fs.stat(binPath)
     } catch (error) {
-      console.log(
-        ` @samen/client does not seem to be installed in ${clientPath}`,
-      )
-      // TODO: Prompt for running `npm i @samen/client` in clientPath
-      process.exit(1)
+      throw new SamenClientNotInstalledError(clientPath)
     }
     await execAsync(`"${binPath}" build`, { cwd: clientPath })
   }

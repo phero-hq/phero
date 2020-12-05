@@ -3,34 +3,37 @@ import path from "path"
 import { RPCFunction, SamenManifest } from "../domain/manifest"
 import { formatCode, generateParameters, generateType } from "./utils"
 import * as paths from "../paths"
+import { ApiEndpointCompilerError, validateProject } from "../errors"
 
 export default async function generateApiEndpoints(
   manifest: SamenManifest,
   samenFilePath: string,
 ): Promise<void> {
-  const userProjectPath = process.cwd()
+  try {
+    const userProjectPath = process.cwd()
 
-  const relativeSamenFilePath = `./${path
-    .relative(userProjectPath, samenFilePath)
-    .replace(/(.+)\..+$/, "$1")}`
+    const relativeSamenFilePath = `./${path
+      .relative(userProjectPath, samenFilePath)
+      .replace(/(.+)\..+$/, "$1")}`
 
-  const project = new Project({
-    compilerOptions: {
-      outDir: paths.userRpcFunctionsDir,
-      declaration: true,
-    },
-  })
+    const project = new Project({
+      compilerOptions: {
+        outDir: paths.userRpcFunctionsDir,
+        declaration: true,
+      },
+    })
 
-  for (const rpcFunction of manifest.rpcFunctions) {
-    const code = generateCode(manifest, relativeSamenFilePath, rpcFunction)
-    project.createSourceFile(`${rpcFunction.name}.ts`, code)
+    for (const rpcFunction of manifest.rpcFunctions) {
+      const code = generateCode(manifest, relativeSamenFilePath, rpcFunction)
+      project.createSourceFile(`${rpcFunction.name}.ts`, code)
+    }
+
+    validateProject(project)
+
+    await project.emit()
+  } catch (error) {
+    throw new ApiEndpointCompilerError(error)
   }
-
-  console.log(
-    "COMPILE ERRORS",
-    project.getPreEmitDiagnostics().map((x) => x.getMessageText()),
-  )
-  await project.emit()
 }
 
 function generateCode(

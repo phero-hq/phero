@@ -1,21 +1,25 @@
 #!/usr/bin/env node
 
-import path from "path"
-import { generateClientSDK } from "@samen/core"
+import { generateClientSDK, handleError } from "@samen/core"
 
-process.on("unhandledRejection", (error) => {
-  console.error(error)
-  process.exit(1)
-})
+process.on("unhandledRejection", handleError)
 
-switch (process.argv[2]) {
-  case "build":
-    build()
-    break
+function run() {
+  try {
+    switch (process.argv[2]) {
+      case "build":
+        build()
+        break
 
-  default:
-    throw new Error(`Unknown command: ${process.argv[2]}`)
+      default:
+        throw new Error(`Unknown command: ${process.argv[2]}`)
+    }
+  } catch (error) {
+    handleError(error)
+  }
 }
+
+run()
 
 async function build(): Promise<void> {
   console.log("Building Samen SDK...")

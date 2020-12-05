@@ -17,81 +17,89 @@ import {
   RPCFunctionParameter,
   SamenManifest,
 } from "../domain/manifest"
+import {
+  ManifestCompilerError,
+  PropertiesMissingError,
+  PropertyMissingError,
+  UnsupportedTypeError,
+} from "../errors"
 import * as paths from "../paths"
-
-export class SamenFileCompileError extends Error {}
 
 export default function generateManifest(
   samenSourceFile: SourceFile,
   typeChecker: TypeChecker,
 ): SamenManifest {
-  const manifest: SamenManifest = {
-    rpcFunctions: [],
-    models: {},
-    refs: {},
-  }
-
-  for (const exportSymbol of samenSourceFile.getExportSymbols()) {
-    const symbol = exportSymbol.isAlias()
-      ? exportSymbol.getAliasedSymbolOrThrow()
-      : exportSymbol
-    if (symbol.getFlags() & ts.SymbolFlags.Function) {
-      const functionDeclaration = symbol.getValueDeclarationOrThrow() as FunctionDeclaration
-
-      const returnType = functionDeclaration.getReturnType()
-      const isReturnTypePromise =
-        returnType.getSymbol()?.getName() === "Promise"
-      const useReturnType = isReturnTypePromise
-        ? returnType.getTypeArguments()[0]
-        : returnType
-
-      const modelIds: string[] = []
-      const newModels = extractModels(functionDeclaration, manifest.models)
-
-      for (const model of Object.values(newModels)) {
-        if (manifest.models[model.id] === undefined) {
-          manifest.models[model.id] = model
-        }
-        modelIds.push(model.id)
-      }
-
-      const name = symbol.getName()
-      const rpcFunction: RPCFunction = {
-        name,
-        parameters: functionDeclaration
-          .getParameters()
-          .map((param, index) =>
-            compileParameterDeclaration(
-              param,
-              index,
-              typeChecker,
-              manifest.refs,
-            ),
-          ),
-        returnType: getJSValue(
-          useReturnType,
-          typeChecker,
-          manifest.refs,
-          functionDeclaration,
-        ),
-        modelIds,
-        filePath: {
-          sourceFile: path.relative(
-            paths.userProjectDir,
-            functionDeclaration.getSourceFile().getFilePath(),
-          ),
-          outputFile: path.relative(
-            paths.userProjectDir,
-            samenSourceFile.getEmitOutput().getOutputFiles()[0].getFilePath(),
-          ),
-        },
-      }
-
-      manifest.rpcFunctions.push(rpcFunction)
+  try {
+    const manifest: SamenManifest = {
+      rpcFunctions: [],
+      models: {},
+      refs: {},
     }
-  }
 
-  return manifest
+    for (const exportSymbol of samenSourceFile.getExportSymbols()) {
+      const symbol = exportSymbol.isAlias()
+        ? exportSymbol.getAliasedSymbolOrThrow()
+        : exportSymbol
+      if (symbol.getFlags() & ts.SymbolFlags.Function) {
+        const functionDeclaration = symbol.getValueDeclarationOrThrow() as FunctionDeclaration
+
+        const returnType = functionDeclaration.getReturnType()
+        const isReturnTypePromise =
+          returnType.getSymbol()?.getName() === "Promise"
+        const useReturnType = isReturnTypePromise
+          ? returnType.getTypeArguments()[0]
+          : returnType
+
+        const modelIds: string[] = []
+        const newModels = extractModels(functionDeclaration, manifest.models)
+
+        for (const model of Object.values(newModels)) {
+          if (manifest.models[model.id] === undefined) {
+            manifest.models[model.id] = model
+          }
+          modelIds.push(model.id)
+        }
+
+        const name = symbol.getName()
+        const rpcFunction: RPCFunction = {
+          name,
+          parameters: functionDeclaration
+            .getParameters()
+            .map((param, index) =>
+              compileParameterDeclaration(
+                param,
+                index,
+                typeChecker,
+                manifest.refs,
+              ),
+            ),
+          returnType: getJSValue(
+            useReturnType,
+            typeChecker,
+            manifest.refs,
+            functionDeclaration,
+          ),
+          modelIds,
+          filePath: {
+            sourceFile: path.relative(
+              paths.userProjectDir,
+              functionDeclaration.getSourceFile().getFilePath(),
+            ),
+            outputFile: path.relative(
+              paths.userProjectDir,
+              samenSourceFile.getEmitOutput().getOutputFiles()[0].getFilePath(),
+            ),
+          },
+        }
+
+        manifest.rpcFunctions.push(rpcFunction)
+      }
+    }
+
+    return manifest
+  } catch (error) {
+    throw new ManifestCompilerError(error)
+  }
 }
 
 function compileParameterDeclaration(
@@ -218,7 +226,7 @@ function getJSValue(
     )
 
     if (!modelId || !symbolName) {
-      throw new SamenFileCompileError("Expected modelId and symbolName")
+      throw new PropertiesMissingError(["modelId", "symbolName"])
     }
 
     if (!refValues[symbolName]) {
@@ -250,7 +258,7 @@ function getJSValue(
     }
   }
 
-  throw new SamenFileCompileError(`Can't compile this yet: ${type}`)
+  throw new UnsupportedTypeError(type)
 }
 
 function cleanModelId(modelId: string): string | undefined {
@@ -324,7 +332,7 @@ function extractModels(func: FunctionDeclaration, models: ModelMap): ModelMap {
       )
 
       if (!modelId) {
-        throw new SamenFileCompileError("Expected modelId")
+        throw new PropertyMissingError("modelId")
       }
 
       if (models[modelId] === undefined) {
