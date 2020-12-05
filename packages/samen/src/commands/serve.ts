@@ -2,7 +2,7 @@ import path from "path"
 import { RPCFunction, SamenManifest } from "@samen/core/build/domain/manifest"
 import { promises as fs } from "fs"
 import http from "http"
-import { manifestPath, serverBuildPath, serverRpcFunctionsPath } from "../paths"
+import { paths } from "@samen/core"
 import build from "./build"
 
 const PORT = parseInt(process.env.PORT || "") || 4000
@@ -34,7 +34,8 @@ export default async function serve() {
 }
 
 async function getManifest(): Promise<SamenManifest> {
-  const manifestFile = await fs.readFile(manifestPath(serverBuildPath))
+  const manifestPath = paths.userManifestFile
+  const manifestFile = await fs.readFile(manifestPath)
 
   if (!manifestFile) {
     throw new Error(`Manifest file not found at ${manifestPath}`)
@@ -51,7 +52,7 @@ function getRoutes(manifest: SamenManifest): Routes {
       [`/${rpcFunction.name}`]: {
         definition: rpcFunction,
         importedFunction: require(path.join(
-          serverRpcFunctionsPath,
+          paths.userRpcFunctionsDir,
           rpcFunction.name,
         ))[`rpc_${rpcFunction.name}`],
         argumentNames: rpcFunction.parameters

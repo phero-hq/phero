@@ -17,11 +17,11 @@ import {
   RPCFunctionParameter,
   SamenManifest,
 } from "../domain/manifest"
+import * as paths from "../paths"
 
 export class SamenFileCompileError extends Error {}
 
 export default function generateManifest(
-  userProjectPath: string,
   samenSourceFile: SourceFile,
   typeChecker: TypeChecker,
 ): SamenManifest {
@@ -77,11 +77,11 @@ export default function generateManifest(
         modelIds,
         filePath: {
           sourceFile: path.relative(
-            userProjectPath,
+            paths.userProjectDir,
             functionDeclaration.getSourceFile().getFilePath(),
           ),
           outputFile: path.relative(
-            userProjectPath,
+            paths.userProjectDir,
             samenSourceFile.getEmitOutput().getOutputFiles()[0].getFilePath(),
           ),
         },

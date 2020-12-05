@@ -2,11 +2,11 @@ import { Project } from "ts-morph"
 import path from "path"
 import { RPCFunction, SamenManifest } from "../domain/manifest"
 import { formatCode, generateParameters, generateType } from "./utils"
+import * as paths from "../paths"
 
 export default async function generateApiEndpoints(
   manifest: SamenManifest,
   samenFilePath: string,
-  rpcFunctionsPath: string,
 ): Promise<void> {
   const userProjectPath = process.cwd()
 
@@ -16,7 +16,7 @@ export default async function generateApiEndpoints(
 
   const project = new Project({
     compilerOptions: {
-      outDir: rpcFunctionsPath,
+      outDir: paths.userRpcFunctionsDir,
       declaration: true,
     },
   })
@@ -48,7 +48,7 @@ function generateCode(
   ${rpcFunction.modelIds
     .map((modelId) => manifest.models[modelId].ts)
     .join("\n")}
-  
+
     export async function handler(event: any) {
       const body = JSON.parse(event.body)
       const result = await ${rpcFunction.name}(${args

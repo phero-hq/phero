@@ -1,13 +1,24 @@
+import { promises as fs } from "fs"
+import { Project } from "ts-morph"
+import { JSType } from "../domain/JSValue"
 import { RPCFunction, SamenManifest } from "../domain/manifest"
-import { JSType, JSValue } from "../domain/JSValue"
+import * as paths from "../paths"
 import { formatCode, generateParameters, generateType } from "./utils"
-import transformManifest from "./transformManifest"
 
-export default function generateClientSDK(
-  manifestPath: string,
-  sdkPath: string,
+export default async function generateClientSDK(
+  projectDir: string,
 ): Promise<void> {
-  return transformManifest(manifestPath, sdkPath, transformToClientSDK)
+  const project = new Project({
+    compilerOptions: {
+      declaration: true,
+      outDir: paths.clientSdkDir(projectDir),
+    },
+  })
+  const manifest = JSON.parse(
+    await fs.readFile(paths.clientManifestFile(projectDir), "utf-8"),
+  )
+  project.createSourceFile("index.ts", transformToClientSDK(manifest))
+  await project.emit()
 }
 
 export function transformToClientSDK(manifest: SamenManifest): string {

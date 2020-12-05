@@ -18,10 +18,6 @@ switch (process.argv[2]) {
 }
 
 async function build(): Promise<void> {
-  const cwd = process.cwd()
-  const manifestPath = path.join(cwd, "samen-manifest.json")
-  const sdkPath = path.join(cwd, "node_modules/@samen/client/build/sdk")
-
   console.log("Building Samen SDK...")
-  await generateClientSDK(manifestPath, sdkPath)
+  await generateClientSDK(process.cwd())
 }
