@@ -31,9 +31,9 @@ export function transformToClientSDK(manifest: SamenManifest): string {
   return formatCode(`
     ${requestFunction}
 
-    ${Object.keys(manifest.models).map(
-      (modelId) => `export ${manifest.models[modelId].ts}`,
-    )}
+    ${Object.keys(manifest.models)
+      .map((modelId) => `export ${manifest.models[modelId].ts}`)
+      .join("\n")}
 
     ${manifest.rpcFunctions.map(genRPC).join("\n")}
   `)

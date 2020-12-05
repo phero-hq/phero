@@ -81,14 +81,14 @@ export function handleError(error: Error) {
   if (error instanceof SamenClientNotInstalledError) {
     console.error(error.message)
     // TODO: Prompt to install it and retry
-    return process.exit(1)
+    process.exit(1)
   }
 
   if (error instanceof TypeScriptCompilerError) {
     console.error(
       error.project.formatDiagnosticsWithColorAndContext(error.diagnostics),
     )
-    return process.exit(1)
+    process.exit(1)
   }
 
   if (
@@ -98,7 +98,7 @@ export function handleError(error: Error) {
   ) {
     console.error(error.message)
     handleError(error.originalError)
-    return process.exit(1)
+    process.exit(1)
   }
 
   console.error(error)

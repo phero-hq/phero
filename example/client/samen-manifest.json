@@ -5,6 +5,29 @@
             "parameters": [
                 {
                     "index": 0,
+                    "name": "sjaak",
+                    "value": {
+                        "type": "ref",
+                        "id": "Sjaak"
+                    }
+                }
+            ],
+            "returnType": {
+                "type": "boolean"
+            },
+            "modelIds": [
+                "Sjaak"
+            ],
+            "filePath": {
+                "sourceFile": "src/samen.ts",
+                "outputFile": "build/samen.js"
+            }
+        },
+        {
+            "name": "isAad",
+            "parameters": [
+                {
+                    "index": 0,
                     "name": "aad",
                     "value": {
                         "type": "ref",
@@ -16,6 +39,7 @@
                 "type": "boolean"
             },
             "modelIds": [
+                "Sjaak",
                 "Aad"
             ],
             "filePath": {
@@ -45,6 +69,7 @@
                 "type": "number"
             },
             "modelIds": [
+                "Sjaak",
                 "Aad"
             ],
             "filePath": {
@@ -54,12 +79,29 @@
         }
     ],
     "models": {
+        "Sjaak": {
+            "id": "Sjaak",
+            "ts": "export interface Sjaak {\n  x: boolean\n}"
+        },
         "Aad": {
             "id": "Aad",
             "ts": "export interface Aad {\n  x: boolean\n}"
         }
     },
     "refs": {
+        "Sjaak": {
+            "id": "Sjaak",
+            "modelId": "Sjaak",
+            "value": {
+                "type": "object",
+                "properties": [
+                    {
+                        "name": "x",
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
         "Aad": {
             "id": "Aad",
             "modelId": "Aad",

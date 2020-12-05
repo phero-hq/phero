@@ -1,8 +1,8 @@
-import { paths } from "@samen/core"
 import { promises as fs } from "fs"
 import http from "http"
 import path from "path"
-import { RPCFunction, SamenManifest } from "@samen/core/build/domain/manifest"
+import TscWatchClient from "tsc-watch/client"
+import { handleError, paths, RPCFunction, SamenManifest } from "@samen/core"
 import build from "./build"
 import buildClients from "./buildClients"
 
@@ -18,21 +18,45 @@ type Routes = Record<string, Route>
 let routes: Routes = {}
 
 export default async function serve() {
-  if (!IS_PROD) {
-    await build()
-    await buildClients()
-  }
-
   const server = http.createServer()
-  const manifest = await getManifest()
-  routes = getRoutes(manifest)
-
   server.on("request", requestListener())
   server.on("listening", () => {
     console.log(`Samen is listening on port ${PORT}`)
   })
-
   server.listen(PORT)
+
+  if (IS_PROD) {
+    await reload()
+  } else {
+    const watch = new TscWatchClient()
+    watch.on("success", reload)
+    watch.start("--project", paths.userProjectDir)
+  }
+}
+
+async function reload(): Promise<void> {
+  try {
+    await build()
+
+    console.log("Updating routes...")
+    const manifest = await getManifest()
+    clearRequireCache()
+    routes = getRoutes(manifest)
+
+    await buildClients()
+
+    console.log("Samen is ready")
+  } catch (error) {
+    // TODO: Stay alive
+    handleError(error)
+  }
+}
+
+// TODO: Make this more exact?
+function clearRequireCache() {
+  Object.keys(require.cache).forEach((key) => {
+    delete require.cache[key]
+  })
 }
 
 async function getManifest(): Promise<SamenManifest> {
@@ -88,11 +112,11 @@ function requestListener() {
             const body = await readBody(req)
             const parameters = buildParameters(route, body)
             const responseData = await route.importedFunction(...parameters)
-            if (responseData) {
+            if (responseData === undefined) {
+              res.statusCode = 204
+            } else {
               res.statusCode = 200
               res.write(JSON.stringify(responseData))
-            } else {
-              res.statusCode = 204
             }
           } catch (e) {
             res.statusCode = 500

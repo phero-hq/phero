@@ -15,7 +15,7 @@ export default async function buildClients(): Promise<void> {
 
   if (config && config.clients.length > 0) {
     for (const configuredClientPath of config.clients) {
-      buildClientSDK(manifestFile, configuredClientPath)
+      await buildClientSDK(manifestFile, configuredClientPath)
     }
   }
 }
