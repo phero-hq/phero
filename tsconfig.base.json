@@ -1,6 +1,8 @@
 {
   "extends": "@tsconfig/recommended/tsconfig.json",
   "compilerOptions": {
-    "declaration": true
+    "declaration": true,
+    "target": "ES2019",
+    "lib": ["ES2020"]
   }
 }
