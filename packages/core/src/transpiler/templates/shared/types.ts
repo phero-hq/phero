@@ -24,7 +24,7 @@ export const type = (value: JSValue): string => {
       return "Date"
 
     case JSType.oneOfTypes:
-      return `${value.oneOfTypes.map(type).join(" | ")}`
+      return `(${value.oneOfTypes.map(type).join(" | ")})`
 
     case JSType.object:
       return `{${value.properties
