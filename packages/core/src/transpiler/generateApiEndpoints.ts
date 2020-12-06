@@ -26,6 +26,8 @@ export default async function generateApiEndpoints(
     for (const rpcFunction of manifest.rpcFunctions) {
       const code = apiEndpoint({ manifest, relativeSamenFilePath, rpcFunction })
       project.createSourceFile(`${rpcFunction.name}.ts`, code)
+      // console.debug(`---${rpcFunction.name}.ts}-------------------------------`)
+      // console.debug(code)
     }
 
     validateProject(project)
