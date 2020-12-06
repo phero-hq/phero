@@ -68,15 +68,83 @@ const rpcFunction = (p: Props): string => {
   })
 
   return `
+    export interface ValidationError {
+      scope: string;
+      jsValue: unknown;
+      message: string;
+    }
+
+    function validateTypeOf(typeString: 'string' | 'number' | 'boolean', scope: string, jsValue: unknown): ValidationError[] {
+      return typeof jsValue === typeString 
+        ? []
+        : [{ scope, jsValue, message: \`value is not a \${typeString}\` }];
+    }
+
+    function validateValueOf(possibleValues: any[], scope: string, jsValue: any): ValidationError[] {
+      return possibleValues.includes(jsValue) 
+        ? []
+        : [{ scope, jsValue, message: \`value must be one of: \${possibleValues.map(v => \`"\${v}"\`).join(', ')}\` }];
+    }
+
+    function validateDate(scope: string, jsValue: unknown): ValidationError[] {
+      const r = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?(([+-]\d\d:\d\d)|Z)?$/i;
+      const isValidDate = jsValue instanceof Date || (
+        typeof jsValue === 'string' && r.test(jsValue) && !isNaN(Date.parse(jsValue))
+      );
+      return isValidDate 
+        ? []
+        : [{ scope, jsValue, message: 'value must be a date' }];
+    }
+
+    function validateNull(scope: string, jsValue: unknown): ValidationError[] {
+      return jsValue === null
+        ? []
+        : [{ scope, jsValue, message: 'value must be null' }];
+    }
+    
+    function validateUndefined(scope: string, jsValue: unknown): ValidationError[] {
+      return jsValue === undefined
+        ? []
+        : [{ scope, jsValue, message: 'value must be undefined' }];
+    }
+    
+    function validateObject(scope: string, jsValue: unknown): ValidationError[] {
+      return jsValue !== null && typeof jsValue === 'object'
+        ? []
+        : [{ scope, jsValue, message: 'value must be an object' }];
+    }
+    
+    function validateArray(scope: string, jsValue: unknown): ValidationError[] {
+      return Array.isArray(jsValue)
+        ? []
+        : [{ scope, jsValue, message: 'value must be an array' }];
+    }
+
+    function validateTuple(length: number, scope: string, jsValue: unknown): ValidationError[] {
+      return Array.isArray(jsValue) && jsValue.length === length
+        ? []
+        : [{ scope, jsValue, message: \`value must be a tuple of length \${length}\` }];
+    }
+
+    function validateOneOfTypes(numberOfTypes: number, scope: string, jsValue: unknown, isValid: boolean): ValidationError[] {
+      return isValid
+        ? []
+        : [{ scope, jsValue, message: \`value is neither of the \${numberOfTypes} union types\` }];
+    }
+
+    function flatten<T>(arr: T[][]): T[] {
+      return arr.reduce((r, a) => [...r, ...a], [])
+    }
 
     export function validate(${parameters
       .map((p) => `${p.name}: unknown`)
-      .join(", ")}): boolean {
+      .join(", ")}): ValidationError[] {
+
       ${generateRefValidators(p.manifest.refs)}
 
-      return ${p.rpcFunction.parameters
-        .map((p) => generateValidator(p.value, p.name))
-        .join(" && \n")};
+      return [${p.rpcFunction.parameters
+        .map((p) => `...${generateValidator(p.value, p.name)},`)
+        .join("\n")}];
     }
 
     export async function ${signature} {
@@ -97,9 +165,9 @@ export default apiEndpoint
 
 function generateRefValidators(refs: RefMap): string {
   return [
-    "const refs: { [refId: string]: (jsValue: unknown) => boolean } = {};",
+    "const refs: { [refId: string]: (jsValue: unknown) => ValidationError[] } = {};",
     ...Object.entries(refs).map(([refId, { value }]) => {
-      return `refs[\`${refId}\`] = (jsValue: unknown): boolean => (${generateValidator(
+      return `refs[\`${refId}\`] = (jsValue: unknown): ValidationError[] => (${generateValidator(
         value,
         "jsValue",
       )});`
@@ -111,67 +179,66 @@ function generateValidator(value: JSValue, scope: string): string {
   switch (value.type) {
     case JSType.string:
       return value.oneOf
-        ? `[${value.oneOf
+        ? `validateValueOf([${value.oneOf
             .map((v) => `\`${v}\``)
-            .join(", ")}].includes(${scope})`
-        : `typeof ${scope} === 'string'`
+            .join(", ")}], '${scope}', ${scope})`
+        : `validateTypeOf('string', '${scope}', ${scope})`
 
     case JSType.number:
       return value.oneOf
-        ? `[${value.oneOf}].includes(${scope})`
-        : `typeof ${scope} === 'number'`
+        ? `validateValueOf([${value.oneOf}], '${scope}', ${scope})`
+        : `validateTypeOf('number', '${scope}', ${scope})`
 
     case JSType.boolean:
       return value.oneOf
-        ? `[${value.oneOf}].includes(${scope})`
-        : `typeof ${scope} === 'boolean'`
+        ? `validateValueOf([${value.oneOf}], '${scope}', ${scope})`
+        : `validateTypeOf('boolean', '${scope}', ${scope})`
 
     case JSType.date:
-      return `(${scope} instanceof Date || (
-        typeof ${scope} === 'string' && 
-        /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?(([+-]\d\d:\d\d)|Z)?$/i.test(${scope}) && 
-        !isNaN(Date.parse(${scope}))))`
+      return `validateDate('${scope}', ${scope})`
 
     case JSType.null:
-      return `${scope} === null`
+      return `validateNull('${scope}', ${scope})`
 
     case JSType.undefined:
-      return `${scope} === undefined`
+      return `validateUndefined('${scope}', ${scope})`
 
     case JSType.untyped:
-      return "true"
+      return "[]"
 
     case JSType.object:
-      return [
-        `${scope} !== null`,
-        `typeof ${scope} === 'object'`,
-        ...value.properties.map((p) =>
-          generateValidator(p, `${scope}[\`${p.name}\`]`),
-        ),
-      ].join(" &&\n")
+      return `flatten([
+        validateObject('${scope}', ${scope}),
+        ${value.properties
+          .map((p) => `${generateValidator(p, `${scope}[\`${p.name}\`]`)},`)
+          .join("\n")}
+      ])`
 
     case JSType.array:
-      return [
-        `Array.isArray(${scope})`,
-        `${scope}.every((e, i) => ${generateValidator(
-          value.elementType,
-          `e`,
-        )})`,
-      ].join(" &&\n")
+      return `flatten([
+        validateArray('${scope}', ${scope}),
+        ${scope}.flatMap((el, i) => ${generateValidator(
+        value.elementType,
+        `${scope}[i]`,
+      )}),
+      ])`
 
     case JSType.oneOfTypes:
-      return `[${value.oneOfTypes
-        .map((t) => generateValidator(t, scope))
-        .join(" ||\n ")}]`
+      return `validateOneOfTypes(${
+        value.oneOfTypes.length
+      }, '${scope}', ${scope}, [
+        ${value.oneOfTypes
+          .map((t) => `${generateValidator(t, scope)}.length,`)
+          .join("\n")}
+        ].some(s => s === 0))`
 
     case JSType.tuple:
-      return [
-        `Array.isArray(${scope})`,
-        `${scope}.length === ${value.elementTypes.length}`,
-        value.elementTypes
-          .map((t, i) => generateValidator(t, `${scope}[${i}]`))
-          .join(" &&\n "),
-      ].join(" &&\n ")
+      return `flatten([
+        validateTuple(${value.elementTypes.length}, '${scope}', ${scope}),
+        ${value.elementTypes
+          .map((t, i) => `${generateValidator(t, `${scope}[${i}]`)},`)
+          .join("\n")}
+      ])`
 
     case JSType.ref:
       return `refs[\`${value.id}\`](${scope})`
