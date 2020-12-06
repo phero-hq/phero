@@ -24,3 +24,7 @@ export interface Y {
 }
 
 export async function answer(y: Y): Promise<void> {}
+
+export type Z = [Aad, Y]
+
+export async function test(z: Z): Promise<void> {}
