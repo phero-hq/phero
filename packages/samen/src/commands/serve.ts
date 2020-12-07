@@ -127,9 +127,15 @@ function requestListener() {
               res.write(JSON.stringify(responseData))
             }
           } catch (e) {
-            res.statusCode = 500
-            console.error(e)
-            res.write(JSON.stringify({ error: e.message }))
+            if (e.errorCode === "INVALID_INPUT_ERROR") {
+              res.statusCode = 400
+              console.error(e)
+              res.write(JSON.stringify({ error: e.message, errors: e.errors }))
+            } else {
+              res.statusCode = 500
+              console.error(e)
+              res.write(JSON.stringify({ error: e.message }))
+            }
           } finally {
             res.end()
             return
