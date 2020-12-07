@@ -135,7 +135,7 @@ const handler = (p: Props): string => {
 
   return `
     export async function handler(event: any) {
-      const body = JSON.parse(event.body === null || event.body === undefined ? {} : event.body)
+      const body = JSON.parse(event.body === null || event.body === undefined ? '{}' : event.body)
 
       const inputValidationResult = validate(${parametersFromBody})
       
