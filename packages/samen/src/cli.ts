@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { handleError } from "@samen/core"
+import { getEnvironment, handleError } from "@samen/core"
 
 import serve from "./commands/serve"
 import build from "./commands/build"
@@ -8,27 +8,25 @@ import buildClients from "./commands/buildClients"
 
 process.on("unhandledRejection", handleError)
 
-function run() {
-  try {
-    switch (process.argv[2]) {
-      case "serve":
-        serve()
-        break
+try {
+  const environment = getEnvironment()
 
-      case "build":
-        build()
-        break
+  switch (process.argv[2]) {
+    case "serve":
+      serve(environment)
+      break
 
-      case "buildClients":
-        buildClients()
-        break
+    case "build":
+      build(environment)
+      break
 
-      default:
-        throw new Error(`Unknown command: ${process.argv[2]}`)
-    }
-  } catch (error) {
-    handleError(error)
+    case "buildClients":
+      buildClients(environment)
+      break
+
+    default:
+      throw new Error(`Unknown command: ${process.argv[2]}`)
   }
+} catch (error) {
+  handleError(error)
 }
-
-run()
