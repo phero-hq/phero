@@ -88,6 +88,41 @@
             }
         },
         {
+            "name": "test",
+            "parameters": [
+                {
+                    "index": 0,
+                    "name": "z",
+                    "value": {
+                        "type": "tuple",
+                        "elementTypes": [
+                            {
+                                "type": "ref",
+                                "id": "Aad"
+                            },
+                            {
+                                "type": "ref",
+                                "id": "Y"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "returnType": {
+                "type": "untyped"
+            },
+            "modelIds": [
+                "Sjaak",
+                "Aad",
+                "Y",
+                "Z"
+            ],
+            "filePath": {
+                "sourceFile": "src/samen.ts",
+                "outputFile": "build/samen.js"
+            }
+        },
+        {
             "name": "add",
             "parameters": [
                 {
@@ -111,7 +146,8 @@
             "modelIds": [
                 "Sjaak",
                 "Aad",
-                "Y"
+                "Y",
+                "Z"
             ],
             "filePath": {
                 "sourceFile": "src/calc.ts",
@@ -131,6 +167,10 @@
         "Y": {
             "id": "Y",
             "ts": "export interface Y {\n  answer: [number, number]\n}"
+        },
+        "Z": {
+            "id": "Z",
+            "ts": "export type Z = [Aad, Y]"
         }
     },
     "refs": {
