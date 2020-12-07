@@ -2,12 +2,17 @@ import { promises as fs } from "fs"
 import http from "http"
 import path from "path"
 import TscWatchClient from "tsc-watch/client"
-import { handleError, paths, RPCFunction, SamenManifest } from "@samen/core"
+import {
+  handleError,
+  paths,
+  RPCFunction,
+  SamenManifest,
+  Environment,
+} from "@samen/core"
 import build from "./build"
 import buildClients from "./buildClients"
 
 const PORT = parseInt(process.env.PORT || "") || 4000
-const IS_PROD = process.env.NODE_ENV === "production"
 
 interface Route {
   definition: RPCFunction
@@ -16,8 +21,13 @@ interface Route {
 }
 type Routes = Record<string, Route>
 let routes: Routes = {}
+let environment: Environment
 
-export default async function serve() {
+export default async function serve(_environment: Environment) {
+  environment = _environment
+
+  console.log(`Starting samen server in ${environment} mode`)
+
   const server = http.createServer()
   server.on("request", requestListener())
   server.on("listening", () => {
@@ -25,9 +35,7 @@ export default async function serve() {
   })
   server.listen(PORT)
 
-  if (IS_PROD) {
-    await reload()
-  } else {
+  if (environment === Environment.development) {
     const watch = new TscWatchClient()
     watch.on("success", reload)
     watch.start("--project", paths.userProjectDir)
@@ -36,14 +44,14 @@ export default async function serve() {
 
 async function reload(): Promise<void> {
   try {
-    await build()
+    await build(environment)
 
     console.log("Updating routes...")
     const manifest = await getManifest()
     clearRequireCache()
     routes = getRoutes(manifest)
 
-    await buildClients()
+    await buildClients(environment)
 
     console.log("Samen is ready")
   } catch (error) {

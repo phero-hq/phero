@@ -3,13 +3,16 @@
 import { promises as fs } from "fs"
 import { Project } from "ts-morph"
 import {
+  Environment,
   generateApiEndpoints,
   generateManifest,
   paths,
   validateProject,
 } from "@samen/core"
 
-export default async function build(): Promise<void> {
+export default async function build(environment: Environment): Promise<void> {
+  console.log(`Building samen in ${environment} mode`)
+
   const project = new Project({
     tsConfigFilePath: `${paths.userProjectDir}/tsconfig.json`,
   })

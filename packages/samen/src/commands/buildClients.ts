@@ -1,4 +1,5 @@
 import {
+  Environment,
   ManifestMissingError,
   paths,
   SamenClientNotInstalledError,
@@ -9,13 +10,17 @@ import { promises as fs } from "fs"
 import util from "util"
 const execAsync = util.promisify(exec)
 
-export default async function buildClients(): Promise<void> {
+export default async function buildClients(
+  environment: Environment,
+): Promise<void> {
+  console.log(`Building samen clients in ${environment} mode`)
+
   const manifestFile = await readManifestFile()
   const config = await readConfig()
 
   if (config && config.clients.length > 0) {
     for (const configuredClientPath of config.clients) {
-      await buildClientSDK(manifestFile, configuredClientPath)
+      await buildClientSDK(environment, manifestFile, configuredClientPath)
     }
   }
 }
@@ -44,6 +49,7 @@ export async function readConfig(): Promise<SamenConfig | null> {
 }
 
 async function buildClientSDK(
+  environment: Environment,
   manifestFile: string,
   configuredClientPath: string,
 ): Promise<void> {
@@ -60,5 +66,7 @@ async function buildClientSDK(
   } catch (error) {
     throw new SamenClientNotInstalledError(clientPath)
   }
-  await execAsync(`"${binPath}" build`, { cwd: clientPath })
+  const productionFlag =
+    environment === Environment.production ? "--production" : ""
+  await execAsync(`"${binPath}" build ${productionFlag}`, { cwd: clientPath })
 }

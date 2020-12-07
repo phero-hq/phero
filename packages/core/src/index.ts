@@ -4,3 +4,4 @@ export { default as generateApiEndpoints } from "./transpiler/generateApiEndpoin
 export * from "./domain"
 export * from "./errors"
 export * as paths from "./paths"
+export * from "./cli"
