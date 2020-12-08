@@ -7,6 +7,7 @@ import {
   generateApiEndpoints,
   generateManifest,
   paths,
+  SamenFileMissingError,
   validateProject,
 } from "@samen/core"
 
@@ -20,8 +21,7 @@ export default async function build(environment: Environment): Promise<void> {
   const samenSourceFile = project.getSourceFile("samen.ts")
 
   if (samenSourceFile === undefined) {
-    console.error(`Couldn't find samen.ts in project ${paths.userProjectDir}`)
-    process.exit(1)
+    throw new SamenFileMissingError(`${paths.userProjectDir}/samen.ts`)
   }
 
   const samenFilePath = samenSourceFile.getFilePath()
