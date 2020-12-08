@@ -8,6 +8,7 @@ import {
   RPCFunction,
   SamenManifest,
   Environment,
+  startSpinner,
 } from "@samen/core"
 import build from "./build"
 import buildClients from "./buildClients"
@@ -25,8 +26,6 @@ let environment: Environment
 
 export default async function serve(_environment: Environment) {
   environment = _environment
-
-  console.log(`Starting samen server in ${environment} mode`)
 
   const server = http.createServer()
   server.on("request", requestListener())
@@ -46,10 +45,11 @@ async function reload(): Promise<void> {
   try {
     await build(environment)
 
-    console.log("Updating routes...")
+    const spinner = startSpinner("Updating routes")
     const manifest = await getManifest()
     clearRequireCache()
     routes = getRoutes(manifest)
+    spinner.succeed("Routes are ready")
 
     await buildClients(environment)
 

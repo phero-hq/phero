@@ -4,6 +4,7 @@ import {
   paths,
   SamenClientNotInstalledError,
   SamenConfig,
+  startSpinner,
 } from "@samen/core"
 import { exec } from "child_process"
 import { promises as fs } from "fs"
@@ -13,8 +14,6 @@ const execAsync = util.promisify(exec)
 export default async function buildClients(
   environment: Environment,
 ): Promise<void> {
-  console.log(`Building samen clients in ${environment} mode`)
-
   const manifestFile = await readManifestFile()
   const config = await readConfig()
 
@@ -26,22 +25,29 @@ export default async function buildClients(
 }
 
 async function readManifestFile(): Promise<string> {
+  const spinner = startSpinner("Reading manifest file")
   const filePath = paths.userManifestFile
   try {
     // No need to parse it, we're going to write it out as-is
-    return await fs.readFile(filePath, { encoding: "utf-8" })
+    const result = await fs.readFile(filePath, { encoding: "utf-8" })
+    spinner.succeed("Manifest is ready")
+    return result
   } catch (error) {
     throw new ManifestMissingError(filePath)
   }
 }
 
 export async function readConfig(): Promise<SamenConfig | null> {
+  const spinner = startSpinner("Reading config file")
   try {
     const samenConfig = await fs.readFile(paths.userConfigFile)
     // TODO validate samenConfig
-    return JSON.parse(samenConfig.toString()) as SamenConfig
+    const result = JSON.parse(samenConfig.toString()) as SamenConfig
+    spinner.succeed("Config is ready")
+    return result
   } catch (e) {
     if (e.code === "ENOENT") {
+      spinner.succeed("No config file is found, but that's ok")
       return null
     }
     throw e
@@ -53,13 +59,13 @@ async function buildClientSDK(
   manifestFile: string,
   configuredClientPath: string,
 ): Promise<void> {
+  const prefix = `Found client project: "${configuredClientPath}"\n`
   const clientPath = paths.clientProjectDir(configuredClientPath)
-  console.log(`Building client: "${configuredClientPath}"`)
 
-  console.log(` Writing manifest file...`)
+  const spinner = startSpinner(prefix + "  Writing manifest file...")
   await fs.writeFile(paths.clientManifestFile(clientPath), manifestFile)
 
-  console.log(` Building client SDK...`)
+  spinner.text = prefix + "  Building client SDK..."
   const binPath = paths.clientBinFile(clientPath)
   try {
     await fs.stat(binPath)
@@ -69,4 +75,6 @@ async function buildClientSDK(
   const productionFlag =
     environment === Environment.production ? "--production" : ""
   await execAsync(`"${binPath}" build ${productionFlag}`, { cwd: clientPath })
+
+  spinner.succeed(`Client is ready: ${configuredClientPath}`)
 }

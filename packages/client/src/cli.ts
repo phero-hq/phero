@@ -8,7 +8,6 @@ try {
   const environment = getEnvironment()
 
   if (process.argv[2] === "build") {
-    console.log(`Building client in ${environment} mode`)
     generateClientSDK(process.cwd())
   } else {
     throw new Error(`Unknown command: ${process.argv[2]}`)
