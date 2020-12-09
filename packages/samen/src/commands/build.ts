@@ -8,33 +8,49 @@ import {
   generateManifest,
   paths,
   SamenFileMissingError,
+  SamenManifest,
   startSpinner,
   validateProject,
 } from "@samen/core"
 
 export default async function build(environment: Environment): Promise<void> {
-  const spinner = startSpinner("Reading project")
+  const { manifest, samenFilePath } = await buildManifest()
+  await buildRPCFunctions(manifest, samenFilePath)
+}
 
+async function buildManifest(): Promise<{
+  manifest: SamenManifest
+  samenFilePath: string
+}> {
+  const spinner = startSpinner("Generating manifest")
+
+  spinner.setSubTask("Reading project")
   const project = new Project({
     tsConfigFilePath: `${paths.userProjectDir}/tsconfig.json`,
   })
-
   const samenSourceFile = project.getSourceFile("samen.ts")
 
   if (samenSourceFile === undefined) {
     throw new SamenFileMissingError(`${paths.userProjectDir}/samen.ts`)
   }
-
   const samenFilePath = samenSourceFile.getFilePath()
 
+  spinner.setSubTask("Validating project")
   validateProject(project)
 
-  spinner.text = "Building manifest file"
+  spinner.setSubTask("Creating manifest file")
   const manifest = generateManifest(samenSourceFile, project.getTypeChecker())
   await fs.writeFile(paths.userManifestFile, JSON.stringify(manifest, null, 4))
+  spinner.succeed("Generated manifest")
 
-  spinner.text = "Building API endpoints"
+  return { manifest, samenFilePath }
+}
+
+async function buildRPCFunctions(
+  manifest: SamenManifest,
+  samenFilePath: string,
+): Promise<void> {
+  const spinner = startSpinner("Generating RPC functions")
   await generateApiEndpoints(manifest, samenFilePath)
-
-  spinner.succeed("Build is ready")
+  spinner.succeed("Generated RPC functions")
 }

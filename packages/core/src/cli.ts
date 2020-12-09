@@ -11,6 +11,15 @@ export function getEnvironment(): Environment {
   return Environment.development
 }
 
-export function startSpinner(message: string) {
-  return ora(message).start()
+interface ExtendedOra extends ora.Ora {
+  setSubTask: (subTask: string) => ExtendedOra
+}
+export function startSpinner(message: string): ExtendedOra {
+  const spinner = ora(message).start()
+  const extended = spinner as any
+  extended.setSubTask = (subTask: string): ExtendedOra => {
+    extended.text = `${message}\n  › ${subTask}`
+    return extended
+  }
+  return extended
 }

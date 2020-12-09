@@ -25,29 +25,22 @@ export default async function buildClients(
 }
 
 async function readManifestFile(): Promise<string> {
-  const spinner = startSpinner("Reading manifest file")
   const filePath = paths.userManifestFile
   try {
     // No need to parse it, we're going to write it out as-is
-    const result = await fs.readFile(filePath, { encoding: "utf-8" })
-    spinner.succeed("Manifest is ready")
-    return result
+    return await fs.readFile(filePath, { encoding: "utf-8" })
   } catch (error) {
     throw new ManifestMissingError(filePath)
   }
 }
 
 export async function readConfig(): Promise<SamenConfig | null> {
-  const spinner = startSpinner("Reading config file")
   try {
     const samenConfig = await fs.readFile(paths.userConfigFile)
     // TODO validate samenConfig
-    const result = JSON.parse(samenConfig.toString()) as SamenConfig
-    spinner.succeed("Config is ready")
-    return result
+    return JSON.parse(samenConfig.toString()) as SamenConfig
   } catch (e) {
     if (e.code === "ENOENT") {
-      spinner.succeed("No config file is found, but that's ok")
       return null
     }
     throw e
@@ -59,13 +52,13 @@ async function buildClientSDK(
   manifestFile: string,
   configuredClientPath: string,
 ): Promise<void> {
-  const prefix = `Found client project: "${configuredClientPath}"\n`
+  const spinner = startSpinner(`Generating client: ${configuredClientPath}`)
   const clientPath = paths.clientProjectDir(configuredClientPath)
 
-  const spinner = startSpinner(prefix + "  Writing manifest file...")
+  spinner.setSubTask("Writing manifest file")
   await fs.writeFile(paths.clientManifestFile(clientPath), manifestFile)
 
-  spinner.text = prefix + "  Building client SDK..."
+  spinner.setSubTask("Generating SDK")
   const binPath = paths.clientBinFile(clientPath)
   try {
     await fs.stat(binPath)
@@ -76,5 +69,5 @@ async function buildClientSDK(
     environment === Environment.production ? "--production" : ""
   await execAsync(`"${binPath}" build ${productionFlag}`, { cwd: clientPath })
 
-  spinner.succeed(`Client is ready: ${configuredClientPath}`)
+  spinner.succeed(`Generated client SDK for: ${configuredClientPath}`)
 }

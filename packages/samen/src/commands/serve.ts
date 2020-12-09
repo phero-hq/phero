@@ -44,16 +44,9 @@ export default async function serve(_environment: Environment) {
 async function reload(): Promise<void> {
   try {
     await build(environment)
-
-    const spinner = startSpinner("Updating routes")
-    const manifest = await getManifest()
-    clearRequireCache()
-    routes = getRoutes(manifest)
-    spinner.succeed("Routes are ready")
-
     await buildClients(environment)
-
-    console.log("Samen is ready")
+    await loadRoutes()
+    startSpinner("").succeed(`Samen is served at http://localhost:${PORT}`)
   } catch (error) {
     // TODO: Stay alive
     handleError(error)
@@ -77,6 +70,14 @@ async function getManifest(): Promise<SamenManifest> {
 
   const manifest = JSON.parse(manifestFile.toString())
   return (manifest as unknown) as SamenManifest
+}
+
+async function loadRoutes(): Promise<void> {
+  const spinner = startSpinner("Updating routes")
+  const manifest = await getManifest()
+  clearRequireCache()
+  routes = getRoutes(manifest)
+  spinner.succeed("Loaded routes")
 }
 
 function getRoutes(manifest: SamenManifest): Routes {
