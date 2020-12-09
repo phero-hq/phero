@@ -2,6 +2,7 @@
 
 import { promises as fs } from "fs"
 import { Project } from "ts-morph"
+import path from "path"
 import {
   Environment,
   generateApiEndpoints,
@@ -38,6 +39,9 @@ async function buildManifest(): Promise<{
   spinner.setSubTask("Validating project")
   validateProject(project)
 
+  spinner.setSubTask("Generating server index file")
+  await generateServerIndexFile(project.getCompilerOptions().outDir)
+
   spinner.setSubTask("Creating manifest file")
   const manifest = generateManifest(samenSourceFile, project.getTypeChecker())
   await fs.writeFile(paths.userManifestFile, JSON.stringify(manifest, null, 4))
@@ -53,4 +57,13 @@ async function buildRPCFunctions(
   const spinner = startSpinner("Generating RPC functions")
   await generateApiEndpoints(manifest, samenFilePath)
   spinner.succeed("Generated RPC functions")
+}
+
+async function generateServerIndexFile(outDir?: string): Promise<void> {
+  if (outDir) {
+    await fs.writeFile(
+      path.join(outDir, "samen-server.js"),
+      "require('@samen/samen/build/production-server.js')",
+    )
+  }
 }
