@@ -6,6 +6,12 @@ export class ManifestMissingError extends Error {
   }
 }
 
+export class ConfigMissingError extends Error {
+  constructor(filePath: string) {
+    super(`Config missing at: ${filePath}`)
+  }
+}
+
 export class SamenFileMissingError extends Error {
   constructor(filePath: string) {
     super(`Samen file missing at: ${filePath}`)
@@ -80,6 +86,7 @@ export function validateProject(project: Project) {
 }
 
 export function handleError(error: Error) {
+  console.log("\n\n")
   console.log("--------")
   console.log(" Error! ")
   console.log("--------")

@@ -2,8 +2,10 @@ import {
   Environment,
   ManifestMissingError,
   paths,
+  readConfigFile,
+  readManifestFile,
   SamenClientNotInstalledError,
-  SamenConfig,
+  SamenManifest,
   startSpinner,
 } from "@samen/core"
 import { exec } from "child_process"
@@ -14,49 +16,31 @@ const execAsync = util.promisify(exec)
 export default async function buildClients(
   environment: Environment,
 ): Promise<void> {
-  const manifestFile = await readManifestFile()
-  const config = await readConfig()
+  const manifest = await readManifestFile()
+  const config = await readConfigFile()
 
   if (config && config.clients.length > 0) {
     for (const configuredClientPath of config.clients) {
-      await buildClientSDK(environment, manifestFile, configuredClientPath)
+      await buildClientSDK(environment, manifest, configuredClientPath)
     }
-  }
-}
-
-async function readManifestFile(): Promise<string> {
-  const filePath = paths.userManifestFile
-  try {
-    // No need to parse it, we're going to write it out as-is
-    return await fs.readFile(filePath, { encoding: "utf-8" })
-  } catch (error) {
-    throw new ManifestMissingError(filePath)
-  }
-}
-
-export async function readConfig(): Promise<SamenConfig | null> {
-  try {
-    const samenConfig = await fs.readFile(paths.userConfigFile)
-    // TODO validate samenConfig
-    return JSON.parse(samenConfig.toString()) as SamenConfig
-  } catch (e) {
-    if (e.code === "ENOENT") {
-      return null
-    }
-    throw e
   }
 }
 
 async function buildClientSDK(
   environment: Environment,
-  manifestFile: string,
+  manifest: SamenManifest,
   configuredClientPath: string,
 ): Promise<void> {
-  const spinner = startSpinner(`Generating client: ${configuredClientPath}`)
+  const spinner = startSpinner(
+    `Generating client SDK for: ${configuredClientPath}`,
+  )
   const clientPath = paths.clientProjectDir(configuredClientPath)
 
   spinner.setSubTask("Writing manifest file")
-  await fs.writeFile(paths.clientManifestFile(clientPath), manifestFile)
+  await fs.writeFile(
+    paths.clientManifestFile(clientPath),
+    JSON.stringify(manifest, null, 4),
+  )
 
   spinner.setSubTask("Generating SDK")
   const binPath = paths.clientBinFile(clientPath)

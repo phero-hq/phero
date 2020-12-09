@@ -10,6 +10,7 @@ export default async function generateApiEndpoints(
   samenFilePath: string,
 ): Promise<void> {
   try {
+    // TODO: use paths for this? 🤔
     const userProjectPath = process.cwd()
 
     const relativeSamenFilePath = `./${path
@@ -26,8 +27,6 @@ export default async function generateApiEndpoints(
     for (const rpcFunction of manifest.rpcFunctions) {
       const code = apiEndpoint({ manifest, relativeSamenFilePath, rpcFunction })
       project.createSourceFile(`${rpcFunction.name}.ts`, code)
-      // console.debug(`---${rpcFunction.name}.ts}-------------------------------`)
-      // console.debug(code)
     }
 
     validateProject(project)

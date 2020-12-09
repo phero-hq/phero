@@ -9,6 +9,7 @@ import {
   SamenManifest,
   Environment,
   startSpinner,
+  readManifestFile,
 } from "@samen/core"
 import build from "./build"
 import buildClients from "./buildClients"
@@ -60,21 +61,9 @@ function clearRequireCache() {
   })
 }
 
-async function getManifest(): Promise<SamenManifest> {
-  const manifestPath = paths.userManifestFile
-  const manifestFile = await fs.readFile(manifestPath)
-
-  if (!manifestFile) {
-    throw new Error(`Manifest file not found at ${manifestPath}`)
-  }
-
-  const manifest = JSON.parse(manifestFile.toString())
-  return (manifest as unknown) as SamenManifest
-}
-
 async function loadRoutes(): Promise<void> {
   const spinner = startSpinner("Updating routes")
-  const manifest = await getManifest()
+  const manifest = await readManifestFile()
   clearRequireCache()
   routes = getRoutes(manifest)
   spinner.succeed("Loaded routes")

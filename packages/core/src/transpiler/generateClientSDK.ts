@@ -1,8 +1,11 @@
-import { promises as fs } from "fs"
 import { Project } from "ts-morph"
 import { Environment } from "../cli"
-import { ClientConfig, SamenManifest } from "../domain"
-import { ClientSDKCompilerError, validateProject } from "../errors"
+import {
+  ClientSDKCompilerError,
+  ConfigMissingError,
+  validateProject,
+} from "../errors"
+import { readClientConfigFile, readClientManifestFile } from "../files"
 import * as paths from "../paths"
 import clientSDK from "./templates/clientSDK"
 
@@ -17,16 +20,15 @@ export default async function generateClientSDK(
         outDir: paths.clientSdkDir(projectDir),
       },
     })
-    const manifest = (JSON.parse(
-      await fs.readFile(paths.clientManifestFile(projectDir), "utf-8"),
-    ) as unknown) as SamenManifest
-    const config = (JSON.parse(
-      await fs.readFile(paths.clientConfigFile(projectDir), "utf-8"),
-    ) as unknown) as ClientConfig
+    const manifest = await readClientManifestFile(projectDir)
+    const config = await readClientConfigFile(projectDir)
+    if (!config) throw new ConfigMissingError(projectDir)
+
     const apiUrl = {
       [Environment.development]: config.development.url,
       [Environment.production]: config.production.url,
     }[environment]
+
     const code = clientSDK({ manifest, apiUrl })
     project.createSourceFile("index.ts", code)
     validateProject(project)
