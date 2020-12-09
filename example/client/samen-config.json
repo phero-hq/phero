@@ -1,0 +1,4 @@
+{
+  "development": { "url": "http://localhost:4000" },
+  "production": { "url": "https://samen.cloud/xxxx" }
+}

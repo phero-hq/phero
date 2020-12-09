@@ -1,17 +1,28 @@
 #!/usr/bin/env node
 
-import { generateClientSDK, getEnvironment, handleError } from "@samen/core"
+import { promises as fs } from "fs"
+import {
+  ClientConfig,
+  generateClientSDK,
+  getEnvironment,
+  handleError,
+  paths,
+} from "@samen/core"
 
 process.on("unhandledRejection", handleError)
 
 try {
-  const environment = getEnvironment()
-
   if (process.argv[2] === "build") {
-    generateClientSDK(process.cwd())
+    build()
   } else {
     throw new Error(`Unknown command: ${process.argv[2]}`)
   }
 } catch (error) {
   handleError(error)
+}
+
+async function build(): Promise<void> {
+  const cwd = process.cwd()
+  const environment = getEnvironment()
+  generateClientSDK(environment, cwd)
 }

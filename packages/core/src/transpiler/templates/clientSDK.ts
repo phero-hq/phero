@@ -5,10 +5,11 @@ import { promise } from "./shared/types"
 
 interface Props {
   manifest: SamenManifest
+  apiUrl: string
 }
 
-const clientSDK = ({ manifest }: Props): string => `
-    ${requestFunction}
+const clientSDK = ({ apiUrl, manifest }: Props): string => `
+    ${requestFunction({ apiUrl })}
 
     ${Object.keys(manifest.models)
       .map((modelId) => manifest.models[modelId].ts)
@@ -17,9 +18,8 @@ const clientSDK = ({ manifest }: Props): string => `
     ${manifest.rpcFunctions.map(rpcFunction).join("\n")}
   `
 
-const requestFunction = `
-  // TODO: Get from manifest
-  const ENDPOINT = "http://localhost:4000/"
+const requestFunction = ({ apiUrl }: { apiUrl: string }) => `
+  const ENDPOINT = "${apiUrl}"
 
   async function request<T>(
     name: string,

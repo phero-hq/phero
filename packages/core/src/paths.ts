@@ -34,6 +34,10 @@ export const clientProjectDir = (configuredClientDir: string) =>
 export const clientManifestFile = (clientProjectDir: string) =>
   path.join(clientProjectDir, "samen-manifest.json")
 
+// example/client/samen-config.json
+export const clientConfigFile = (clientProjectDir: string) =>
+  path.join(clientProjectDir, "samen-config.json")
+
 // example/client/node_modules/.bin/samen
 export const clientBinFile = (clientProjectDir: string) =>
   path.join(clientProjectDir, "node_modules/.bin/samen")
