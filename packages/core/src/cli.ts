@@ -1,4 +1,5 @@
 import ora from "ora"
+import { promises as fs } from "fs"
 
 export enum Environment {
   production = "production",
@@ -22,4 +23,14 @@ export function startSpinner(message: string): ExtendedOra {
     return extended
   }
   return extended
+}
+
+export async function ensureDir(path: string): Promise<void> {
+  try {
+    await fs.stat(path)
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      await fs.mkdir(path)
+    }
+  }
 }

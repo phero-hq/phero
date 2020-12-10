@@ -13,6 +13,7 @@ import {
   startSpinner,
   validateProject,
 } from "@samen/core"
+import { ensureDir } from "@samen/core"
 
 export default async function build(environment: Environment): Promise<void> {
   const { manifest, samenFilePath } = await buildManifest()
@@ -24,6 +25,9 @@ async function buildManifest(): Promise<{
   samenFilePath: string
 }> {
   const spinner = startSpinner("Generating manifest")
+
+  spinner.setSubTask("Making sure build dir exists")
+  await ensureDir(paths.userBuildDir)
 
   spinner.setSubTask("Reading project")
   const project = new Project({

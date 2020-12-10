@@ -45,7 +45,3 @@ export const clientBinFile = (clientProjectDir: string) =>
 // example/client/node_modules/@samen/client/build
 export const clientBuildDir = (clientProjectDir: string) =>
   path.join(clientProjectDir, "node_modules/@samen/client/build")
-
-// example/client/node_modules/@samen/client/build/sdk
-export const clientSdkDir = (clientProjectDir: string) =>
-  path.join(clientBuildDir(clientProjectDir), "sdk")

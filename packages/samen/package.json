@@ -2,7 +2,7 @@
   "name": "@samen/samen",
   "version": "0.0.0",
   "bin": {
-    "samen": "build/cli.js"
+    "samen": "dist/cli.js"
   },
   "scripts": {
     "clean": "rm -rf build",

@@ -1,7 +1,7 @@
 {
   "name": "@samen/core",
   "version": "0.0.0",
-  "main": "build/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "clean": "rm -rf build",
     "build": "tsc",

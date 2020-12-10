@@ -1,5 +1,5 @@
 import { Project } from "ts-morph"
-import { Environment } from "../cli"
+import { ensureDir, Environment } from "../cli"
 import {
   ClientSDKCompilerError,
   ConfigMissingError,
@@ -14,10 +14,12 @@ export default async function generateClientSDK(
   projectDir: string,
 ): Promise<void> {
   try {
+    await ensureDir(paths.clientBuildDir(projectDir))
+
     const project = new Project({
       compilerOptions: {
         declaration: true,
-        outDir: paths.clientSdkDir(projectDir),
+        outDir: paths.clientBuildDir(projectDir),
       },
     })
     const manifest = await readClientManifestFile(projectDir)
