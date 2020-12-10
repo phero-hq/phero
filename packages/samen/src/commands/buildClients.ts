@@ -19,7 +19,7 @@ export default async function buildClients(
   const manifest = await readManifestFile()
   const config = await readConfigFile()
 
-  if (config && config.clients.length > 0) {
+  if (config.clients.length > 0) {
     for (const configuredClientPath of config.clients) {
       await buildClientSDK(environment, manifest, configuredClientPath)
     }
