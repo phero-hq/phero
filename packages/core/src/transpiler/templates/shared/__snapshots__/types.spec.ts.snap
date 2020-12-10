@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Array 1`] = `"number[]"`;
+
+exports[`Boolean 1`] = `"boolean"`;
+
+exports[`Date 1`] = `"Date"`;
+
+exports[`ModelRef 1`] = `"Something"`;
+
+exports[`Null 1`] = `"null"`;
+
+exports[`Number 1`] = `"number"`;
+
+exports[`Object 1`] = `"{a: number;b: string}"`;
+
+exports[`OneOfTypes 1`] = `"(number | string)"`;
+
+exports[`String 1`] = `"string"`;
+
+exports[`Tuple 1`] = `"[number, string]"`;
+
+exports[`Undefined 1`] = `"undefined"`;
+
+exports[`Untyped 1`] = `"void"`;
