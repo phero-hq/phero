@@ -6,7 +6,6 @@
     "access": "public"
   },
   "scripts": {
-    "clean": "rm -rf build",
     "build": "tsc",
     "test": "jest src",
     "prepublish": "npm run build"
