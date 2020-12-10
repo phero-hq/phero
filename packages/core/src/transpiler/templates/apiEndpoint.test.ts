@@ -39,19 +39,20 @@ const props = (partialRpcFunction: Partial<RPCFunction>): Props => {
   }
 }
 
-test("literal parameter", () => {
+test("literal parameter and return type", () => {
   expect(
     render(
       apiEndpoint(
         props({
           parameters: [{ name: "a", index: 0, value: { type: JSType.number } }],
+          returnType: { type: JSType.string },
         }),
       ),
     ),
   ).toMatchSnapshot()
 })
 
-test("ref parameter", () => {
+test("ref parameter and return type", () => {
   expect(
     render(
       apiEndpoint(
@@ -63,22 +64,9 @@ test("ref parameter", () => {
               value: { type: JSType.ref, id: "Something" },
             },
           ],
+          returnType: { type: JSType.ref, id: "Something" },
         }),
       ),
-    ),
-  ).toMatchSnapshot()
-})
-
-test("literal returnType", () => {
-  expect(
-    render(apiEndpoint(props({ returnType: { type: JSType.string } }))),
-  ).toMatchSnapshot()
-})
-
-test("ref returnType", () => {
-  expect(
-    render(
-      apiEndpoint(props({ returnType: { type: JSType.ref, id: "Something" } })),
     ),
   ).toMatchSnapshot()
 })

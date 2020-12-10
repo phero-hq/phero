@@ -24,15 +24,27 @@ test("Object", () => {
       properties: [
         { name: "a", type: JSType.number },
         { name: "b", type: JSType.string },
+        { name: "c", type: JSType.ref, id: "Something" },
       ],
     }),
   ).toMatchSnapshot()
 })
 
-test("Array", () => {
-  expect(
-    type({ type: JSType.array, elementType: { type: JSType.number } }),
-  ).toMatchSnapshot()
+describe("Array", () => {
+  test("Number", () => {
+    expect(
+      type({ type: JSType.array, elementType: { type: JSType.number } }),
+    ).toMatchSnapshot()
+  })
+
+  test("Ref", () => {
+    expect(
+      type({
+        type: JSType.array,
+        elementType: { type: JSType.ref, id: "Something" },
+      }),
+    ).toMatchSnapshot()
+  })
 })
 
 test("Date", () => {
@@ -51,7 +63,10 @@ test("OneOfTypes", () => {
   expect(
     type({
       type: JSType.oneOfTypes,
-      oneOfTypes: [{ type: JSType.number }, { type: JSType.string }],
+      oneOfTypes: [
+        { type: JSType.number },
+        { type: JSType.ref, id: "Something" },
+      ],
     }),
   ).toMatchSnapshot()
 })
@@ -60,7 +75,10 @@ test("Tuple", () => {
   expect(
     type({
       type: JSType.tuple,
-      elementTypes: [{ type: JSType.number }, { type: JSType.string }],
+      elementTypes: [
+        { type: JSType.string },
+        { type: JSType.ref, id: "Something" },
+      ],
     }),
   ).toMatchSnapshot()
 })

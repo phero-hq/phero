@@ -15,7 +15,7 @@ export const type = (value: JSValue): string => {
       return value.id
 
     case JSType.array:
-      return `${value.elementType.type}[]`
+      return `${type(value.elementType)}[]`
 
     case JSType.tuple:
       return `[${value.elementTypes.map(type).join(", ")}]`
