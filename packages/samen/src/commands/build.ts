@@ -4,6 +4,7 @@ import { promises as fs } from "fs"
 import { Project } from "ts-morph"
 import path from "path"
 import {
+  dirExists,
   Environment,
   generateApiEndpoints,
   generateManifest,
@@ -64,7 +65,7 @@ async function buildRPCFunctions(
 }
 
 async function generateServerIndexFile(outDir?: string): Promise<void> {
-  if (outDir) {
+  if (outDir && (await dirExists(outDir))) {
     await fs.writeFile(
       path.join(outDir, "samen-server.js"),
       "require('@samen/samen/build/production-server.js')",

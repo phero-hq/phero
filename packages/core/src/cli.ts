@@ -26,11 +26,16 @@ export function startSpinner(message: string): ExtendedOra {
 }
 
 export async function ensureDir(path: string): Promise<void> {
+  if (!(await dirExists(path))) {
+    await fs.mkdir(path)
+  }
+}
+
+export async function dirExists(path: string): Promise<boolean> {
   try {
     await fs.stat(path)
+    return true
   } catch (error) {
-    if (error.code === "ENOENT") {
-      await fs.mkdir(path)
-    }
+    return false
   }
 }
