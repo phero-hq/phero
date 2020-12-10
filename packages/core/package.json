@@ -2,6 +2,9 @@
   "name": "@samen/core",
   "version": "0.1.0",
   "main": "dist/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "clean": "rm -rf build",
     "build": "tsc",
