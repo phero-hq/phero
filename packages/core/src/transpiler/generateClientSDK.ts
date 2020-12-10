@@ -19,9 +19,7 @@ export default async function generateClientSDK(
     const project = new Project({
       compilerOptions: {
         outDir: paths.clientBuildDir(projectDir),
-        target: ts.ScriptTarget.ES2019,
         declaration: true,
-        lib: ["ES2020"],
       },
     })
     const manifest = await readClientManifestFile(projectDir)

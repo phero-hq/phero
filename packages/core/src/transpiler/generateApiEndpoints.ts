@@ -19,9 +19,7 @@ export default async function generateApiEndpoints(
     const project = new Project({
       compilerOptions: {
         outDir: paths.userRpcFunctionsDir,
-        target: ts.ScriptTarget.ES2019,
         declaration: true,
-        lib: ["ES2020"],
       },
     })
 
