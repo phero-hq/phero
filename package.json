@@ -12,8 +12,6 @@
     "url": "git+https://github.com/samen-io/samen.git"
   },
   "devDependencies": {
-    "@tsconfig/recommended": "^1.0.1",
-    "lerna": "^3.22.1",
-    "prettier": "^2.2.1"
+    "lerna": "^3.22.1"
   }
 }
