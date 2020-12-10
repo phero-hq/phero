@@ -1,4 +1,4 @@
-import { Project } from "ts-morph"
+import { Project, ts } from "ts-morph"
 import { ensureDir, Environment } from "../cli"
 import {
   ClientSDKCompilerError,
@@ -18,8 +18,10 @@ export default async function generateClientSDK(
 
     const project = new Project({
       compilerOptions: {
-        declaration: true,
         outDir: paths.clientBuildDir(projectDir),
+        target: ts.ScriptTarget.ES2019,
+        declaration: true,
+        lib: ["ES2020"],
       },
     })
     const manifest = await readClientManifestFile(projectDir)

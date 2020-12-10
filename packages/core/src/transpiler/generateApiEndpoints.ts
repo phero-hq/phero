@@ -1,5 +1,5 @@
 import path from "path"
-import { Project } from "ts-morph"
+import { Project, ts } from "ts-morph"
 import { SamenManifest } from "../domain/manifest"
 import { ApiEndpointCompilerError, validateProject } from "../errors"
 import * as paths from "../paths"
@@ -19,7 +19,9 @@ export default async function generateApiEndpoints(
     const project = new Project({
       compilerOptions: {
         outDir: paths.userRpcFunctionsDir,
+        target: ts.ScriptTarget.ES2019,
         declaration: true,
+        lib: ["ES2020"],
       },
     })
 
