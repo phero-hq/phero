@@ -1,6 +1,5 @@
 {
   "name": "samen",
-  "version": "0.0.0",
   "description": "Samen builds and deploys serverless backend services and databases",
   "author": "Press Play Development",
   "homepage": "https://samen.io",
