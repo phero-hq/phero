@@ -10,7 +10,7 @@ import functionSignature from "./shared/functionSignature"
 import { parametersFromObject, untypedParameters } from "./shared/parameters"
 import { promise } from "./shared/types"
 
-interface Props {
+export interface Props {
   rpcFunction: RPCFunction
   manifest: SamenManifest
   relativeSamenFilePath: string
@@ -29,7 +29,7 @@ const apiEndpoint = (p: Props) => {
     ${validator(p)}
 
     ${handler(p)}
-    
+
     ${rpcFunction(p)}
   `
 }
@@ -54,15 +54,15 @@ const validator = (p: Props): string => {
     export function validate(${parameters
       .map((p) => `${p.name}: unknown`)
       .join(", ")}): ValidationError[] {
-        
+
       function validateTypeOf(typeString: 'string' | 'number' | 'boolean', scope: string, jsValue: unknown): ValidationError[] {
-        return typeof jsValue === typeString 
+        return typeof jsValue === typeString
           ? []
           : [{ scope, jsValue, message: \`value is not a \${typeString}\` }];
       }
 
       function validateValueOf(possibleValues: any[], scope: string, jsValue: any): ValidationError[] {
-        return possibleValues.includes(jsValue) 
+        return possibleValues.includes(jsValue)
           ? []
           : [{ scope, jsValue, message: \`value must be one of: \${possibleValues.map(v => \`"\${v}"\`).join(', ')}\` }];
       }
@@ -72,7 +72,7 @@ const validator = (p: Props): string => {
         const isValidDate = jsValue instanceof Date || (
           typeof jsValue === 'string' && r.test(jsValue) && !isNaN(Date.parse(jsValue))
         );
-        return isValidDate 
+        return isValidDate
           ? []
           : [{ scope, jsValue, message: 'value must be a date' }];
       }
@@ -82,19 +82,19 @@ const validator = (p: Props): string => {
           ? []
           : [{ scope, jsValue, message: 'value must be null' }];
       }
-      
+
       function validateUndefined(scope: string, jsValue: unknown): ValidationError[] {
         return jsValue === undefined
           ? []
           : [{ scope, jsValue, message: 'value must be undefined' }];
       }
-      
+
       function validateObject(scope: string, jsValue: unknown): ValidationError[] {
         return jsValue !== null && typeof jsValue === 'object'
           ? []
           : [{ scope, jsValue, message: 'value must be an object' }];
       }
-      
+
       function validateArray(scope: string, jsValue: unknown): ValidationError[] {
         return Array.isArray(jsValue)
           ? []
@@ -138,7 +138,7 @@ const handler = (p: Props): string => {
       const body = JSON.parse(event.body === null || event.body === undefined ? '{}' : event.body)
 
       const inputValidationResult = validate(${parametersFromBody})
-      
+
       if (inputValidationResult.length) {
         return {
           statusCode: 400,
@@ -148,10 +148,10 @@ const handler = (p: Props): string => {
           },
         }
       }
-      
+
       try {
         const result = await ${name}(${parametersFromBody})
-      
+
         return {
           statusCode: 200,
           ${
@@ -189,11 +189,11 @@ const rpcFunction = (p: Props): string => {
       const inputValidationResult = validate(${untypedParameters({
         parameters,
       })})
-      
+
       if (inputValidationResult.length) {
         throw new InvalidInputError(inputValidationResult);
       }
-      
+
       const result = await ${name}(${untypedParameters({ parameters })})
       return result
     }

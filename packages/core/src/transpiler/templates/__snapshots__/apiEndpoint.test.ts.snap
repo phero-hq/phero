@@ -1,0 +1,1285 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`literal parameter 1`] = `
+"import { testFunction } from \\"../samen\\";
+
+export interface ValidationError {
+  scope: string;
+  jsValue: unknown;
+  message: string;
+}
+
+class InvalidInputError extends Error {
+  errorCode = \\"INVALID_INPUT_ERROR\\";
+  constructor(private readonly errors: ValidationError[]) {
+    super(\\"Invalid input for RPC\\");
+  }
+}
+
+export function validate(a: unknown): ValidationError[] {
+  function validateTypeOf(
+    typeString: \\"string\\" | \\"number\\" | \\"boolean\\",
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return typeof jsValue === typeString
+      ? []
+      : [{ scope, jsValue, message: \`value is not a \${typeString}\` }];
+  }
+
+  function validateValueOf(
+    possibleValues: any[],
+    scope: string,
+    jsValue: any
+  ): ValidationError[] {
+    return possibleValues.includes(jsValue)
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value must be one of: \${possibleValues
+              .map((v) => \`\\"\${v}\\"\`)
+              .join(\\", \\")}\`,
+          },
+        ];
+  }
+
+  function validateDate(scope: string, jsValue: unknown): ValidationError[] {
+    const r = /^d{4}-dd-ddTdd:dd:dd(.d+)?(([+-]dd:dd)|Z)?$/i;
+    const isValidDate =
+      jsValue instanceof Date ||
+      (typeof jsValue === \\"string\\" &&
+        r.test(jsValue) &&
+        !isNaN(Date.parse(jsValue)));
+    return isValidDate
+      ? []
+      : [{ scope, jsValue, message: \\"value must be a date\\" }];
+  }
+
+  function validateNull(scope: string, jsValue: unknown): ValidationError[] {
+    return jsValue === null
+      ? []
+      : [{ scope, jsValue, message: \\"value must be null\\" }];
+  }
+
+  function validateUndefined(
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return jsValue === undefined
+      ? []
+      : [{ scope, jsValue, message: \\"value must be undefined\\" }];
+  }
+
+  function validateObject(scope: string, jsValue: unknown): ValidationError[] {
+    return jsValue !== null && typeof jsValue === \\"object\\"
+      ? []
+      : [{ scope, jsValue, message: \\"value must be an object\\" }];
+  }
+
+  function validateArray(scope: string, jsValue: unknown): ValidationError[] {
+    return Array.isArray(jsValue)
+      ? []
+      : [{ scope, jsValue, message: \\"value must be an array\\" }];
+  }
+
+  function validateTuple(
+    length: number,
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return Array.isArray(jsValue) && jsValue.length === length
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value must be a tuple of length \${length}\`,
+          },
+        ];
+  }
+
+  function validateOneOfTypes(
+    numberOfTypes: number,
+    scope: string,
+    jsValue: unknown,
+    isValid: boolean
+  ): ValidationError[] {
+    return isValid
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value is neither of the \${numberOfTypes} union types\`,
+          },
+        ];
+  }
+
+  function flatten<T>(arr: T[][]): T[] {
+    return arr.reduce((r, a) => [...r, ...a], []);
+  }
+
+  const refs: { [refId: string]: (jsValue: unknown) => ValidationError[] } = {};
+  refs[\`Something\`] = (jsValue: unknown): ValidationError[] =>
+    refs[\`Something\`](jsValue);
+
+  return [...validateTypeOf(\\"number\\", \\"a\\", a)];
+}
+
+export async function handler(event: any) {
+  const body = JSON.parse(
+    event.body === null || event.body === undefined ? \\"{}\\" : event.body
+  );
+
+  const inputValidationResult = validate(body.a);
+
+  if (inputValidationResult.length) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify(
+        new InvalidInputError(inputValidationResult),
+        null,
+        4
+      ),
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  }
+
+  try {
+    const result = await testFunction(body.a);
+
+    return {
+      statusCode: 200,
+      body: null,
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  } catch (e) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify(e, null, 4),
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  }
+}
+
+export async function rpc_testFunction(a: number): Promise<void> {
+  const inputValidationResult = validate(a);
+
+  if (inputValidationResult.length) {
+    throw new InvalidInputError(inputValidationResult);
+  }
+
+  const result = await testFunction(a);
+  return result;
+}
+"
+`;
+
+exports[`literal returnType 1`] = `
+"import { testFunction } from \\"../samen\\";
+
+export interface ValidationError {
+  scope: string;
+  jsValue: unknown;
+  message: string;
+}
+
+class InvalidInputError extends Error {
+  errorCode = \\"INVALID_INPUT_ERROR\\";
+  constructor(private readonly errors: ValidationError[]) {
+    super(\\"Invalid input for RPC\\");
+  }
+}
+
+export function validate(): ValidationError[] {
+  function validateTypeOf(
+    typeString: \\"string\\" | \\"number\\" | \\"boolean\\",
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return typeof jsValue === typeString
+      ? []
+      : [{ scope, jsValue, message: \`value is not a \${typeString}\` }];
+  }
+
+  function validateValueOf(
+    possibleValues: any[],
+    scope: string,
+    jsValue: any
+  ): ValidationError[] {
+    return possibleValues.includes(jsValue)
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value must be one of: \${possibleValues
+              .map((v) => \`\\"\${v}\\"\`)
+              .join(\\", \\")}\`,
+          },
+        ];
+  }
+
+  function validateDate(scope: string, jsValue: unknown): ValidationError[] {
+    const r = /^d{4}-dd-ddTdd:dd:dd(.d+)?(([+-]dd:dd)|Z)?$/i;
+    const isValidDate =
+      jsValue instanceof Date ||
+      (typeof jsValue === \\"string\\" &&
+        r.test(jsValue) &&
+        !isNaN(Date.parse(jsValue)));
+    return isValidDate
+      ? []
+      : [{ scope, jsValue, message: \\"value must be a date\\" }];
+  }
+
+  function validateNull(scope: string, jsValue: unknown): ValidationError[] {
+    return jsValue === null
+      ? []
+      : [{ scope, jsValue, message: \\"value must be null\\" }];
+  }
+
+  function validateUndefined(
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return jsValue === undefined
+      ? []
+      : [{ scope, jsValue, message: \\"value must be undefined\\" }];
+  }
+
+  function validateObject(scope: string, jsValue: unknown): ValidationError[] {
+    return jsValue !== null && typeof jsValue === \\"object\\"
+      ? []
+      : [{ scope, jsValue, message: \\"value must be an object\\" }];
+  }
+
+  function validateArray(scope: string, jsValue: unknown): ValidationError[] {
+    return Array.isArray(jsValue)
+      ? []
+      : [{ scope, jsValue, message: \\"value must be an array\\" }];
+  }
+
+  function validateTuple(
+    length: number,
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return Array.isArray(jsValue) && jsValue.length === length
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value must be a tuple of length \${length}\`,
+          },
+        ];
+  }
+
+  function validateOneOfTypes(
+    numberOfTypes: number,
+    scope: string,
+    jsValue: unknown,
+    isValid: boolean
+  ): ValidationError[] {
+    return isValid
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value is neither of the \${numberOfTypes} union types\`,
+          },
+        ];
+  }
+
+  function flatten<T>(arr: T[][]): T[] {
+    return arr.reduce((r, a) => [...r, ...a], []);
+  }
+
+  const refs: { [refId: string]: (jsValue: unknown) => ValidationError[] } = {};
+  refs[\`Something\`] = (jsValue: unknown): ValidationError[] =>
+    refs[\`Something\`](jsValue);
+
+  return [];
+}
+
+export async function handler(event: any) {
+  const body = JSON.parse(
+    event.body === null || event.body === undefined ? \\"{}\\" : event.body
+  );
+
+  const inputValidationResult = validate();
+
+  if (inputValidationResult.length) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify(
+        new InvalidInputError(inputValidationResult),
+        null,
+        4
+      ),
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  }
+
+  try {
+    const result = await testFunction();
+
+    return {
+      statusCode: 200,
+      body: result && JSON.stringify(result, null, 4),
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  } catch (e) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify(e, null, 4),
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  }
+}
+
+export async function rpc_testFunction(): Promise<string> {
+  const inputValidationResult = validate();
+
+  if (inputValidationResult.length) {
+    throw new InvalidInputError(inputValidationResult);
+  }
+
+  const result = await testFunction();
+  return result;
+}
+"
+`;
+
+exports[`multiple literal parameters 1`] = `
+"import { testFunction } from \\"../samen\\";
+
+export interface ValidationError {
+  scope: string;
+  jsValue: unknown;
+  message: string;
+}
+
+class InvalidInputError extends Error {
+  errorCode = \\"INVALID_INPUT_ERROR\\";
+  constructor(private readonly errors: ValidationError[]) {
+    super(\\"Invalid input for RPC\\");
+  }
+}
+
+export function validate(a: unknown, b: unknown): ValidationError[] {
+  function validateTypeOf(
+    typeString: \\"string\\" | \\"number\\" | \\"boolean\\",
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return typeof jsValue === typeString
+      ? []
+      : [{ scope, jsValue, message: \`value is not a \${typeString}\` }];
+  }
+
+  function validateValueOf(
+    possibleValues: any[],
+    scope: string,
+    jsValue: any
+  ): ValidationError[] {
+    return possibleValues.includes(jsValue)
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value must be one of: \${possibleValues
+              .map((v) => \`\\"\${v}\\"\`)
+              .join(\\", \\")}\`,
+          },
+        ];
+  }
+
+  function validateDate(scope: string, jsValue: unknown): ValidationError[] {
+    const r = /^d{4}-dd-ddTdd:dd:dd(.d+)?(([+-]dd:dd)|Z)?$/i;
+    const isValidDate =
+      jsValue instanceof Date ||
+      (typeof jsValue === \\"string\\" &&
+        r.test(jsValue) &&
+        !isNaN(Date.parse(jsValue)));
+    return isValidDate
+      ? []
+      : [{ scope, jsValue, message: \\"value must be a date\\" }];
+  }
+
+  function validateNull(scope: string, jsValue: unknown): ValidationError[] {
+    return jsValue === null
+      ? []
+      : [{ scope, jsValue, message: \\"value must be null\\" }];
+  }
+
+  function validateUndefined(
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return jsValue === undefined
+      ? []
+      : [{ scope, jsValue, message: \\"value must be undefined\\" }];
+  }
+
+  function validateObject(scope: string, jsValue: unknown): ValidationError[] {
+    return jsValue !== null && typeof jsValue === \\"object\\"
+      ? []
+      : [{ scope, jsValue, message: \\"value must be an object\\" }];
+  }
+
+  function validateArray(scope: string, jsValue: unknown): ValidationError[] {
+    return Array.isArray(jsValue)
+      ? []
+      : [{ scope, jsValue, message: \\"value must be an array\\" }];
+  }
+
+  function validateTuple(
+    length: number,
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return Array.isArray(jsValue) && jsValue.length === length
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value must be a tuple of length \${length}\`,
+          },
+        ];
+  }
+
+  function validateOneOfTypes(
+    numberOfTypes: number,
+    scope: string,
+    jsValue: unknown,
+    isValid: boolean
+  ): ValidationError[] {
+    return isValid
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value is neither of the \${numberOfTypes} union types\`,
+          },
+        ];
+  }
+
+  function flatten<T>(arr: T[][]): T[] {
+    return arr.reduce((r, a) => [...r, ...a], []);
+  }
+
+  const refs: { [refId: string]: (jsValue: unknown) => ValidationError[] } = {};
+  refs[\`Something\`] = (jsValue: unknown): ValidationError[] =>
+    refs[\`Something\`](jsValue);
+
+  return [
+    ...validateTypeOf(\\"number\\", \\"a\\", a),
+    ...validateTypeOf(\\"string\\", \\"b\\", b),
+  ];
+}
+
+export async function handler(event: any) {
+  const body = JSON.parse(
+    event.body === null || event.body === undefined ? \\"{}\\" : event.body
+  );
+
+  const inputValidationResult = validate(body.a, body.b);
+
+  if (inputValidationResult.length) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify(
+        new InvalidInputError(inputValidationResult),
+        null,
+        4
+      ),
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  }
+
+  try {
+    const result = await testFunction(body.a, body.b);
+
+    return {
+      statusCode: 200,
+      body: null,
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  } catch (e) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify(e, null, 4),
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  }
+}
+
+export async function rpc_testFunction(a: number, b: string): Promise<void> {
+  const inputValidationResult = validate(a, b);
+
+  if (inputValidationResult.length) {
+    throw new InvalidInputError(inputValidationResult);
+  }
+
+  const result = await testFunction(a, b);
+  return result;
+}
+"
+`;
+
+exports[`ref parameter 1`] = `
+"import { testFunction } from \\"../samen\\";
+
+export interface ValidationError {
+  scope: string;
+  jsValue: unknown;
+  message: string;
+}
+
+class InvalidInputError extends Error {
+  errorCode = \\"INVALID_INPUT_ERROR\\";
+  constructor(private readonly errors: ValidationError[]) {
+    super(\\"Invalid input for RPC\\");
+  }
+}
+
+export function validate(a: unknown): ValidationError[] {
+  function validateTypeOf(
+    typeString: \\"string\\" | \\"number\\" | \\"boolean\\",
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return typeof jsValue === typeString
+      ? []
+      : [{ scope, jsValue, message: \`value is not a \${typeString}\` }];
+  }
+
+  function validateValueOf(
+    possibleValues: any[],
+    scope: string,
+    jsValue: any
+  ): ValidationError[] {
+    return possibleValues.includes(jsValue)
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value must be one of: \${possibleValues
+              .map((v) => \`\\"\${v}\\"\`)
+              .join(\\", \\")}\`,
+          },
+        ];
+  }
+
+  function validateDate(scope: string, jsValue: unknown): ValidationError[] {
+    const r = /^d{4}-dd-ddTdd:dd:dd(.d+)?(([+-]dd:dd)|Z)?$/i;
+    const isValidDate =
+      jsValue instanceof Date ||
+      (typeof jsValue === \\"string\\" &&
+        r.test(jsValue) &&
+        !isNaN(Date.parse(jsValue)));
+    return isValidDate
+      ? []
+      : [{ scope, jsValue, message: \\"value must be a date\\" }];
+  }
+
+  function validateNull(scope: string, jsValue: unknown): ValidationError[] {
+    return jsValue === null
+      ? []
+      : [{ scope, jsValue, message: \\"value must be null\\" }];
+  }
+
+  function validateUndefined(
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return jsValue === undefined
+      ? []
+      : [{ scope, jsValue, message: \\"value must be undefined\\" }];
+  }
+
+  function validateObject(scope: string, jsValue: unknown): ValidationError[] {
+    return jsValue !== null && typeof jsValue === \\"object\\"
+      ? []
+      : [{ scope, jsValue, message: \\"value must be an object\\" }];
+  }
+
+  function validateArray(scope: string, jsValue: unknown): ValidationError[] {
+    return Array.isArray(jsValue)
+      ? []
+      : [{ scope, jsValue, message: \\"value must be an array\\" }];
+  }
+
+  function validateTuple(
+    length: number,
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return Array.isArray(jsValue) && jsValue.length === length
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value must be a tuple of length \${length}\`,
+          },
+        ];
+  }
+
+  function validateOneOfTypes(
+    numberOfTypes: number,
+    scope: string,
+    jsValue: unknown,
+    isValid: boolean
+  ): ValidationError[] {
+    return isValid
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value is neither of the \${numberOfTypes} union types\`,
+          },
+        ];
+  }
+
+  function flatten<T>(arr: T[][]): T[] {
+    return arr.reduce((r, a) => [...r, ...a], []);
+  }
+
+  const refs: { [refId: string]: (jsValue: unknown) => ValidationError[] } = {};
+  refs[\`Something\`] = (jsValue: unknown): ValidationError[] =>
+    refs[\`Something\`](jsValue);
+
+  return [...refs[\`Something\`](a)];
+}
+
+export async function handler(event: any) {
+  const body = JSON.parse(
+    event.body === null || event.body === undefined ? \\"{}\\" : event.body
+  );
+
+  const inputValidationResult = validate(body.a);
+
+  if (inputValidationResult.length) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify(
+        new InvalidInputError(inputValidationResult),
+        null,
+        4
+      ),
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  }
+
+  try {
+    const result = await testFunction(body.a);
+
+    return {
+      statusCode: 200,
+      body: null,
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  } catch (e) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify(e, null, 4),
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  }
+}
+
+export async function rpc_testFunction(a: Something): Promise<void> {
+  const inputValidationResult = validate(a);
+
+  if (inputValidationResult.length) {
+    throw new InvalidInputError(inputValidationResult);
+  }
+
+  const result = await testFunction(a);
+  return result;
+}
+"
+`;
+
+exports[`ref returnType 1`] = `
+"import { testFunction } from \\"../samen\\";
+
+export interface ValidationError {
+  scope: string;
+  jsValue: unknown;
+  message: string;
+}
+
+class InvalidInputError extends Error {
+  errorCode = \\"INVALID_INPUT_ERROR\\";
+  constructor(private readonly errors: ValidationError[]) {
+    super(\\"Invalid input for RPC\\");
+  }
+}
+
+export function validate(): ValidationError[] {
+  function validateTypeOf(
+    typeString: \\"string\\" | \\"number\\" | \\"boolean\\",
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return typeof jsValue === typeString
+      ? []
+      : [{ scope, jsValue, message: \`value is not a \${typeString}\` }];
+  }
+
+  function validateValueOf(
+    possibleValues: any[],
+    scope: string,
+    jsValue: any
+  ): ValidationError[] {
+    return possibleValues.includes(jsValue)
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value must be one of: \${possibleValues
+              .map((v) => \`\\"\${v}\\"\`)
+              .join(\\", \\")}\`,
+          },
+        ];
+  }
+
+  function validateDate(scope: string, jsValue: unknown): ValidationError[] {
+    const r = /^d{4}-dd-ddTdd:dd:dd(.d+)?(([+-]dd:dd)|Z)?$/i;
+    const isValidDate =
+      jsValue instanceof Date ||
+      (typeof jsValue === \\"string\\" &&
+        r.test(jsValue) &&
+        !isNaN(Date.parse(jsValue)));
+    return isValidDate
+      ? []
+      : [{ scope, jsValue, message: \\"value must be a date\\" }];
+  }
+
+  function validateNull(scope: string, jsValue: unknown): ValidationError[] {
+    return jsValue === null
+      ? []
+      : [{ scope, jsValue, message: \\"value must be null\\" }];
+  }
+
+  function validateUndefined(
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return jsValue === undefined
+      ? []
+      : [{ scope, jsValue, message: \\"value must be undefined\\" }];
+  }
+
+  function validateObject(scope: string, jsValue: unknown): ValidationError[] {
+    return jsValue !== null && typeof jsValue === \\"object\\"
+      ? []
+      : [{ scope, jsValue, message: \\"value must be an object\\" }];
+  }
+
+  function validateArray(scope: string, jsValue: unknown): ValidationError[] {
+    return Array.isArray(jsValue)
+      ? []
+      : [{ scope, jsValue, message: \\"value must be an array\\" }];
+  }
+
+  function validateTuple(
+    length: number,
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return Array.isArray(jsValue) && jsValue.length === length
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value must be a tuple of length \${length}\`,
+          },
+        ];
+  }
+
+  function validateOneOfTypes(
+    numberOfTypes: number,
+    scope: string,
+    jsValue: unknown,
+    isValid: boolean
+  ): ValidationError[] {
+    return isValid
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value is neither of the \${numberOfTypes} union types\`,
+          },
+        ];
+  }
+
+  function flatten<T>(arr: T[][]): T[] {
+    return arr.reduce((r, a) => [...r, ...a], []);
+  }
+
+  const refs: { [refId: string]: (jsValue: unknown) => ValidationError[] } = {};
+  refs[\`Something\`] = (jsValue: unknown): ValidationError[] =>
+    refs[\`Something\`](jsValue);
+
+  return [];
+}
+
+export async function handler(event: any) {
+  const body = JSON.parse(
+    event.body === null || event.body === undefined ? \\"{}\\" : event.body
+  );
+
+  const inputValidationResult = validate();
+
+  if (inputValidationResult.length) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify(
+        new InvalidInputError(inputValidationResult),
+        null,
+        4
+      ),
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  }
+
+  try {
+    const result = await testFunction();
+
+    return {
+      statusCode: 200,
+      body: result && JSON.stringify(result, null, 4),
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  } catch (e) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify(e, null, 4),
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  }
+}
+
+export async function rpc_testFunction(): Promise<Something> {
+  const inputValidationResult = validate();
+
+  if (inputValidationResult.length) {
+    throw new InvalidInputError(inputValidationResult);
+  }
+
+  const result = await testFunction();
+  return result;
+}
+"
+`;
+
+exports[`single literal parameter 1`] = `
+"import { testFunction } from \\"../samen\\";
+
+export interface ValidationError {
+  scope: string;
+  jsValue: unknown;
+  message: string;
+}
+
+class InvalidInputError extends Error {
+  errorCode = \\"INVALID_INPUT_ERROR\\";
+  constructor(private readonly errors: ValidationError[]) {
+    super(\\"Invalid input for RPC\\");
+  }
+}
+
+export function validate(a: unknown): ValidationError[] {
+  function validateTypeOf(
+    typeString: \\"string\\" | \\"number\\" | \\"boolean\\",
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return typeof jsValue === typeString
+      ? []
+      : [{ scope, jsValue, message: \`value is not a \${typeString}\` }];
+  }
+
+  function validateValueOf(
+    possibleValues: any[],
+    scope: string,
+    jsValue: any
+  ): ValidationError[] {
+    return possibleValues.includes(jsValue)
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value must be one of: \${possibleValues
+              .map((v) => \`\\"\${v}\\"\`)
+              .join(\\", \\")}\`,
+          },
+        ];
+  }
+
+  function validateDate(scope: string, jsValue: unknown): ValidationError[] {
+    const r = /^d{4}-dd-ddTdd:dd:dd(.d+)?(([+-]dd:dd)|Z)?$/i;
+    const isValidDate =
+      jsValue instanceof Date ||
+      (typeof jsValue === \\"string\\" &&
+        r.test(jsValue) &&
+        !isNaN(Date.parse(jsValue)));
+    return isValidDate
+      ? []
+      : [{ scope, jsValue, message: \\"value must be a date\\" }];
+  }
+
+  function validateNull(scope: string, jsValue: unknown): ValidationError[] {
+    return jsValue === null
+      ? []
+      : [{ scope, jsValue, message: \\"value must be null\\" }];
+  }
+
+  function validateUndefined(
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return jsValue === undefined
+      ? []
+      : [{ scope, jsValue, message: \\"value must be undefined\\" }];
+  }
+
+  function validateObject(scope: string, jsValue: unknown): ValidationError[] {
+    return jsValue !== null && typeof jsValue === \\"object\\"
+      ? []
+      : [{ scope, jsValue, message: \\"value must be an object\\" }];
+  }
+
+  function validateArray(scope: string, jsValue: unknown): ValidationError[] {
+    return Array.isArray(jsValue)
+      ? []
+      : [{ scope, jsValue, message: \\"value must be an array\\" }];
+  }
+
+  function validateTuple(
+    length: number,
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return Array.isArray(jsValue) && jsValue.length === length
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value must be a tuple of length \${length}\`,
+          },
+        ];
+  }
+
+  function validateOneOfTypes(
+    numberOfTypes: number,
+    scope: string,
+    jsValue: unknown,
+    isValid: boolean
+  ): ValidationError[] {
+    return isValid
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value is neither of the \${numberOfTypes} union types\`,
+          },
+        ];
+  }
+
+  function flatten<T>(arr: T[][]): T[] {
+    return arr.reduce((r, a) => [...r, ...a], []);
+  }
+
+  const refs: { [refId: string]: (jsValue: unknown) => ValidationError[] } = {};
+  refs[\`Something\`] = (jsValue: unknown): ValidationError[] =>
+    refs[\`Something\`](jsValue);
+
+  return [...validateTypeOf(\\"number\\", \\"a\\", a)];
+}
+
+export async function handler(event: any) {
+  const body = JSON.parse(
+    event.body === null || event.body === undefined ? \\"{}\\" : event.body
+  );
+
+  const inputValidationResult = validate(body.a);
+
+  if (inputValidationResult.length) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify(
+        new InvalidInputError(inputValidationResult),
+        null,
+        4
+      ),
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  }
+
+  try {
+    const result = await testFunction(body.a);
+
+    return {
+      statusCode: 200,
+      body: null,
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  } catch (e) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify(e, null, 4),
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  }
+}
+
+export async function rpc_testFunction(a: number): Promise<void> {
+  const inputValidationResult = validate(a);
+
+  if (inputValidationResult.length) {
+    throw new InvalidInputError(inputValidationResult);
+  }
+
+  const result = await testFunction(a);
+  return result;
+}
+"
+`;
+
+exports[`single ref parameter 1`] = `
+"import { testFunction } from \\"../samen\\";
+
+export interface ValidationError {
+  scope: string;
+  jsValue: unknown;
+  message: string;
+}
+
+class InvalidInputError extends Error {
+  errorCode = \\"INVALID_INPUT_ERROR\\";
+  constructor(private readonly errors: ValidationError[]) {
+    super(\\"Invalid input for RPC\\");
+  }
+}
+
+export function validate(a: unknown): ValidationError[] {
+  function validateTypeOf(
+    typeString: \\"string\\" | \\"number\\" | \\"boolean\\",
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return typeof jsValue === typeString
+      ? []
+      : [{ scope, jsValue, message: \`value is not a \${typeString}\` }];
+  }
+
+  function validateValueOf(
+    possibleValues: any[],
+    scope: string,
+    jsValue: any
+  ): ValidationError[] {
+    return possibleValues.includes(jsValue)
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value must be one of: \${possibleValues
+              .map((v) => \`\\"\${v}\\"\`)
+              .join(\\", \\")}\`,
+          },
+        ];
+  }
+
+  function validateDate(scope: string, jsValue: unknown): ValidationError[] {
+    const r = /^d{4}-dd-ddTdd:dd:dd(.d+)?(([+-]dd:dd)|Z)?$/i;
+    const isValidDate =
+      jsValue instanceof Date ||
+      (typeof jsValue === \\"string\\" &&
+        r.test(jsValue) &&
+        !isNaN(Date.parse(jsValue)));
+    return isValidDate
+      ? []
+      : [{ scope, jsValue, message: \\"value must be a date\\" }];
+  }
+
+  function validateNull(scope: string, jsValue: unknown): ValidationError[] {
+    return jsValue === null
+      ? []
+      : [{ scope, jsValue, message: \\"value must be null\\" }];
+  }
+
+  function validateUndefined(
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return jsValue === undefined
+      ? []
+      : [{ scope, jsValue, message: \\"value must be undefined\\" }];
+  }
+
+  function validateObject(scope: string, jsValue: unknown): ValidationError[] {
+    return jsValue !== null && typeof jsValue === \\"object\\"
+      ? []
+      : [{ scope, jsValue, message: \\"value must be an object\\" }];
+  }
+
+  function validateArray(scope: string, jsValue: unknown): ValidationError[] {
+    return Array.isArray(jsValue)
+      ? []
+      : [{ scope, jsValue, message: \\"value must be an array\\" }];
+  }
+
+  function validateTuple(
+    length: number,
+    scope: string,
+    jsValue: unknown
+  ): ValidationError[] {
+    return Array.isArray(jsValue) && jsValue.length === length
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value must be a tuple of length \${length}\`,
+          },
+        ];
+  }
+
+  function validateOneOfTypes(
+    numberOfTypes: number,
+    scope: string,
+    jsValue: unknown,
+    isValid: boolean
+  ): ValidationError[] {
+    return isValid
+      ? []
+      : [
+          {
+            scope,
+            jsValue,
+            message: \`value is neither of the \${numberOfTypes} union types\`,
+          },
+        ];
+  }
+
+  function flatten<T>(arr: T[][]): T[] {
+    return arr.reduce((r, a) => [...r, ...a], []);
+  }
+
+  const refs: { [refId: string]: (jsValue: unknown) => ValidationError[] } = {};
+  refs[\`Something\`] = (jsValue: unknown): ValidationError[] =>
+    refs[\`Something\`](jsValue);
+
+  return [...refs[\`Something\`](a)];
+}
+
+export async function handler(event: any) {
+  const body = JSON.parse(
+    event.body === null || event.body === undefined ? \\"{}\\" : event.body
+  );
+
+  const inputValidationResult = validate(body.a);
+
+  if (inputValidationResult.length) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify(
+        new InvalidInputError(inputValidationResult),
+        null,
+        4
+      ),
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  }
+
+  try {
+    const result = await testFunction(body.a);
+
+    return {
+      statusCode: 200,
+      body: null,
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  } catch (e) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify(e, null, 4),
+      headers: {
+        \\"Content-Type\\": \\"application/json\\",
+      },
+    };
+  }
+}
+
+export async function rpc_testFunction(a: Something): Promise<void> {
+  const inputValidationResult = validate(a);
+
+  if (inputValidationResult.length) {
+    throw new InvalidInputError(inputValidationResult);
+  }
+
+  const result = await testFunction(a);
+  return result;
+}
+"
+`;
