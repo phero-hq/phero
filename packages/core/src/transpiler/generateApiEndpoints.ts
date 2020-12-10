@@ -10,7 +10,6 @@ export default async function generateApiEndpoints(
   samenFilePath: string,
 ): Promise<void> {
   try {
-    // TODO: use paths for this? 🤔
     const userProjectPath = process.cwd()
 
     const relativeSamenFilePath = `./${path
