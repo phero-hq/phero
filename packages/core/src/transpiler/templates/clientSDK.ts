@@ -29,7 +29,6 @@ const requestFunction = ({ apiUrl }: { apiUrl: string }) => `
     try {
       const result = await fetch(ENDPOINT + name, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       })
       if (!result.ok) {
