@@ -28,7 +28,9 @@ const apiEndpoint = (p: Props) => {
 
     ${validator(p)}
 
-    ${handler(p)}
+    ${awsHandler(p)}
+    
+    ${gcHandler(p)}
 
     ${rpcFunction(p)}
   `
@@ -126,7 +128,7 @@ const validator = (p: Props): string => {
   `
 }
 
-const handler = (p: Props): string => {
+const awsHandler = (p: Props): string => {
   const { name, parameters, returnType } = p.rpcFunction
   const parametersFromBody = parametersFromObject({
     parameters,
@@ -134,7 +136,7 @@ const handler = (p: Props): string => {
   })
 
   return `
-    export async function handler(event: any) {
+    export async function awsHandler(event: any) {
       const body = JSON.parse(event.body === null || event.body === undefined ? '{}' : event.body)
 
       const inputValidationResult = validate(${parametersFromBody})
@@ -171,6 +173,36 @@ const handler = (p: Props): string => {
             "Content-Type": "application/json",
           },
         }
+      }
+    }
+  `
+}
+
+const gcHandler = (p: Props): string => {
+  const { name, parameters, returnType } = p.rpcFunction
+  const parametersFromBody = parametersFromObject({
+    parameters,
+    objectName: "body",
+  })
+
+  return `
+    export async function gcHandler(req: any, res: any) {
+      const body = req.body
+
+      const inputValidationResult = validate(${parametersFromBody})
+
+      if (inputValidationResult.length) {
+        res.status(400).json(new InvalidInputError(inputValidationResult))
+        return
+      }
+
+      try {
+        const result = await ${name}(${parametersFromBody})
+        res.json(${returnType.type === JSType.untyped ? "null" : "result"})
+        return
+      } catch (e) {
+        res.status(500).json(e)
+        return
       }
     }
   `
