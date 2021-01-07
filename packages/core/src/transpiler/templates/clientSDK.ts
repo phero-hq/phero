@@ -6,10 +6,11 @@ import { promise } from "./shared/types"
 interface Props {
   manifest: SamenManifest
   apiUrl: string
+  isEnvNode: boolean
 }
 
-const clientSDK = ({ apiUrl, manifest }: Props): string => `
-    ${requestFunction({ apiUrl })}
+const clientSDK = ({ apiUrl, manifest, isEnvNode }: Props): string => `
+    ${requestFunction({ apiUrl, isEnvNode })}
 
     ${Object.keys(manifest.models)
       .map((modelId) => manifest.models[modelId].ts)
@@ -18,7 +19,14 @@ const clientSDK = ({ apiUrl, manifest }: Props): string => `
     ${manifest.rpcFunctions.map(rpcFunction).join("\n")}
   `
 
-const requestFunction = ({ apiUrl }: { apiUrl: string }) => `
+const requestFunction = ({
+  apiUrl,
+  isEnvNode,
+}: {
+  apiUrl: string
+  isEnvNode: boolean
+}) => `
+  const _fetch = ${isEnvNode ? `require('node-fetch')` : `fetch`}
   const ENDPOINT = "${apiUrl}"
 
   async function request<T>(
@@ -27,7 +35,7 @@ const requestFunction = ({ apiUrl }: { apiUrl: string }) => `
     isVoid: boolean,
   ): Promise<T> {
     try {
-      const result = await fetch(ENDPOINT + name, {
+      const result = await _fetch(ENDPOINT + name, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

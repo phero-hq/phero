@@ -1,5 +1,6 @@
 import { Project, ts } from "ts-morph"
 import { ensureDir, Environment } from "../cli"
+import { ClientEnvironment } from "../domain"
 import {
   ClientSDKCompilerError,
   ConfigMissingError,
@@ -31,7 +32,9 @@ export default async function generateClientSDK(
       [Environment.production]: config.production.url,
     }[environment]
 
-    const code = clientSDK({ manifest, apiUrl })
+    const isEnvNode = config.env === ClientEnvironment.Node
+
+    const code = clientSDK({ manifest, apiUrl, isEnvNode })
     project.createSourceFile("index.ts", code)
     validateProject(project)
     await project.emit()
