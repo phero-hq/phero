@@ -132,10 +132,25 @@ function getJSValue(
         .getValueDeclarationOrThrow()
       if (Node.isEnumMember(enumValueDeclration)) {
         const enumValue = enumValueDeclration.getValue()
+
+        const theEnum = enumValueDeclration.getParent()
+        const enumName = theEnum.getName()
+        const allEnumValues = theEnum.getMembers().map((m) => m.getValue())
+
         if (typeof enumValue === "string") {
+          refValues[enumName] = {
+            id: enumName,
+            modelId: enumName,
+            value: { type: JSType.string, oneOf: allEnumValues as string[] },
+          }
           return { type: JSType.string, oneOf: [enumValue] }
         }
         if (typeof enumValue === "number") {
+          refValues[enumName] = {
+            id: enumName,
+            modelId: enumName,
+            value: { type: JSType.number, oneOf: allEnumValues as number[] },
+          }
           return { type: JSType.number, oneOf: [enumValue] }
         }
       }
@@ -345,7 +360,16 @@ function extractModels(func: FunctionDeclaration, models: ModelMap): ModelMap {
 
     const arrayElement = type.getArrayElementType()
 
+    const theEnum =
+      type.isEnumLiteral() &&
+      type
+        .getSymbolOrThrow()
+        .getValueDeclarationOrThrow()
+        .getParent()
+        ?.getType()
+
     const possibleTypes = [
+      ...(theEnum ? [theEnum] : []),
       ...type.getBaseTypes(),
       ...type.getTypeArguments(),
       ...type.getAliasTypeArguments(),
