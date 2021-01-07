@@ -192,21 +192,21 @@ const gcHandler = (p: Props): string => {
   return `
     const ORIGIN_WHITELIST = ${cors ? JSON.stringify(cors.whitelist) : `[]`}
     export async function gcHandler(req: any, res: any) {
+      
+      if (!ORIGIN_WHITELIST.includes(req.headers.origin)) {
+        res.status(401).end()
+        return
+      }
+
+      res.set({
+        "Access-Control-Allow-Origin": req.headers.origin,
+        "Access-Control-Allow-Methods": req.method,
+        "Access-Control-Allow-Headers": "content-type",
+      })
+
       if (req.method === 'OPTIONS') {
-        if (ORIGIN_WHITELIST.includes(req.headers.origin)) {
-          res
-            .status(200)
-            .set({
-              "Access-Control-Allow-Origin": req.headers.origin,
-              "Access-Control-Allow-Methods": req.method,
-              "Access-Control-Allow-Headers": "content-type",
-            })
-            .end()
-          return
-        } else {
-          res.status(401).end()
-          return
-        }
+        res.end();
+        return
       } else if (req.method !== 'POST') {
         res.status(404).end()
         return
