@@ -3,8 +3,8 @@ export interface SamenConfig {
 }
 
 export enum ClientEnvironment {
-  Browser,
-  Node,
+  Browser = "browser",
+  Node = "node",
 }
 
 export interface ClientConfig {
