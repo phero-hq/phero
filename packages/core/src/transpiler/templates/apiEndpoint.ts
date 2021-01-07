@@ -1,9 +1,9 @@
 import {
   JSType,
   JSValue,
-  Ref,
   RefMap,
   RPCFunction,
+  SamenConfig,
   SamenManifest,
 } from "../../domain"
 import functionSignature from "./shared/functionSignature"
@@ -14,6 +14,7 @@ export interface Props {
   rpcFunction: RPCFunction
   manifest: SamenManifest
   relativeSamenFilePath: string
+  config: SamenConfig
 }
 
 const apiEndpoint = (p: Props) => {
@@ -179,14 +180,38 @@ const awsHandler = (p: Props): string => {
 }
 
 const gcHandler = (p: Props): string => {
-  const { name, parameters, returnType } = p.rpcFunction
+  const {
+    rpcFunction: { name, parameters, returnType },
+    config: { cors },
+  } = p
   const parametersFromBody = parametersFromObject({
     parameters,
     objectName: "body",
   })
 
   return `
+    const ORIGIN_WHITELIST = ${cors ? JSON.stringify(cors.whitelist) : `[]`}
     export async function gcHandler(req: any, res: any) {
+      if (req.method === 'OPTIONS') {
+        if (ORIGIN_WHITELIST.includes(req.headers.origin)) {
+          res
+            .status(200)
+            .set({
+              "Access-Control-Allow-Origin": req.headers.origin,
+              "Access-Control-Allow-Methods": req.method,
+              "Access-Control-Allow-Headers": "content-type",
+            })
+            .end()
+          return
+        } else {
+          res.status(401).end()
+          return
+        }
+      } else if (req.method !== 'POST') {
+        res.status(404).end()
+        return
+      }
+
       const body = req.body
 
       const inputValidationResult = validate(${parametersFromBody})

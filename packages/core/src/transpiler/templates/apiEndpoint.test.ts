@@ -36,6 +36,7 @@ const props = (partialRpcFunction: Partial<RPCFunction>): Props => {
       },
     },
     relativeSamenFilePath: "../samen",
+    config: { clients: [] },
   }
 }
 
