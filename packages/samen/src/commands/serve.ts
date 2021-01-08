@@ -1,5 +1,5 @@
-import { promises as fs } from "fs"
 import http from "http"
+import path from "path"
 import path from "path"
 import TscWatchClient from "tsc-watch/client"
 import {
@@ -78,7 +78,7 @@ function getRoutes(manifest: SamenManifest): Routes {
         importedFunction: require(path.join(
           paths.userRpcFunctionsDir,
           rpcFunction.name,
-        ))[`rpc_${rpcFunction.name}`],
+        ))[`serveHandler`],
         argumentNames: rpcFunction.parameters
           .sort((a, b) => a.index - b.index)
           .map((r) => r.name),
@@ -107,9 +107,9 @@ function requestListener() {
         const route = routes[req.url]
         if (route) {
           try {
+            const { headers } = req
             const body = await readBody(req)
-            const parameters = buildParameters(route, body)
-            const responseData = await route.importedFunction(...parameters)
+            const responseData = await route.importedFunction({ headers, body })
             if (responseData === undefined) {
               res.statusCode = 204
             } else {

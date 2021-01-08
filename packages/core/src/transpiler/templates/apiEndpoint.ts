@@ -32,8 +32,8 @@ const apiEndpoint = (p: Props) => {
     ${awsHandler(p)}
     
     ${gcHandler(p)}
-
-    ${rpcFunction(p)}
+    
+    ${serveHandler(p)}
   `
 }
 
@@ -250,25 +250,41 @@ const gcHandler = (p: Props): string => {
   `
 }
 
-const rpcFunction = (p: Props): string => {
-  const { name, parameters, returnType } = p.rpcFunction
-  const signature = functionSignature({
-    name: `rpc_${name}`,
+const serveHandler = (p: Props): string => {
+  const { name, parameters } = p.rpcFunction
+  const parametersFromBody = parametersFromObject({
     parameters,
-    returnType: promise(returnType),
+    objectName: "body",
   })
+  const hasIdTokenParam = parameters.some((p) => p.name === "idToken")
 
   return `
-    export async function ${signature} {
-      const inputValidationResult = validate(${untypedParameters({
-        parameters,
-      })})
+    export async function serveHandler(req: any) {
+      const body = req.body
+      ${
+        hasIdTokenParam
+          ? `
+        /// AUTH
+        const idTokenString = req.headers['authorization']?.substring('Bearer '.length)
+        if (!idTokenString) {
+          res.status(401).end();
+          return;
+        }
+        const firebaseAdmin = require('firebase-admin')
+        const idToken = await firebaseAdmin.auth().verifyIdToken(idTokenString)
+        body.idToken = idToken;
+        /// AUTH
+      `
+          : ""
+      }
+
+      const inputValidationResult = validate(${parametersFromBody})
 
       if (inputValidationResult.length) {
         throw new InvalidInputError(inputValidationResult);
       }
 
-      const result = await ${name}(${untypedParameters({ parameters })})
+      const result = await ${name}(${parametersFromBody})
       return result
     }
   `
