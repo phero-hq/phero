@@ -1,6 +1,6 @@
 {
   "name": "@samen/core",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
