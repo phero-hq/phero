@@ -132,27 +132,21 @@ function getJSValue(
         .getValueDeclarationOrThrow()
       if (Node.isEnumMember(enumValueDeclration)) {
         const enumValue = enumValueDeclration.getValue()
-
         const theEnum = enumValueDeclration.getParent()
-        const enumName = theEnum.getName()
-        const allEnumValues = theEnum.getMembers().map((m) => m.getValue())
+        const enumName = `${theEnum.getName()}.${enumValueDeclration.getName()}`
+        const jsValue: JSValue =
+          typeof enumValue === "string"
+            ? { type: JSType.string, oneOf: [enumValue] }
+            : typeof enumValue === "number"
+            ? { type: JSType.number, oneOf: [enumValue] }
+            : { type: JSType.undefined }
 
-        if (typeof enumValue === "string") {
-          refValues[enumName] = {
-            id: enumName,
-            modelId: enumName,
-            value: { type: JSType.string, oneOf: allEnumValues as string[] },
-          }
-          return { type: JSType.string, oneOf: [enumValue] }
+        refValues[enumName] = {
+          id: enumName,
+          modelId: enumName,
+          value: jsValue,
         }
-        if (typeof enumValue === "number") {
-          refValues[enumName] = {
-            id: enumName,
-            modelId: enumName,
-            value: { type: JSType.number, oneOf: allEnumValues as number[] },
-          }
-          return { type: JSType.number, oneOf: [enumValue] }
-        }
+        return { type: JSType.ref, id: enumName }
       }
     }
     if (type.isStringLiteral()) {
@@ -260,6 +254,31 @@ function getJSValue(
   }
 
   if (type.isUnion()) {
+    if (type.isEnum()) {
+      const enumDeclr = type.getSymbolOrThrow().getValueDeclarationOrThrow()
+      if (Node.isEnumDeclaration(enumDeclr)) {
+        const enumName = enumDeclr.getName()
+        const allEnumValues = enumDeclr.getMembers().map((m) => m.getValue())
+        const jsValue: JSValue =
+          allEnumValues.length && typeof allEnumValues[0] === "string"
+            ? { type: JSType.string, oneOf: allEnumValues as string[] }
+            : allEnumValues.length && typeof allEnumValues[0] === "number"
+            ? { type: JSType.number, oneOf: allEnumValues as number[] }
+            : { type: JSType.undefined }
+
+        refValues[enumName] = {
+          id: enumName,
+          modelId: enumName,
+          value: jsValue,
+        }
+
+        return {
+          type: JSType.ref,
+          id: enumName,
+        }
+      }
+    }
+
     const unionTypes = type
       .getUnionTypes()
       .map((ut) => getJSValue(ut, typeChecker, refValues, location))
