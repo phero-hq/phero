@@ -188,11 +188,12 @@ const gcHandler = (p: Props): string => {
     parameters,
     objectName: "body",
   })
+  const hasIdTokenParam = parameters.some((p) => p.name === "idToken")
 
   return `
     const ORIGIN_WHITELIST = ${cors ? JSON.stringify(cors.whitelist) : `[]`}
+    let firebaseAdminInitialized = false;
     export async function gcHandler(req: any, res: any) {
-      
       if (!ORIGIN_WHITELIST.includes(req.headers.origin)) {
         res.status(401).end()
         return
@@ -214,6 +215,27 @@ const gcHandler = (p: Props): string => {
 
       const body = req.body
 
+      ${
+        hasIdTokenParam
+          ? `
+        /// AUTH
+        const firebaseAdmin = require('firebase-admin')
+        if (!firebaseAdminInitialized) {
+          firebaseAdmin.initializeApp()
+          firebaseAdminInitialized = true
+        }
+        const idTokenString = req.headers['authorization']?.substring('Bearer '.length)
+        if (!idTokenString) {
+          res.status(401).end();
+          return;
+        }
+        const idToken = await firebaseAdmin.auth().verifyIdToken(idTokenString)
+        body.idToken = idToken;
+        /// AUTH
+      `
+          : ""
+      }
+      
       const inputValidationResult = validate(${parametersFromBody})
 
       if (inputValidationResult.length) {
