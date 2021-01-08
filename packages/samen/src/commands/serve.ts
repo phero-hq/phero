@@ -120,6 +120,10 @@ function requestListener() {
               res.statusCode = 400
               console.error(e)
               res.write(JSON.stringify({ error: e.message, errors: e.errors }))
+            } else if (e.errorCode === "AUTHORIZATION_ERROR") {
+              res.statusCode = 401
+              console.error(e)
+              res.write(JSON.stringify({ error: e.message }))
             } else {
               res.statusCode = 500
               console.error(e)

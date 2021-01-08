@@ -259,6 +259,13 @@ const serveHandler = (p: Props): string => {
   const hasIdTokenParam = parameters.some((p) => p.name === "idToken")
 
   return `
+    class AuthorizationError extends Error {
+      errorCode = 'AUTHORIZATION_ERROR'
+      constructor() {
+        super('Malformed authorization header')
+      }
+    }
+
     export async function serveHandler(req: any) {
       const body = req.body
       ${
@@ -267,8 +274,7 @@ const serveHandler = (p: Props): string => {
         /// AUTH
         const idTokenString = req.headers['authorization']?.substring('Bearer '.length)
         if (!idTokenString) {
-          res.status(401).end();
-          return;
+          throw new AuthorizationError()
         }
         const firebaseAdmin = require('firebase-admin')
         const idToken = await firebaseAdmin.auth().verifyIdToken(idTokenString)
