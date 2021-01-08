@@ -22,7 +22,7 @@ const clientSDK = ({ apiUrl, manifest, isEnvNode }: Props): string => `
   `
 
 const setAuthorizationHeaderFunction = () => `
-  const authorizationHeader: string | undefined = undefined
+  let authorizationHeader: string | undefined = undefined
   export function setAuthorizationHeader(header: string) {
     authorizationHeader = header;
   }
