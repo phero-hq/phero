@@ -10,6 +10,8 @@ interface Props {
 }
 
 const clientSDK = ({ apiUrl, manifest, isEnvNode }: Props): string => `
+    ${setAuthorizationHeaderFunction()}
+
     ${requestFunction({ apiUrl, isEnvNode })}
 
     ${Object.keys(manifest.models)
@@ -18,6 +20,19 @@ const clientSDK = ({ apiUrl, manifest, isEnvNode }: Props): string => `
 
     ${manifest.rpcFunctions.map(rpcFunction).join("\n")}
   `
+
+const setAuthorizationHeaderFunction = () => `
+  const authorizationHeader: string | undefined = undefined
+  export function setAuthorizationHeader(header: string) {
+    authorizationHeader = header;
+  }
+  export function unsetAuthorizationHeader() {
+    authorizationHeader = undefined
+  }
+  function getAuthorizationHeader() {
+    return authorizationHeader ? { 'Authorization': authorizationHeader } : {}
+  }
+`
 
 const requestFunction = ({
   apiUrl,
@@ -37,7 +52,10 @@ const requestFunction = ({
     try {
       const result = await _fetch(ENDPOINT + name, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...getAuthorizationHeader(),
+        },
         body: JSON.stringify(body),
       })
       if (!result.ok) {
