@@ -73,11 +73,12 @@ const requestFunction = ({
 `
 
 const rpcFunction = (rpcFn: RPCFunction): string => {
-  const { name, parameters, returnType } = rpcFn
+  const { name, parameters: _parameters, returnType } = rpcFn
+  // filter out idToken parameter
+  const parameters = _parameters.filter((p) => p.name !== "idToken")
   const signature = functionSignature({
     name,
-    // filter out idToken parameter
-    parameters: parameters.filter((p) => p.name !== "idToken"),
+    parameters,
     returnType: promise(returnType),
   })
   const body = `{${untypedParameters({ parameters })}}`
