@@ -107,7 +107,8 @@ function requestListener() {
         if (route) {
           try {
             const { headers } = req
-            const body = await readBody(req)
+            const bodyString = await readBody(req)
+            const body = bodyString === "" ? {} : JSON.parse(bodyString)
             const responseData = await route.importedFunction({ headers, body })
             if (responseData === undefined) {
               res.statusCode = 204
@@ -141,12 +142,6 @@ function requestListener() {
     res.write(`{ "error": "RPC not found" }`)
     res.end()
   }
-}
-
-function buildParameters(route: Route, body?: string): unknown[] {
-  if (!body) return []
-  const parsedBody = JSON.parse(body)
-  return route.argumentNames.map((argumentName) => parsedBody[argumentName])
 }
 
 function readBody(request: http.IncomingMessage): Promise<string> {
