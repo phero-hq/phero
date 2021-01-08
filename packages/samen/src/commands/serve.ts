@@ -91,7 +91,7 @@ function requestListener() {
   return async (req: http.IncomingMessage, res: http.ServerResponse) => {
     res.setHeader("Access-Control-Allow-Origin", "*")
     res.setHeader("Access-Control-Allow-Methods", "POST")
-    res.setHeader("Access-Control-Allow-Headers", "content-type")
+    res.setHeader("Access-Control-Allow-Headers", "content-type authorization")
 
     console.log("REQUEST", req.method, req.url)
     if (req.method === "OPTIONS") {

@@ -201,7 +201,7 @@ const gcHandler = (p: Props): string => {
       res.set({
         "Access-Control-Allow-Origin": req.headers.origin,
         "Access-Control-Allow-Methods": req.method,
-        "Access-Control-Allow-Headers": "content-type",
+        "Access-Control-Allow-Headers": "content-type authorization",
       })
 
       if (req.method === 'OPTIONS') {
