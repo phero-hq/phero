@@ -1,4 +1,3 @@
-import { promises as fs } from "fs"
 import http from "http"
 import path from "path"
 import TscWatchClient from "tsc-watch/client"
@@ -78,7 +77,7 @@ function getRoutes(manifest: SamenManifest): Routes {
         importedFunction: require(path.join(
           paths.userRpcFunctionsDir,
           rpcFunction.name,
-        ))[`rpc_${rpcFunction.name}`],
+        ))[`serveHandler`],
         argumentNames: rpcFunction.parameters
           .sort((a, b) => a.index - b.index)
           .map((r) => r.name),
@@ -91,7 +90,7 @@ function requestListener() {
   return async (req: http.IncomingMessage, res: http.ServerResponse) => {
     res.setHeader("Access-Control-Allow-Origin", "*")
     res.setHeader("Access-Control-Allow-Methods", "POST")
-    res.setHeader("Access-Control-Allow-Headers", "content-type")
+    res.setHeader("Access-Control-Allow-Headers", "content-type, authorization")
 
     console.log("REQUEST", req.method, req.url)
     if (req.method === "OPTIONS") {
@@ -107,9 +106,10 @@ function requestListener() {
         const route = routes[req.url]
         if (route) {
           try {
-            const body = await readBody(req)
-            const parameters = buildParameters(route, body)
-            const responseData = await route.importedFunction(...parameters)
+            const { headers } = req
+            const bodyString = await readBody(req)
+            const body = bodyString === "" ? {} : JSON.parse(bodyString)
+            const responseData = await route.importedFunction({ headers, body })
             if (responseData === undefined) {
               res.statusCode = 204
             } else {
@@ -121,6 +121,10 @@ function requestListener() {
               res.statusCode = 400
               console.error(e)
               res.write(JSON.stringify({ error: e.message, errors: e.errors }))
+            } else if (e.errorCode === "AUTHORIZATION_ERROR") {
+              res.statusCode = 401
+              console.error(e)
+              res.write(JSON.stringify({ error: e.message }))
             } else {
               res.statusCode = 500
               console.error(e)
@@ -138,12 +142,6 @@ function requestListener() {
     res.write(`{ "error": "RPC not found" }`)
     res.end()
   }
-}
-
-function buildParameters(route: Route, body?: string): unknown[] {
-  if (!body) return []
-  const parsedBody = JSON.parse(body)
-  return route.argumentNames.map((argumentName) => parsedBody[argumentName])
 }
 
 function readBody(request: http.IncomingMessage): Promise<string> {

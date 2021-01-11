@@ -9,6 +9,8 @@ import {
   generateApiEndpoints,
   generateManifest,
   paths,
+  readConfigFile,
+  SamenConfig,
   SamenFileMissingError,
   SamenManifest,
   startSpinner,
@@ -18,7 +20,8 @@ import { ensureDir } from "@samen/core"
 
 export default async function build(environment: Environment): Promise<void> {
   const { manifest, samenFilePath } = await buildManifest()
-  await buildRPCFunctions(manifest, samenFilePath)
+  const config = await readConfigFile()
+  await buildRPCFunctions(manifest, samenFilePath, config)
 }
 
 async function buildManifest(): Promise<{
@@ -58,9 +61,10 @@ async function buildManifest(): Promise<{
 async function buildRPCFunctions(
   manifest: SamenManifest,
   samenFilePath: string,
+  config: SamenConfig,
 ): Promise<void> {
   const spinner = startSpinner("Generating RPC functions")
-  await generateApiEndpoints(manifest, samenFilePath)
+  await generateApiEndpoints(manifest, samenFilePath, config)
   spinner.succeed("Generated RPC functions")
 }
 

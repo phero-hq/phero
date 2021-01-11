@@ -1,9 +1,9 @@
 import {
   JSType,
   JSValue,
-  Ref,
   RefMap,
   RPCFunction,
+  SamenConfig,
   SamenManifest,
 } from "../../domain"
 import functionSignature from "./shared/functionSignature"
@@ -14,6 +14,7 @@ export interface Props {
   rpcFunction: RPCFunction
   manifest: SamenManifest
   relativeSamenFilePath: string
+  config: SamenConfig
 }
 
 const apiEndpoint = (p: Props) => {
@@ -28,9 +29,11 @@ const apiEndpoint = (p: Props) => {
 
     ${validator(p)}
 
-    ${handler(p)}
-
-    ${rpcFunction(p)}
+    ${awsHandler(p)}
+    
+    ${gcHandler(p)}
+    
+    ${serveHandler(p)}
   `
 }
 
@@ -126,7 +129,7 @@ const validator = (p: Props): string => {
   `
 }
 
-const handler = (p: Props): string => {
+const awsHandler = (p: Props): string => {
   const { name, parameters, returnType } = p.rpcFunction
   const parametersFromBody = parametersFromObject({
     parameters,
@@ -134,7 +137,7 @@ const handler = (p: Props): string => {
   })
 
   return `
-    export async function handler(event: any) {
+    export async function awsHandler(event: any) {
       const body = JSON.parse(event.body === null || event.body === undefined ? '{}' : event.body)
 
       const inputValidationResult = validate(${parametersFromBody})
@@ -176,25 +179,118 @@ const handler = (p: Props): string => {
   `
 }
 
-const rpcFunction = (p: Props): string => {
-  const { name, parameters, returnType } = p.rpcFunction
-  const signature = functionSignature({
-    name: `rpc_${name}`,
+const gcHandler = (p: Props): string => {
+  const {
+    rpcFunction: { name, parameters, returnType },
+    config: { cors },
+  } = p
+  const parametersFromBody = parametersFromObject({
     parameters,
-    returnType: promise(returnType),
+    objectName: "body",
   })
+  const hasIdTokenParam = parameters.some((p) => p.name === "idToken")
 
   return `
-    export async function ${signature} {
-      const inputValidationResult = validate(${untypedParameters({
-        parameters,
-      })})
+    const ORIGIN_WHITELIST = ${cors ? JSON.stringify(cors.whitelist) : `[]`}
+    export async function gcHandler(req: any, res: any) {
+      if (!ORIGIN_WHITELIST.includes(req.headers.origin)) {
+        res.status(401).end()
+        return
+      }
+
+      res.set({
+        "Access-Control-Allow-Origin": req.headers.origin,
+        "Access-Control-Allow-Methods": req.method,
+        "Access-Control-Allow-Headers": "content-type, authorization",
+      })
+
+      if (req.method === 'OPTIONS') {
+        res.end();
+        return
+      } else if (req.method !== 'POST') {
+        res.status(404).end()
+        return
+      }
+
+      const body = req.body
+
+      ${
+        hasIdTokenParam
+          ? `
+        /// AUTH
+        const idTokenString = req.headers['authorization']?.substring('Bearer '.length)
+        if (!idTokenString) {
+          res.status(401).end();
+          return;
+        }
+        const firebaseAdmin = require('firebase-admin')
+        const idToken = await firebaseAdmin.auth().verifyIdToken(idTokenString)
+        body.idToken = idToken;
+        /// AUTH
+      `
+          : ""
+      }
+      
+      const inputValidationResult = validate(${parametersFromBody})
+
+      if (inputValidationResult.length) {
+        res.status(400).json(new InvalidInputError(inputValidationResult))
+        return
+      }
+
+      try {
+        const result = await ${name}(${parametersFromBody})
+        res.json(${returnType.type === JSType.untyped ? "null" : "result"})
+        return
+      } catch (e) {
+        res.status(500).json(e)
+        return
+      }
+    }
+  `
+}
+
+const serveHandler = (p: Props): string => {
+  const { name, parameters } = p.rpcFunction
+  const parametersFromBody = parametersFromObject({
+    parameters,
+    objectName: "body",
+  })
+  const hasIdTokenParam = parameters.some((p) => p.name === "idToken")
+
+  return `
+    class AuthorizationError extends Error {
+      errorCode = 'AUTHORIZATION_ERROR'
+      constructor() {
+        super('Malformed authorization header')
+      }
+    }
+
+    export async function serveHandler(req: any) {
+      const body = req.body
+      ${
+        hasIdTokenParam
+          ? `
+        /// AUTH
+        const idTokenString = req.headers['authorization']?.substring('Bearer '.length)
+        if (!idTokenString) {
+          throw new AuthorizationError()
+        }
+        const firebaseAdmin = require('firebase-admin')
+        const idToken = await firebaseAdmin.auth().verifyIdToken(idTokenString)
+        body.idToken = idToken;
+        /// AUTH
+      `
+          : ""
+      }
+
+      const inputValidationResult = validate(${parametersFromBody})
 
       if (inputValidationResult.length) {
         throw new InvalidInputError(inputValidationResult);
       }
 
-      const result = await ${name}(${untypedParameters({ parameters })})
+      const result = await ${name}(${parametersFromBody})
       return result
     }
   `
