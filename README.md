@@ -7,6 +7,12 @@ Alpha release will come soon, join the waiting list here: https://samen.io
 
 Samen builds and deploys serverless backend services and databases from your code and autogenerates end-to-end type-safe SDK's for your web or mobile client(s).
 
+## Design principles
+
+- Code-first
+- Declarative
+- End-to-end typesafe
+
 ## Example
 
 First, define your models like:
