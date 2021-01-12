@@ -69,6 +69,7 @@ function getFunctionsPerNamespace(
   for (const namespace of namespaces) {
     const namespaceString = namespace.join(".")
     const topLevelNamespace = samenSourceFile.getNamespace(namespaceString)
+
     const namespaceSymbols = namespace
       .slice(1)
       .reduce((result: Symbol[], namespaceSegment: string) => {
@@ -91,11 +92,24 @@ function getFunctionsPerNamespace(
           ? exportSymbol.getAliasedSymbolOrThrow()
           : exportSymbol
 
-        if (symbol.getFlags() & ts.SymbolFlags.Function) {
-          return [
-            ...result,
-            symbol.getValueDeclarationOrThrow() as FunctionDeclaration,
-          ]
+        const valueDeclr = symbol.getValueDeclaration()
+
+        if (valueDeclr === undefined) {
+          return result
+        }
+
+        if (Node.isFunctionDeclaration(valueDeclr)) {
+          return [...result, valueDeclr]
+        }
+        if (Node.isVariableDeclaration(valueDeclr)) {
+          const exportedVariable = valueDeclr
+            .getInitializer()
+            ?.getType()
+            ?.getSymbol()
+            ?.getValueDeclaration()
+          if (Node.isFunctionDeclaration(exportedVariable)) {
+            return [...result, exportedVariable]
+          }
         }
         return result
       },
