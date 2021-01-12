@@ -18,10 +18,7 @@
             "modelIds": [
                 "Sjaak"
             ],
-            "filePath": {
-                "sourceFile": "src/samen.ts",
-                "outputFile": "build/samen.js"
-            }
+            "namespace": []
         },
         {
             "name": "isAad",
@@ -42,10 +39,7 @@
                 "Sjaak",
                 "Aad"
             ],
-            "filePath": {
-                "sourceFile": "src/samen.ts",
-                "outputFile": "build/samen.js"
-            }
+            "namespace": []
         },
         {
             "name": "x",
@@ -57,10 +51,7 @@
                 "Sjaak",
                 "Aad"
             ],
-            "filePath": {
-                "sourceFile": "src/samen.ts",
-                "outputFile": "build/samen.js"
-            }
+            "namespace": []
         },
         {
             "name": "answer",
@@ -82,10 +73,7 @@
                 "Aad",
                 "Y"
             ],
-            "filePath": {
-                "sourceFile": "src/samen.ts",
-                "outputFile": "build/samen.js"
-            }
+            "namespace": []
         },
         {
             "name": "test",
@@ -117,10 +105,7 @@
                 "Y",
                 "Z"
             ],
-            "filePath": {
-                "sourceFile": "src/samen.ts",
-                "outputFile": "build/samen.js"
-            }
+            "namespace": []
         },
         {
             "name": "add",
@@ -149,27 +134,32 @@
                 "Y",
                 "Z"
             ],
-            "filePath": {
-                "sourceFile": "src/calc.ts",
-                "outputFile": "build/samen.js"
-            }
+            "namespace": []
         }
     ],
     "models": {
         "Sjaak": {
             "id": "Sjaak",
+            "name": "Sjaak",
+            "namespace": [],
             "ts": "export interface Sjaak {\n  x: boolean\n  y: number\n}"
         },
         "Aad": {
             "id": "Aad",
+            "name": "Aad",
+            "namespace": [],
             "ts": "export interface Aad {\n  x: boolean\n}"
         },
         "Y": {
             "id": "Y",
+            "name": "Y",
+            "namespace": [],
             "ts": "export interface Y {\n  answer: [number, number]\n}"
         },
         "Z": {
             "id": "Z",
+            "name": "Z",
+            "namespace": [],
             "ts": "export type Z = [Aad, Y]"
         }
     },
