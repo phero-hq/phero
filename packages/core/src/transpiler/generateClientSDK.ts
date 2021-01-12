@@ -1,3 +1,4 @@
+import path from "path"
 import { Project, ts } from "ts-morph"
 import { ensureDir, Environment } from "../cli"
 import { ClientEnvironment } from "../domain"
@@ -15,11 +16,15 @@ export default async function generateClientSDK(
   projectDir: string,
 ): Promise<void> {
   try {
-    await ensureDir(paths.clientBuildDir(projectDir))
+    const outDir = paths.clientBuildDir(projectDir)
+    await ensureDir(outDir)
 
+    const defaultCompilerOptions = await getDefaultCompilerOptions(projectDir)
     const project = new Project({
       compilerOptions: {
-        outDir: paths.clientBuildDir(projectDir),
+        ...defaultCompilerOptions,
+        types: [],
+        outDir,
         declaration: true,
       },
     })
@@ -33,12 +38,45 @@ export default async function generateClientSDK(
     }[environment]
 
     const isEnvNode = config.env === ClientEnvironment.Node
-
     const code = clientSDK({ manifest, apiUrl, isEnvNode })
     project.createSourceFile("index.ts", code)
     validateProject(project)
     await project.emit()
   } catch (error) {
     throw new ClientSDKCompilerError(error)
+  }
+}
+
+async function getDefaultCompilerOptions(
+  projectDir: string,
+): Promise<ts.CompilerOptions> {
+  const options = new Project({
+    tsConfigFilePath: path.join(projectDir, "tsconfig.json"),
+  }).getCompilerOptions()
+
+  const {
+    lib,
+    module,
+    moduleResolution,
+    strict,
+    target,
+    esModuleInterop,
+    jsx,
+    isolatedModules,
+    allowSyntheticDefaultImports,
+    allowJs,
+  } = options
+
+  return {
+    lib,
+    module,
+    moduleResolution,
+    strict,
+    target,
+    esModuleInterop,
+    jsx,
+    isolatedModules,
+    allowSyntheticDefaultImports,
+    allowJs,
   }
 }

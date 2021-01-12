@@ -29,7 +29,7 @@ const setAuthorizationHeaderFunction = () => `
   export function unsetAuthorizationHeader() {
     authorizationHeader = undefined
   }
-  function getAuthorizationHeader() {
+  function getAuthorizationHeader(): { 'Authorization': string } | {} {
     return authorizationHeader ? { 'Authorization': authorizationHeader } : {}
   }
 `
@@ -44,11 +44,7 @@ const requestFunction = ({
   const _fetch = ${isEnvNode ? `require('node-fetch')` : `fetch`}
   const ENDPOINT = "${apiUrl}"
 
-  async function request<T>(
-    name: string,
-    body: object,
-    isVoid: boolean,
-  ): Promise<T> {
+  async function request<T>(name: string, body: object): Promise<T> {
     try {
       const result = await _fetch(ENDPOINT + name, {
         method: "POST",
@@ -61,9 +57,26 @@ const requestFunction = ({
       if (!result.ok) {
         throw new Error(\`Call failed with status \${result.status}\`)
       }
-      if (!isVoid) {
-        const data = await result.json()
-        return data as T
+      const data = await result.json()
+      return data as T
+    } catch (err) {
+      console.error(err)
+      throw new Error("Network error")
+    }
+  }
+
+  async function requestVoid(name: string, body: object): Promise<void> {
+    try {
+      const result = await _fetch(ENDPOINT + name, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthorizationHeader(),
+        },
+        body: JSON.stringify(body),
+      })
+      if (!result.ok) {
+        throw new Error(\`Call failed with status \${result.status}\`)
       }
     } catch (err) {
       console.error(err)
@@ -94,17 +107,20 @@ const rpcFunction = (rpcFn: RPCFunction, manifest: SamenManifest): string => {
     manifest,
   })
   const body = `{${untypedParameters({ parameters, manifest })}}`
-  const isVoid = returnType.type === JSType.untyped ? "true" : "false"
+
+  const requestPath = `/${
+    namespace.length ? `${namespace.join("/")}/${name}` : name
+  }`
+  const requestFunction =
+    returnType.type === JSType.untyped ? "requestVoid" : "request"
 
   return wrapWithNamespace(
     namespace,
     `
     export async function ${signature} {
-      return request("/${
-        namespace.length ? `${namespace.join("/")}/${name}` : name
-      }", ${body}, ${isVoid});
+      return ${requestFunction}("${requestPath}", ${body});
     }
-  `,
+    `,
   )
 }
 
