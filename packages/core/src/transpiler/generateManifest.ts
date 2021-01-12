@@ -1,4 +1,3 @@
-import path from "path"
 import {
   ts,
   SourceFile,
@@ -8,6 +7,7 @@ import {
   ParameterDeclaration,
   Type,
   Symbol,
+  NamespaceDeclaration,
 } from "ts-morph"
 import { JSType, JSValue } from "../domain/JSValue"
 import {
@@ -23,7 +23,6 @@ import {
   PropertyMissingError,
   UnsupportedTypeError,
 } from "../errors"
-import * as paths from "../paths"
 
 export default function generateManifest(
   samenSourceFile: SourceFile,
@@ -36,69 +35,122 @@ export default function generateManifest(
       refs: {},
     }
 
-    for (const exportSymbol of samenSourceFile.getExportSymbols()) {
-      const symbol = exportSymbol.isAlias()
-        ? exportSymbol.getAliasedSymbolOrThrow()
-        : exportSymbol
-      if (symbol.getFlags() & ts.SymbolFlags.Function) {
-        const functionDeclaration = symbol.getValueDeclarationOrThrow() as FunctionDeclaration
-
-        const returnType = functionDeclaration.getReturnType()
-        const isReturnTypePromise =
-          returnType.getSymbol()?.getName() === "Promise"
-        const useReturnType = isReturnTypePromise
-          ? returnType.getTypeArguments()[0]
-          : returnType
-
-        const modelIds: string[] = []
-        const newModels = extractModels(functionDeclaration, manifest.models)
-
-        for (const model of Object.values(newModels)) {
-          if (manifest.models[model.id] === undefined) {
-            manifest.models[model.id] = model
-          }
-          modelIds.push(model.id)
-        }
-
-        const name = symbol.getName()
-        const rpcFunction: RPCFunction = {
-          name,
-          parameters: functionDeclaration
-            .getParameters()
-            .map((param, index) =>
-              compileParameterDeclaration(
-                param,
-                index,
-                typeChecker,
-                manifest.refs,
-              ),
-            ),
-          returnType: getJSValue(
-            useReturnType,
-            typeChecker,
-            manifest.refs,
-            functionDeclaration,
-          ),
-          modelIds,
-          filePath: {
-            sourceFile: path.relative(
-              paths.userProjectDir,
-              functionDeclaration.getSourceFile().getFilePath(),
-            ),
-            outputFile: path.relative(
-              paths.userProjectDir,
-              samenSourceFile.getEmitOutput().getOutputFiles()[0].getFilePath(),
-            ),
-          },
-        }
-
-        manifest.rpcFunctions.push(rpcFunction)
-      }
+    for (const [namespace, functions] of getFunctionsPerNamespace(
+      samenSourceFile,
+    ).entries()) {
+      compileRPCs(typeChecker, manifest, namespace, functions)
     }
 
     return manifest
   } catch (error) {
     throw new ManifestCompilerError(error)
+  }
+}
+
+type NamespaceFunctionMap = Map<string[], FunctionDeclaration[]>
+
+function getFunctionsPerNamespace(
+  samenSourceFile: SourceFile,
+): NamespaceFunctionMap {
+  const result: NamespaceFunctionMap = new Map<
+    string[],
+    FunctionDeclaration[]
+  >()
+
+  result.set([], reduceFuncs(samenSourceFile.getExportSymbols()))
+
+  const namespaces = samenSourceFile.getNamespaces().map((namespaceDeclr) => {
+    const namespaceSegments = namespaceDeclr
+      .getNameNodes()
+      .map((nn) => nn.getSymbolOrThrow().getName())
+    return namespaceSegments
+  })
+
+  for (const namespace of namespaces) {
+    const namespaceString = namespace.join(".")
+    const topLevelNamespace = samenSourceFile.getNamespace(namespaceString)
+    const namespaceSymbols = namespace
+      .slice(1)
+      .reduce((result: Symbol[], namespaceSegment: string) => {
+        return result
+          .filter((s) => s.getName() == namespaceSegment)
+          .flatMap((s) =>
+            (s.getValueDeclaration() as NamespaceDeclaration)?.getExportSymbols(),
+          )
+      }, topLevelNamespace?.getExportSymbols() ?? [])
+
+    result.set(namespace, reduceFuncs(namespaceSymbols))
+  }
+
+  return result
+
+  function reduceFuncs(symbols: Symbol[]): FunctionDeclaration[] {
+    return symbols.reduce(
+      (result: FunctionDeclaration[], exportSymbol: Symbol) => {
+        const symbol = exportSymbol.isAlias()
+          ? exportSymbol.getAliasedSymbolOrThrow()
+          : exportSymbol
+
+        if (symbol.getFlags() & ts.SymbolFlags.Function) {
+          return [
+            ...result,
+            symbol.getValueDeclarationOrThrow() as FunctionDeclaration,
+          ]
+        }
+        return result
+      },
+      [] as FunctionDeclaration[],
+    )
+  }
+}
+
+function compileRPCs(
+  typeChecker: TypeChecker,
+  manifest: SamenManifest,
+  namespace: string[],
+  functionDeclarations: FunctionDeclaration[],
+) {
+  for (const functionDeclaration of functionDeclarations) {
+    const returnType = functionDeclaration.getReturnType()
+    const isReturnTypePromise = returnType.getSymbol()?.getName() === "Promise"
+    const useReturnType = isReturnTypePromise
+      ? returnType.getTypeArguments()[0]
+      : returnType
+
+    const modelIds: string[] = []
+    const newModels = extractModels(functionDeclaration, manifest.models)
+
+    for (const model of Object.values(newModels)) {
+      if (manifest.models[model.id] === undefined) {
+        manifest.models[model.id] = model
+      }
+      modelIds.push(model.id)
+    }
+
+    const name = functionDeclaration.getName()
+
+    if (!name) {
+      throw new Error("Function has no name")
+    }
+
+    const rpcFunction: RPCFunction = {
+      name,
+      parameters: functionDeclaration
+        .getParameters()
+        .map((param, index) =>
+          compileParameterDeclaration(param, index, typeChecker, manifest.refs),
+        ),
+      returnType: getJSValue(
+        useReturnType,
+        typeChecker,
+        manifest.refs,
+        functionDeclaration,
+      ),
+      modelIds,
+      namespace,
+    }
+
+    manifest.rpcFunctions.push(rpcFunction)
   }
 }
 
@@ -364,6 +416,7 @@ function extractModels(func: FunctionDeclaration, models: ModelMap): ModelMap {
       const modelId = cleanModelId(
         node.getSymbolOrThrow().getFullyQualifiedName(),
       )
+      const modelName = node.getSymbolOrThrow().getName()
 
       if (!modelId) {
         throw new PropertyMissingError("modelId")
@@ -372,6 +425,10 @@ function extractModels(func: FunctionDeclaration, models: ModelMap): ModelMap {
       if (models[modelId] === undefined) {
         models[modelId] = {
           id: modelId,
+          name: modelName,
+          namespace: modelId.includes(".")
+            ? modelId.replace(new RegExp(`\\.${modelName}$`), "").split(".")
+            : [],
           ts: modelAsText,
         }
       }

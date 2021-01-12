@@ -70,13 +70,20 @@ async function loadRoutes(): Promise<void> {
 
 function getRoutes(manifest: SamenManifest): Routes {
   return manifest.rpcFunctions.reduce((routes, rpcFunction) => {
+    const makeRpcPath = (joinWith = ".") =>
+      rpcFunction.namespace.length
+        ? `${rpcFunction.namespace.join(joinWith)}${joinWith}${
+            rpcFunction.name
+          }`
+        : rpcFunction.name
+
     return {
       ...routes,
-      [`/${rpcFunction.name}`]: {
+      [`/${makeRpcPath("/")}`]: {
         definition: rpcFunction,
         importedFunction: require(path.join(
           paths.userRpcFunctionsDir,
-          rpcFunction.name,
+          makeRpcPath(),
         ))[`serveHandler`],
         argumentNames: rpcFunction.parameters
           .sort((a, b) => a.index - b.index)

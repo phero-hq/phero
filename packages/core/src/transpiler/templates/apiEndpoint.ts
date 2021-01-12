@@ -6,9 +6,7 @@ import {
   SamenConfig,
   SamenManifest,
 } from "../../domain"
-import functionSignature from "./shared/functionSignature"
-import { parametersFromObject, untypedParameters } from "./shared/parameters"
-import { promise } from "./shared/types"
+import { parametersFromObject } from "./shared/parameters"
 
 export interface Props {
   rpcFunction: RPCFunction
@@ -22,8 +20,20 @@ const apiEndpoint = (p: Props) => {
     .map((id) => p.manifest.models[id].ts)
     .join("\n")
 
+  const importSyntax = p.rpcFunction.namespace.length
+    ? p.rpcFunction.namespace[0]
+    : p.rpcFunction.name
+
+  const importRef = p.rpcFunction.namespace.length
+    ? `const ${p.rpcFunction.name} = ${p.rpcFunction.namespace.join(".")}.${
+        p.rpcFunction.name
+      }`
+    : ""
+
   return `
-    import { ${p.rpcFunction.name} } from '${p.relativeSamenFilePath}';
+    import { ${importSyntax} } from '${p.relativeSamenFilePath}';
+    
+    ${importRef}
 
     ${models}
 
@@ -134,6 +144,7 @@ const awsHandler = (p: Props): string => {
   const parametersFromBody = parametersFromObject({
     parameters,
     objectName: "body",
+    manifest: p.manifest,
   })
 
   return `
@@ -187,6 +198,7 @@ const gcHandler = (p: Props): string => {
   const parametersFromBody = parametersFromObject({
     parameters,
     objectName: "body",
+    manifest: p.manifest,
   })
   const hasIdTokenParam = parameters.some((p) => p.name === "idToken")
 
@@ -255,6 +267,7 @@ const serveHandler = (p: Props): string => {
   const parametersFromBody = parametersFromObject({
     parameters,
     objectName: "body",
+    manifest: p.manifest,
   })
   const hasIdTokenParam = parameters.some((p) => p.name === "idToken")
 
