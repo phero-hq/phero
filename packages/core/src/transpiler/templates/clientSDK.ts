@@ -14,11 +14,11 @@ const clientSDK = ({ apiUrl, manifest, isEnvNode }: Props): string => `
 
     ${requestFunction({ apiUrl, isEnvNode })}
 
-    ${Object.keys(manifest.models)
-      .map((modelId) => manifest.models[modelId].ts)
+    ${Object.values(manifest.models)
+      .map((model) => wrapWithNamespace(model.namespace, model.ts))
       .join("\n")}
 
-    ${manifest.rpcFunctions.map(rpcFunction).join("\n")}
+    ${manifest.rpcFunctions.map((rpc) => rpcFunction(rpc, manifest)).join("\n")}
   `
 
 const setAuthorizationHeaderFunction = () => `
@@ -72,23 +72,40 @@ const requestFunction = ({
   }
 `
 
-const rpcFunction = (rpcFn: RPCFunction): string => {
-  const { name, parameters: _parameters, returnType } = rpcFn
+function wrapWithNamespace(namespace: string[], tsCode: string) {
+  if (namespace.length) {
+    return `
+          export namespace ${namespace.join(".")} {
+            ${tsCode}
+          }
+        `
+  }
+  return tsCode
+}
+
+const rpcFunction = (rpcFn: RPCFunction, manifest: SamenManifest): string => {
+  const { name, parameters: _parameters, returnType, namespace } = rpcFn
   // filter out idToken parameter
   const parameters = _parameters.filter((p) => p.name !== "idToken")
   const signature = functionSignature({
     name,
     parameters,
-    returnType: promise(returnType),
+    returnType: promise(returnType, manifest),
+    manifest,
   })
-  const body = `{${untypedParameters({ parameters })}}`
+  const body = `{${untypedParameters({ parameters, manifest })}}`
   const isVoid = returnType.type === JSType.untyped ? "true" : "false"
 
-  return `
+  return wrapWithNamespace(
+    namespace,
+    `
     export async function ${signature} {
-      return request("${name}", ${body}, ${isVoid});
+      return request("/${
+        namespace.length ? `${namespace.join("/")}/${name}` : name
+      }", ${body}, ${isVoid});
     }
-  `
+  `,
+  )
 }
 
 export default clientSDK

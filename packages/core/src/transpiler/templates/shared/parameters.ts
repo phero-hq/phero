@@ -1,12 +1,13 @@
-import { RPCFunctionParameter } from "../../../domain/manifest"
+import { RPCFunctionParameter, SamenManifest } from "../../../domain/manifest"
 import { type } from "./types"
 
 interface Props {
   parameters: RPCFunctionParameter[]
+  manifest: SamenManifest
 }
 
-export const typedParameters = ({ parameters }: Props): string =>
-  parameters.map((p) => `${p.name}: ${type(p.value)}`).join(", ")
+export const typedParameters = ({ parameters, manifest }: Props): string =>
+  parameters.map((p) => `${p.name}: ${type(p.value, manifest)}`).join(", ")
 
 export const untypedParameters = ({ parameters }: Props): string =>
   parameters.map((p) => p.name).join(", ")

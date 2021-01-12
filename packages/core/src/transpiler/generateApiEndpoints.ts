@@ -32,7 +32,14 @@ export default async function generateApiEndpoints(
         rpcFunction,
         config,
       })
-      project.createSourceFile(`${rpcFunction.name}.ts`, code)
+      project.createSourceFile(
+        `${
+          rpcFunction.namespace.length
+            ? `${rpcFunction.namespace.join(".")}.`
+            : ""
+        }${rpcFunction.name}.ts`,
+        code,
+      )
     }
 
     validateProject(project)

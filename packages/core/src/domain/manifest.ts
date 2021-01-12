@@ -11,10 +11,7 @@ export interface RPCFunction {
   parameters: RPCFunctionParameter[]
   returnType: JSValue
   modelIds: string[]
-  filePath: {
-    sourceFile: string
-    outputFile: string
-  }
+  namespace: string[]
 }
 
 export interface RPCFunctionParameter {
@@ -29,6 +26,8 @@ export type ModelMap = {
 
 export interface Model {
   id: string
+  name: string
+  namespace: string[]
   ts: string
 }
 
