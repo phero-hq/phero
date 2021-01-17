@@ -19,11 +19,11 @@ export default async function generateClientSDK(
     const outDir = paths.clientBuildDir(projectDir)
     await ensureDir(outDir)
 
-    const defaultCompilerOptions = await getDefaultCompilerOptions(projectDir)
+    const userCompilerOptions = await getUserCompilerOptions(projectDir)
     const project = new Project({
       compilerOptions: {
-        ...defaultCompilerOptions,
         types: [],
+        ...userCompilerOptions,
         outDir,
         declaration: true,
       },
@@ -47,7 +47,7 @@ export default async function generateClientSDK(
   }
 }
 
-async function getDefaultCompilerOptions(
+async function getUserCompilerOptions(
   projectDir: string,
 ): Promise<ts.CompilerOptions> {
   const options = new Project({
@@ -56,6 +56,7 @@ async function getDefaultCompilerOptions(
 
   const {
     lib,
+    types,
     module,
     moduleResolution,
     strict,
@@ -69,6 +70,7 @@ async function getDefaultCompilerOptions(
 
   return {
     lib,
+    types,
     module,
     moduleResolution,
     strict,
