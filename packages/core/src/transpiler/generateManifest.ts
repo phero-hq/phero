@@ -294,14 +294,14 @@ function getJSValue(
       return getJsObjectValue()
     }
 
-    const symbolName: string | undefined = cleanSymbolName(type.getText())
+    const symbolName = cleanSymbolName(type.getText())
     const modelNode: Node<ts.Node> = symbol.getDeclarations()[0]
     const modelId: string | undefined = cleanModelId(
       modelNode.getSymbolOrThrow().getFullyQualifiedName(),
     )
 
-    if (!modelId || !symbolName) {
-      throw new PropertiesMissingError(["modelId", "symbolName"])
+    if (!modelId) {
+      throw new PropertiesMissingError(["modelId"])
     }
 
     if (!refValues[symbolName]) {
@@ -365,8 +365,8 @@ function cleanModelId(modelId: string): string | undefined {
   return modelId.match(/(^"[^"]+"\.)?(.+)/)?.[2]
 }
 
-function cleanSymbolName(symbolName: string): string | undefined {
-  return symbolName.match(/(^import\([^)]+\)\.)?(.+)/)?.[2]
+function cleanSymbolName(symbolName: string): string {
+  return symbolName.replace(/(import\([^)]+\)\.)/g, "")
 }
 
 function mergeUnionTypes(jsValues: JSValue[]): JSValue[] {
