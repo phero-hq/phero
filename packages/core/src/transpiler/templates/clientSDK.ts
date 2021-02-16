@@ -24,7 +24,7 @@ const clientSDK = ({ apiUrl, manifest, isEnvNode }: Props): string => `
       .map((model) => wrapWithNamespace(model.namespace, model.ts))
       .join("\n")}
 
-    ${dateConverters(manifest.refs)}
+    ${dateConverters(manifest)}
 
     ${manifest.rpcFunctions.map((rpc) => rpcFunction(rpc, manifest)).join("\n")}
   `
@@ -121,7 +121,11 @@ const rpcFunction = (rpcFn: RPCFunction, manifest: SamenManifest): string => {
   }`
   const isEmptyResult = returnType.type === JSType.untyped
 
-  const dateConvertLogic = generateDateConverter(returnType, "rpcResult")
+  const dateConvertLogic = generateDateConverter(
+    manifest,
+    returnType,
+    "rpcResult",
+  )
 
   return wrapWithNamespace(
     namespace,
@@ -144,11 +148,11 @@ const rpcFunction = (rpcFn: RPCFunction, manifest: SamenManifest): string => {
 
 export default clientSDK
 
-function dateConverters(refs: RefMap): string {
+function dateConverters(manifest: SamenManifest): string {
   return [
     "const refs: { [refId: string]: (jsValue: any) => void } = {};",
-    ...Object.entries(refs).map(([refId, { value }]) => {
-      const refConverter = generateDateConverter(value, "jsValue")
+    ...Object.entries(manifest.refs).map(([refId, { value }]) => {
+      const refConverter = generateDateConverter(manifest, value, "jsValue")
       if (refConverter === null) {
         return ""
       }
@@ -159,7 +163,11 @@ function dateConverters(refs: RefMap): string {
   ].join("\n")
 }
 
-function generateDateConverter(value: JSValue, scope: string): string | null {
+function generateDateConverter(
+  manifest: SamenManifest,
+  value: JSValue,
+  scope: string,
+): string | null {
   switch (value.type) {
     case JSType.string:
     case JSType.number:
@@ -176,7 +184,7 @@ function generateDateConverter(value: JSValue, scope: string): string | null {
     case JSType.object:
       const propDateConverters = value.properties
         .map((prop) =>
-          generateDateConverter(prop, `${scope}[\`${prop.name}\`]`),
+          generateDateConverter(manifest, prop, `${scope}[\`${prop.name}\`]`),
         )
         .filter((result) => result !== null)
 
@@ -187,6 +195,7 @@ function generateDateConverter(value: JSValue, scope: string): string | null {
 
     case JSType.array:
       const elementConverter = generateDateConverter(
+        manifest,
         value.elementType,
         `${scope}[i]`,
       )
@@ -199,7 +208,7 @@ function generateDateConverter(value: JSValue, scope: string): string | null {
 
     case JSType.oneOfTypes:
       const oneOfTypesConverters = value.oneOfTypes
-        .map((t) => generateDateConverter(t, scope))
+        .map((t) => generateDateConverter(manifest, t, scope))
         .filter((result) => result !== null)
 
       if (oneOfTypesConverters.length === 0) {
@@ -211,7 +220,7 @@ function generateDateConverter(value: JSValue, scope: string): string | null {
     case JSType.tuple:
       const elementConverters = value.elementTypes
         .map((elementType, i) =>
-          generateDateConverter(elementType, `${scope}[${i}]`),
+          generateDateConverter(manifest, elementType, `${scope}[${i}]`),
         )
         .filter((result) => result !== null)
 
@@ -222,6 +231,14 @@ function generateDateConverter(value: JSValue, scope: string): string | null {
       return elementConverters.join("\n")
 
     case JSType.ref:
+      const refConverter = generateDateConverter(
+        manifest,
+        manifest.refs[value.id].value,
+        scope,
+      )
+      if (refConverter === null) {
+        return null
+      }
       return `refs[\`${value.id}\`]?.(${scope})`
   }
 }
