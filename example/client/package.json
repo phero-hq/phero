@@ -1,9 +1,9 @@
 {
   "name": "example-project-client",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "private": true,
   "dependencies": {
-    "@samen/client": "^0.7.1",
+    "@samen/client": "^0.7.2",
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
