@@ -2,137 +2,17 @@
     "rpcFunctions": [
         {
             "name": "isSjaak",
-            "parameters": [
-                {
-                    "index": 0,
-                    "name": "sjaak",
-                    "value": {
-                        "type": "ref",
-                        "id": "Sjaak"
-                    }
-                }
-            ],
-            "returnType": {
-                "type": "boolean"
-            },
-            "modelIds": [
-                "Sjaak"
-            ],
-            "namespace": []
-        },
-        {
-            "name": "isAad",
-            "parameters": [
-                {
-                    "index": 0,
-                    "name": "aad",
-                    "value": {
-                        "type": "ref",
-                        "id": "Aad"
-                    }
-                }
-            ],
-            "returnType": {
-                "type": "boolean"
-            },
-            "modelIds": [
-                "Sjaak",
-                "Aad"
-            ],
-            "namespace": []
-        },
-        {
-            "name": "x",
             "parameters": [],
             "returnType": {
-                "type": "untyped"
+                "type": "ref",
+                "id": "Sjaak"
             },
             "modelIds": [
                 "Sjaak",
-                "Aad"
-            ],
-            "namespace": []
-        },
-        {
-            "name": "answer",
-            "parameters": [
-                {
-                    "index": 0,
-                    "name": "y",
-                    "value": {
-                        "type": "ref",
-                        "id": "Y"
-                    }
-                }
-            ],
-            "returnType": {
-                "type": "untyped"
-            },
-            "modelIds": [
-                "Sjaak",
+                "Kees",
+                "Kaas",
                 "Aad",
-                "Y"
-            ],
-            "namespace": []
-        },
-        {
-            "name": "test",
-            "parameters": [
-                {
-                    "index": 0,
-                    "name": "z",
-                    "value": {
-                        "type": "tuple",
-                        "elementTypes": [
-                            {
-                                "type": "ref",
-                                "id": "Aad"
-                            },
-                            {
-                                "type": "ref",
-                                "id": "Y"
-                            }
-                        ]
-                    }
-                }
-            ],
-            "returnType": {
-                "type": "untyped"
-            },
-            "modelIds": [
-                "Sjaak",
-                "Aad",
-                "Y",
-                "Z"
-            ],
-            "namespace": []
-        },
-        {
-            "name": "add",
-            "parameters": [
-                {
-                    "index": 0,
-                    "name": "a",
-                    "value": {
-                        "type": "number"
-                    }
-                },
-                {
-                    "index": 1,
-                    "name": "b",
-                    "value": {
-                        "type": "number"
-                    }
-                }
-            ],
-            "returnType": {
-                "type": "number"
-            },
-            "modelIds": [
-                "Sjaak",
-                "Aad",
-                "Y",
-                "Z"
+                "Banaan"
             ],
             "namespace": []
         }
@@ -142,25 +22,31 @@
             "id": "Sjaak",
             "name": "Sjaak",
             "namespace": [],
-            "ts": "export interface Sjaak {\n  x: boolean\n  y: number\n}"
+            "ts": "export interface Sjaak {\n  z: Date\n  kees: Kees[]\n  kaas: Kaas[]\n}"
+        },
+        "Kees": {
+            "id": "Kees",
+            "name": "Kees",
+            "namespace": [],
+            "ts": "export interface Kees {\n  z: Date\n}"
+        },
+        "Kaas": {
+            "id": "Kaas",
+            "name": "Kaas",
+            "namespace": [],
+            "ts": "export interface Kaas {\n  koos: {\n    z: Date\n  }\n  uhh: Aad | Banaan\n}"
         },
         "Aad": {
             "id": "Aad",
             "name": "Aad",
             "namespace": [],
-            "ts": "export interface Aad {\n  x: boolean\n}"
+            "ts": "interface Aad {\n  d: Date\n}"
         },
-        "Y": {
-            "id": "Y",
-            "name": "Y",
+        "Banaan": {
+            "id": "Banaan",
+            "name": "Banaan",
             "namespace": [],
-            "ts": "export interface Y {\n  answer: [number, number]\n}"
-        },
-        "Z": {
-            "id": "Z",
-            "name": "Z",
-            "namespace": [],
-            "ts": "export type Z = [Aad, Y]"
+            "ts": "interface Banaan {\n  b: boolean\n}"
         }
     },
     "refs": {
@@ -171,12 +57,70 @@
                 "type": "object",
                 "properties": [
                     {
-                        "name": "x",
-                        "type": "boolean"
+                        "name": "z",
+                        "type": "date"
                     },
                     {
-                        "name": "y",
-                        "type": "number"
+                        "name": "kees",
+                        "type": "array",
+                        "elementType": {
+                            "type": "ref",
+                            "id": "Kees"
+                        }
+                    },
+                    {
+                        "name": "kaas",
+                        "type": "array",
+                        "elementType": {
+                            "type": "ref",
+                            "id": "Kaas"
+                        }
+                    }
+                ]
+            }
+        },
+        "Kees": {
+            "id": "Kees",
+            "modelId": "Kees",
+            "value": {
+                "type": "object",
+                "properties": [
+                    {
+                        "name": "z",
+                        "type": "date"
+                    }
+                ]
+            }
+        },
+        "Kaas": {
+            "id": "Kaas",
+            "modelId": "Kaas",
+            "value": {
+                "type": "object",
+                "properties": [
+                    {
+                        "name": "koos",
+                        "type": "object",
+                        "properties": [
+                            {
+                                "name": "z",
+                                "type": "date"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "uhh",
+                        "type": "oneOfTypes",
+                        "oneOfTypes": [
+                            {
+                                "type": "ref",
+                                "id": "Aad"
+                            },
+                            {
+                                "type": "ref",
+                                "id": "Banaan"
+                            }
+                        ]
                     }
                 ]
             }
@@ -188,29 +132,21 @@
                 "type": "object",
                 "properties": [
                     {
-                        "name": "x",
-                        "type": "boolean"
+                        "name": "d",
+                        "type": "date"
                     }
                 ]
             }
         },
-        "Y": {
-            "id": "Y",
-            "modelId": "Y",
+        "Banaan": {
+            "id": "Banaan",
+            "modelId": "Banaan",
             "value": {
                 "type": "object",
                 "properties": [
                     {
-                        "name": "answer",
-                        "type": "tuple",
-                        "elementTypes": [
-                            {
-                                "type": "number"
-                            },
-                            {
-                                "type": "number"
-                            }
-                        ]
+                        "name": "b",
+                        "type": "boolean"
                     }
                 ]
             }
