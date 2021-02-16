@@ -16,7 +16,7 @@ export const type = (value: JSValue, manifest: SamenManifest): string => {
         return value.type
 
       case JSType.ref:
-        return manifest.models[value.id].name
+        return value.id
 
       case JSType.array:
         return `${typeToString(value.elementType)}[]`
