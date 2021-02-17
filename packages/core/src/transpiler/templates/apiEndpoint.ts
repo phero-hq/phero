@@ -237,6 +237,7 @@ const gcHandler = (p: Props): string => {
         }
         const firebaseAdmin = require('firebase-admin')
         const idToken = await firebaseAdmin.auth().verifyIdToken(idTokenString)
+        console.debug(\`Got IdToken \${JSON.stringify(idToken ?? 'NONE')}\`)
         body.idToken = idToken;
         /// AUTH
       `
@@ -291,6 +292,7 @@ const serveHandler = (p: Props): string => {
         }
         const firebaseAdmin = require('firebase-admin')
         const idToken = await firebaseAdmin.auth().verifyIdToken(idTokenString)
+        console.debug(\`Got IdToken \${JSON.stringify(idToken ?? 'NONE')}\`)
         body.idToken = idToken;
         /// AUTH
       `
