@@ -1,5 +1,4 @@
-import path from "path"
-import { Project, ts } from "ts-morph"
+import { Project } from "ts-morph"
 import { ensureDir, Environment } from "../cli"
 import { ClientEnvironment } from "../domain"
 import {
@@ -9,6 +8,7 @@ import {
 } from "../errors"
 import { readClientConfigFile, readClientManifestFile } from "../files"
 import * as paths from "../paths"
+import getUserCompilerOptions from "./getUserCompilerOptions"
 import clientSDK from "./templates/clientSDK"
 
 export default async function generateClientSDK(
@@ -44,41 +44,5 @@ export default async function generateClientSDK(
     await project.emit()
   } catch (error) {
     throw new ClientSDKCompilerError(error)
-  }
-}
-
-async function getUserCompilerOptions(
-  projectDir: string,
-): Promise<ts.CompilerOptions> {
-  const options = new Project({
-    tsConfigFilePath: path.join(projectDir, "tsconfig.json"),
-  }).getCompilerOptions()
-
-  const {
-    lib,
-    types,
-    module,
-    moduleResolution,
-    strict,
-    target,
-    esModuleInterop,
-    jsx,
-    isolatedModules,
-    allowSyntheticDefaultImports,
-    allowJs,
-  } = options
-
-  return {
-    lib,
-    types,
-    module,
-    moduleResolution,
-    strict,
-    target,
-    esModuleInterop,
-    jsx,
-    isolatedModules,
-    allowSyntheticDefaultImports,
-    allowJs,
   }
 }
