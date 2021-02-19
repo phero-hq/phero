@@ -79,10 +79,16 @@ export default function generateInputValidator(
           : [{ scope, jsValue, message: \`value must be a tuple of length \${length}\` }];
       }
 
-      function validateOneOfTypes(numberOfTypes: number, scope: string, jsValue: any, isValid: boolean): ValidationError[] {
-        return isValid
-          ? []
-          : [{ scope, jsValue, message: \`value is neither of the \${numberOfTypes} union types\` }];
+      function validateOneOfTypes(scope: string, jsValue: any, typeValidators: Array<() => ValidationError[]>): ValidationError[] {
+        for (const typeValidator of typeValidators) {
+          try {
+            if (typeValidator().length === 0) {
+              return [];
+            }
+          } catch (e) { /* ignore possible error */ }
+        }
+        const numberOfTypes = typeValidators.length;
+        return [{ scope, jsValue, message: \`value is neither of the \${numberOfTypes} union types\` }];
       }
 
       function flatten<T>(arr: T[][]): T[] {
@@ -159,13 +165,11 @@ function generateValidator(value: JSValue, scope: string): string {
       ])`
 
     case JSType.oneOfTypes:
-      return `validateOneOfTypes(${
-        value.oneOfTypes.length
-      }, '${scope}', ${scope}, [
+      return `validateOneOfTypes('${scope}', ${scope}, [
         ${value.oneOfTypes
-          .map((t) => `${generateValidator(t, scope)}.length,`)
+          .map((t) => `() => ${generateValidator(t, scope)},`)
           .join("\n")}
-        ].some(s => s === 0))`
+        ])`
 
     case JSType.tuple:
       return `flatten([

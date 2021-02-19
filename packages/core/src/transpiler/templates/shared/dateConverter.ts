@@ -77,15 +77,26 @@ export function generateDateConverter(
       });`
 
     case JSType.oneOfTypes:
-      const oneOfTypesConverters = value.oneOfTypes
-        .map((t) => generateDateConverter(manifest, t, scope))
-        .filter((result) => result !== null)
-
-      if (oneOfTypesConverters.length === 0) {
-        return null
+      let result = ""
+      for (const oneType of value.oneOfTypes) {
+        const converter = generateDateConverter(manifest, oneType, scope)
+        if (!converter) {
+          continue
+        }
+        // TODO this will try to convert each Union type
+        // when the user has something like:
+        // type Union = { a: number, date: Date } | { a: boolean, date: string }
+        // it would incorrectly convert the date into a Date object in the second case
+        // this is for now okay because it's unlikely enough
+        // we can fix this by combining the validator with the converter
+        result += `
+          try {
+            ${converter}
+          } catch (e) { /* ignore possible error */ }
+        `
       }
 
-      return oneOfTypesConverters.join("\n")
+      return result
 
     case JSType.tuple:
       const elementConverters = value.elementTypes
