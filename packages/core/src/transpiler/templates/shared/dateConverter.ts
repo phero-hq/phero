@@ -11,9 +11,12 @@ export function generateInputDateConverter(
       .map((p) => `${p.name}: any`)
       .join(", ")}): void {
       
-      ${rpcFunction.parameters.map((param) =>
-        generateDateConverter(manifest, param.value, param.name),
-      )}
+      ${rpcFunction.parameters
+        .map((param) =>
+          generateDateConverter(manifest, param.value, param.name),
+        )
+        .filter((x) => x !== null)
+        .join("\n")}
     }
   `
 }
@@ -21,15 +24,17 @@ export function generateInputDateConverter(
 export function generateRefDateConverters(manifest: SamenManifest): string {
   return [
     "const refDateConverters: { [refId: string]: (jsValue: any) => void } = {};",
-    ...Object.entries(manifest.refs).map(([refId, { value }]) => {
-      const refConverter = generateDateConverter(manifest, value, "jsValue")
-      if (refConverter === null) {
-        return ""
-      }
-      return `refDateConverters[\`${refId}\`] = (jsValue: any): void => {
+    ...Object.entries(manifest.refs)
+      .map(([refId, { value }]) => {
+        const refConverter = generateDateConverter(manifest, value, "jsValue")
+        if (refConverter === null) {
+          return null
+        }
+        return `refDateConverters[\`${refId}\`] = (jsValue: any): void => {
         ${refConverter}
       };`
-    }),
+      })
+      .filter((x) => x !== null),
   ].join("\n")
 }
 
