@@ -7,7 +7,7 @@
   "scripts": {
     "clean": "rm -rf ./dist",
     "build": "tsc",
-    "samen": "samen"
+    "samen": "./run-samen.sh"
   },
   "author": "",
   "license": "ISC",
