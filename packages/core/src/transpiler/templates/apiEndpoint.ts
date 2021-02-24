@@ -44,6 +44,8 @@ const apiEndpoint = (p: Props) => {
     ${awsHandler(p)}
     
     ${gcHandler(p)}
+
+    ${gcPubSubHandler(p)}
     
     ${serveHandler(p)}
   `
@@ -175,6 +177,35 @@ const gcHandler = (p: Props): string => {
         res.status(500).json(e)
         return
       }
+    }
+  `
+}
+
+const gcPubSubHandler = (p: Props): string => {
+  const {
+    rpcFunction: { name, parameters },
+  } = p
+  const parametersFromBody = parametersFromObject({
+    parameters,
+    objectName: "body",
+    manifest: p.manifest,
+  })
+
+  // https://cloud.google.com/functions/docs/calling/pubsub
+  return `
+    export async function gcPubSubHandler(message: any, context: any) {
+      const jsonString = Buffer.from(message.data, 'base64').toString();
+       
+      const body = JSON.parse(jsonString)
+      const inputValidationResult = validate(${parametersFromBody})
+
+      if (inputValidationResult.length) {
+        throw new InvalidInputError(inputValidationResult)
+      }
+
+      convertDates(${parametersFromBody})
+
+      await ${name}(${parametersFromBody})
     }
   `
 }
