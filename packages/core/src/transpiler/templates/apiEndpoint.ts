@@ -63,8 +63,6 @@ const awsHandler = (p: Props): string => {
 
       const inputValidationResult = validate(${parametersFromBody})
 
-      convertDates(${parametersFromBody})
-
       if (inputValidationResult.length) {
         return {
           statusCode: 400,
@@ -74,6 +72,8 @@ const awsHandler = (p: Props): string => {
           },
         }
       }
+
+      convertDates(${parametersFromBody})
 
       try {
         const result = await ${name}(${parametersFromBody})
@@ -160,12 +160,12 @@ const gcHandler = (p: Props): string => {
 
       const inputValidationResult = validate(${parametersFromBody})
 
-      convertDates(${parametersFromBody})
-
       if (inputValidationResult.length) {
         res.status(400).json(new InvalidInputError(inputValidationResult))
         return
       }
+
+      convertDates(${parametersFromBody})
 
       try {
         const result = await ${name}(${parametersFromBody})
@@ -217,11 +217,11 @@ const serveHandler = (p: Props): string => {
 
       const inputValidationResult = validate(${parametersFromBody})
 
-      convertDates(${parametersFromBody})
-
       if (inputValidationResult.length) {
         throw new InvalidInputError(inputValidationResult);
       }
+
+      convertDates(${parametersFromBody})
 
       const result = await ${name}(${parametersFromBody})
       return result
