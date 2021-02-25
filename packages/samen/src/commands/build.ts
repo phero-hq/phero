@@ -20,7 +20,7 @@ import { ensureDir } from "@samen/core"
 
 export default async function build(
   environment: Environment,
-  isDebugFlag: boolean,
+  isDebugFlag: boolean = false,
 ): Promise<void> {
   const { manifest, samenFilePath } = await buildManifest()
   const config = await readConfigFile()
