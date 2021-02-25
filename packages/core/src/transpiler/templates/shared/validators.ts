@@ -91,7 +91,7 @@ export default function generateInputValidator(
         return [{ scope, jsValue, message: \`value is neither of the \${numberOfTypes} union types\` }];
       }
 
-      function flatten<T>(arr: T[][]): T[] {
+      function flatten(arr: ValidationError[][]): ValidationError[] {
         return arr.reduce((r, a) => [...r, ...a], [])
       }
 
