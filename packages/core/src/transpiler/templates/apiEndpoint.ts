@@ -194,9 +194,9 @@ const gcPubSubHandler = (p: Props): string => {
   // https://cloud.google.com/functions/docs/calling/pubsub
   return `
     export async function gcPubSubHandler(message: any, context: any) {
-      const jsonString = Buffer.from(message.data, 'base64').toString();
-       
-      const body = JSON.parse(jsonString)
+      const dataJSON = Buffer.from(message.data, 'base64').toString()
+      const body = { message: JSON.parse(dataJSON) }
+      
       const inputValidationResult = validate(${parametersFromBody})
 
       if (inputValidationResult.length) {
