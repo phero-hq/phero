@@ -195,7 +195,7 @@ const gcPubSubHandler = (p: Props): string => {
   return `
     export async function gcPubSubHandler(message: any, context: any) {
       const dataJSON = Buffer.from(message.data, 'base64').toString()
-      const body = { message: JSON.parse(dataJSON) }
+      const body: any = { message: JSON.parse(dataJSON) }
       
       const inputValidationResult = validate(${parametersFromBody})
 
