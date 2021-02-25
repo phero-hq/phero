@@ -38,6 +38,8 @@ export default async function serve(_environment: Environment) {
     const watch = new TscWatchClient()
     watch.on("success", reload)
     watch.start("--project", paths.userProjectDir)
+  } else {
+    await loadRoutes()
   }
 }
 
