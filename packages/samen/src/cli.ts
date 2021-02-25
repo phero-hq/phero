@@ -17,7 +17,8 @@ try {
       break
 
     case "build":
-      build(environment)
+      const isDebugFlag = process.argv.includes("--debug")
+      build(environment, isDebugFlag)
       break
 
     case "buildClients":

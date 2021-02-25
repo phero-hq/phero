@@ -18,10 +18,13 @@ import {
 } from "@samen/core"
 import { ensureDir } from "@samen/core"
 
-export default async function build(environment: Environment): Promise<void> {
+export default async function build(
+  environment: Environment,
+  isDebugFlag: boolean,
+): Promise<void> {
   const { manifest, samenFilePath } = await buildManifest()
   const config = await readConfigFile()
-  await buildRPCFunctions(manifest, samenFilePath, config)
+  await buildRPCFunctions(manifest, samenFilePath, config, isDebugFlag)
 }
 
 async function buildManifest(): Promise<{
@@ -62,9 +65,10 @@ async function buildRPCFunctions(
   manifest: SamenManifest,
   samenFilePath: string,
   config: SamenConfig,
+  isDebugFlag: boolean,
 ): Promise<void> {
   const spinner = startSpinner("Generating RPC functions")
-  await generateApiEndpoints(manifest, samenFilePath, config)
+  await generateApiEndpoints(manifest, samenFilePath, config, isDebugFlag)
   spinner.succeed("Generated RPC functions")
 }
 

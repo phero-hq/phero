@@ -11,6 +11,7 @@ export default async function generateApiEndpoints(
   manifest: SamenManifest,
   samenFilePath: string,
   config: SamenConfig,
+  isDebugFlag: boolean = false,
 ): Promise<void> {
   try {
     const userProjectPath = process.cwd()
@@ -36,6 +37,7 @@ export default async function generateApiEndpoints(
         rpcFunction,
         config,
       })
+
       project.createSourceFile(
         `${
           rpcFunction.namespace.length
@@ -44,6 +46,12 @@ export default async function generateApiEndpoints(
         }${rpcFunction.name}.ts`,
         code,
       )
+
+      if (isDebugFlag) {
+        console.log(`----- ${rpcFunction.name} -----`)
+        console.log(code)
+        console.log(`-------------------------------`)
+      }
     }
 
     validateProject(project)
