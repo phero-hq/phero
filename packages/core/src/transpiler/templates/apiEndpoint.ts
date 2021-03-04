@@ -121,13 +121,14 @@ const gcHandler = (p: Props): string => {
       cors ? JSON.stringify(cors.whitelist) : `[]`
     }
     export async function gcHandler(req: any, res: any) {
-      if (!ORIGIN_WHITELIST.includes(req.headers.origin)) {
+      const origin = req.headers.origin
+      if (origin && !ORIGIN_WHITELIST.includes(origin)) {
         res.status(401).end()
         return
       }
 
       res.set({
-        "Access-Control-Allow-Origin": req.headers.origin,
+        "Access-Control-Allow-Origin": origin,
         "Access-Control-Allow-Methods": req.method,
         "Access-Control-Allow-Headers": "content-type, authorization",
       })
