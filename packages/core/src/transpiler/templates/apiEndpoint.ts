@@ -123,6 +123,7 @@ const gcHandler = (p: Props): string => {
     export async function gcHandler(req: any, res: any) {
       const origin = req.headers.origin
       if (origin && !ORIGIN_WHITELIST.includes(origin)) {
+        console.warn("Origin not in whitelist", origin)
         res.status(401).end()
         return
       }
@@ -137,6 +138,7 @@ const gcHandler = (p: Props): string => {
         res.end();
         return
       } else if (req.method !== 'POST') {
+        console.warn("Wrong method", req.method, req.path)
         res.status(404).end()
         return
       }
@@ -149,12 +151,12 @@ const gcHandler = (p: Props): string => {
         /// AUTH
         const idTokenString = req.headers['authorization']?.substring('Bearer '.length)
         if (!idTokenString) {
+          console.warn("IdToken not set", req.headers['authorization'])
           res.status(401).end();
           return;
         }
         const firebaseAdmin = require('firebase-admin')
         const idToken = await firebaseAdmin.auth().verifyIdToken(idTokenString)
-        console.debug(\`Got IdToken \${JSON.stringify(idToken ?? 'NONE')}\`)
         body.idToken = idToken;
         /// AUTH
       `
@@ -175,6 +177,7 @@ const gcHandler = (p: Props): string => {
         res.json(${returnType.type === JSType.untyped ? "null" : "result"})
         return
       } catch (e) {
+        console.error("RPC ${name} errored", e)
         res.status(500).json(e)
         return
       }
