@@ -204,7 +204,10 @@ const gcPubSubHandler = (p: Props): string => {
       const inputValidationResult = validate(${parametersFromBody})
 
       if (inputValidationResult.length) {
-        throw new InvalidInputError(inputValidationResult)
+        // FIXME If we throw this error we get stuck in an infinite loop...
+        // throw new InvalidInputError(inputValidationResult)
+        console.warn('Invalid input for RPC', inputValidationResult)
+        return
       }
 
       convertDates(${parametersFromBody})
