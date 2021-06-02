@@ -1,4 +1,9 @@
-import { JSType, RPCFunction, SamenManifest } from "../../domain"
+import {
+  ClientEnvironment,
+  JSType,
+  RPCFunction,
+  SamenManifest,
+} from "../../domain"
 import functionSignature from "./shared/functionSignature"
 import { untypedParameters } from "./shared/parameters"
 import { promise, type } from "./shared/types"
@@ -10,13 +15,13 @@ import {
 interface Props {
   manifest: SamenManifest
   apiUrl: string
-  isEnvNode: boolean
+  environment: ClientEnvironment
 }
 
-const clientSDK = ({ apiUrl, manifest, isEnvNode }: Props): string => `
+const clientSDK = ({ apiUrl, manifest, environment }: Props): string => `
     ${setAuthorizationHeaderFunction()}
 
-    ${requestFunction({ apiUrl, isEnvNode })}
+    ${requestFunction({ apiUrl, environment })}
 
     ${Object.values(manifest.models)
       .map((model) => wrapWithNamespace(model.namespace, model.ts))
@@ -42,12 +47,14 @@ const setAuthorizationHeaderFunction = () => `
 
 const requestFunction = ({
   apiUrl,
-  isEnvNode,
+  environment,
 }: {
   apiUrl: string
-  isEnvNode: boolean
+  environment: ClientEnvironment
 }) => `
-  const _fetch = ${isEnvNode ? `require('node-fetch')` : `fetch`}
+  const _fetch = ${
+    environment === ClientEnvironment.Node ? `require('node-fetch')` : `fetch`
+  }
   const ENDPOINT = "${apiUrl}"
 
   async function request<T>(name: string, body: object): Promise<T> {

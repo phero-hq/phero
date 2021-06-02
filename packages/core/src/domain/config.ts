@@ -1,5 +1,4 @@
 export interface SamenConfig {
-  clients: string[]
   cors?: CorsConfig
 }
 
@@ -13,7 +12,5 @@ export interface CorsConfig {
 }
 
 export interface ClientConfig {
-  development: { url: string }
-  production: { url: string }
   env?: ClientEnvironment
 }

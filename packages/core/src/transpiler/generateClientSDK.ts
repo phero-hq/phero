@@ -1,24 +1,20 @@
 import { Project } from "ts-morph"
-import { ensureDir, Environment } from "../cli"
-import { ClientEnvironment } from "../domain"
-import {
-  ClientSDKCompilerError,
-  ConfigMissingError,
-  validateProject,
-} from "../errors"
-import { readClientConfigFile, readClientManifestFile } from "../files"
+import { ensureDir } from "../cli"
+import { ClientEnvironment, SamenManifest } from "../domain"
+import { ClientSDKCompilerError, validateProject } from "../errors"
 import * as paths from "../paths"
 import getUserCompilerOptions from "./getUserCompilerOptions"
 import clientSDK from "./templates/clientSDK"
 
 export default async function generateClientSDK(
-  environment: Environment,
+  manifest: SamenManifest,
+  apiUrl: string,
   projectDir: string,
+  environment: ClientEnvironment,
 ): Promise<void> {
   try {
     const outDir = paths.clientBuildDir(projectDir)
     await ensureDir(outDir)
-
     const userCompilerOptions = await getUserCompilerOptions(projectDir)
     const project = new Project({
       compilerOptions: {
@@ -28,17 +24,8 @@ export default async function generateClientSDK(
         declaration: true,
       },
     })
-    const manifest = await readClientManifestFile(projectDir)
-    const config = await readClientConfigFile(projectDir)
-    if (!config) throw new ConfigMissingError(projectDir)
 
-    const apiUrl = {
-      [Environment.development]: config.development.url,
-      [Environment.production]: config.production.url,
-    }[environment]
-
-    const isEnvNode = config.env === ClientEnvironment.Node
-    const code = clientSDK({ manifest, apiUrl, isEnvNode })
+    const code = clientSDK({ manifest, apiUrl, environment })
     project.createSourceFile("index.ts", code)
     validateProject(project)
     await project.emit()

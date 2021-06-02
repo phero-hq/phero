@@ -4,7 +4,6 @@ import { getEnvironment, handleError } from "@samen/core"
 
 import serve from "./commands/serve"
 import build from "./commands/build"
-import buildClients from "./commands/buildClients"
 
 process.on("unhandledRejection", handleError)
 
@@ -19,10 +18,6 @@ try {
     case "build":
       const isDebugFlag = process.argv.includes("--debug")
       build(environment, isDebugFlag)
-      break
-
-    case "buildClients":
-      buildClients(environment)
       break
 
     default:
