@@ -23,3 +23,15 @@ interface Banaan {
 export async function isSjaak(): Promise<Sjaak> {
   throw new Error()
 }
+
+export namespace A {
+  export async function b(): Promise<boolean> {
+    return true
+  }
+}
+
+export namespace X.Y {
+  export async function z(): Promise<boolean> {
+    return true
+  }
+}

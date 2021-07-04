@@ -8,7 +8,6 @@ import clientSDK from "./templates/clientSDK"
 
 export default async function generateClientSDK(
   manifest: SamenManifest,
-  apiUrl: string,
   projectDir: string,
   environment: ClientEnvironment,
 ): Promise<void> {
@@ -25,7 +24,7 @@ export default async function generateClientSDK(
       },
     })
 
-    const code = clientSDK({ manifest, apiUrl, environment })
+    const code = clientSDK({ manifest, environment })
     project.createSourceFile("index.ts", code)
     validateProject(project)
     await project.emit()
