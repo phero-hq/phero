@@ -109,11 +109,17 @@ function requestListener() {
 
     if (req.method === "GET") {
       if (req.url === "/manifest.json") {
-        res.setHeader("Content-Type", "application/json")
-        res.statusCode = 200
-        res.write(JSON.stringify(manifest))
-        res.end()
-        return
+        if (environment === Environment.development) {
+          res.setHeader("Content-Type", "application/json")
+          res.statusCode = 200
+          res.write(JSON.stringify(manifest))
+          res.end()
+          return
+        } else {
+          res.statusCode = 404
+          res.end()
+          return
+        }
       }
     }
 
