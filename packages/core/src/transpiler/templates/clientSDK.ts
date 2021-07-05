@@ -4,14 +4,14 @@ import {
   RPCFunction,
   SamenManifest,
 } from "../../domain"
-import functionSignature from "./shared/functionSignature"
-import { untypedParameters } from "./shared/parameters"
-import { promise, type } from "./shared/types"
+import arrowFunctionSignature from "./shared/arrowFunctionSignature"
 import {
   generateDateConverter,
   generateRefDateConverters,
 } from "./shared/dateConverter"
-import arrowFunctionSignature from "./shared/arrowFunctionSignature"
+import functionSignature from "./shared/functionSignature"
+import { untypedParameters } from "./shared/parameters"
+import { promise, type } from "./shared/types"
 
 interface Props {
   manifest: SamenManifest
@@ -34,19 +34,7 @@ const clientSDK = ({ manifest, environment }: Props) => `
 
     ${requestFunctions()}
 
-    ${Object.entries(groupByNamespace(manifest.rpcFunctions))
-      .map(([namespace, rpcs]) => {
-        if (namespace === "none") {
-          return rpcs.map((rpc) => rpcFunction(rpc, manifest, false)).join("\n")
-        } else {
-          return `
-          public '${namespace}' = {
-            ${rpcs.map((rpc) => rpcFunction(rpc, manifest, true)).join(",")}
-          }
-        `
-        }
-      })
-      .join("\n")}
+    ${rpcFunctions(manifest)}
   }
 
   ${Object.values(manifest.models)
@@ -56,21 +44,66 @@ const clientSDK = ({ manifest, environment }: Props) => `
   ${generateRefDateConverters(manifest)}
 `
 
-function groupByNamespace(
-  rpcFunctions: RPCFunction[],
-): { [namespace: string]: RPCFunction[] } {
-  const result: { [namespace: string]: RPCFunction[] } = {}
+type Code = {
+  rpcs?: RPCFunction[]
+  namespaces?: {
+    [name: string]: Code
+  }
+}
 
-  for (const rpcFunction of rpcFunctions) {
-    const namespace =
-      rpcFunction.namespace.length > 0
-        ? rpcFunction.namespace.join(".")
-        : "none"
-    if (!result[namespace]) result[namespace] = []
-    result[namespace].push(rpcFunction)
+function rpcFunctions(manifest: SamenManifest): string {
+  const result: Code = {}
+
+  manifest.rpcFunctions.forEach((rpc) => {
+    setRpcInNamespace(result, rpc.namespace, rpc)
+  })
+
+  function setRpcInNamespace(
+    code: Code,
+    namespace: string[],
+    rpc: RPCFunction,
+  ) {
+    if (namespace.length === 0) {
+      code.rpcs = [...(code.rpcs ?? []), rpc]
+    } else {
+      const [curr, ...rest] = namespace
+
+      if (!code.namespaces) {
+        code.namespaces = {}
+      }
+
+      if (!code.namespaces[curr]) {
+        code.namespaces[curr] = {}
+      }
+
+      setRpcInNamespace(code.namespaces[curr], rest, rpc)
+    }
   }
 
-  return result
+  function render(code: Code, isRoot = false): string {
+    const namespaceEntries = Object.entries(code.namespaces ?? {})
+    const ts: string[] = [
+      ...(code.rpcs ?? []).map((rpc) => rpcFunction(rpc, manifest, !isRoot)),
+    ]
+
+    if (isRoot) {
+      for (const [namespace, namespaceCode] of namespaceEntries) {
+        ts.push(
+          [`${namespace} = {`, render(namespaceCode, false), `}`].join("\n"),
+        )
+      }
+      return ts.join("\n")
+    } else {
+      for (const [namespace, namespaceCode] of namespaceEntries) {
+        ts.push(
+          [`${namespace}: {`, render(namespaceCode, false), `}`].join("\n"),
+        )
+      }
+      return ts.join(",\n")
+    }
+  }
+
+  return render(result, true)
 }
 
 const authHeaderFunctions = () => `

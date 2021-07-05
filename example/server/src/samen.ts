@@ -28,6 +28,15 @@ export namespace A {
   export async function b(): Promise<boolean> {
     return true
   }
+  export async function c(): Promise<boolean> {
+    return true
+  }
+}
+
+export namespace A.Nested {
+  export async function nested(): Promise<boolean> {
+    return true
+  }
 }
 
 export namespace X.Y {

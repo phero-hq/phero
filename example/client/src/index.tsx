@@ -1,12 +1,11 @@
-import { Y, add, isAad, isSjaak } from "@samen/client"
+import { SamenClient } from "@samen/client"
+
+const client = new SamenClient("http://localhost:4000")
 
 async function run() {
-  const result = await add(1, 2)
-  console.log("result", result)
-
-  const sjaak = await isSjaak({ x: true, y: 1 })
-  const aad = await isAad({ x: true })
-  const x: Y = { answer: [1, 1] }
+  const b = await client.A.b()
+  const c = await client.A.c()
+  const nexted = await client.A.Nested.nested()
 }
 
-run()
+export default run()
