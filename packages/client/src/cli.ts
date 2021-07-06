@@ -1,14 +1,11 @@
 #!/usr/bin/env node
 
-// import { fstat } from "fs/promises"
 import { promises as fs } from "fs"
 
 import {
   ClientEnvironment,
   generateClientSDK,
   handleError,
-  paths,
-  readClientConfigFile,
   SamenManifest,
   startSpinner,
 } from "@samen/core"
@@ -18,28 +15,32 @@ import https from "https"
 process.on("unhandledRejection", handleError)
 
 try {
-  if (process.argv[2] === "build") {
-    build(process.argv[3])
+  const environment = process.argv.includes("--node")
+    ? ClientEnvironment.Node
+    : ClientEnvironment.Browser
+  const args = process.argv.filter((a) => !["--node", "--browser"].includes(a))
+
+  if (args[2] === "build") {
+    build(environment, args[3])
   } else {
-    throw new Error(`Unknown command: ${process.argv[2]}`)
+    throw new Error(`Unknown command: ${args[2]}`)
   }
 } catch (error) {
   handleError(error)
 }
 
-async function build(manifestLocation?: string): Promise<void> {
+async function build(
+  environment: ClientEnvironment,
+  manifestLocation?: string,
+): Promise<void> {
   const spinner = startSpinner("Building client SDK")
   const cwd = process.cwd()
 
-  spinner.setSubTask("Reading configuration")
-  const config = await readClientConfigFile(cwd)
-  const env = config.env ?? ClientEnvironment.Browser
-
   spinner.setSubTask("Fetching manifest")
   const manifest = await getManifest(manifestLocation)
-  console.log({ manifest })
+
   spinner.setSubTask("Generating SDK")
-  await generateClientSDK(manifest, cwd, env)
+  await generateClientSDK(manifest, cwd, environment)
 
   spinner.succeed("Samen is ready")
 }

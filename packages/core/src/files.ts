@@ -1,5 +1,5 @@
 import { promises as fs } from "fs"
-import { ClientConfig, SamenConfig } from "./domain"
+import { SamenConfig } from "./domain"
 import { SamenManifest } from "./domain/manifest"
 import { ManifestMissingError } from "./errors"
 import * as paths from "./paths"
@@ -40,14 +40,4 @@ export async function readClientManifestFile(
   // TODO: Validate file contents
   if (!manifest) throw new ManifestMissingError(filePath)
   return manifest as SamenManifest
-}
-
-export async function readClientConfigFile(
-  clientProjectDir: string,
-): Promise<ClientConfig> {
-  const filePath = paths.clientConfigFile(clientProjectDir)
-  const config = await readFile(filePath)
-  // TODO: Validate file contents
-  if (!config) return {}
-  return config as ClientConfig
 }

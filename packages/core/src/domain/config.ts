@@ -10,7 +10,3 @@ export enum ClientEnvironment {
 export interface CorsConfig {
   whitelist: string[]
 }
-
-export interface ClientConfig {
-  env?: ClientEnvironment
-}
