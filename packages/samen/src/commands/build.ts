@@ -20,14 +20,15 @@ import { ensureDir } from "@samen/core"
 
 export default async function build(
   environment: Environment,
+  manifestPath: string,
   isDebugFlag: boolean = false,
 ): Promise<void> {
-  const { manifest, samenFilePath } = await buildManifest()
+  const { manifest, samenFilePath } = await buildManifest(manifestPath)
   const config = await readConfigFile()
   await buildRPCFunctions(manifest, samenFilePath, config, isDebugFlag)
 }
 
-async function buildManifest(): Promise<{
+async function buildManifest(manifestPath: string): Promise<{
   manifest: SamenManifest
   samenFilePath: string
 }> {
@@ -55,7 +56,7 @@ async function buildManifest(): Promise<{
 
   spinner.setSubTask("Creating manifest file")
   const manifest = generateManifest(samenSourceFile, project.getTypeChecker())
-  await fs.writeFile(paths.userManifestFile, JSON.stringify(manifest, null, 4))
+  await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 4))
   spinner.succeed("Generated manifest")
 
   return { manifest, samenFilePath }

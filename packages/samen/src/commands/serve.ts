@@ -23,9 +23,14 @@ type RPCRoutes = Record<string, RPCRoute>
 let rpcRoutes: RPCRoutes = {}
 let environment: Environment
 let manifest: SamenManifest
+let manifestPath: string
 
-export default async function serve(_environment: Environment) {
+export default async function serve(
+  _environment: Environment,
+  _manifestPath: string,
+) {
   environment = _environment
+  manifestPath = _manifestPath
 
   const server = http.createServer()
   server.on("request", requestListener())
@@ -45,7 +50,7 @@ export default async function serve(_environment: Environment) {
 
 async function reload(): Promise<void> {
   try {
-    await build(environment)
+    await build(environment, manifestPath)
     await loadRoutes()
     startSpinner("").succeed(`Samen is served at http://localhost:${PORT}`)
   } catch (error) {
@@ -64,7 +69,7 @@ function clearRequireCache() {
 async function loadRoutes(): Promise<void> {
   const spinner = startSpinner("Updating routes")
   clearRequireCache()
-  manifest = await readManifestFile()
+  manifest = await readManifestFile(manifestPath)
   rpcRoutes = getRPCRoutes(manifest)
   spinner.succeed("Loaded routes")
 }

@@ -16,8 +16,9 @@ export async function readFile<T>(filePath: string): Promise<T | undefined> {
   }
 }
 
-export async function readManifestFile(): Promise<SamenManifest> {
-  const filePath = paths.userManifestFile
+export async function readManifestFile(
+  filePath: string,
+): Promise<SamenManifest> {
   const manifest = await readFile(filePath)
   // TODO: Validate file contents
   if (!manifest) throw new ManifestMissingError(filePath)
