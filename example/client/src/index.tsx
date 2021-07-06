@@ -1,11 +1,15 @@
 import { SamenClient } from "@samen/client"
 
-const client = new SamenClient("http://localhost:4000")
+const client = new SamenClient(
+  process.env.REACT_APP_SAMEN_URL ?? "http://localhost:4000",
+)
 
 async function run() {
-  const b = await client.A.b()
-  const c = await client.A.c()
-  const nexted = await client.A.Nested.nested()
+  const answer = await client.add(1, 2)
+  const example = await client.exampleInterface()
+  const namespacedExample =
+    await client.ExampleNamespace.exampleNamespacedInterface()
+  console.log({ answer, example, namespacedExample })
 }
 
 export default run()
