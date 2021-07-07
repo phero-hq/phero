@@ -22,7 +22,6 @@ export default async function generateClientSDK(
     const userCompilerOptions = await getUserCompilerOptions(projectDir)
     const project = new Project({
       compilerOptions: {
-        types: [],
         ...userCompilerOptions,
         outDir,
         declaration: true,
