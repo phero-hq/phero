@@ -9,5 +9,6 @@ export default async function getUserCompilerOptions(
   }).getCompilerOptions()
 
   delete options.rootDir
+  options.noEmit = false
   return options
 }
