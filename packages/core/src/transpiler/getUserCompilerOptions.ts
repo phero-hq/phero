@@ -8,31 +8,7 @@ export default async function getUserCompilerOptions(
     tsConfigFilePath: path.join(projectDir, "tsconfig.json"),
   }).getCompilerOptions()
 
-  const {
-    lib,
-    types,
-    module,
-    moduleResolution,
-    strict,
-    target,
-    esModuleInterop,
-    jsx,
-    isolatedModules,
-    allowSyntheticDefaultImports,
-    allowJs,
-  } = options
-
-  return {
-    lib,
-    types,
-    module,
-    moduleResolution,
-    strict,
-    target,
-    esModuleInterop,
-    jsx,
-    isolatedModules,
-    allowSyntheticDefaultImports,
-    allowJs,
-  }
+  delete options.rootDir
+  options.noEmit = false
+  return options
 }

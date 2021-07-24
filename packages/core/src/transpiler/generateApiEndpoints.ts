@@ -23,7 +23,6 @@ export default async function generateApiEndpoints(
     const userCompilerOptions = await getUserCompilerOptions(userProjectPath)
     const project = new Project({
       compilerOptions: {
-        // types: [],
         ...userCompilerOptions,
         outDir: paths.userRpcFunctionsDir,
         declaration: true,
