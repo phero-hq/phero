@@ -28,7 +28,7 @@ export default async function build(
   await buildRPCFunctions(manifest, samenFilePath, config, isDebugFlag)
 }
 
-async function buildManifest(manifestPath: string): Promise<{
+export async function buildManifest(manifestPath: string): Promise<{
   manifest: SamenManifest
   samenFilePath: string
 }> {
@@ -62,7 +62,7 @@ async function buildManifest(manifestPath: string): Promise<{
   return { manifest, samenFilePath }
 }
 
-async function buildRPCFunctions(
+export async function buildRPCFunctions(
   manifest: SamenManifest,
   samenFilePath: string,
   config: SamenConfig,
