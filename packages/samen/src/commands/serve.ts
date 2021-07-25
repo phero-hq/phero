@@ -32,6 +32,7 @@ type RPCRoutes = Record<string, RPCRoute>
 let rpcRoutes: RPCRoutes = {}
 let environment: Environment
 let manifest: SamenManifest
+let manifestHash: string
 let manifestPath: string
 let clients: http.ServerResponse[] = []
 
@@ -60,11 +61,14 @@ export default async function serve(
 
 async function reload(): Promise<void> {
   try {
-    const { manifest: _m, samenFilePath } = await buildManifest(manifestPath)
-    manifest = _m
-    notifyClients(ClientEvent.ManifestDidCHange, clients)
+    const result = await buildManifest(manifestPath)
+    manifest = result.manifest
+    if (manifestHash !== result.hash) {
+      manifestHash = result.hash
+      notifyClients(ClientEvent.ManifestDidCHange, clients)
+    }
     const config = await readConfigFile()
-    await buildRPCFunctions(manifest, samenFilePath, config, false)
+    await buildRPCFunctions(manifest, result.samenFilePath, config, false)
     await loadRoutes()
     startSpinner("").succeed(`Samen is served at http://localhost:${PORT}`)
   } catch (error) {
