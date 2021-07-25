@@ -9,20 +9,19 @@ import {
   Symbol,
   NamespaceDeclaration,
 } from "ts-morph"
-import { JSType, JSValue } from "../domain/JSValue"
 import {
-  ModelMap,
-  RefMap,
-  RPCFunction,
-  RPCFunctionParameter,
   SamenManifest,
-} from "../domain/manifest"
-import {
   ManifestCompilerError,
+  RPCFunction,
+  RefMap,
+  RPCFunctionParameter,
+  JSValue,
+  JSType,
   PropertiesMissingError,
-  PropertyMissingError,
   UnsupportedTypeError,
-} from "../errors"
+  ModelMap,
+  PropertyMissingError,
+} from "@samen/core"
 
 export default function generateManifest(
   samenSourceFile: SourceFile,
@@ -76,7 +75,9 @@ function getFunctionsPerNamespace(
         return result
           .filter((s) => s.getName() == namespaceSegment)
           .flatMap((s) =>
-            (s.getValueDeclaration() as NamespaceDeclaration)?.getExportSymbols(),
+            (
+              s.getValueDeclaration() as NamespaceDeclaration
+            )?.getExportSymbols(),
           )
       }, topLevelNamespace?.getExportSymbols() ?? [])
 

@@ -1,12 +1,8 @@
-import {
-  ClientEnvironment,
-  generateClientSDK,
-  SamenManifest,
-  startSpinner,
-} from "@samen/core"
+import { ClientEnvironment, SamenManifest, startSpinner } from "@samen/core"
 import { promises as fs } from "fs"
 import http from "http"
 import https from "https"
+import generateClientSDK from "../transpiler/generateClientSDK"
 
 export default async function build(
   environment: ClientEnvironment,

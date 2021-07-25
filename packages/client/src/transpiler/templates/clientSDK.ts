@@ -1,17 +1,16 @@
 import {
+  arrowFunctionSignature,
   ClientEnvironment,
-  JSType,
-  RPCFunction,
-  SamenManifest,
-} from "../../domain"
-import arrowFunctionSignature from "./shared/arrowFunctionSignature"
-import {
+  functionSignature,
   generateDateConverter,
   generateRefDateConverters,
-} from "./shared/dateConverter"
-import functionSignature from "./shared/functionSignature"
-import { untypedParameters } from "./shared/parameters"
-import { promise, type } from "./shared/types"
+  JSType,
+  promise,
+  RPCFunction,
+  SamenManifest,
+  type,
+  untypedParameters,
+} from "@samen/core"
 
 interface Props {
   manifest: SamenManifest

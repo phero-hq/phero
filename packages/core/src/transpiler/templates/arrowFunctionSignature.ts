@@ -1,4 +1,4 @@
-import { RPCFunctionParameter, SamenManifest } from "../../../domain"
+import { RPCFunctionParameter, SamenManifest } from "../../domain"
 import { typedParameters } from "./parameters"
 
 interface Props {

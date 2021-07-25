@@ -4,8 +4,6 @@ import {
   dirExists,
   ensureDir,
   Environment,
-  generateApiEndpoints,
-  generateManifest,
   paths,
   readConfigFile,
   SamenConfig,
@@ -18,6 +16,8 @@ import crypto from "crypto"
 import { promises as fs } from "fs"
 import path from "path"
 import { Project } from "ts-morph"
+import generateApiEndpoints from "../transpiler/generateApiEndpoints"
+import generateManifest from "../transpiler/generateManifest"
 
 export default async function build(
   environment: Environment,

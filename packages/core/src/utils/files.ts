@@ -1,8 +1,8 @@
 import { promises as fs } from "fs"
-import { SamenConfig } from "./domain"
-import { SamenManifest } from "./domain/manifest"
-import { ManifestMissingError } from "./errors"
-import * as paths from "./paths"
+import { SamenConfig } from "../domain"
+import { SamenManifest } from "../domain/manifest"
+import { ManifestMissingError } from "../errors"
+import * as paths from "../paths"
 
 export async function readFile<T>(filePath: string): Promise<T | undefined> {
   try {

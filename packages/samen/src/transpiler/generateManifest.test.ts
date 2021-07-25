@@ -1,7 +1,6 @@
 import { Project } from "ts-morph"
+import { SamenManifest, RPCFunction, JSType } from "@samen/core"
 import generateManifest from "./generateManifest"
-import { JSType } from "../domain/JSValue"
-import { RPCFunction, SamenManifest } from "../domain/manifest"
 
 function getCompiledSamenFile(tsContent: string): SamenManifest {
   const project = new Project()

@@ -4,7 +4,7 @@ import {
   RefMap,
   RPCFunction,
   SamenManifest,
-} from "../../../domain"
+} from "../../domain"
 
 export default function generateInputValidator(
   rpcFunction: RPCFunction,

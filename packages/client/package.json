@@ -11,6 +11,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "tsc",
+    "test": "jest src",
     "prepublish": "npm run clean && npm run build"
   },
   "dependencies": {

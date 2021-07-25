@@ -1,4 +1,4 @@
-import { JSType, JSValue, RPCFunction, SamenManifest } from "../../../domain"
+import { JSType, JSValue, RPCFunction, SamenManifest } from "../../domain"
 
 export function generateInputDateConverter(
   rpcFunction: RPCFunction,
@@ -10,7 +10,7 @@ export function generateInputDateConverter(
     export function convertDates(${parameters
       .map((p) => `${p.name}: any`)
       .join(", ")}): void {
-      
+
       ${rpcFunction.parameters
         .map((param) =>
           generateDateConverter(manifest, param.value, param.name),

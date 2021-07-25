@@ -1,9 +1,13 @@
 import { Project } from "ts-morph"
-import { ensureDir } from "../cli"
-import { ClientEnvironment, SamenManifest } from "../domain"
-import { ClientSDKCompilerError, validateProject } from "../errors"
-import * as paths from "../paths"
-import getUserCompilerOptions from "./getUserCompilerOptions"
+import {
+  paths,
+  SamenManifest,
+  ClientEnvironment,
+  validateProject,
+  ClientSDKCompilerError,
+  ensureDir,
+  getUserCompilerOptions,
+} from "@samen/core"
 import clientSDK from "./templates/clientSDK"
 
 export default async function generateClientSDK(
