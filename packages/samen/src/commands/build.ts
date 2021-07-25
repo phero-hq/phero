@@ -4,8 +4,6 @@ import {
   dirExists,
   ensureDir,
   Environment,
-  paths,
-  readConfigFile,
   SamenConfig,
   SamenFileMissingError,
   SamenManifest,
@@ -18,6 +16,8 @@ import path from "path"
 import { Project } from "ts-morph"
 import generateApiEndpoints from "../transpiler/generateApiEndpoints"
 import generateManifest from "../transpiler/generateManifest"
+import { readConfigFile } from "../utils/files"
+import * as paths from "../utils/paths"
 
 export default async function build(
   environment: Environment,
@@ -25,7 +25,7 @@ export default async function build(
   isDebugFlag: boolean = false,
 ): Promise<void> {
   const { manifest, samenFilePath } = await buildManifest(manifestPath)
-  const config = await readConfigFile()
+  const config = await readConfigFile(paths.userConfigFile)
   await buildRPCFunctions(manifest, samenFilePath, config, isDebugFlag)
 }
 

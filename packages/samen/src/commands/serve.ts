@@ -2,9 +2,6 @@ import {
   ClientEvent,
   Environment,
   handleError,
-  paths,
-  readConfigFile,
-  readManifestFile,
   RPCFunction,
   SamenManifest,
   startSpinner,
@@ -12,6 +9,8 @@ import {
 import http from "http"
 import path from "path"
 import TscWatchClient from "tsc-watch/client"
+import { readConfigFile, readManifestFile } from "../utils/files"
+import * as paths from "../utils/paths"
 import { buildManifest, buildRPCFunctions } from "./build"
 
 const PORT = parseInt(process.env.PORT || "") || 4000
@@ -67,7 +66,7 @@ async function reload(): Promise<void> {
       manifestHash = result.hash
       notifyClients(ClientEvent.ManifestDidCHange, clients)
     }
-    const config = await readConfigFile()
+    const config = await readConfigFile(paths.userConfigFile)
     await buildRPCFunctions(manifest, result.samenFilePath, config, false)
     await loadRoutes()
     startSpinner("").succeed(`Samen is served at http://localhost:${PORT}`)

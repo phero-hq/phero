@@ -1,13 +1,13 @@
-import { Project } from "ts-morph"
 import {
-  paths,
-  SamenManifest,
   ClientEnvironment,
-  validateProject,
   ClientSDKCompilerError,
   ensureDir,
   getUserCompilerOptions,
+  SamenManifest,
+  validateProject,
 } from "@samen/core"
+import path from "path"
+import { Project } from "ts-morph"
 import clientSDK from "./templates/clientSDK"
 
 export default async function generateClientSDK(
@@ -16,7 +16,7 @@ export default async function generateClientSDK(
   environment: ClientEnvironment,
 ): Promise<void> {
   try {
-    const outDir = paths.clientBuildDir(projectDir)
+    const outDir = path.join(projectDir, "node_modules/@samen/client/build")
     await ensureDir(outDir)
     const userCompilerOptions = await getUserCompilerOptions(projectDir)
     const project = new Project({

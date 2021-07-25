@@ -1,7 +1,6 @@
 import {
   ApiEndpointCompilerError,
   getUserCompilerOptions,
-  paths,
   SamenConfig,
   SamenManifest,
   validateProject,
@@ -9,6 +8,7 @@ import {
 import path from "path"
 import { Project } from "ts-morph"
 import apiEndpoint from "./templates/apiEndpoint"
+import * as paths from "../utils/paths"
 
 export default async function generateApiEndpoints(
   manifest: SamenManifest,

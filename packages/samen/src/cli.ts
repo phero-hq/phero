@@ -4,7 +4,7 @@ import { getEnvironment, handleError } from "@samen/core"
 
 import serve from "./commands/serve"
 import build from "./commands/build"
-import getManifestPath from "./getManifestPath"
+import { getManifestPath } from "./utils/paths"
 
 process.on("unhandledRejection", handleError)
 

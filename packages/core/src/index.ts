@@ -1,5 +1,4 @@
 export * from "./domain"
 export * from "./errors"
-export * as paths from "./paths"
 export * from "./utils"
 export * from "./transpiler"
