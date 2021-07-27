@@ -129,8 +129,14 @@ function requestListener() {
     }
 
     if (req.headers.accept?.includes("text/event-stream")) {
-      registerClient(req, res)
-      return notifyClients(ClientEvent.ClientDidRegister, [res])
+      if (environment === Environment.development) {
+        registerClient(req, res)
+        return notifyClients(ClientEvent.ClientDidRegister, [res])
+      } else {
+        res.statusCode = 404
+        res.end()
+        return
+      }
     }
 
     console.log("REQUEST", req.method, req.url)
