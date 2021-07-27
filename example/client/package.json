@@ -13,12 +13,11 @@
     "typescript": "~3.7.2"
   },
   "scripts": {
-    "prestart": "npm run samen build",
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "samen": "samen"
+    "samen": "samen",
+    "prestart": "npm run samen build",
+    "prebuild": "SAMEN_URL=https://some-deployed-url.com npm run samen build"
   },
   "eslintConfig": {
     "extends": "react-app"

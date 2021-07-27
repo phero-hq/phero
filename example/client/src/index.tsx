@@ -1,8 +1,6 @@
 import { SamenClient } from "@samen/client"
 
-const client = new SamenClient(
-  process.env.REACT_APP_SAMEN_URL ?? "http://localhost:4000",
-)
+const client = new SamenClient(process.env.REACT_APP_SAMEN_URL)
 
 async function run() {
   const answer = await client.add(1, 2)

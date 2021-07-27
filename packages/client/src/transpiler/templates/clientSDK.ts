@@ -25,7 +25,7 @@ const clientSDK = ({ manifest, environment }: Props) => `
   export class SamenClient {
     private url: string
 
-    public constructor(apiUrl: string) {
+    public constructor(apiUrl = "http://localhost:4000") {
       this.url = apiUrl
     }
 
