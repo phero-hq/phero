@@ -1,3 +1,4 @@
 src
 build
 tsconfig.json
+jest.config.js
