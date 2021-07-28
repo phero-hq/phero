@@ -6,9 +6,10 @@
     "access": "public"
   },
   "scripts": {
+    "clean": "rm -rf dist",
     "build": "tsc",
     "test": "jest src",
-    "prepublish": "npm run build"
+    "prepublish": "npm run clean && npm run build"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
