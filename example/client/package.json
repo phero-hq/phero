@@ -16,8 +16,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "samen": "samen",
-    "prestart": "npm run samen build",
-    "prebuild": "SAMEN_URL=https://some-deployed-url.com npm run samen build"
+    "prestart": "npm run samen build ../server/samen-manifest.json",
+    "prebuild": "npm run samen build ../server/samen-manifest.json"
   },
   "eslintConfig": {
     "extends": "react-app"
