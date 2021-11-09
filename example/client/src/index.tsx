@@ -1,12 +1,13 @@
-import { Y, add, isAad, isSjaak } from "@samen/client"
+import { SamenClient } from "@samen/client"
+
+const client = new SamenClient(process.env.REACT_APP_SAMEN_URL)
 
 async function run() {
-  const result = await add(1, 2)
-  console.log("result", result)
-
-  const sjaak = await isSjaak({ x: true, y: 1 })
-  const aad = await isAad({ x: true })
-  const x: Y = { answer: [1, 1] }
+  const answer = await client.add(1, 2)
+  const example = await client.exampleInterface()
+  const namespacedExample =
+    await client.ExampleNamespace.exampleNamespacedInterface()
+  console.log({ answer, example, namespacedExample })
 }
 
-run()
+export default run()

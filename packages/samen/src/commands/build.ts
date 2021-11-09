@@ -1,35 +1,38 @@
 #!/usr/bin/env node
 
-import { promises as fs } from "fs"
-import { Project } from "ts-morph"
-import path from "path"
 import {
   dirExists,
+  ensureDir,
   Environment,
-  generateApiEndpoints,
-  generateManifest,
-  paths,
-  readConfigFile,
   SamenConfig,
   SamenFileMissingError,
   SamenManifest,
   startSpinner,
   validateProject,
 } from "@samen/core"
-import { ensureDir } from "@samen/core"
+import crypto from "crypto"
+import { promises as fs } from "fs"
+import path from "path"
+import { Project } from "ts-morph"
+import generateApiEndpoints from "../transpiler/generateApiEndpoints"
+import generateManifest from "../transpiler/generateManifest"
+import { readConfigFile } from "../utils/files"
+import * as paths from "../utils/paths"
 
 export default async function build(
   environment: Environment,
+  manifestPath: string,
   isDebugFlag: boolean = false,
 ): Promise<void> {
-  const { manifest, samenFilePath } = await buildManifest()
-  const config = await readConfigFile()
+  const { manifest, samenFilePath } = await buildManifest(manifestPath)
+  const config = await readConfigFile(paths.userConfigFile)
   await buildRPCFunctions(manifest, samenFilePath, config, isDebugFlag)
 }
 
-async function buildManifest(): Promise<{
+export async function buildManifest(manifestPath: string): Promise<{
   manifest: SamenManifest
   samenFilePath: string
+  hash: string
 }> {
   const spinner = startSpinner("Generating manifest")
 
@@ -55,13 +58,15 @@ async function buildManifest(): Promise<{
 
   spinner.setSubTask("Creating manifest file")
   const manifest = generateManifest(samenSourceFile, project.getTypeChecker())
-  await fs.writeFile(paths.userManifestFile, JSON.stringify(manifest, null, 4))
+  const manifestJsonString = JSON.stringify(manifest, null, 4)
+  await fs.writeFile(manifestPath, manifestJsonString)
+  const hash = await createHash(manifestJsonString)
   spinner.succeed("Generated manifest")
 
-  return { manifest, samenFilePath }
+  return { manifest, samenFilePath, hash }
 }
 
-async function buildRPCFunctions(
+export async function buildRPCFunctions(
   manifest: SamenManifest,
   samenFilePath: string,
   config: SamenConfig,
@@ -79,4 +84,8 @@ async function generateServerIndexFile(outDir?: string): Promise<void> {
       "require('@samen/samen/build/production-server.js')",
     )
   }
+}
+
+async function createHash(manifestJsonString: string): Promise<string> {
+  return crypto.createHash("sha1").update(manifestJsonString).digest("base64")
 }

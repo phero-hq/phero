@@ -1,11 +1,14 @@
+import {
+  ApiEndpointCompilerError,
+  getUserCompilerOptions,
+  SamenConfig,
+  SamenManifest,
+  validateProject,
+} from "@samen/core"
 import path from "path"
-import { Project, ts } from "ts-morph"
-import { SamenConfig } from "../domain/config"
-import { SamenManifest } from "../domain/manifest"
-import { ApiEndpointCompilerError, validateProject } from "../errors"
-import * as paths from "../paths"
-import getUserCompilerOptions from "./getUserCompilerOptions"
+import { Project } from "ts-morph"
 import apiEndpoint from "./templates/apiEndpoint"
+import * as paths from "../utils/paths"
 
 export default async function generateApiEndpoints(
   manifest: SamenManifest,

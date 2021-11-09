@@ -1,5 +1,5 @@
-import { JSType } from "../../../domain"
-import { RPCFunctionParameter, SamenManifest } from "../../../domain/manifest"
+import { JSType } from "../../domain"
+import { RPCFunctionParameter, SamenManifest } from "../../domain/manifest"
 import { type } from "./types"
 
 interface Props {

@@ -1,12 +1,5 @@
-import {
-  JSType,
-  ModelMap,
-  RefMap,
-  RPCFunction,
-  SamenManifest,
-} from "../../domain"
+import { RPCFunction, JSType, render } from "@samen/core"
 import apiEndpoint, { Props } from "./apiEndpoint"
-import render from "./render"
 
 const props = (partialRpcFunction: Partial<RPCFunction>): Props => {
   const rpcFunction: RPCFunction = {
@@ -14,7 +7,7 @@ const props = (partialRpcFunction: Partial<RPCFunction>): Props => {
     parameters: [],
     returnType: { type: JSType.untyped },
     modelIds: [],
-    filePath: { sourceFile: "test.ts", outputFile: "test.js" },
+    namespace: [],
     ...partialRpcFunction,
   }
   return {
@@ -23,6 +16,8 @@ const props = (partialRpcFunction: Partial<RPCFunction>): Props => {
       rpcFunctions: [rpcFunction],
       models: {
         Something: {
+          name: "Something",
+          namespace: [],
           id: "Something",
           ts: "interface Something { x: number }",
         },
@@ -36,7 +31,7 @@ const props = (partialRpcFunction: Partial<RPCFunction>): Props => {
       },
     },
     relativeSamenFilePath: "../samen",
-    config: { clients: [] },
+    config: {},
   }
 }
 

@@ -2,11 +2,13 @@
 
 import { Environment, handleError } from "@samen/core"
 import serve from "./commands/serve"
+import { getManifestPath } from "./utils/paths"
 
 process.on("unhandledRejection", handleError)
 
 try {
-  serve(Environment.production)
+  const manifestPath = getManifestPath()
+  serve(Environment.production, manifestPath)
 } catch (error) {
   handleError(error)
 }

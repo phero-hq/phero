@@ -1,13 +1,13 @@
 {
   "name": "example-project-server",
-  "version": "0.7.18",
+  "version": "0.8.0-alpha.6",
   "private": true,
   "description": "",
   "main": "index.js",
   "scripts": {
     "clean": "rm -rf ./dist",
     "build": "tsc",
-    "samen": "./run-samen.sh"
+    "samen": "samen"
   },
   "author": "",
   "license": "ISC",
@@ -15,7 +15,7 @@
     "typescript": "^4.1.2"
   },
   "dependencies": {
-    "@samen/samen": "^0.7.18",
+    "@samen/samen": "^0.8.0-alpha.6",
     "@types/node": "^14.14.30"
   }
 }

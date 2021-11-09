@@ -1,31 +1,46 @@
+import {
+  ClientEvent,
+  Environment,
+  handleError,
+  RPCFunction,
+  SamenManifest,
+  startSpinner,
+} from "@samen/core"
 import http from "http"
 import path from "path"
 import TscWatchClient from "tsc-watch/client"
-import {
-  handleError,
-  paths,
-  RPCFunction,
-  SamenManifest,
-  Environment,
-  startSpinner,
-  readManifestFile,
-} from "@samen/core"
-import build from "./build"
-import buildClients from "./buildClients"
+import { readConfigFile, readManifestFile } from "../utils/files"
+import * as paths from "../utils/paths"
+import { buildManifest, buildRPCFunctions } from "./build"
 
 const PORT = parseInt(process.env.PORT || "") || 4000
 
-interface Route {
+const SSE_RESPONSE_HEADER = {
+  Connection: "keep-alive",
+  "Content-Type": "text/event-stream",
+  "Cache-Control": "no-cache",
+  "X-Accel-Buffering": "no",
+}
+
+interface RPCRoute {
   definition: RPCFunction
   importedFunction: any // TODO
   argumentNames: string[]
 }
-type Routes = Record<string, Route>
-let routes: Routes = {}
+type RPCRoutes = Record<string, RPCRoute>
+let rpcRoutes: RPCRoutes = {}
 let environment: Environment
+let manifest: SamenManifest
+let manifestHash: string
+let manifestPath: string
+let clients: http.ServerResponse[] = []
 
-export default async function serve(_environment: Environment) {
+export default async function serve(
+  _environment: Environment,
+  _manifestPath: string,
+) {
   environment = _environment
+  manifestPath = _manifestPath
 
   const server = http.createServer()
   server.on("request", requestListener())
@@ -45,8 +60,14 @@ export default async function serve(_environment: Environment) {
 
 async function reload(): Promise<void> {
   try {
-    await build(environment)
-    await buildClients(environment)
+    const result = await buildManifest(manifestPath)
+    manifest = result.manifest
+    if (manifestHash !== result.hash) {
+      manifestHash = result.hash
+      notifyClients(ClientEvent.ManifestDidCHange, clients)
+    }
+    const config = await readConfigFile(paths.userConfigFile)
+    await buildRPCFunctions(manifest, result.samenFilePath, config, false)
     await loadRoutes()
     startSpinner("").succeed(`Samen is served at http://localhost:${PORT}`)
   } catch (error) {
@@ -64,13 +85,13 @@ function clearRequireCache() {
 
 async function loadRoutes(): Promise<void> {
   const spinner = startSpinner("Updating routes")
-  const manifest = await readManifestFile()
   clearRequireCache()
-  routes = getRoutes(manifest)
+  if (!manifest) manifest = await readManifestFile(manifestPath)
+  rpcRoutes = getRPCRoutes(manifest)
   spinner.succeed("Loaded routes")
 }
 
-function getRoutes(manifest: SamenManifest): Routes {
+function getRPCRoutes(manifest: SamenManifest): RPCRoutes {
   return manifest.rpcFunctions.reduce((routes, rpcFunction) => {
     const makeRpcPath = (joinWith = ".") =>
       rpcFunction.namespace.length
@@ -92,7 +113,7 @@ function getRoutes(manifest: SamenManifest): Routes {
           .map((r) => r.name),
       },
     }
-  }, {} as Routes)
+  }, {} as RPCRoutes)
 }
 
 function requestListener() {
@@ -101,18 +122,46 @@ function requestListener() {
     res.setHeader("Access-Control-Allow-Methods", "POST")
     res.setHeader("Access-Control-Allow-Headers", "content-type, authorization")
 
-    console.log("REQUEST", req.method, req.url)
     if (req.method === "OPTIONS") {
       res.statusCode = 200
       res.end()
       return
     }
 
+    if (req.headers.accept?.includes("text/event-stream")) {
+      if (environment === Environment.development) {
+        registerClient(req, res)
+        return notifyClients(ClientEvent.ClientDidRegister, [res])
+      } else {
+        res.statusCode = 404
+        res.end()
+        return
+      }
+    }
+
+    console.log("REQUEST", req.method, req.url)
+
+    if (req.method === "GET") {
+      if (req.url === "/manifest.json") {
+        if (environment === Environment.development) {
+          res.setHeader("Content-Type", "application/json")
+          res.statusCode = 200
+          res.write(JSON.stringify(manifest))
+          res.end()
+          return
+        } else {
+          res.statusCode = 404
+          res.end()
+          return
+        }
+      }
+    }
+
     if (req.method === "POST") {
       res.setHeader("Content-Type", "application/json")
 
       if (req.url) {
-        const route = routes[req.url]
+        const route = rpcRoutes[req.url]
         if (route) {
           try {
             const { headers } = req
@@ -167,4 +216,50 @@ function readBody(request: http.IncomingMessage): Promise<string> {
         reject(err)
       })
   })
+}
+
+function notifyClients(event: ClientEvent, clients: http.ServerResponse[]) {
+  if (!clients.length) return
+
+  let spinner
+  if (event === ClientEvent.ManifestDidCHange) {
+    spinner = startSpinner(
+      `Notifying ${
+        clients.length === 1 ? "client" : `${clients.length} clients`
+      }`,
+    )
+  }
+
+  clients.forEach((connection) => {
+    const id = new Date().toISOString()
+    connection.write("id: " + id + "\n")
+    connection.write("retry: 2000\n")
+    connection.write("data: " + event + "\n\n")
+  })
+
+  if (spinner) {
+    spinner.succeed(
+      `Notified ${
+        clients.length === 1 ? "client" : `${clients.length} clients`
+      }`,
+    )
+  }
+}
+
+function registerClient(req: http.IncomingMessage, res: http.ServerResponse) {
+  const spinner = startSpinner("Connecting client")
+  clients.push(res)
+  res.on("close", () => unregisterClient(res))
+  res.writeHead(200, SSE_RESPONSE_HEADER)
+  spinner.succeed(
+    clients.length === 1
+      ? "Client connected"
+      : `${clients.length} clients connected`,
+  )
+}
+
+function unregisterClient(res: http.ServerResponse) {
+  const spinner = startSpinner("Disconnecting client")
+  clients = clients.filter((client) => client !== res)
+  spinner.succeed("Client disconnected")
 }

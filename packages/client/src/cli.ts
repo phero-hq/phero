@@ -1,28 +1,31 @@
 #!/usr/bin/env node
 
-import { promises as fs } from "fs"
-import {
-  ClientConfig,
-  generateClientSDK,
-  getEnvironment,
-  handleError,
-  paths,
-} from "@samen/core"
+import { ClientEnvironment, handleError } from "@samen/core"
+import build from "./commands/build"
+import watch from "./commands/watch"
 
 process.on("unhandledRejection", handleError)
 
 try {
-  if (process.argv[2] === "build") {
-    build()
-  } else {
-    throw new Error(`Unknown command: ${process.argv[2]}`)
+  const environment = process.argv.includes("--node")
+    ? ClientEnvironment.Node
+    : ClientEnvironment.Browser
+  const args = process.argv.filter((a) => !["--node", "--browser"].includes(a))
+
+  const runBuild = () => build(environment, args[3])
+
+  switch (args[2]) {
+    case "build":
+      runBuild()
+      break
+
+    case "watch":
+      watch(runBuild, args[3])
+      break
+
+    default:
+      throw new Error(`Unknown command: ${args[2]}`)
   }
 } catch (error) {
   handleError(error)
-}
-
-async function build(): Promise<void> {
-  const cwd = process.cwd()
-  const environment = getEnvironment()
-  generateClientSDK(environment, cwd)
 }

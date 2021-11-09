@@ -1,4 +1,4 @@
-import { JSType } from "../../../domain"
+import { JSType } from "../../domain"
 import { type } from "./types"
 
 test("Untyped", () => {

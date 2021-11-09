@@ -1,10 +1,13 @@
-import { JSType, RPCFunction, SamenConfig, SamenManifest } from "../../domain"
 import {
+  generateInputValidator,
   generateInputDateConverter,
   generateRefDateConverters,
-} from "./shared/dateConverter"
-import { parametersFromObject } from "./shared/parameters"
-import generateInputValidator from "./shared/validators"
+  JSType,
+  parametersFromObject,
+  RPCFunction,
+  SamenConfig,
+  SamenManifest,
+} from "@samen/core"
 
 export interface Props {
   rpcFunction: RPCFunction
@@ -30,7 +33,7 @@ const apiEndpoint = (p: Props) => {
 
   return `
     import { ${importSyntax} } from '${p.relativeSamenFilePath}';
-    
+
     const logger = require('firebase-functions/lib/logger')
 
     ${importRef}
@@ -44,11 +47,11 @@ const apiEndpoint = (p: Props) => {
     ${generateInputValidator(p.rpcFunction, p.manifest)}
 
     ${awsHandler(p)}
-    
+
     ${gcHandler(p)}
 
     ${gcPubSubHandler(p)}
-    
+
     ${serveHandler(p)}
   `
 }
@@ -204,7 +207,7 @@ const gcPubSubHandler = (p: Props): string => {
     export async function gcPubSubHandler(message: any, context: any) {
       const dataJSON = Buffer.from(message.data, 'base64').toString()
       const body: any = { message: JSON.parse(dataJSON) }
-      
+
       const inputValidationResult = validate(${parametersFromBody})
 
       if (inputValidationResult.length) {

@@ -1,14 +1,15 @@
 {
   "name": "@samen/core",
-  "version": "0.7.18",
+  "version": "0.8.0-alpha.6",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
+    "clean": "rm -rf dist",
     "build": "tsc",
     "test": "jest src",
-    "prepublish": "npm run build"
+    "prepublish": "npm run clean && npm run build"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

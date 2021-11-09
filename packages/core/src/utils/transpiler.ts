@@ -1,7 +1,7 @@
 import path from "path"
 import { Project, ts } from "ts-morph"
 
-export default async function getUserCompilerOptions(
+export async function getUserCompilerOptions(
   projectDir: string,
 ): Promise<ts.CompilerOptions> {
   const options = new Project({

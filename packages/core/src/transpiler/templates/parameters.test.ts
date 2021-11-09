@@ -1,4 +1,4 @@
-import { JSType, RPCFunctionParameter } from "../../../domain"
+import { JSType, RPCFunctionParameter } from "../../domain"
 import {
   parametersFromObject,
   typedParameters,

@@ -1,4 +1,4 @@
-import { JSType, JSValue, SamenManifest } from "../../../domain"
+import { JSType, JSValue, SamenManifest } from "../../domain"
 
 export const promise = (value: JSValue, manifest: SamenManifest) =>
   `Promise<${type(value, manifest)}>`
