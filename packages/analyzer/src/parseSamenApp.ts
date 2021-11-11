@@ -1,13 +1,10 @@
+import ts from "typescript"
 import {
-  ExportedDeclarations,
-  Node,
-  SourceFile,
-  TypeChecker,
-  ts,
-  CallExpression,
-  ObjectLiteralExpression,
-  FunctionDeclaration,
-} from "ts-morph"
+  getChildrenOfKind,
+  getFirstChildOfKind,
+  hasModifier,
+  resolveSymbol,
+} from "./tsUtils"
 
 export interface ParsedSamenApp {
   services: ParsedSamenServiceDefinition[]
@@ -20,7 +17,7 @@ export interface ParsedSamenServiceDefinition {
 
 export interface ParsedSamenFunctionDefinition {
   name: string
-  func: FunctionDeclaration
+  func: ts.FunctionDeclaration
   config: ParsedSamenFunctionConfig
 }
 
@@ -30,26 +27,39 @@ export interface ParsedSamenFunctionConfig {
 
   minInstance?: number
   maxInstance?: number
-  middleware?: FunctionDeclaration[]
+  middleware?: ts.FunctionDeclaration[]
 }
 
 export default function parseSamenApp(
-  samenSourceFile: SourceFile,
+  samenSourceFile: ts.SourceFile,
+  typeChecker: ts.TypeChecker,
 ): ParsedSamenApp {
   console.debug("Start analyzing")
   const t1 = Date.now()
 
-  const services: ParsedSamenServiceDefinition[] = []
+  const syntaxList = getFirstChildOfKind(
+    samenSourceFile,
+    ts.SyntaxKind.SyntaxList,
+  )
 
-  for (const [
-    exportName,
-    exportDeclrs,
-  ] of samenSourceFile.getExportedDeclarations()) {
-    for (const exportDeclr of exportDeclrs) {
-      const service = parseService(exportName, exportDeclr)
-      if (service) {
-        services.push(service)
-      }
+  const exportedVariableStatements = getChildrenOfKind(
+    syntaxList,
+    ts.SyntaxKind.VariableStatement,
+  ).filter((s) => hasModifier(s, ts.SyntaxKind.ExportKeyword))
+
+  const variableDeclarations = exportedVariableStatements.flatMap((evs) => {
+    const syntaxList = getFirstChildOfKind(
+      evs.declarationList,
+      ts.SyntaxKind.SyntaxList,
+    )
+    return getChildrenOfKind(syntaxList, ts.SyntaxKind.VariableDeclaration)
+  })
+
+  const services: ParsedSamenServiceDefinition[] = []
+  for (const variableDeclaration of variableDeclarations) {
+    const service = parseService(variableDeclaration, typeChecker)
+    if (service) {
+      services.push(service)
     }
   }
 
@@ -59,25 +69,34 @@ export default function parseSamenApp(
 }
 
 function parseService(
-  exportName: string,
-  exportDeclr: ExportedDeclarations,
+  varDeclr: ts.VariableDeclaration,
+  typeChecker: ts.TypeChecker,
 ): ParsedSamenServiceDefinition | undefined {
-  // check if we are exporting a variable
-  if (Node.isVariableDeclaration(exportDeclr)) {
-    // check if the value of the export is a function call to "creatService"
-    const createServiceCallExpr = getLibFunctionCall(
-      exportDeclr.getInitializer(),
-      SamenLibFunctions.CreateService,
-    )
-    if (createServiceCallExpr) {
-      // parsing arguments of createService
-      const [functionDefs, serviceConfig] = createServiceCallExpr.getArguments()
-      const parsedServiceConfig = parseFunctionConfig(serviceConfig)
-      return {
-        name: exportName,
-        funcs: parseFunctionDefinitions(functionDefs, parsedServiceConfig),
-      }
-    }
+  const callExpression = getFirstChildOfKind(
+    varDeclr,
+    ts.SyntaxKind.CallExpression,
+  )
+
+  // check if the value of the export is a function call to "creatService"
+  const createServiceCallExpr = getLibFunctionCall(
+    callExpression,
+    SamenLibFunctions.CreateService,
+  )
+
+  if (!createServiceCallExpr) {
+    return
+  }
+
+  // parsing arguments of createService
+  const [functionDefs, serviceConfig] = createServiceCallExpr.arguments
+  const parsedServiceConfig = parseFunctionConfig(serviceConfig, typeChecker)
+  return {
+    name: varDeclr.name.getText(),
+    funcs: parseFunctionDefinitions(
+      functionDefs,
+      parsedServiceConfig,
+      typeChecker,
+    ),
   }
 }
 
@@ -87,59 +106,56 @@ enum SamenLibFunctions {
 }
 
 function getLibFunctionCall(
-  node: Node | undefined,
+  node: ts.Node | undefined,
   libFunction: SamenLibFunctions,
-): CallExpression | undefined {
-  if (node && Node.isCallExpression(node)) {
-    const functionNameIdentifier = node.getFirstChildByKind(
-      ts.SyntaxKind.Identifier,
-    )
-    if (
-      functionNameIdentifier &&
-      functionNameIdentifier.getText() === libFunction.toString()
-    ) {
-      return node
-    }
+): ts.CallExpression | undefined {
+  if (
+    node &&
+    ts.isCallExpression(node) &&
+    ts.isIdentifier(node.expression) &&
+    node.expression.text === libFunction.toString()
+  ) {
+    return node
   }
 }
 
 function parseFunctionDefinitions(
-  functionDefs: Node,
+  functionDefs: ts.Expression,
   parsedServiceConfig: ParsedSamenFunctionConfig,
+  typeChecker: ts.TypeChecker,
 ): ParsedSamenFunctionDefinition[] {
   const result: ParsedSamenFunctionDefinition[] = []
+  if (ts.isObjectLiteralExpression(functionDefs)) {
+    const propertyAssignments = functionDefs.properties
+    for (const propertyAssignment of propertyAssignments) {
+      const functionName = propertyAssignment.name
+      if (functionName) {
+        const createFunctionCallExpr = getLibFunctionCall(
+          getFirstChildOfKind(propertyAssignment, ts.SyntaxKind.CallExpression),
+          SamenLibFunctions.CreateFunction,
+        )
+        if (createFunctionCallExpr) {
+          const [funcArgument, functionConfig] =
+            createFunctionCallExpr.arguments
+          const parsedFunctionConfig = parseFunctionConfig(
+            functionConfig,
+            typeChecker,
+          )
 
-  if (Node.isObjectLiteralExpression(functionDefs)) {
-    const properties = functionDefs.getChildrenOfKind(
-      ts.SyntaxKind.PropertyAssignment,
-    )
-    for (const property of properties) {
-      const functionName = property.getChildrenOfKind(ts.SyntaxKind.Identifier)
-      const createFunctionCallExpr = getLibFunctionCall(
-        property.getFirstChildByKind(ts.SyntaxKind.CallExpression),
-        SamenLibFunctions.CreateFunction,
-      )
-      if (createFunctionCallExpr) {
-        const [funcArgument, functionConfig] =
-          createFunctionCallExpr.getArguments()
-        const parsedFunctionConfig = parseFunctionConfig(functionConfig)
-
-        const funcDeclr =
-          // we need getAliasedSymbol to resolve imports
-          (
-            funcArgument.getSymbol()?.getAliasedSymbol() ??
-            funcArgument.getSymbol()
-          )?.getValueDeclaration()
-
-        if (Node.isFunctionDeclaration(funcDeclr)) {
-          result.push({
-            name: functionName?.[0].getText(),
-            func: funcDeclr,
-            config: mergeFunctionConfigs(
-              parsedServiceConfig,
-              parsedFunctionConfig,
-            ),
-          })
+          const symbol = resolveSymbol(funcArgument, typeChecker)
+          if (
+            symbol?.valueDeclaration &&
+            ts.isFunctionDeclaration(symbol.valueDeclaration)
+          ) {
+            result.push({
+              name: functionName.getText(),
+              func: symbol.valueDeclaration,
+              config: mergeFunctionConfigs(
+                parsedServiceConfig,
+                parsedFunctionConfig,
+              ),
+            })
+          }
         }
       }
     }
@@ -149,9 +165,10 @@ function parseFunctionDefinitions(
 }
 
 function parseFunctionConfig(
-  configObject: Node | undefined,
+  configObject: ts.Expression | undefined,
+  typeChecker: ts.TypeChecker,
 ): ParsedSamenFunctionConfig {
-  if (configObject && Node.isObjectLiteralExpression(configObject)) {
+  if (configObject && ts.isObjectLiteralExpression(configObject)) {
     const memory = parseFunctionConfigNumberPropValue(configObject, "memory")
     const timeout = parseFunctionConfigNumberPropValue(configObject, "timeout")
     const minInstance = parseFunctionConfigNumberPropValue(
@@ -165,7 +182,9 @@ function parseFunctionConfig(
     const middleware = parseFunctionConfigMiddlewares(
       configObject,
       "middleware",
+      typeChecker,
     )
+
     return { memory, timeout, minInstance, maxInstance, middleware }
   }
 
@@ -173,12 +192,15 @@ function parseFunctionConfig(
 }
 
 function parseFunctionConfigNumberPropValue(
-  configObject: ObjectLiteralExpression,
+  configObject: ts.ObjectLiteralExpression,
   name: string,
 ): number | undefined {
-  const prop = configObject.getProperty(name)
-  if (prop && Node.isPropertyAssignment(prop)) {
-    const numericLiteral = prop.getLastChildByKind(ts.SyntaxKind.NumericLiteral)
+  const prop = configObject.properties.find((p) => p.name?.getText() === name)
+  if (prop && ts.isPropertyAssignment(prop)) {
+    const numericLiteral = getFirstChildOfKind(
+      prop,
+      ts.SyntaxKind.NumericLiteral,
+    )
     if (numericLiteral) {
       const value = Number.parseInt(numericLiteral.getText(), 10)
       return value
@@ -187,29 +209,31 @@ function parseFunctionConfigNumberPropValue(
 }
 
 function parseFunctionConfigMiddlewares(
-  configObject: ObjectLiteralExpression,
+  configObject: ts.ObjectLiteralExpression,
   name: string,
-): FunctionDeclaration[] {
-  const middlewareArrayLiteralExpr = configObject
-    .getProperty(name)
-    ?.getFirstChildByKind(ts.SyntaxKind.ArrayLiteralExpression)
+  typeChecker: ts.TypeChecker,
+): ts.FunctionDeclaration[] {
+  const prop = configObject.properties.find((p) => p.name?.getText() === name)
+  const middlewareArrayLiteralExpr = getFirstChildOfKind(
+    prop,
+    ts.SyntaxKind.ArrayLiteralExpression,
+  )
 
   if (!middlewareArrayLiteralExpr) {
     return []
   }
 
-  const middlewareArrayElements = middlewareArrayLiteralExpr.getElements()
+  const middlewareArrayElements = middlewareArrayLiteralExpr.elements
 
-  const functionDeclrs: FunctionDeclaration[] = []
+  const functionDeclrs: ts.FunctionDeclaration[] = []
   for (const middlewareArrayElement of middlewareArrayElements) {
     // we need getAliasedSymbol to resolve imports
-    const funcDeclr = (
-      middlewareArrayElement.getSymbol()?.getAliasedSymbol() ??
-      middlewareArrayElement.getSymbol()
-    )?.getValueDeclaration()
-
-    if (Node.isFunctionDeclaration(funcDeclr)) {
-      functionDeclrs.push(funcDeclr)
+    const symbol = resolveSymbol(middlewareArrayElement, typeChecker)
+    if (
+      symbol?.valueDeclaration &&
+      ts.isFunctionDeclaration(symbol.valueDeclaration)
+    ) {
+      functionDeclrs.push(symbol.valueDeclaration)
     }
   }
   return functionDeclrs

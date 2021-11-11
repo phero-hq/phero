@@ -1,5 +1,4 @@
 import ts from "typescript"
-import { Project, SourceFile, TypeChecker } from "ts-morph"
 import { MissingSamenFileError, MissingTSConfigFile } from "./errors"
 
 const formatHost: ts.FormatDiagnosticsHost = {
@@ -10,8 +9,8 @@ const formatHost: ts.FormatDiagnosticsHost = {
 
 type ErrorCallback = () => void
 type ChangeCallback = (
-  samenSourceFile: SourceFile,
-  typeChecker: TypeChecker,
+  samenSourceFile: ts.SourceFile,
+  typeChecker: ts.TypeChecker,
 ) => void
 
 export default class WatchProgram {
@@ -46,8 +45,6 @@ export default class WatchProgram {
     )
 
     this.watchProgram = ts.createWatchProgram(host)
-
-    this.watchProgram.getProgram().getSemanticDiagnostics()
   }
 
   public onError(callback: ErrorCallback) {
@@ -109,16 +106,17 @@ export default class WatchProgram {
       return
     }
 
-    const project = new Project({
-      tsConfigFilePath: this.tsConfigFilePath,
-    })
-
-    const sourceFile = project.getSourceFile("samen.ts")
+    const program = this.watchProgram.getProgram()
+    // TODO check all root dirs for samen.ts
+    const sourceFile = program.getSourceFile(`${this.projectDir}/src/samen.ts`)
 
     if (!sourceFile) {
       throw new MissingSamenFileError(this.projectDir)
     }
 
-    this.changeCallback(sourceFile, project.getTypeChecker())
+    this.changeCallback(
+      sourceFile.getSourceFile(),
+      this.watchProgram.getProgram().getProgram().getTypeChecker(),
+    )
   }
 }

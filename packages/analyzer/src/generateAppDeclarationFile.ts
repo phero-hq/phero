@@ -1,5 +1,4 @@
-import path from "path"
-import { ts } from "ts-morph"
+import ts from "typescript"
 import { ParsedSamenApp } from "./parseSamenApp"
 
 export namespace cmsService {
@@ -30,10 +29,6 @@ export default function generateAppDeclarationFile(app: ParsedSamenApp) {
       app.services.map((service) => {
         const serviceNamespaceBlock = ts.factory.createModuleBlock(
           service.funcs.map((func) => {
-            console.log(
-              "func.func.compilerNode.type",
-              func.func.compilerNode.type,
-            )
             const funcNamespaceBlock = ts.factory.createModuleBlock([
               ts.factory.createModuleDeclaration(
                 undefined,
@@ -45,12 +40,12 @@ export default function generateAppDeclarationFile(app: ParsedSamenApp) {
                     [exportModifier],
                     undefined,
                     func.name,
-                    func.func.compilerNode.typeParameters,
-                    func.func.compilerNode.parameters,
-                    // func.func.compilerNode.type,
-                    ts.factory.createKeywordTypeNode(
-                      ts.SyntaxKind.NumberKeyword,
-                    ),
+                    func.func.typeParameters,
+                    func.func.parameters,
+                    func.func.type,
+                    // ts.factory.createKeywordTypeNode(
+                    //   ts.SyntaxKind.NumberKeyword,
+                    // ),
                     // func.func.compilerNode.body,
                     ts.factory.createBlock([
                       ts.factory.createThrowStatement(
