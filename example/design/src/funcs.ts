@@ -1,7 +1,9 @@
 export function getArticle() {}
-export function editArticle() {}
+export async function editArticle() {
+  return true
+}
 export function removeArticle() {}
-export function publishArticle() {}
+export async function publishArticle() {}
 export function deployStaticWebsite() {}
 
 export function requireCmsUser() {}

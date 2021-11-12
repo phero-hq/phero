@@ -236,4 +236,5 @@ export function resolveSymbol(
   if (symbol && symbol.getFlags() === ts.SymbolFlags.Alias) {
     return typeChecker.getAliasedSymbol(symbol)
   }
+  return symbol
 }

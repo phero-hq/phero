@@ -11,8 +11,8 @@ program.onCompileSucceeded(
   (samenSourceFile: ts.SourceFile, typeChecker: ts.TypeChecker) => {
     console.info("something changed!")
     const app = parseSamenApp(samenSourceFile, typeChecker)
-    console.log(app.services[0].funcs[0])
-    generateAppDeclarationFile(app)
+    // console.log(app.services[0].funcs[0])
+    generateAppDeclarationFile(app, typeChecker)
   },
 )
-program.close()
+// program.close()

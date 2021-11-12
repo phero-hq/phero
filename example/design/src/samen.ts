@@ -10,54 +10,18 @@ interface Aad {
   kaas: string
 }
 
-export function getArticle(aad: number) {
-  return 10
+interface User {
+  id: string
+  age: number
 }
 
-// export const cmsService = createService(
-//   {
-//     getArticle,
-
-//     editArticle: createFunction(editArticle, {
-//       memory: 2048,
-//       // middlewares: [requireAuthorRole],
-//     }),
-
-//     // removeArticle: createFunction(removeArticle, {
-//     //   // middlewares: [requireAdminRole],
-//     // }),
-
-//     // publishArticle: createFunction(publishArticle, {
-//     //   memory: 2048,
-//     // }),
-//   },
-//   {
-//     memory: 1024,
-//     minInstance: 1,
-//     maxInstance: 4,
-//     // middlewares: [requireCmsUser],
-//   },
-// )
-
-// export const aad = {
-//   config: {
-//     memory: 123,
-//   },
-// }
-
-// export const testService = createService(xxx())
-
-// function xxx() {
-//   return {
-//     aad: () => 10,
-//   }
-// }
-
-// export default createService(xxx())
+export async function getArticle() {
+  return "10"
+}
 
 export const cmsService = createService(
   {
-    getArticle: createFunction(getArticle),
+    getArticleX: createFunction(getArticle),
     editArticle: createFunction(editArticle, {
       memory: 2048,
       middleware: [requireAuthorRole],
@@ -71,4 +35,11 @@ export const cmsService = createService(
 
 export const testService = createService({
   publishArticle: createFunction(publishArticle),
+})
+
+const aad = 10
+const aadx = 10
+
+export const zaadService = createService({
+  removeArticle: createFunction(removeArticle),
 })
