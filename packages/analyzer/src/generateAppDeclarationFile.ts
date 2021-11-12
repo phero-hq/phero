@@ -1,7 +1,15 @@
+import { readFileSync } from "fs"
 import ts from "typescript"
 import { ParsedSamenApp, ParsedSamenFunctionDefinition } from "./parseSamenApp"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
+const asyncModifier = ts.factory.createModifier(ts.SyntaxKind.AsyncKeyword)
+
+const formatHost: ts.FormatDiagnosticsHost = {
+  getCanonicalFileName: (path) => path,
+  getCurrentDirectory: ts.sys.getCurrentDirectory,
+  getNewLine: () => ts.sys.newLine,
+}
 
 function generateNamespace(
   name: string,
@@ -51,7 +59,7 @@ export default function generateAppDeclarationFile(
   const file = ts.createSourceFile(
     "api.ts",
     "",
-    ts.ScriptTarget.ESNext,
+    ts.ScriptTarget.ES5,
     false,
     ts.ScriptKind.TS,
   )
@@ -67,18 +75,33 @@ export default function generateAppDeclarationFile(
   const opts: ts.CompilerOptions = {
     declaration: true,
     emitDeclarationOnly: true,
+    // NOTE: we need Promise support in our declaration file. In a normal TS project you would add
+    // the "es2015". Because we're implementing a file system here, sort of, we need to set the file
+    // name more explicitly. (Implementing our own fileExists makes compilation much much faster.)
+    lib: ["lib.es2015.d.ts"],
   }
   const host = ts.createCompilerHost(opts)
+  const originalReadFile = host.readFile
 
   host.writeFile = (fileName: string, contents: string) => {
     xfiles[fileName] = contents
   }
-  host.readFile = (fileName: string) => xfiles[fileName]
-  host.fileExists = (fileName: string) => !!xfiles[fileName]
+  host.readFile = (fileName: string) => {
+    if (xfiles[fileName]) {
+      return xfiles[fileName]
+    }
+    // Reads the "es2015" lib files
+    return originalReadFile(fileName)
+  }
+  host.fileExists = (fileName: string) => {
+    return !!xfiles[fileName]
+  }
 
   // // Prepare and emit the d.ts files
   const program = ts.createProgram(["api.ts"], opts, host)
-  program.emit()
+  const emitResult = program.emit()
+
+  console.log(ts.formatDiagnostics(emitResult.diagnostics, formatHost))
 
   console.log(xfiles)
 }
@@ -95,7 +118,7 @@ function generateFunction(
 
   return ts.factory.createFunctionDeclaration(
     undefined,
-    [exportModifier],
+    [exportModifier, asyncModifier],
     undefined,
     func.name,
     func.func.typeParameters,
