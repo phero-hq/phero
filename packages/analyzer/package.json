@@ -11,7 +11,7 @@
     "build": "tsc",
     "test": "jest src",
     "prepublish": "npm run clean && npm run build",
-    "start": "npm run build && node ./dist/index.js"
+    "start": "ts-node-dev src/index.ts"
   },
   "author": "",
   "license": "ISC",
@@ -23,6 +23,7 @@
     "@types/jest": "^27.0.2",
     "@types/node": "^16.11.7",
     "jest": "^27.3.1",
-    "ts-jest": "^27.0.7"
+    "ts-jest": "^27.0.7",
+    "ts-node-dev": "^1.1.8"
   }
 }
