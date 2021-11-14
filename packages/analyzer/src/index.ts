@@ -3,8 +3,8 @@ import generateAppDeclarationFile from "./generateAppDeclarationFile"
 import parseSamenApp from "./parseSamenApp"
 import WatchProgram from "./WatchProgram"
 
-const input = "/Users/kamilafsar/Projects/samen/example/design"
-// const input = "/Users/kamilafsar/Projects/slimste-mens/api"
+// const input = "/Users/kamilafsar/Projects/samen/example/design"
+const input = "/Users/kamilafsar/Projects/slimste-mens/api"
 const program = new WatchProgram(input)
 
 // program.onError(() => console.error("oops error!"))

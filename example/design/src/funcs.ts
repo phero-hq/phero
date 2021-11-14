@@ -1,4 +1,4 @@
-import { Kaas } from "./other"
+import * as xxx from "./other"
 
 export function getArticle() {}
 export async function editArticle() {
@@ -30,17 +30,14 @@ export function requireAuthorRole() {}
 // type User = {
 //   aad: number
 // }
-interface Kees extends Kaas {
-  aad: number
-}
 
-export async function publishArticle(): Promise<Kees> {
-  // aad: { a: string },
-  // user: User,
-  // user2: User,
-  // user3: Kees,
+export async function publishArticle(): Promise<
+  xxx.aad.banaan.Kaas<xxx.aad.banaan.XX>
+> {
   return {
-    aad: 1,
-    asdsd: "",
+    asdsd: "123",
+    a: {
+      aad: 1,
+    },
   }
 }

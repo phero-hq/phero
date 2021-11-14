@@ -145,7 +145,9 @@ function parseFunctionDefinitions(
           const symbol = resolveSymbol(funcArgument, typeChecker)
           if (
             symbol?.valueDeclaration &&
-            ts.isFunctionDeclaration(symbol.valueDeclaration)
+            ts.isFunctionDeclaration(symbol.valueDeclaration) &&
+            // Function MUST explicitly define return type
+            symbol.valueDeclaration.type
           ) {
             result.push({
               name: functionName.getText(),

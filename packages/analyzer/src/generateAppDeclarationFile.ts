@@ -1,7 +1,6 @@
 import { readFileSync } from "fs"
 import ts, { nodeModuleNameResolver } from "typescript"
 import { ParsedSamenApp, ParsedSamenFunctionDefinition } from "./parseSamenApp"
-import { resolveSymbol } from "./tsUtils"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
 const asyncModifier = ts.factory.createModifier(ts.SyntaxKind.AsyncKeyword)
@@ -29,6 +28,9 @@ export default function generateAppDeclarationFile(
   app: ParsedSamenApp,
   typeChecker: ts.TypeChecker,
 ) {
+  console.debug("Start generating declaration file")
+  const t1 = Date.now()
+
   const serviceNamespaceDeclrs = generateNamespace(
     // export namespace service {
     "services",
@@ -110,6 +112,9 @@ export default function generateAppDeclarationFile(
   const program = ts.createProgram(["api.ts"], opts, host)
   const emitResult = program.emit()
 
+  const t2 = Date.now()
+  console.debug(`Done generating declaration file in ${t2 - t1}`)
+
   console.log(ts.formatDiagnostics(emitResult.diagnostics, formatHost))
   console.log("errors", emitResult.diagnostics.length)
 
@@ -123,12 +128,12 @@ function generateFunction(
   func: ParsedSamenFunctionDefinition,
   typeChecker: ts.TypeChecker,
 ): ts.FunctionDeclaration {
-  const type = typeChecker
-    .getSignatureFromDeclaration(func.func)
-    ?.getReturnType()
+  // const type = typeChecker
+  //   .getSignatureFromDeclaration(func.func)
+  //   ?.getReturnType()
 
-  const typeNode =
-    type && typeChecker.typeToTypeNode(type, undefined, undefined)
+  // const typeNode =
+  //   type && typeChecker.typeToTypeNode(type, undefined, undefined)
 
   return ts.factory.createFunctionDeclaration(
     undefined, // TODO decoraters are prohibited
@@ -137,7 +142,7 @@ function generateFunction(
     func.name,
     undefined, // TODO typeParameters are prohibited
     func.func.parameters,
-    typeNode,
+    unwrapPromise(func.func.type),
     ts.factory.createBlock([
       ts.factory.createThrowStatement(
         ts.factory.createNewExpression(
@@ -148,6 +153,40 @@ function generateFunction(
       ),
     ]),
   )
+}
+
+function unwrapPromise(
+  typeNode: ts.TypeNode | undefined,
+): ts.TypeNode | undefined {
+  if (typeNode && ts.isTypeReferenceNode(typeNode)) {
+    const promisedType = typeNode.typeArguments?.[0]
+    if (typeNode.typeName.getText() === "Promise" && promisedType) {
+      const cleanedPromisedType = cleanQualiedName(promisedType)
+      return ts.factory.createTypeReferenceNode(
+        typeNode.typeName,
+        cleanedPromisedType ? [cleanedPromisedType] : [],
+      )
+    }
+  }
+  return typeNode
+}
+
+function cleanQualiedName(
+  typeNode: ts.TypeNode | undefined,
+): ts.TypeNode | undefined {
+  if (
+    typeNode &&
+    ts.isTypeReferenceNode(typeNode) &&
+    ts.isQualifiedName(typeNode.typeName)
+  ) {
+    return ts.factory.createTypeReferenceNode(
+      typeNode.typeName.right,
+      typeNode.typeArguments
+        ?.map(cleanQualiedName)
+        .filter((a): a is ts.TypeNode => a !== undefined),
+    )
+  }
+  return typeNode
 }
 
 function generateModels(
@@ -171,44 +210,27 @@ function generateModels(
   }
 
   for (const func of funcs) {
-    const returnType = typeChecker
-      .getSignatureFromDeclaration(func)
-      ?.getReturnType()
-
-    if (returnType?.symbol.name !== "Promise") {
-      // ReturnType should always be wrapped with Promise
-      continue
-    }
-
-    if (returnType) {
-      const returnTypeNode = typeChecker.typeToTypeNode(
-        returnType,
-        func,
-        undefined,
-      )
-      console.log(func.name, returnTypeNode?.getChildAt(0))
-      // if (returnTypeNode && ts.isTypeReferenceNode(returnTypeNode)) {
-      //   console.log("returnTypeNode", returnType.symbol.name)
-      //   // returnTypeNode.getChildAt(0)
-      //   // doType(returnTypeNode)
-      // }
-    }
+    doType(func.type)
   }
 
   function doType(typeNode: ts.TypeNode | undefined, log = false): void {
+    // console.log("declaration", typeNode?.getText())
     if (!typeNode) {
       return
     } else if (ts.isTypeReferenceNode(typeNode)) {
-      console.log("typeNode.typeArguments", typeNode.typeArguments)
+      // console.log("doing", typeNode.typeName.getText())
       for (const typeArgument of typeNode.typeArguments ?? []) {
+        // console.log("func.type", typeArgument.kind, typeArgument.getText())
         doType(typeArgument)
       }
 
       const type = typeChecker.getTypeFromTypeNode(typeNode)
       const symbol = type.aliasSymbol ?? type.symbol
+      // console.log("git symbol", symbol.name)
       if (addedSymbols.includes(symbol)) {
         return
       }
+      // console.log("addedSymbols", symbol.name)
       addedSymbols.push(symbol)
 
       for (const declaration of symbol.declarations ?? []) {
@@ -224,10 +246,8 @@ function generateModels(
         doDeclaration(declaration)
       }
     } else if (ts.isTypeLiteralNode(typeNode)) {
-      // console.log("TYPE LITERAL", typeNode.getText())
       for (const member of typeNode.members) {
         if (ts.isPropertySignature(member)) {
-          // console.log("TYPE", member.type?.kind, member.name.getText())
           doType(member.type)
         }
       }
@@ -242,29 +262,16 @@ function generateModels(
       for (const declr of extendedType.symbol.declarations ?? []) {
         doDeclaration(declr)
       }
-
-      // console.log("par", typeNode.parent.getText())
+    } else if (ts.isIndexedAccessTypeNode(typeNode)) {
+      doType(typeNode.objectType)
+      doType(typeNode.indexType)
+    } else {
+      // console.log("other typeNode", typeNode.kind, typeNode.getText())
     }
-
-    // else if (ts.isQualifiedName(typeNode)) {
-    //   console.log("QUALIFIED NAME")
-    // } else if (ts.isPropertySignature(typeNode)) {
-    //   console.log("PROP SIG")
-    // }
-    // else {
-    //   ts.isStringLiteralLike()
-    //   console.log("ELSEEEE", typeNode.kind)
-    //   // console.log(typeNode)
-
-    //   // typeChecker.getSym
-    //   if (ts.isPropertySignature(typeNode.parent)) {
-    //     // console.log("is stringggg", typeNode.parent)
-    //     console.log("PROPPSPPP", typeNode.parent.type)
-    //   }
-    // }
   }
 
   function doDeclaration(declaration: ts.Declaration | undefined): void {
+    // console.log("declaration", declaration?.getText())
     if (!declaration) {
       return
     }
@@ -280,10 +287,6 @@ function generateModels(
           doType(type)
         }
       }
-      for (const typeParam of declaration.typeParameters ?? []) {
-        doDeclaration(typeParam)
-      }
-
       for (const typeParam of declaration.typeParameters ?? []) {
         doDeclaration(typeParam)
       }
@@ -325,8 +328,11 @@ function generateModels(
       )
     } else if (ts.isEnumMember(declaration)) {
       doDeclaration(declaration.parent)
+    } else if (ts.isTypeParameterDeclaration(declaration)) {
+      doType(declaration.constraint)
+      doType(declaration.default)
     } else {
-      console.log("declr kind", declaration.kind)
+      // console.log("declr kind", declaration.kind)
     }
   }
 
