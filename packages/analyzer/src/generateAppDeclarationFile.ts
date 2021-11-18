@@ -1,5 +1,5 @@
-import { readFileSync } from "fs"
-import ts, { nodeModuleNameResolver } from "typescript"
+import ts, { createTypeQueryNode } from "typescript"
+import { ParseError } from "./errors"
 import { ParsedSamenApp, ParsedSamenFunctionDefinition } from "./parseSamenApp"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
@@ -28,7 +28,6 @@ export default function generateAppDeclarationFile(
   app: ParsedSamenApp,
   typeChecker: ts.TypeChecker,
 ) {
-  console.debug("Start generating declaration file")
   const t1 = Date.now()
 
   const serviceNamespaceDeclrs = generateNamespace(
@@ -101,7 +100,7 @@ export default function generateAppDeclarationFile(
     if (xfiles[fileName]) {
       return xfiles[fileName]
     }
-    // Reads the "es2015" lib files
+    // Reads the lib files
     return originalReadFile(fileName)
   }
   host.fileExists = (fileName: string) => {
@@ -113,7 +112,7 @@ export default function generateAppDeclarationFile(
   const emitResult = program.emit()
 
   const t2 = Date.now()
-  console.debug(`Done generating declaration file in ${t2 - t1}`)
+  console.log("parseSamenApp in", t2 - t1)
 
   console.log(ts.formatDiagnostics(emitResult.diagnostics, formatHost))
   console.log("errors", emitResult.diagnostics.length)
@@ -128,21 +127,25 @@ function generateFunction(
   func: ParsedSamenFunctionDefinition,
   typeChecker: ts.TypeChecker,
 ): ts.FunctionDeclaration {
-  // const type = typeChecker
-  //   .getSignatureFromDeclaration(func.func)
-  //   ?.getReturnType()
-
-  // const typeNode =
-  //   type && typeChecker.typeToTypeNode(type, undefined, undefined)
-
   return ts.factory.createFunctionDeclaration(
     undefined, // TODO decoraters are prohibited
     [exportModifier, asyncModifier],
     undefined, // TODO asteriks is prohibited
     func.name,
     undefined, // TODO typeParameters are prohibited
-    func.func.parameters,
-    unwrapPromise(func.func.type),
+    // func.parameters,
+    func.parameters.map((p) =>
+      ts.factory.createParameterDeclaration(
+        undefined,
+        p.modifiers,
+        p.dotDotDotToken,
+        p.name,
+        p.questionToken,
+        p.type && generateTypeNode(p.type),
+        p.initializer,
+      ),
+    ),
+    generateTypeNode(func.returnType),
     ts.factory.createBlock([
       ts.factory.createThrowStatement(
         ts.factory.createNewExpression(
@@ -155,82 +158,197 @@ function generateFunction(
   )
 }
 
-function unwrapPromise(
-  typeNode: ts.TypeNode | undefined,
-): ts.TypeNode | undefined {
-  if (typeNode && ts.isTypeReferenceNode(typeNode)) {
-    const promisedType = typeNode.typeArguments?.[0]
-    if (typeNode.typeName.getText() === "Promise" && promisedType) {
-      const cleanedPromisedType = cleanQualiedName(promisedType)
-      return ts.factory.createTypeReferenceNode(
-        typeNode.typeName,
-        cleanedPromisedType ? [cleanedPromisedType] : [],
+type Model =
+  | ts.InterfaceDeclaration
+  | ts.TypeAliasDeclaration
+  | ts.EnumDeclaration // add more types of models
+
+function generateModelDeclaration(model: Model): Model {
+  if (ts.isTypeAliasDeclaration(model)) {
+    console.log("model.type", model.type.getText())
+    return ts.factory.createTypeAliasDeclaration(
+      undefined,
+      [exportModifier],
+      model.name,
+      model.typeParameters?.map((tp) =>
+        ts.factory.createTypeParameterDeclaration(
+          tp.name,
+          tp.constraint && generateTypeNode(tp.constraint),
+          tp.default && generateTypeNode(tp.default),
+        ),
+      ),
+      generateTypeNode(model.type),
+    )
+  } else if (ts.isInterfaceDeclaration(model)) {
+    return ts.factory.createInterfaceDeclaration(
+      undefined,
+      [exportModifier],
+      model.name,
+      model.typeParameters?.map((tp) =>
+        ts.factory.createTypeParameterDeclaration(
+          tp.name,
+          tp.constraint && generateTypeNode(tp.constraint),
+          tp.default && generateTypeNode(tp.default),
+        ),
+      ),
+      model.heritageClauses?.map((hc) =>
+        ts.factory.createHeritageClause(
+          hc.token,
+          hc.types.map((t) =>
+            ts.factory.createExpressionWithTypeArguments(
+              t.expression,
+              t.typeArguments?.map(generateTypeNode),
+            ),
+          ),
+        ),
+      ),
+      model.members.map(generateTypeElement),
+    )
+  }
+
+  console.log("MODEL AS IS", model.kind)
+  return model
+}
+
+function generateTypeElement(typeElement: ts.TypeElement): ts.TypeElement {
+  if (ts.isPropertySignature(typeElement)) {
+    return ts.factory.createPropertySignature(
+      typeElement.modifiers,
+      typeElement.name,
+      typeElement.questionToken,
+      typeElement.type && generateTypeNode(typeElement.type),
+    )
+  }
+
+  if (ts.isIndexSignatureDeclaration(typeElement)) {
+    return ts.factory.createIndexSignature(
+      undefined,
+      typeElement.modifiers,
+      typeElement.parameters.map((p) =>
+        ts.factory.createParameterDeclaration(
+          undefined,
+          p.modifiers,
+          p.dotDotDotToken,
+          p.name,
+          p.questionToken,
+          p.type && generateTypeNode(p.type),
+          p.initializer,
+        ),
+      ),
+      generateTypeNode(typeElement.type),
+    )
+  }
+
+  throw new ParseError(
+    "Only Property signature is allowed " + typeElement.kind,
+    typeElement,
+  )
+}
+
+function generateTypeNode(type: ts.TypeNode, indent = 0): ts.TypeNode {
+  let indentString = ""
+  for (let ind = 0; ind < indent; ind++) {
+    indentString += " "
+  }
+
+  if (ts.isTypeReferenceNode(type)) {
+    return ts.factory.createTypeReferenceNode(
+      type.typeName,
+      type.typeArguments?.map((ta) => generateTypeNode(ta, indent + 4)),
+    )
+  }
+  if (ts.isLiteralTypeNode(type)) {
+    console.log(indentString)
+    if (ts.isStringLiteral(type.literal)) {
+      console.log(indentString, "createStringLiteral", type.literal.text)
+      return ts.factory.createLiteralTypeNode(
+        ts.factory.createStringLiteral(type.literal.text),
+      )
+    } else if (ts.isNumericLiteral(type.literal)) {
+      console.log(indentString, "createNumericLiteral", type.literal.text)
+      return ts.factory.createLiteralTypeNode(
+        ts.factory.createNumericLiteral(type.literal.text),
       )
     }
   }
-  return typeNode
-}
-
-function cleanQualiedName(
-  typeNode: ts.TypeNode | undefined,
-): ts.TypeNode | undefined {
-  if (
-    typeNode &&
-    ts.isTypeReferenceNode(typeNode) &&
-    ts.isQualifiedName(typeNode.typeName)
-  ) {
-    return ts.factory.createTypeReferenceNode(
-      typeNode.typeName.right,
-      typeNode.typeArguments
-        ?.map(cleanQualiedName)
-        .filter((a): a is ts.TypeNode => a !== undefined),
+  if (ts.isUnionTypeNode(type)) {
+    console.log(indentString, "createUnion")
+    return ts.factory.createUnionTypeNode(
+      type.types.map((t) => generateTypeNode(t, indent + 4)),
     )
   }
-  return typeNode
+  if (ts.isIntersectionTypeNode(type)) {
+    return ts.factory.createIntersectionTypeNode(
+      type.types.map((t) => generateTypeNode(t, indent + 4)),
+    )
+  }
+
+  if (ts.isTypeLiteralNode(type)) {
+    return ts.factory.createTypeLiteralNode(
+      type.members.map(generateTypeElement),
+    )
+  }
+
+  return type
 }
 
 function generateModels(
   app: ParsedSamenApp,
   typeChecker: ts.TypeChecker,
 ): ts.Statement[] {
-  type Model =
-    | ts.InterfaceDeclaration
-    | ts.TypeAliasDeclaration
-    | ts.EnumDeclaration // add more types of models
   const models: Model[] = []
   const addedSymbols: ts.Symbol[] = []
 
-  const funcs: ts.FunctionDeclaration[] = app.services
-    .flatMap((s) => s.funcs)
-    .flatMap((f) => f.func)
+  const funcs: ParsedSamenFunctionDefinition[] = app.services.flatMap(
+    (s) => s.funcs,
+  )
 
   const params: ts.ParameterDeclaration[] = funcs.flatMap((f) => f.parameters)
   for (const param of params) {
     doType(param.type)
   }
 
-  for (const func of funcs) {
-    doType(func.type)
+  const returnTypes: ts.TypeNode[] = funcs.map((f) => f.returnType)
+  for (const returnType of returnTypes) {
+    if (
+      // returnType itself is a Promise
+      ts.isTypeReferenceNode(returnType) &&
+      returnType.typeName.getText() === "Promise"
+    ) {
+      for (const typeArg of returnType.typeArguments ?? []) {
+        doType(typeArg)
+      }
+    } else {
+      throw new ParseError(
+        "Return type should be of type Promise<T>",
+        returnType,
+      )
+    }
   }
 
-  function doType(typeNode: ts.TypeNode | undefined, log = false): void {
-    // console.log("declaration", typeNode?.getText())
+  function doType(typeNode: ts.TypeNode | undefined): void {
     if (!typeNode) {
       return
     } else if (ts.isTypeReferenceNode(typeNode)) {
-      // console.log("doing", typeNode.typeName.getText())
       for (const typeArgument of typeNode.typeArguments ?? []) {
-        // console.log("func.type", typeArgument.kind, typeArgument.getText())
         doType(typeArgument)
+      }
+
+      if (
+        typeNode.typeName
+          .getSourceFile()
+          .fileName.includes("node_modules/typescript/lib/lib.")
+      ) {
+        return
       }
 
       const type = typeChecker.getTypeFromTypeNode(typeNode)
       const symbol = type.aliasSymbol ?? type.symbol
-      // console.log("git symbol", symbol.name)
+
       if (addedSymbols.includes(symbol)) {
         return
       }
-      // console.log("addedSymbols", symbol.name)
+
       addedSymbols.push(symbol)
 
       for (const declaration of symbol.declarations ?? []) {
@@ -239,7 +357,6 @@ function generateModels(
         // prevent that we include TS lib types
         if (declarationFileName.includes("node_modules/typescript/lib/lib.")) {
           declaration
-
           continue
         }
 
@@ -255,6 +372,10 @@ function generateModels(
       for (const unionElementType of typeNode.types) {
         doType(unionElementType)
       }
+    } else if (ts.isIntersectionTypeNode(typeNode)) {
+      for (const intersectionElementType of typeNode.types) {
+        doType(intersectionElementType)
+      }
     } else if (ts.isArrayTypeNode(typeNode)) {
       doType(typeNode.elementType)
     } else if (ts.isExpressionWithTypeArguments(typeNode)) {
@@ -265,13 +386,10 @@ function generateModels(
     } else if (ts.isIndexedAccessTypeNode(typeNode)) {
       doType(typeNode.objectType)
       doType(typeNode.indexType)
-    } else {
-      // console.log("other typeNode", typeNode.kind, typeNode.getText())
     }
   }
 
   function doDeclaration(declaration: ts.Declaration | undefined): void {
-    // console.log("declaration", declaration?.getText())
     if (!declaration) {
       return
     }
@@ -331,10 +449,8 @@ function generateModels(
     } else if (ts.isTypeParameterDeclaration(declaration)) {
       doType(declaration.constraint)
       doType(declaration.default)
-    } else {
-      // console.log("declr kind", declaration.kind)
     }
   }
 
-  return models
+  return models.map(generateModelDeclaration)
 }
