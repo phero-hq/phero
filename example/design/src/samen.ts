@@ -32,10 +32,29 @@ type Aad<
 
 type Kaas = Omit<Banaan, "hallo">
 
+const aad: Aad<10> = {
+  a: 10,
+  aad: {},
+  z: {
+    aad: 1,
+    zaza: 1,
+    hallo: 1,
+  },
+}
+
 async function getArticle(
   x: Pick<Banaan, "zaad">,
   // y: Aad<null>,
-  z: Aad<10>,
+  z: Aad<10> = {
+    a: 10,
+    aad: {},
+    z: {
+      aad: 1,
+      zaza: 1,
+      hallo: 1,
+    },
+  },
+  xx?: number,
   // a: Aad<true>,
   // b: Aad<Aad<Date>>,
   // c: Aad<Date>,

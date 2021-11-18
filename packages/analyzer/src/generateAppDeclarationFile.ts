@@ -45,7 +45,7 @@ export default function generateAppDeclarationFile(
               // export namespace v1 {
               generateNamespace("v1", [
                 // generate Function declaration
-                generateFunction(func, typeChecker),
+                generateFunction(func),
               ]),
             ]),
           ),
@@ -125,7 +125,6 @@ export default function generateAppDeclarationFile(
 
 function generateFunction(
   func: ParsedSamenFunctionDefinition,
-  typeChecker: ts.TypeChecker,
 ): ts.FunctionDeclaration {
   return ts.factory.createFunctionDeclaration(
     undefined, // TODO decoraters are prohibited
@@ -142,7 +141,7 @@ function generateFunction(
         p.name,
         p.questionToken,
         p.type && generateTypeNode(p.type),
-        p.initializer,
+        undefined, // initializer is prohibited, only on classes
       ),
     ),
     generateTypeNode(func.returnType),
