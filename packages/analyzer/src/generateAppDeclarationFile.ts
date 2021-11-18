@@ -165,7 +165,6 @@ type Model =
 
 function generateModelDeclaration(model: Model): Model {
   if (ts.isTypeAliasDeclaration(model)) {
-    console.log("model.type", model.type.getText())
     return ts.factory.createTypeAliasDeclaration(
       undefined,
       [exportModifier],
@@ -206,7 +205,6 @@ function generateModelDeclaration(model: Model): Model {
     )
   }
 
-  console.log("MODEL AS IS", model.kind)
   return model
 }
 
@@ -258,21 +256,17 @@ function generateTypeNode(type: ts.TypeNode, indent = 0): ts.TypeNode {
     )
   }
   if (ts.isLiteralTypeNode(type)) {
-    console.log(indentString)
     if (ts.isStringLiteral(type.literal)) {
-      console.log(indentString, "createStringLiteral", type.literal.text)
       return ts.factory.createLiteralTypeNode(
         ts.factory.createStringLiteral(type.literal.text),
       )
     } else if (ts.isNumericLiteral(type.literal)) {
-      console.log(indentString, "createNumericLiteral", type.literal.text)
       return ts.factory.createLiteralTypeNode(
         ts.factory.createNumericLiteral(type.literal.text),
       )
     }
   }
   if (ts.isUnionTypeNode(type)) {
-    console.log(indentString, "createUnion")
     return ts.factory.createUnionTypeNode(
       type.types.map((t) => generateTypeNode(t, indent + 4)),
     )
