@@ -4,16 +4,25 @@ import extractServiceFromSamenExport from "./extractServiceFromSamenExport"
 import { hasModifier } from "./tsUtils"
 
 export interface ParsedSamenApp {
+  models: Model[]
   services: ParsedSamenServiceDefinition[]
 }
 
 export interface ParsedSamenServiceDefinition {
   name: string
+  models: Model[]
   funcs: ParsedSamenFunctionDefinition[]
 }
 
+export type Model =
+  | ts.InterfaceDeclaration
+  | ts.TypeAliasDeclaration
+  | ts.EnumDeclaration
+
 export interface ParsedSamenFunctionDefinition {
   name: string
+  // TODO for clashing service models
+  // models: Model[]
   actualFunction: ts.FunctionLikeDeclarationBase
   parameters: ts.ParameterDeclaration[]
   returnType: ts.TypeNode
@@ -75,5 +84,8 @@ export default function parseSamenApp(
 
   const t2 = Date.now()
   console.log("parseSamenApp in", t2 - t1)
-  return { services }
+  return {
+    models: [], // TODO
+    services,
+  }
 }

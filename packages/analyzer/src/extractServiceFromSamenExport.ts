@@ -1,6 +1,7 @@
 import ts from "typescript"
 import { ParseError } from "./errors"
 import extractFunctionFromServiceProperty from "./extractFunctionFromServiceProperty"
+import extractModels from "./extractModels"
 import getLibFunctionCall from "./getLibFunctionCall"
 import parseFunctionConfig, {
   mergeFunctionConfigs,
@@ -48,6 +49,7 @@ export default function extractServiceFromSamenExport(
   return {
     name: serviceName,
     funcs: functionDefinitions,
+    models: extractModels(functionDefinitions, typeChecker), // TODO
   }
 }
 

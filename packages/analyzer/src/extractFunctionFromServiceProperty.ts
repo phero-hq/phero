@@ -1,5 +1,6 @@
 import ts from "typescript"
 import { ParseError } from "./errors"
+import extractModels from "./extractModels"
 import getLibFunctionCall from "./getLibFunctionCall"
 import parseFunctionConfig from "./parseFunctionConfig"
 import {
@@ -116,33 +117,11 @@ function getReturnType(node: ts.FunctionLikeDeclaration): ts.TypeNode {
   }
 
   if (ts.isTypeReferenceNode(typeNode)) {
-    const promisedType = typeNode.typeArguments?.[0]
-    if (typeNode.typeName.getText() === "Promise" && promisedType) {
-      const cleanedPromisedType = cleanQualiedName(promisedType)
-      return ts.factory.createTypeReferenceNode(
-        typeNode.typeName,
-        cleanedPromisedType ? [cleanedPromisedType] : [],
-      )
+    const hasPromisedType = typeNode.typeArguments?.length === 1
+    if (typeNode.typeName.getText() === "Promise" && hasPromisedType) {
+      return typeNode
     }
   }
 
   throw new ParseError("Return type should be a Promise<T>", typeNode)
-}
-
-function cleanQualiedName(
-  typeNode: ts.TypeNode | undefined,
-): ts.TypeNode | undefined {
-  if (
-    typeNode &&
-    ts.isTypeReferenceNode(typeNode) &&
-    ts.isQualifiedName(typeNode.typeName)
-  ) {
-    return ts.factory.createTypeReferenceNode(
-      typeNode.typeName.right,
-      typeNode.typeArguments
-        ?.map(cleanQualiedName)
-        .filter((a): a is ts.TypeNode => a !== undefined),
-    )
-  }
-  return typeNode
 }
