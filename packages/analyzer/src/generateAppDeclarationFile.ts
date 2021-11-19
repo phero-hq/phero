@@ -16,13 +16,13 @@ const formatHost: ts.FormatDiagnosticsHost = {
 }
 
 function generateNamespace(
-  name: string,
+  name: ts.Identifier,
   body: ts.Statement[],
 ): ts.ModuleDeclaration {
   return ts.factory.createModuleDeclaration(
     undefined,
     [exportModifier],
-    ts.factory.createIdentifier(name),
+    name,
     ts.factory.createModuleBlock(body),
     ts.NodeFlags.Namespace,
   )
@@ -34,39 +34,57 @@ export default function generateAppDeclarationFile(
 ) {
   const t1 = Date.now()
 
+  const appDomainIdentifier = ts.factory.createIdentifier("appDomain")
+  const serviceDomainIdentifier = ts.factory.createIdentifier("serviceDomain")
   const versionIdentifier = ts.factory.createIdentifier("v_1_0_0")
 
   const sharedTypes = app.models.map((m) => typeChecker.getTypeAtLocation(m))
 
-  // const x = app.models.map(m => m.)
-
   const serviceNamespaceDeclrs = [
     ...(app.models.length
       ? [
-          generateNamespace(
-            "domain",
-            app.models.map((m) =>
-              generateModelDeclaration(m, sharedTypes, typeChecker),
+          generateNamespace(appDomainIdentifier, [
+            generateNamespace(
+              versionIdentifier,
+              app.models.map((m) =>
+                generateModelDeclaration(
+                  m,
+                  sharedTypes,
+                  typeChecker,
+                  versionIdentifier,
+                ),
+              ),
             ),
-          ),
+          ]),
         ]
       : []),
     ...app.services.map((service) =>
       // export namespace cmsService {
-      generateNamespace(service.name, [
-        ...service.models.map((m) =>
-          generateModelDeclaration(m, sharedTypes, typeChecker),
-        ),
-        ...service.funcs.map(
-          (func) =>
-            // // export namespace editArticle {
-            // generateNamespace(func.name, [
-            //   // export namespace v_latest {
-            //   generateNamespace("v_latest", [
-            // generate Function declaration
-            generateFunction(func, sharedTypes, typeChecker),
-          //   ]),
-          // ]),
+      generateNamespace(ts.factory.createIdentifier(service.name), [
+        ...(service.models.length
+          ? [
+              generateNamespace(
+                serviceDomainIdentifier,
+                service.models.length
+                  ? [
+                      generateNamespace(
+                        versionIdentifier,
+                        service.models.map((m) =>
+                          generateModelDeclaration(
+                            m,
+                            sharedTypes,
+                            typeChecker,
+                            versionIdentifier,
+                          ),
+                        ),
+                      ),
+                    ]
+                  : [],
+              ),
+            ]
+          : []),
+        ...service.funcs.map((func) =>
+          generateFunction(func, sharedTypes, typeChecker, versionIdentifier),
         ),
       ]),
     ),
@@ -145,6 +163,7 @@ function generateFunction(
   func: ParsedSamenFunctionDefinition,
   sharedTypes: ts.Type[],
   typeChecker: ts.TypeChecker,
+  versionIdentifier: ts.Identifier,
 ): ts.FunctionDeclaration {
   return ts.factory.createFunctionDeclaration(
     undefined, // TODO decoraters are prohibited
@@ -159,12 +178,18 @@ function generateFunction(
         p.dotDotDotToken,
         p.name,
         p.questionToken,
-        p.type && generateTypeNode(p.type, sharedTypes, typeChecker),
+        p.type &&
+          generateTypeNode(p.type, sharedTypes, typeChecker, versionIdentifier),
         undefined, // initializer is prohibited, only on classes
       ),
     ),
     ts.factory.createTypeReferenceNode("Promise", [
-      generateTypeNode(func.returnType, sharedTypes, typeChecker),
+      generateTypeNode(
+        func.returnType,
+        sharedTypes,
+        typeChecker,
+        versionIdentifier,
+      ),
     ]),
     ts.factory.createBlock([
       ts.factory.createThrowStatement(
@@ -182,6 +207,7 @@ function generateModelDeclaration(
   model: Model,
   sharedTypes: ts.Type[],
   typeChecker: ts.TypeChecker,
+  versionIdentifier: ts.Identifier,
 ): Model {
   if (ts.isTypeAliasDeclaration(model)) {
     return ts.factory.createTypeAliasDeclaration(
@@ -192,11 +218,22 @@ function generateModelDeclaration(
         ts.factory.createTypeParameterDeclaration(
           tp.name,
           tp.constraint &&
-            generateTypeNode(tp.constraint, sharedTypes, typeChecker),
-          tp.default && generateTypeNode(tp.default, sharedTypes, typeChecker),
+            generateTypeNode(
+              tp.constraint,
+              sharedTypes,
+              typeChecker,
+              versionIdentifier,
+            ),
+          tp.default &&
+            generateTypeNode(
+              tp.default,
+              sharedTypes,
+              typeChecker,
+              versionIdentifier,
+            ),
         ),
       ),
-      generateTypeNode(model.type, sharedTypes, typeChecker),
+      generateTypeNode(model.type, sharedTypes, typeChecker, versionIdentifier),
     )
   } else if (ts.isInterfaceDeclaration(model)) {
     return ts.factory.createInterfaceDeclaration(
@@ -207,8 +244,19 @@ function generateModelDeclaration(
         ts.factory.createTypeParameterDeclaration(
           cleanQualiedName(tp.name),
           tp.constraint &&
-            generateTypeNode(tp.constraint, sharedTypes, typeChecker),
-          tp.default && generateTypeNode(tp.default, sharedTypes, typeChecker),
+            generateTypeNode(
+              tp.constraint,
+              sharedTypes,
+              typeChecker,
+              versionIdentifier,
+            ),
+          tp.default &&
+            generateTypeNode(
+              tp.default,
+              sharedTypes,
+              typeChecker,
+              versionIdentifier,
+            ),
         ),
       ),
       model.heritageClauses?.map((hc) =>
@@ -218,14 +266,19 @@ function generateModelDeclaration(
             ts.factory.createExpressionWithTypeArguments(
               t.expression,
               t.typeArguments?.map((t) =>
-                generateTypeNode(t, sharedTypes, typeChecker),
+                generateTypeNode(
+                  t,
+                  sharedTypes,
+                  typeChecker,
+                  versionIdentifier,
+                ),
               ),
             ),
           ),
         ),
       ),
       model.members.map((m) =>
-        generateTypeElement(m, sharedTypes, typeChecker),
+        generateTypeElement(m, sharedTypes, typeChecker, versionIdentifier),
       ),
     )
   }
@@ -237,6 +290,7 @@ function generateTypeElement(
   typeElement: ts.TypeElement,
   sharedTypes: ts.Type[],
   typeChecker: ts.TypeChecker,
+  versionIdentifier: ts.Identifier,
 ): ts.TypeElement {
   if (ts.isPropertySignature(typeElement)) {
     return ts.factory.createPropertySignature(
@@ -244,7 +298,12 @@ function generateTypeElement(
       typeElement.name,
       typeElement.questionToken,
       typeElement.type &&
-        generateTypeNode(typeElement.type, sharedTypes, typeChecker),
+        generateTypeNode(
+          typeElement.type,
+          sharedTypes,
+          typeChecker,
+          versionIdentifier,
+        ),
     )
   }
 
@@ -259,11 +318,22 @@ function generateTypeElement(
           p.dotDotDotToken,
           p.name,
           p.questionToken,
-          p.type && generateTypeNode(p.type, sharedTypes, typeChecker),
+          p.type &&
+            generateTypeNode(
+              p.type,
+              sharedTypes,
+              typeChecker,
+              versionIdentifier,
+            ),
           p.initializer,
         ),
       ),
-      generateTypeNode(typeElement.type, sharedTypes, typeChecker),
+      generateTypeNode(
+        typeElement.type,
+        sharedTypes,
+        typeChecker,
+        versionIdentifier,
+      ),
     )
   }
 
@@ -277,12 +347,13 @@ function generateTypeNode(
   type: ts.TypeNode,
   sharedTypes: ts.Type[],
   typeChecker: ts.TypeChecker,
+  versionIdentifier: ts.Identifier,
 ): ts.TypeNode {
   if (ts.isTypeReferenceNode(type)) {
     return ts.factory.createTypeReferenceNode(
-      withNamespace(type, sharedTypes, typeChecker),
+      withNamespace(type, sharedTypes, typeChecker, versionIdentifier),
       type.typeArguments?.map((t) =>
-        generateTypeNode(t, sharedTypes, typeChecker),
+        generateTypeNode(t, sharedTypes, typeChecker, versionIdentifier),
       ),
     )
   }
@@ -299,18 +370,24 @@ function generateTypeNode(
   }
   if (ts.isUnionTypeNode(type)) {
     return ts.factory.createUnionTypeNode(
-      type.types.map((t) => generateTypeNode(t, sharedTypes, typeChecker)),
+      type.types.map((t) =>
+        generateTypeNode(t, sharedTypes, typeChecker, versionIdentifier),
+      ),
     )
   }
   if (ts.isIntersectionTypeNode(type)) {
     return ts.factory.createIntersectionTypeNode(
-      type.types.map((t) => generateTypeNode(t, sharedTypes, typeChecker)),
+      type.types.map((t) =>
+        generateTypeNode(t, sharedTypes, typeChecker, versionIdentifier),
+      ),
     )
   }
 
   if (ts.isTypeLiteralNode(type)) {
     return ts.factory.createTypeLiteralNode(
-      type.members.map((m) => generateTypeElement(m, sharedTypes, typeChecker)),
+      type.members.map((m) =>
+        generateTypeElement(m, sharedTypes, typeChecker, versionIdentifier),
+      ),
     )
   }
 
@@ -327,21 +404,30 @@ function cleanQualiedName(entityName: ts.EntityName): ts.Identifier {
 function withNamespace(
   typeNode: ts.TypeReferenceNode,
   sharedTypes: ts.Type[],
-  // ns: ts.EntityName,
   typeChecker: ts.TypeChecker,
+  versionIdentifier: ts.Identifier,
 ): ts.EntityName {
   const type = typeChecker.getTypeFromTypeNode(typeNode)
 
   const isSharedType = sharedTypes.some((st) => st.symbol === type.symbol)
 
-  const clean = cleanQualiedName(typeNode.typeName)
+  const modelName = cleanQualiedName(typeNode.typeName)
 
   if (isSharedType) {
     return ts.factory.createQualifiedName(
-      ts.factory.createIdentifier("domain"),
-      clean,
+      ts.factory.createQualifiedName(
+        ts.factory.createIdentifier("appDomain"),
+        versionIdentifier,
+      ),
+      modelName,
     )
   }
 
-  return clean
+  return ts.factory.createQualifiedName(
+    ts.factory.createQualifiedName(
+      ts.factory.createIdentifier("serviceDomain"),
+      versionIdentifier,
+    ),
+    modelName,
+  )
 }
