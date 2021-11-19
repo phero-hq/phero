@@ -1,83 +1,43 @@
 import { createFunction, createService } from "./smn"
 
-// const getArticle = async (): Promise<string> => {
-//   return "10"
-// }
-
-interface Kees {
-  aad: number
+interface Article {
+  id: string
+  title: string
+  text: string
+}
+interface User {
+  id: string
+  name: string
 }
 
-interface Banaan {
-  zaad: number
-  hallo: number
-  zaza: number
-  kees: number
-  aad: Aad<Omit<Banaan, "zaad">>
+type Thee = string | number
+
+interface Kaas<T = Thee> {
+  id: string
 }
 
-type Aad<
-  X extends number | string | boolean | Omit<Banaan, "zaad"> = Omit<
-    Banaan,
-    "zaad"
-  >,
-> = {
-  a: X
-  z: Pick<Banaan, "zaza"> & Kees & Pick<Banaan, "hallo">
+export const articleService = createService({
+  getArticle: createFunction(async (kaas: Kaas<Thee>): Promise<Article> => {
+    return {
+      id: "id",
+      text: "text",
+      title: "title",
+    }
+  }),
+})
 
-  aad: {
-    [z: string]: Omit<Banaan, "kees">
-  }
-}
-
-type Kaas = Omit<Banaan, "hallo">
-
-const aad: Aad<10> = {
-  a: 10,
-  aad: {},
-  z: {
-    aad: 1,
-    zaza: 1,
-    hallo: 1,
-  },
-}
-
-async function getArticle(
-  x: Pick<Banaan, "zaad">,
-  // y: Aad<null>,
-  z: Aad<10> = {
-    a: 10,
-    aad: {},
-    z: {
-      aad: 1,
-      zaza: 1,
-      hallo: 1,
-    },
-  },
-  xx?: number,
-  // a: Aad<true>,
-  // b: Aad<Aad<Date>>,
-  // c: Aad<Date>,
-): Promise<Map<Aad<10>, Kaas>> {
-  return new Map<Aad<10>, Kaas>()
-}
-
-// interface Banaan {
-//   zaad: number
-//   hallo: number
-// }
-
-// type Aad<X extends number | Omit<Banaan, "zaad">> = {
-//   a: X
-// }
-
-// async function getArticle(c: Aad<number>): Promise<Omit<Banaan, "zaad">> {
-//   return {
-//     // a: 10,
-//     hallo: c.a,
-//   }
-// }
-
-export const testService = createService({
-  getArticleX: createFunction(getArticle),
+export const cmsService = createService({
+  editArticle: createFunction(async (): Promise<Article> => {
+    return {
+      id: "id",
+      text: "text",
+      title: "title",
+    }
+  }),
+  getUser: createFunction(async (kaas: Kaas<string>): Promise<User> => {
+    return {
+      id: "id",
+      name: "name",
+    }
+  }),
 })

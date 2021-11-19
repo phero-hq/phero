@@ -14,22 +14,8 @@ export default function extractModels(
     doType(param.type)
   }
 
-  const returnTypes = funcs.flatMap((func) => func.returnType)
-  for (const returnType of returnTypes) {
-    if (
-      // returnType itself is a Promise
-      ts.isTypeReferenceNode(returnType) &&
-      returnType.typeName.getText() === "Promise"
-    ) {
-      for (const typeArg of returnType.typeArguments ?? []) {
-        doType(typeArg)
-      }
-    } else {
-      throw new ParseError(
-        "Return type should be of type Promise<T>",
-        returnType,
-      )
-    }
+  for (const returnType of funcs.flatMap((func) => func.returnType)) {
+    doType(returnType)
   }
 
   function doType(typeNode: ts.TypeNode | undefined): void {

@@ -77,15 +77,28 @@ export default function parseSamenApp(
         services.push(service)
       }
     } else {
-      console.log("SAT", statement.kind)
       throw new ParseError("Unsupported export statement", statement)
+    }
+  }
+
+  const seen: Model[] = []
+  const shared: Model[] = []
+
+  for (const model of services.flatMap((s) => s.models)) {
+    if (seen.includes(model)) {
+      shared.push(model)
+    } else {
+      seen.push(model)
     }
   }
 
   const t2 = Date.now()
   console.log("parseSamenApp in", t2 - t1)
   return {
-    models: [], // TODO
-    services,
+    models: shared,
+    services: services.map((service) => ({
+      ...service,
+      models: service.models.filter((m) => !shared.includes(m)),
+    })),
   }
 }

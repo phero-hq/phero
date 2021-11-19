@@ -34,25 +34,39 @@ export default function generateAppDeclarationFile(
 ) {
   const t1 = Date.now()
 
+  const versionIdentifier = ts.factory.createIdentifier("v_1_0_0")
+
+  const sharedTypes = app.models.map((m) => typeChecker.getTypeAtLocation(m))
+
+  // const x = app.models.map(m => m.)
+
   const serviceNamespaceDeclrs = [
-    generateNamespace(
-      // export namespace domain {
-      "domain",
-      app.models.map(generateModelDeclaration),
-    ),
+    ...(app.models.length
+      ? [
+          generateNamespace(
+            "domain",
+            app.models.map((m) =>
+              generateModelDeclaration(m, sharedTypes, typeChecker),
+            ),
+          ),
+        ]
+      : []),
     ...app.services.map((service) =>
       // export namespace cmsService {
       generateNamespace(service.name, [
-        ...service.models.map(generateModelDeclaration),
-        ...service.funcs.map((func) =>
-          // export namespace editArticle {
-          generateNamespace(func.name, [
-            // export namespace v1 {
-            generateNamespace("v1", [
-              // generate Function declaration
-              generateFunction(func),
-            ]),
-          ]),
+        ...service.models.map((m) =>
+          generateModelDeclaration(m, sharedTypes, typeChecker),
+        ),
+        ...service.funcs.map(
+          (func) =>
+            // // export namespace editArticle {
+            // generateNamespace(func.name, [
+            //   // export namespace v_latest {
+            //   generateNamespace("v_latest", [
+            // generate Function declaration
+            generateFunction(func, sharedTypes, typeChecker),
+          //   ]),
+          // ]),
         ),
       ]),
     ),
@@ -73,9 +87,9 @@ export default function generateAppDeclarationFile(
     ts.ScriptKind.TS,
   )
 
-  const result = printer.printNode(
-    ts.EmitHint.Unspecified,
-    ts.factory.createModuleBlock(serviceNamespaceDeclrs),
+  const result = printer.printList(
+    ts.ListFormat.SourceFileStatements,
+    ts.factory.createNodeArray(serviceNamespaceDeclrs),
     file,
   )
 
@@ -129,6 +143,8 @@ export default function generateAppDeclarationFile(
 
 function generateFunction(
   func: ParsedSamenFunctionDefinition,
+  sharedTypes: ts.Type[],
+  typeChecker: ts.TypeChecker,
 ): ts.FunctionDeclaration {
   return ts.factory.createFunctionDeclaration(
     undefined, // TODO decoraters are prohibited
@@ -136,7 +152,6 @@ function generateFunction(
     undefined, // TODO asteriks is prohibited
     func.name,
     undefined, // TODO typeParameters are prohibited
-    // func.parameters,
     func.parameters.map((p) =>
       ts.factory.createParameterDeclaration(
         undefined,
@@ -144,11 +159,13 @@ function generateFunction(
         p.dotDotDotToken,
         p.name,
         p.questionToken,
-        p.type && generateTypeNode(p.type),
+        p.type && generateTypeNode(p.type, sharedTypes, typeChecker),
         undefined, // initializer is prohibited, only on classes
       ),
     ),
-    generateTypeNode(func.returnType),
+    ts.factory.createTypeReferenceNode("Promise", [
+      generateTypeNode(func.returnType, sharedTypes, typeChecker),
+    ]),
     ts.factory.createBlock([
       ts.factory.createThrowStatement(
         ts.factory.createNewExpression(
@@ -161,7 +178,11 @@ function generateFunction(
   )
 }
 
-function generateModelDeclaration(model: Model): Model {
+function generateModelDeclaration(
+  model: Model,
+  sharedTypes: ts.Type[],
+  typeChecker: ts.TypeChecker,
+): Model {
   if (ts.isTypeAliasDeclaration(model)) {
     return ts.factory.createTypeAliasDeclaration(
       undefined,
@@ -170,11 +191,12 @@ function generateModelDeclaration(model: Model): Model {
       model.typeParameters?.map((tp) =>
         ts.factory.createTypeParameterDeclaration(
           tp.name,
-          tp.constraint && generateTypeNode(tp.constraint),
-          tp.default && generateTypeNode(tp.default),
+          tp.constraint &&
+            generateTypeNode(tp.constraint, sharedTypes, typeChecker),
+          tp.default && generateTypeNode(tp.default, sharedTypes, typeChecker),
         ),
       ),
-      generateTypeNode(model.type),
+      generateTypeNode(model.type, sharedTypes, typeChecker),
     )
   } else if (ts.isInterfaceDeclaration(model)) {
     return ts.factory.createInterfaceDeclaration(
@@ -184,8 +206,9 @@ function generateModelDeclaration(model: Model): Model {
       model.typeParameters?.map((tp) =>
         ts.factory.createTypeParameterDeclaration(
           cleanQualiedName(tp.name),
-          tp.constraint && generateTypeNode(tp.constraint),
-          tp.default && generateTypeNode(tp.default),
+          tp.constraint &&
+            generateTypeNode(tp.constraint, sharedTypes, typeChecker),
+          tp.default && generateTypeNode(tp.default, sharedTypes, typeChecker),
         ),
       ),
       model.heritageClauses?.map((hc) =>
@@ -194,25 +217,34 @@ function generateModelDeclaration(model: Model): Model {
           hc.types.map((t) =>
             ts.factory.createExpressionWithTypeArguments(
               t.expression,
-              t.typeArguments?.map(generateTypeNode),
+              t.typeArguments?.map((t) =>
+                generateTypeNode(t, sharedTypes, typeChecker),
+              ),
             ),
           ),
         ),
       ),
-      model.members.map(generateTypeElement),
+      model.members.map((m) =>
+        generateTypeElement(m, sharedTypes, typeChecker),
+      ),
     )
   }
 
   return model
 }
 
-function generateTypeElement(typeElement: ts.TypeElement): ts.TypeElement {
+function generateTypeElement(
+  typeElement: ts.TypeElement,
+  sharedTypes: ts.Type[],
+  typeChecker: ts.TypeChecker,
+): ts.TypeElement {
   if (ts.isPropertySignature(typeElement)) {
     return ts.factory.createPropertySignature(
       typeElement.modifiers,
       typeElement.name,
       typeElement.questionToken,
-      typeElement.type && generateTypeNode(typeElement.type),
+      typeElement.type &&
+        generateTypeNode(typeElement.type, sharedTypes, typeChecker),
     )
   }
 
@@ -227,11 +259,11 @@ function generateTypeElement(typeElement: ts.TypeElement): ts.TypeElement {
           p.dotDotDotToken,
           p.name,
           p.questionToken,
-          p.type && generateTypeNode(p.type),
+          p.type && generateTypeNode(p.type, sharedTypes, typeChecker),
           p.initializer,
         ),
       ),
-      generateTypeNode(typeElement.type),
+      generateTypeNode(typeElement.type, sharedTypes, typeChecker),
     )
   }
 
@@ -241,11 +273,17 @@ function generateTypeElement(typeElement: ts.TypeElement): ts.TypeElement {
   )
 }
 
-function generateTypeNode(type: ts.TypeNode): ts.TypeNode {
+function generateTypeNode(
+  type: ts.TypeNode,
+  sharedTypes: ts.Type[],
+  typeChecker: ts.TypeChecker,
+): ts.TypeNode {
   if (ts.isTypeReferenceNode(type)) {
     return ts.factory.createTypeReferenceNode(
-      type.typeName,
-      type.typeArguments?.map(generateTypeNode),
+      withNamespace(type, sharedTypes, typeChecker),
+      type.typeArguments?.map((t) =>
+        generateTypeNode(t, sharedTypes, typeChecker),
+      ),
     )
   }
   if (ts.isLiteralTypeNode(type)) {
@@ -260,17 +298,19 @@ function generateTypeNode(type: ts.TypeNode): ts.TypeNode {
     }
   }
   if (ts.isUnionTypeNode(type)) {
-    return ts.factory.createUnionTypeNode(type.types.map(generateTypeNode))
+    return ts.factory.createUnionTypeNode(
+      type.types.map((t) => generateTypeNode(t, sharedTypes, typeChecker)),
+    )
   }
   if (ts.isIntersectionTypeNode(type)) {
     return ts.factory.createIntersectionTypeNode(
-      type.types.map(generateTypeNode),
+      type.types.map((t) => generateTypeNode(t, sharedTypes, typeChecker)),
     )
   }
 
   if (ts.isTypeLiteralNode(type)) {
     return ts.factory.createTypeLiteralNode(
-      type.members.map(generateTypeElement),
+      type.members.map((m) => generateTypeElement(m, sharedTypes, typeChecker)),
     )
   }
 
@@ -282,4 +322,26 @@ function cleanQualiedName(entityName: ts.EntityName): ts.Identifier {
     return entityName.right
   }
   return entityName
+}
+
+function withNamespace(
+  typeNode: ts.TypeReferenceNode,
+  sharedTypes: ts.Type[],
+  // ns: ts.EntityName,
+  typeChecker: ts.TypeChecker,
+): ts.EntityName {
+  const type = typeChecker.getTypeFromTypeNode(typeNode)
+
+  const isSharedType = sharedTypes.some((st) => st.symbol === type.symbol)
+
+  const clean = cleanQualiedName(typeNode.typeName)
+
+  if (isSharedType) {
+    return ts.factory.createQualifiedName(
+      ts.factory.createIdentifier("domain"),
+      clean,
+    )
+  }
+
+  return clean
 }

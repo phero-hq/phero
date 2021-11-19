@@ -117,9 +117,9 @@ function getReturnType(node: ts.FunctionLikeDeclaration): ts.TypeNode {
   }
 
   if (ts.isTypeReferenceNode(typeNode)) {
-    const hasPromisedType = typeNode.typeArguments?.length === 1
-    if (typeNode.typeName.getText() === "Promise" && hasPromisedType) {
-      return typeNode
+    const promisedType = typeNode.typeArguments?.[0]
+    if (typeNode.typeName.getText() === "Promise" && promisedType) {
+      return promisedType
     }
   }
 
