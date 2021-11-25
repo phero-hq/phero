@@ -3,7 +3,7 @@
 import ts from "typescript"
 
 import parseSamenApp, { ParsedSamenApp } from "./parseSamenApp"
-import { createTSProgram, printSamenApp } from "./tsTestUtils"
+import { createTestProgram } from "./tsTestUtils"
 
 function parseProgram(prog: ts.Program): ParsedSamenApp {
   // if (prog.getSemanticDiagnostics().length) {
@@ -45,7 +45,7 @@ describe("parseSamenApp", () => {
   describe("parse services & function config", () => {
     test("should parse a simple service/function with no config", () => {
       const parsedApp = parseProgram(
-        createTSProgram(`
+        createTestProgram(`
         async function getArticle(): Promise<string> {
           return "ok"
         }
@@ -78,7 +78,7 @@ describe("parseSamenApp", () => {
 
     test("should parse a simple service/function with config", () => {
       const parsedApp = parseProgram(
-        createTSProgram(`
+        createTestProgram(`
         async function getArticle(): Promise<string> {
           return "ok"
         }
@@ -114,7 +114,7 @@ describe("parseSamenApp", () => {
 
     test("should parse the correct name of the function", () => {
       const parsedApp = parseProgram(
-        createTSProgram(`
+        createTestProgram(`
         async function getArticle(): Promise<string> {
           return "ok"
         }
@@ -150,7 +150,7 @@ describe("parseSamenApp", () => {
 
     test("should parse a simple service with 2 functions with no config", () => {
       const parsedApp = parseProgram(
-        createTSProgram(`
+        createTestProgram(`
         async function getArticle(): Promise<string> {
           return "ok"
         }
@@ -195,7 +195,7 @@ describe("parseSamenApp", () => {
 
     test("should parse a service with 2 functions with different config", () => {
       const parsedApp = parseProgram(
-        createTSProgram(`
+        createTestProgram(`
         async function getArticle(): Promise<string> {
           return "ok"
         }
@@ -248,7 +248,7 @@ describe("parseSamenApp", () => {
 
     test("should parse a service with default config", () => {
       const parsedApp = parseProgram(
-        createTSProgram(`
+        createTestProgram(`
         async function getArticle(): Promise<string> {
           return "ok"
         }
@@ -301,7 +301,7 @@ describe("parseSamenApp", () => {
 
     test("should parse middleware config", () => {
       const parsedApp = parseProgram(
-        createTSProgram(`
+        createTestProgram(`
         async function getArticle(): Promise<string> {
           return "ok"
         }
@@ -369,7 +369,7 @@ describe("parseSamenApp", () => {
 
     test("should parse multiple services", () => {
       const parsedApp = parseProgram(
-        createTSProgram(`
+        createTestProgram(`
         async function getArticle(): Promise<string> {
           return "ok"
         }
@@ -441,7 +441,7 @@ describe("parseSamenApp", () => {
   describe("alternative syntax", () => {
     test("should parse a simple service/function with no config", () => {
       const parsedApp = parseProgram(
-        createTSProgram(`
+        createTestProgram(`
         const getArticle = async (): Promise<string> => {
           return "ok"
         }
@@ -474,7 +474,7 @@ describe("parseSamenApp", () => {
 
     test("should parse a function import correctly", () => {
       const parsedApp = parseProgram(
-        createTSProgram({
+        createTestProgram({
           other: `
           export const getArticle = async (): Promise<string> => {
             return "ok"
@@ -529,12 +529,11 @@ describe("parseSamenApp", () => {
         parsedApp.services[0].funcs[2].actualFunction,
         "publishArticle",
       )
-      // expectFunctionDeclrWithName(parsedApp.services[0].funcs[2].actualFunction, "xxx")
     })
 
     test("should parse a function referenced by an variable declaration", () => {
       const parsedApp = parseProgram(
-        createTSProgram(`
+        createTestProgram(`
           async function _editArticle(): Promise<string> {
             return ""
           }
@@ -567,7 +566,7 @@ describe("parseSamenApp", () => {
 
     test("should parse an imported arrow function referenced by a variable declaration", () => {
       const parsedApp = parseProgram(
-        createTSProgram({
+        createTestProgram({
           other: `
           const _editArticle = async (): Promise<string> => {
             return ""
@@ -604,7 +603,7 @@ describe("parseSamenApp", () => {
 
     test("should parse a wildcard imported function", () => {
       const parsedApp = parseProgram(
-        createTSProgram({
+        createTestProgram({
           other: `
           const _editArticle = async (): Promise<string> => {
             return ""
@@ -641,7 +640,7 @@ describe("parseSamenApp", () => {
 
     test("should parse a direct exported function", () => {
       const parsedApp = parseProgram(
-        createTSProgram({
+        createTestProgram({
           yetAnother: `
           export const _editArticle = async (): Promise<string> => {
             return ""
@@ -680,7 +679,7 @@ describe("parseSamenApp", () => {
 
     test("should parse a direct exported service", () => {
       const parsedApp = parseProgram(
-        createTSProgram({
+        createTestProgram({
           other: `
           const _editArticle = async (): Promise<string> => {
             return ""
@@ -718,7 +717,7 @@ describe("parseSamenApp", () => {
     })
     test("should parse an exported service definition variable declaration", () => {
       const parsedApp = parseProgram(
-        createTSProgram({
+        createTestProgram({
           other: `
           const _editArticle = async (): Promise<string> => {
             return ""
@@ -757,7 +756,7 @@ describe("parseSamenApp", () => {
 
     test("should parse an exported service definition from another file", () => {
       const parsedApp = parseProgram(
-        createTSProgram({
+        createTestProgram({
           other: `
           const _editArticle = async (): Promise<string> => {
             return ""
@@ -796,7 +795,7 @@ describe("parseSamenApp", () => {
 
     test("should parse inline function expression", () => {
       const parsedApp = parseProgram(
-        createTSProgram({
+        createTestProgram({
           other: `
           export const editArticle = createFunction(async function _editArticle(): Promise<string> {
             return "ok"
@@ -832,7 +831,7 @@ describe("parseSamenApp", () => {
     })
     test("should parse inline arrow function expression", () => {
       const parsedApp = parseProgram(
-        createTSProgram({
+        createTestProgram({
           other: `
           export const editArticle = createFunction(async (): Promise<string> => {
             return "ok"
@@ -869,7 +868,7 @@ describe("parseSamenApp", () => {
 
     test("should parse unnamed function expression", () => {
       const parsedApp = parseProgram(
-        createTSProgram({
+        createTestProgram({
           other: `
           export const editArticle = createFunction(async function(): Promise<string> {
             return "ok"
@@ -906,7 +905,7 @@ describe("parseSamenApp", () => {
 
     test("should parse short hand assignment function", () => {
       const parsedApp = parseProgram(
-        createTSProgram(`
+        createTestProgram(`
         const editArticle = createFunction(async function inlineFunc(): Promise<string> {
           return "ok"
         })
@@ -937,7 +936,7 @@ describe("parseSamenApp", () => {
 
     test("should parse short hand assignment function without config", () => {
       const parsedApp = parseProgram(
-        createTSProgram(`
+        createTestProgram(`
         function editArticle(): Promise<string> {
           return "ok"
         }
@@ -968,7 +967,7 @@ describe("parseSamenApp", () => {
 
     test("should parse a imported+referenced function config", () => {
       const parsedApp = parseProgram(
-        createTSProgram({
+        createTestProgram({
           other: `
             const timeout = 5
             

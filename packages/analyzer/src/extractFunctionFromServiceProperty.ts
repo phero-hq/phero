@@ -106,7 +106,14 @@ function parseActualFunction(
     return parseActualFunction(symbol.valueDeclaration, typeChecker)
   }
 
-  throw new ParseError("Unsupported syntax", node)
+  if (ts.isPropertyAccessExpression(node)) {
+    const lastToken = node.getLastToken()
+    if (lastToken) {
+      return parseActualFunction(lastToken, typeChecker)
+    }
+  }
+
+  throw new ParseError("Unsupported syntax" + node.kind, node)
 }
 
 function getReturnType(node: ts.FunctionLikeDeclaration): ts.TypeNode {

@@ -85,8 +85,12 @@ export default function parseSamenApp(
   const shared: Model[] = []
 
   for (const model of services.flatMap((s) => s.models)) {
-    if (seen.includes(model)) {
-      shared.push(model)
+    if (shared.includes(model)) {
+      continue
+    } else if (seen.includes(model)) {
+      if (!shared.includes(model)) {
+        shared.push(model)
+      }
     } else {
       seen.push(model)
     }

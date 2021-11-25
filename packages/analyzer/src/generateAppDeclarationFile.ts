@@ -5,15 +5,10 @@ import {
   ParsedSamenApp,
   ParsedSamenFunctionDefinition,
 } from "./parseSamenApp"
+import { VirtualCompilerHost } from "./VirtualCompilerHost"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
 const asyncModifier = ts.factory.createModifier(ts.SyntaxKind.AsyncKeyword)
-
-const formatHost: ts.FormatDiagnosticsHost = {
-  getCanonicalFileName: (path) => path,
-  getCurrentDirectory: ts.sys.getCurrentDirectory,
-  getNewLine: () => ts.sys.newLine,
-}
 
 function generateNamespace(
   name: ts.Identifier,
@@ -31,67 +26,83 @@ function generateNamespace(
 export default function generateAppDeclarationFile(
   app: ParsedSamenApp,
   typeChecker: ts.TypeChecker,
-) {
+): string {
   const t1 = Date.now()
 
-  const appDomainIdentifier = ts.factory.createIdentifier("appDomain")
-  const serviceDomainIdentifier = ts.factory.createIdentifier("serviceDomain")
+  const domainIdentifier = ts.factory.createIdentifier("domain")
   const versionIdentifier = ts.factory.createIdentifier("v_1_0_0")
 
   const sharedTypes = app.models.map((m) => typeChecker.getTypeAtLocation(m))
 
-  const serviceNamespaceDeclrs = [
-    ...(app.models.length
-      ? [
-          generateNamespace(appDomainIdentifier, [
-            generateNamespace(
+  const namespaceDeclrs: ts.ModuleDeclaration[] = []
+
+  if (app.models.length) {
+    namespaceDeclrs.push(
+      // export namespace domain {
+      generateNamespace(domainIdentifier, [
+        // export namespace v_1_0_0 {
+        generateNamespace(
+          versionIdentifier,
+          app.models.map((m) =>
+            // export interface MyModel {
+            generateModelDeclaration(
+              m,
+              sharedTypes,
+              typeChecker,
               versionIdentifier,
-              app.models.map((m) =>
-                generateModelDeclaration(
-                  m,
-                  sharedTypes,
-                  typeChecker,
-                  versionIdentifier,
-                ),
-              ),
             ),
-          ]),
-        ]
-      : []),
-    ...app.services.map((service) =>
-      // export namespace cmsService {
-      generateNamespace(ts.factory.createIdentifier(service.name), [
-        ...(service.models.length
-          ? [
-              generateNamespace(
-                serviceDomainIdentifier,
-                service.models.length
-                  ? [
-                      generateNamespace(
-                        versionIdentifier,
-                        service.models.map((m) =>
-                          generateModelDeclaration(
-                            m,
-                            sharedTypes,
-                            typeChecker,
-                            versionIdentifier,
-                          ),
-                        ),
-                      ),
-                    ]
-                  : [],
-              ),
-            ]
-          : []),
-        ...service.funcs.map((func) =>
-          generateFunction(func, sharedTypes, typeChecker, versionIdentifier),
+          ),
         ),
       ]),
-    ),
-  ]
+    )
+  }
 
-  const xfiles: { [fileName: string]: string } = {}
+  for (const service of app.services) {
+    namespaceDeclrs.push(
+      // export namespace cmsService {
+      generateNamespace(ts.factory.createIdentifier(service.name), [
+        // export namespace v_1_0_0 {
+        generateNamespace(versionIdentifier, [
+          ...service.models.map((m) =>
+            // export interface MyModel {
+            generateModelDeclaration(
+              m,
+              sharedTypes,
+              typeChecker,
+              versionIdentifier,
+            ),
+          ),
+          // export function myFunction(): Promise<void> {
+          ...service.funcs.map((func) =>
+            generateFunction(func, sharedTypes, typeChecker, versionIdentifier),
+          ),
+        ]),
+      ]),
+    )
+  }
 
+  const vHost = new VirtualCompilerHost({
+    emitDeclarationOnly: true,
+  })
+
+  vHost.addFile("api.ts", generateTS(namespaceDeclrs))
+
+  const program = vHost.createProgram("api.ts")
+  program.emit()
+
+  const t2 = Date.now()
+  console.log("generateAppDeclarationFile in", t2 - t1)
+
+  const declrFile = vHost.getFile("api.d.ts")
+
+  if (!declrFile) {
+    throw new Error("Can't generate app declaration file")
+  }
+
+  return declrFile
+}
+
+function generateTS(nodes: ts.Node[]): string {
   const printer = ts.createPrinter({
     newLine: ts.NewLineKind.LineFeed,
     removeComments: true,
@@ -105,58 +116,11 @@ export default function generateAppDeclarationFile(
     ts.ScriptKind.TS,
   )
 
-  const result = printer.printList(
+  return printer.printList(
     ts.ListFormat.SourceFileStatements,
-    ts.factory.createNodeArray(serviceNamespaceDeclrs),
+    ts.factory.createNodeArray(nodes),
     file,
   )
-
-  xfiles["api.ts"] = result
-
-  const opts: ts.CompilerOptions = {
-    declaration: true,
-    emitDeclarationOnly: true,
-    // NOTE: we need Promise support in our declaration file. In a normal TS project you would add
-    // the "es2015". Because we're implementing a file system here, sort of, we need to set the file
-    // name more explicitly. (Implementing our own fileExists makes compilation much much faster.)
-    lib: [
-      // support for Promise
-      "lib.es2015.d.ts",
-      // support for Pick, Omit, and other TS utilities
-      "lib.es5.d.ts",
-    ],
-  }
-  const host = ts.createCompilerHost(opts)
-  const originalReadFile = host.readFile
-
-  host.writeFile = (fileName: string, contents: string) => {
-    xfiles[fileName] = contents
-  }
-  host.readFile = (fileName: string) => {
-    if (xfiles[fileName]) {
-      return xfiles[fileName]
-    }
-    // Reads the lib files
-    return originalReadFile(fileName)
-  }
-  host.fileExists = (fileName: string) => {
-    return !!xfiles[fileName]
-  }
-
-  // // Prepare and emit the d.ts files
-  const program = ts.createProgram(["api.ts"], opts, host)
-  const emitResult = program.emit()
-
-  const t2 = Date.now()
-  console.log("parseSamenApp in", t2 - t1)
-
-  console.log(ts.formatDiagnostics(emitResult.diagnostics, formatHost))
-  console.log("errors", emitResult.diagnostics.length)
-
-  console.log("==== api.ts ====")
-  console.log(xfiles["api.ts"])
-  console.log("==== api.d.ts ====")
-  console.log(xfiles["api.d.ts"])
 }
 
 function generateFunction(
@@ -213,7 +177,7 @@ function generateModelDeclaration(
     return ts.factory.createTypeAliasDeclaration(
       undefined,
       [exportModifier],
-      cleanQualiedName(model.name),
+      model.name,
       model.typeParameters?.map((tp) =>
         ts.factory.createTypeParameterDeclaration(
           tp.name,
@@ -239,10 +203,10 @@ function generateModelDeclaration(
     return ts.factory.createInterfaceDeclaration(
       undefined,
       [exportModifier],
-      cleanQualiedName(model.name),
+      model.name,
       model.typeParameters?.map((tp) =>
         ts.factory.createTypeParameterDeclaration(
-          cleanQualiedName(tp.name),
+          tp.name,
           tp.constraint &&
             generateTypeNode(
               tp.constraint,
@@ -281,9 +245,43 @@ function generateModelDeclaration(
         generateTypeElement(m, sharedTypes, typeChecker, versionIdentifier),
       ),
     )
+  } else if (ts.isEnumDeclaration(model)) {
+    return ts.factory.createEnumDeclaration(
+      undefined,
+      [exportModifier],
+      model.name,
+      model.members.map((member) => {
+        return ts.factory.createEnumMember(
+          generatePropertyName(member.name),
+          member.initializer &&
+            (ts.isStringLiteral(member.initializer)
+              ? ts.factory.createStringLiteral(member.initializer.text)
+              : ts.isNumericLiteral(member.initializer)
+              ? ts.factory.createNumericLiteral(member.initializer.text)
+              : undefined),
+        )
+      }),
+    )
   }
 
   return model
+}
+
+function generatePropertyName(propName: ts.PropertyName): ts.PropertyName {
+  if (ts.isIdentifier(propName)) {
+    return ts.factory.createIdentifier(propName.text)
+  } else if (ts.isStringLiteral(propName)) {
+    return ts.factory.createStringLiteral(propName.text)
+  } else if (ts.isNumericLiteral(propName)) {
+    return ts.factory.createNumericLiteral(propName.text)
+  }
+  // else if (ts.isComputedPropertyName(propName)) {
+  // } else if (ts.isPrivateIdentifier(propName)) {
+  // }
+  throw new ParseError(
+    "Must be identifier, stringliteral or numericliteral",
+    propName,
+  )
 }
 
 function generateTypeElement(
@@ -391,14 +389,35 @@ function generateTypeNode(
     )
   }
 
-  return type
-}
-
-function cleanQualiedName(entityName: ts.EntityName): ts.Identifier {
-  if (ts.isQualifiedName(entityName)) {
-    return entityName.right
+  if (ts.isArrayTypeNode(type)) {
+    return ts.factory.createArrayTypeNode(
+      generateTypeNode(
+        type.elementType,
+        sharedTypes,
+        typeChecker,
+        versionIdentifier,
+      ),
+    )
   }
-  return entityName
+
+  if (ts.isIndexedAccessTypeNode(type)) {
+    return ts.factory.createIndexedAccessTypeNode(
+      generateTypeNode(
+        type.objectType,
+        sharedTypes,
+        typeChecker,
+        versionIdentifier,
+      ),
+      generateTypeNode(
+        type.indexType,
+        sharedTypes,
+        typeChecker,
+        versionIdentifier,
+      ),
+    )
+  }
+
+  return type
 }
 
 function withNamespace(
@@ -408,26 +427,75 @@ function withNamespace(
   versionIdentifier: ts.Identifier,
 ): ts.EntityName {
   const type = typeChecker.getTypeFromTypeNode(typeNode)
+  const isSharedType = sharedTypes.some(
+    (st) => (st.symbol ?? st.aliasSymbol) === (type.symbol ?? type.aliasSymbol),
+  )
 
-  const isSharedType = sharedTypes.some((st) => st.symbol === type.symbol)
-
-  const modelName = cleanQualiedName(typeNode.typeName)
+  const modelName = cleanTypeName(typeNode.typeName, typeChecker)
 
   if (isSharedType) {
-    return ts.factory.createQualifiedName(
+    return withDomainEntity(modelName)
+  }
+
+  if ((type.flags & ts.TypeFlags.EnumLiteral) === ts.TypeFlags.EnumLiteral) {
+    const theEnum = typeChecker.getBaseTypeOfLiteralType(type)
+    if (sharedTypes.some((st) => st.symbol === theEnum.symbol)) {
+      return withDomainEntity(modelName)
+    }
+  }
+
+  return modelName
+
+  function withDomainEntity(name: ts.EntityName) {
+    return concatEntityNames(
       ts.factory.createQualifiedName(
-        ts.factory.createIdentifier("appDomain"),
+        ts.factory.createIdentifier("domain"),
         versionIdentifier,
       ),
-      modelName,
+      name,
+      typeChecker,
     )
+  }
+}
+
+function cleanTypeName(
+  tn: ts.EntityName,
+  typeChecker: ts.TypeChecker,
+): ts.EntityName {
+  if (ts.isIdentifier(tn)) {
+    return tn
+  }
+
+  const symbol = typeChecker.getSymbolAtLocation(tn)
+
+  if (
+    !symbol ||
+    (symbol.flags & ts.SymbolFlags.EnumMember) !== ts.SymbolFlags.EnumMember
+  ) {
+    return tn.right
+  }
+
+  if (ts.isIdentifier(tn.left)) {
+    return tn
   }
 
   return ts.factory.createQualifiedName(
-    ts.factory.createQualifiedName(
-      ts.factory.createIdentifier("serviceDomain"),
-      versionIdentifier,
-    ),
-    modelName,
+    tn.left.right, // Enum
+    tn.right, // EnumMember
+  )
+}
+
+function concatEntityNames(
+  left: ts.EntityName,
+  right: ts.EntityName,
+  tc: ts.TypeChecker,
+): ts.EntityName {
+  if (ts.isIdentifier(right)) {
+    return ts.factory.createQualifiedName(left, right)
+  }
+
+  return ts.factory.createQualifiedName(
+    concatEntityNames(left, right.left, tc),
+    right.right,
   )
 }

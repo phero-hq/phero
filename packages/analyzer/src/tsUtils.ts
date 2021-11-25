@@ -233,7 +233,10 @@ export function resolveSymbol(
   typeChecker: ts.TypeChecker,
 ): ts.Symbol | undefined {
   const symbol = node && typeChecker.getSymbolAtLocation(node)
-  if (symbol && symbol.flags & ts.SymbolFlags.Alias) {
+  if (
+    symbol &&
+    (symbol.flags & ts.SymbolFlags.Alias) === ts.SymbolFlags.Alias
+  ) {
     return typeChecker.getAliasedSymbol(symbol)
   }
   return symbol
