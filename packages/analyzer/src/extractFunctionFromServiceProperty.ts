@@ -116,7 +116,7 @@ function parseActualFunction(
   throw new ParseError("Unsupported syntax" + node.kind, node)
 }
 
-function getReturnType(node: ts.FunctionLikeDeclaration): ts.TypeNode {
+export function getReturnType(node: ts.FunctionLikeDeclaration): ts.TypeNode {
   const typeNode: ts.TypeNode | undefined = node.type
 
   if (!typeNode) {
