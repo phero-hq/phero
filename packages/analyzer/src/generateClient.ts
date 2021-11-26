@@ -1,24 +1,23 @@
-import { promises as fs } from "fs"
-import path from "path"
 import ts from "typescript"
 import {
   generateClientFunction,
-  generateFunction,
   generateModel,
   generateNamespace,
   makeReference,
 } from "./code-gen"
 import { ParsedAppDeclaration } from "./parseAppDeclaration"
 
-export default async function generateClient(
+export interface ClientSource {
+  samenClientSource: ts.SourceFile
+  domainSource: ts.SourceFile
+}
+
+export default function generateClient(
   app: ParsedAppDeclaration,
   typeChecker: ts.TypeChecker,
-): Promise<void> {
+  version = "v_1_0_0",
+): ClientSource {
   const t1 = Date.now()
-  const outputPath = "/Users/kamilafsar/Projects/samen/packages/analyzer/out"
-  const version = "v_1_0_0"
-
-  await fs.mkdir(outputPath, { recursive: true })
 
   const domainModels = app.domain[version].models
   const makeDomainRef = makeReference(
@@ -28,7 +27,7 @@ export default async function generateClient(
     undefined,
   )
 
-  const domainSourceFile = ts.factory.createSourceFile(
+  const domainSource = ts.factory.createSourceFile(
     [
       ...domainModels.map((model) => generateModel(model, makeDomainRef)),
       ...app.services.map((service) =>
@@ -170,30 +169,11 @@ export default async function generateClient(
     ts.NodeFlags.None,
   )
 
-  const printer = ts.createPrinter({
-    newLine: ts.NewLineKind.LineFeed,
-    noEmitHelpers: true,
-    removeComments: true,
-    omitTrailingSemicolon: false,
-  })
-
-  await fs.writeFile(
-    path.join(outputPath, "domain.ts"),
-    printer.printFile(domainSourceFile),
-    { encoding: "utf-8" },
-  )
-
-  await fs.copyFile(
-    path.join(__dirname, "../src/BaseSamenClient.ts"),
-    path.join(outputPath, "BaseSamenClient.ts"),
-  )
-
-  await fs.writeFile(
-    path.join(outputPath, `SamenClient.ts`),
-    printer.printFile(samenClientSource),
-    { encoding: "utf-8" },
-  )
-
   const t2 = Date.now()
   console.log("Generate client in ", t2 - t1)
+
+  return {
+    samenClientSource,
+    domainSource,
+  }
 }
