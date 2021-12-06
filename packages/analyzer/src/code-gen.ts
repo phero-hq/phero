@@ -1,8 +1,8 @@
 import ts from "typescript"
 import { ParseError } from "./errors"
 import { getReturnType } from "./extractFunctionFromServiceProperty"
-import { ParsedServiceDeclaration } from "./parseAppDeclaration"
 import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
+import { resolveSymbol } from "./tsUtils"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
 const asyncModifier = ts.factory.createModifier(ts.SyntaxKind.AsyncKeyword)
@@ -22,7 +22,7 @@ export function generateNamespace(
 
 export function generateFunction(
   func: ParsedSamenFunctionDefinition,
-  makeRef: (typeNode: ts.TypeReferenceNode) => ts.EntityName,
+  refMaker: ReferenceMaker,
 ): ts.FunctionDeclaration {
   return ts.factory.createFunctionDeclaration(
     undefined, // TODO decoraters are prohibited
@@ -37,12 +37,12 @@ export function generateFunction(
         p.dotDotDotToken,
         p.name,
         p.questionToken,
-        p.type && generateTypeNode(p.type, makeRef),
+        p.type && generateTypeNode(p.type, refMaker),
         undefined, // initializer is prohibited, only on classes
       ),
     ),
     ts.factory.createTypeReferenceNode("Promise", [
-      generateTypeNode(func.returnType, makeRef),
+      generateTypeNode(func.returnType, refMaker),
     ]),
     ts.factory.createBlock([
       ts.factory.createThrowStatement(
@@ -57,8 +57,8 @@ export function generateFunction(
 }
 
 export function generateClientFunction(
-  func: ts.FunctionDeclaration,
-  makeRef: (typeNode: ts.TypeReferenceNode) => ts.EntityName,
+  func: ts.FunctionLikeDeclarationBase,
+  refMaker: ReferenceMaker,
 ): ts.PropertyAssignment {
   return ts.factory.createPropertyAssignment(
     func.name!,
@@ -72,21 +72,21 @@ export function generateClientFunction(
           p.dotDotDotToken,
           p.name,
           p.questionToken,
-          p.type && generateTypeNode(p.type, makeRef),
+          p.type && generateTypeNode(p.type, refMaker),
           undefined, // initializer is prohibited, only on classes
         ),
       ),
-      func.type && generateTypeNode(func.type, makeRef),
+      func.type && generateTypeNode(func.type, refMaker),
       undefined,
       // ts.factory.createBlock([], false),
-      generateClientFunctionBlock(func, makeRef),
+      generateClientFunctionBlock(func, refMaker),
     ),
   )
 }
 
 function generateClientFunctionBlock(
-  func: ts.FunctionDeclaration,
-  makeRef: (typeNode: ts.TypeReferenceNode) => ts.EntityName,
+  func: ts.FunctionLikeDeclarationBase,
+  refMaker: ReferenceMaker,
 ): ts.Block {
   // TODO should not use getReturnType or refactor
   const returnType = getReturnType(func)
@@ -101,7 +101,7 @@ function generateClientFunctionBlock(
             ? ts.factory.createIdentifier("requestVoid")
             : ts.factory.createIdentifier("request"),
         ),
-        isVoid ? undefined : [generateTypeNode(returnType, makeRef)], //typeArgs,
+        isVoid ? undefined : [generateTypeNode(returnType, refMaker)], //typeArgs,
         [
           ts.factory.createStringLiteral(func.name!.getText()),
           ts.factory.createObjectLiteralExpression(
@@ -122,10 +122,7 @@ function generateClientFunctionBlock(
   ])
 }
 
-export function generateModel(
-  model: Model,
-  makeRef: (typeNode: ts.TypeReferenceNode) => ts.EntityName,
-): Model {
+export function generateModel(model: Model, refMaker: ReferenceMaker): Model {
   if (ts.isTypeAliasDeclaration(model)) {
     return ts.factory.createTypeAliasDeclaration(
       undefined,
@@ -134,11 +131,11 @@ export function generateModel(
       model.typeParameters?.map((tp) =>
         ts.factory.createTypeParameterDeclaration(
           tp.name,
-          tp.constraint && generateTypeNode(tp.constraint, makeRef),
-          tp.default && generateTypeNode(tp.default, makeRef),
+          tp.constraint && generateTypeNode(tp.constraint, refMaker),
+          tp.default && generateTypeNode(tp.default, refMaker),
         ),
       ),
-      generateTypeNode(model.type, makeRef),
+      generateTypeNode(model.type, refMaker),
     )
   } else if (ts.isInterfaceDeclaration(model)) {
     return ts.factory.createInterfaceDeclaration(
@@ -148,8 +145,8 @@ export function generateModel(
       model.typeParameters?.map((tp) =>
         ts.factory.createTypeParameterDeclaration(
           tp.name,
-          tp.constraint && generateTypeNode(tp.constraint, makeRef),
-          tp.default && generateTypeNode(tp.default, makeRef),
+          tp.constraint && generateTypeNode(tp.constraint, refMaker),
+          tp.default && generateTypeNode(tp.default, refMaker),
         ),
       ),
       model.heritageClauses?.map((hc) =>
@@ -157,13 +154,15 @@ export function generateModel(
           hc.token,
           hc.types.map((t) =>
             ts.factory.createExpressionWithTypeArguments(
-              t.expression,
-              t.typeArguments?.map((t) => generateTypeNode(t, makeRef)),
+              ts.isIdentifier(t.expression)
+                ? refMaker.fromIdentifier(t.expression)
+                : t.expression,
+              t.typeArguments?.map((t) => generateTypeNode(t, refMaker)),
             ),
           ),
         ),
       ),
-      model.members.map((m) => generateTypeElement(m, makeRef)),
+      model.members.map((m) => generateTypeElement(m, refMaker)),
     )
   } else if (ts.isEnumDeclaration(model)) {
     return ts.factory.createEnumDeclaration(
@@ -206,14 +205,14 @@ function generatePropertyName(propName: ts.PropertyName): ts.PropertyName {
 
 function generateTypeElement(
   typeElement: ts.TypeElement,
-  makeRef: (typeNode: ts.TypeReferenceNode) => ts.EntityName,
+  refMaker: ReferenceMaker,
 ): ts.TypeElement {
   if (ts.isPropertySignature(typeElement)) {
     return ts.factory.createPropertySignature(
       typeElement.modifiers,
       typeElement.name,
       typeElement.questionToken,
-      typeElement.type && generateTypeNode(typeElement.type, makeRef),
+      typeElement.type && generateTypeNode(typeElement.type, refMaker),
     )
   }
 
@@ -228,11 +227,11 @@ function generateTypeElement(
           p.dotDotDotToken,
           p.name,
           p.questionToken,
-          p.type && generateTypeNode(p.type, makeRef),
+          p.type && generateTypeNode(p.type, refMaker),
           p.initializer,
         ),
       ),
-      generateTypeNode(typeElement.type, makeRef),
+      generateTypeNode(typeElement.type, refMaker),
     )
   }
 
@@ -244,12 +243,12 @@ function generateTypeElement(
 
 function generateTypeNode(
   type: ts.TypeNode,
-  makeRef: (typeNode: ts.TypeReferenceNode) => ts.EntityName,
+  refMaker: ReferenceMaker,
 ): ts.TypeNode {
   if (ts.isTypeReferenceNode(type)) {
     return ts.factory.createTypeReferenceNode(
-      makeRef(type),
-      type.typeArguments?.map((t) => generateTypeNode(t, makeRef)),
+      refMaker.fromTypeNode(type),
+      type.typeArguments?.map((t) => generateTypeNode(t, refMaker)),
     )
   }
   if (ts.isLiteralTypeNode(type)) {
@@ -265,31 +264,31 @@ function generateTypeNode(
   }
   if (ts.isUnionTypeNode(type)) {
     return ts.factory.createUnionTypeNode(
-      type.types.map((t) => generateTypeNode(t, makeRef)),
+      type.types.map((t) => generateTypeNode(t, refMaker)),
     )
   }
   if (ts.isIntersectionTypeNode(type)) {
     return ts.factory.createIntersectionTypeNode(
-      type.types.map((t) => generateTypeNode(t, makeRef)),
+      type.types.map((t) => generateTypeNode(t, refMaker)),
     )
   }
 
   if (ts.isTypeLiteralNode(type)) {
     return ts.factory.createTypeLiteralNode(
-      type.members.map((m) => generateTypeElement(m, makeRef)),
+      type.members.map((m) => generateTypeElement(m, refMaker)),
     )
   }
 
   if (ts.isArrayTypeNode(type)) {
     return ts.factory.createArrayTypeNode(
-      generateTypeNode(type.elementType, makeRef),
+      generateTypeNode(type.elementType, refMaker),
     )
   }
 
   if (ts.isIndexedAccessTypeNode(type)) {
     return ts.factory.createIndexedAccessTypeNode(
-      generateTypeNode(type.objectType, makeRef),
-      generateTypeNode(type.indexType, makeRef),
+      generateTypeNode(type.objectType, refMaker),
+      generateTypeNode(type.indexType, refMaker),
     )
   }
 
@@ -323,63 +322,98 @@ function cleanTypeName(
   )
 }
 
-function concatEntityNames(
-  left: ts.EntityName,
-  right: ts.EntityName,
-): ts.EntityName {
-  if (ts.isIdentifier(right)) {
-    return ts.factory.createQualifiedName(left, right)
-  }
-
-  return ts.factory.createQualifiedName(
-    concatEntityNames(left, right.left),
-    right.right,
-  )
+function unpack(entityName: ts.EntityName): ts.Identifier[] {
+  return ts.isIdentifier(entityName)
+    ? [entityName]
+    : [...unpack(entityName.left), entityName.right]
 }
 
-export function makeReference(
-  domain: Model[],
-  typeChecker: ts.TypeChecker,
-  sharedDomainName: ts.EntityName | undefined,
-  serviceDomainName: ts.EntityName | undefined,
-): (typeNode: ts.TypeReferenceNode) => ts.EntityName {
-  const sharedTypes = domain.map((m) => typeChecker.getTypeAtLocation(m))
+function combineAsEntityName(ids: ts.Identifier[]): ts.EntityName {
+  if (ids.length === 1) {
+    return ids[0]
+  }
 
-  return (typeNode: ts.TypeReferenceNode): ts.EntityName => {
-    const type = typeChecker.getTypeFromTypeNode(typeNode)
-    const isSharedType = sharedTypes.some(
+  const rest = ids.slice(0, ids.length - 1)
+  const last = ids[ids.length - 1]
+
+  return ts.factory.createQualifiedName(combineAsEntityName(rest), last)
+}
+
+function combineAsExpr(
+  ids: ts.Identifier[],
+): ts.Identifier | ts.PropertyAccessExpression {
+  if (ids.length === 1) {
+    return ids[0]
+  }
+
+  const rest = ids.slice(0, ids.length - 1)
+  const last = ids[ids.length - 1]
+
+  return ts.factory.createPropertyAccessExpression(combineAsExpr(rest), last)
+}
+
+export class ReferenceMaker {
+  private readonly sharedTypes: ts.Type[]
+
+  constructor(
+    private readonly domain: Model[],
+    private readonly typeChecker: ts.TypeChecker,
+    private readonly sharedDomainName: ts.EntityName | undefined,
+    private readonly serviceDomainName: ts.EntityName | undefined,
+  ) {
+    this.sharedTypes = this.domain.map((m) => typeChecker.getTypeAtLocation(m))
+  }
+
+  fromTypeNode(typeNode: ts.TypeReferenceNode): ts.EntityName {
+    const type = this.typeChecker.getTypeFromTypeNode(typeNode)
+    const result = this.xx(typeNode.typeName, type)
+    return combineAsEntityName(result.flatMap(unpack))
+  }
+
+  fromIdentifier(
+    identifier: ts.Identifier,
+  ): ts.Identifier | ts.PropertyAccessExpression {
+    const type = this.typeChecker.getTypeAtLocation(identifier)
+    const result = this.xx(identifier, type)
+    return combineAsExpr(result.flatMap(unpack))
+  }
+
+  xx(name: ts.EntityName, type: ts.Type): ts.EntityName[] {
+    const isSharedType = this.sharedTypes.some(
       (st) =>
         (st.symbol ?? st.aliasSymbol) === (type.symbol ?? type.aliasSymbol),
     )
 
-    const modelName = cleanTypeName(typeNode.typeName, typeChecker)
+    const modelName = cleanTypeName(name, this.typeChecker)
 
-    const isExternalType = type
-      .getSymbol()
-      ?.declarations?.some((d) =>
-        d.getSourceFile().fileName.includes("node_modules/typescript/lib/lib."),
-      )
+    const isExternalType = type.getSymbol()?.declarations?.some((d) =>
+      // TODO ts.Program:
+      //isSourceFileFromExternalLibrary(file: SourceFile): boolean;
+      //isSourceFileDefaultLibrary(file: SourceFile): boolean;
+      d.getSourceFile().fileName.includes("node_modules/typescript/lib/lib."),
+    )
 
     if (isExternalType) {
-      return modelName
+      return [modelName]
     }
+
+    const withDomainEntity = (name: ts.EntityName): ts.EntityName[] => {
+      return this.sharedDomainName ? [this.sharedDomainName, name] : [name]
+    }
+
     if (isSharedType) {
       return withDomainEntity(modelName)
     }
 
     if ((type.flags & ts.TypeFlags.EnumLiteral) === ts.TypeFlags.EnumLiteral) {
-      const theEnum = typeChecker.getBaseTypeOfLiteralType(type)
-      if (sharedTypes.some((st) => st.symbol === theEnum.symbol)) {
+      const theEnum = this.typeChecker.getBaseTypeOfLiteralType(type)
+      if (this.sharedTypes.some((st) => st.symbol === theEnum.symbol)) {
         return withDomainEntity(modelName)
       }
     }
 
-    return serviceDomainName
-      ? concatEntityNames(serviceDomainName, modelName)
-      : modelName
-
-    function withDomainEntity(name: ts.EntityName) {
-      return sharedDomainName ? concatEntityNames(sharedDomainName, name) : name
-    }
+    return this.serviceDomainName
+      ? [this.serviceDomainName, modelName]
+      : [modelName]
   }
 }

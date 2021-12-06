@@ -7,7 +7,7 @@ const formatHost: ts.FormatDiagnosticsHost = {
   getNewLine: () => ts.sys.newLine,
 }
 
-type ErrorCallback = () => void
+type ErrorCallback = (dianostics: readonly ts.Diagnostic[]) => void
 type ChangeCallback = (
   samenSourceFile: ts.SourceFile,
   typeChecker: ts.TypeChecker,
@@ -77,13 +77,14 @@ export default class WatchProgram {
     )
 
     if (this.errorCallback) {
-      // const diagnostics = this.watchProgram.getProgram().getSemanticDiagnostics()
+      const diagnostics = this.watchProgram
+        .getProgram()
+        .getSemanticDiagnostics()
       // for (const diag of diagnostics) {
       //   if (diag.category === ts.DiagnosticCategory.Error) {
-
       //   }
       // }
-      this.errorCallback()
+      this.errorCallback(diagnostics)
     }
   }
 

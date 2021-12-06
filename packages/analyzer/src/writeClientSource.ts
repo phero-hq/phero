@@ -4,22 +4,22 @@ import ts from "typescript"
 
 import { ClientSource } from "./generateClient"
 
+const printer = ts.createPrinter({
+  newLine: ts.NewLineKind.LineFeed,
+  noEmitHelpers: true,
+  removeComments: true,
+  omitTrailingSemicolon: false,
+})
+
 export default async function writeClientSource(
   outputPath: string,
   client: ClientSource,
 ): Promise<void> {
-  const printer = ts.createPrinter({
-    newLine: ts.NewLineKind.LineFeed,
-    noEmitHelpers: true,
-    removeComments: true,
-    omitTrailingSemicolon: false,
-  })
-
   await fs.mkdir(outputPath, { recursive: true })
 
   await fs.writeFile(
     path.join(outputPath, "domain.ts"),
-    printer.printFile(client.domainSource),
+    printSourceFile(client.domainSource),
     { encoding: "utf-8" },
   )
 
@@ -30,7 +30,11 @@ export default async function writeClientSource(
 
   await fs.writeFile(
     path.join(outputPath, `SamenClient.ts`),
-    printer.printFile(client.samenClientSource),
+    printSourceFile(client.samenClientSource),
     { encoding: "utf-8" },
   )
+}
+
+export function printSourceFile(source: ts.SourceFile): string {
+  return printer.printFile(source)
 }

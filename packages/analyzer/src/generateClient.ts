@@ -3,24 +3,60 @@ import {
   generateClientFunction,
   generateModel,
   generateNamespace,
-  makeReference,
+  ReferenceMaker,
 } from "./code-gen"
 import { ParsedAppDeclaration } from "./parseAppDeclaration"
+import { Model, ParsedSamenApp } from "./parseSamenApp"
+
+export interface ServerSource {
+  domainModels: Model[]
+  services: Array<{
+    name: string
+    models: Model[]
+    functions: ts.FunctionLikeDeclarationBase[]
+  }>
+}
 
 export interface ClientSource {
-  samenClientSource: ts.SourceFile
   domainSource: ts.SourceFile
+  samenClientSource: ts.SourceFile
+}
+
+export function mapSamenAppAppToServerSource(
+  app: ParsedSamenApp,
+): ServerSource {
+  return {
+    domainModels: app.models,
+    services: app.services.map((service) => ({
+      name: service.name,
+      models: service.models,
+      functions: service.funcs.map((f) => f.actualFunction),
+    })),
+  }
+}
+
+export function mapParsedAppDeclarationToServerSource(
+  app: ParsedAppDeclaration,
+  version = "v_1_0_0",
+): ServerSource {
+  return {
+    domainModels: app.domain[version].models,
+    services: app.services.map((service) => ({
+      name: service.name,
+      models: service.versions[version].models,
+      functions: service.versions[version].functions,
+    })),
+  }
 }
 
 export default function generateClient(
-  app: ParsedAppDeclaration,
+  serverSource: ServerSource,
   typeChecker: ts.TypeChecker,
-  version = "v_1_0_0",
 ): ClientSource {
   const t1 = Date.now()
 
-  const domainModels = app.domain[version].models
-  const makeDomainRef = makeReference(
+  const { domainModels, services } = serverSource
+  const domainRefMaker = new ReferenceMaker(
     domainModels,
     typeChecker,
     undefined,
@@ -29,13 +65,11 @@ export default function generateClient(
 
   const domainSource = ts.factory.createSourceFile(
     [
-      ...domainModels.map((model) => generateModel(model, makeDomainRef)),
-      ...app.services.map((service) =>
+      ...domainModels.map((model) => generateModel(model, domainRefMaker)),
+      ...services.map((service) =>
         generateNamespace(
           ts.factory.createIdentifier(service.name),
-          service.versions[version].models.map((model) =>
-            generateModel(model, makeDomainRef),
-          ),
+          service.models.map((model) => generateModel(model, domainRefMaker)),
         ),
       ),
     ],
@@ -53,7 +87,7 @@ export default function generateClient(
         ...domainModels.map((model) =>
           ts.factory.createImportSpecifier(undefined, model.name),
         ),
-        ...app.services.map((service) =>
+        ...services.map((service) =>
           ts.factory.createImportSpecifier(
             undefined,
             ts.factory.createIdentifier(service.name),
@@ -136,25 +170,25 @@ export default function generateClient(
           ),
         ]),
       ),
-      ...app.services.map((service) => {
-        const { functions } = service.versions[version]
+      ...services.map((service) => {
+        const { name, functions } = service
 
-        const makeServiceRef = makeReference(
+        const serviceRefMaker = new ReferenceMaker(
           domainModels,
           typeChecker,
           undefined,
-          ts.factory.createIdentifier(service.name),
+          ts.factory.createIdentifier(name),
         )
 
         return ts.factory.createPropertyDeclaration(
           undefined,
           [],
-          service.name,
+          name,
           undefined,
           undefined,
           ts.factory.createObjectLiteralExpression(
             functions.map((func) =>
-              generateClientFunction(func, makeServiceRef),
+              generateClientFunction(func, serviceRefMaker),
             ),
             true,
           ),

@@ -1,6 +1,5 @@
 import ts from "typescript"
 import { ParseError } from "./errors"
-import extractModels from "./extractModels"
 import getLibFunctionCall from "./getLibFunctionCall"
 import parseFunctionConfig from "./parseFunctionConfig"
 import {
@@ -116,7 +115,9 @@ function parseActualFunction(
   throw new ParseError("Unsupported syntax" + node.kind, node)
 }
 
-export function getReturnType(node: ts.FunctionLikeDeclaration): ts.TypeNode {
+export function getReturnType(
+  node: ts.FunctionLikeDeclarationBase,
+): ts.TypeNode {
   const typeNode: ts.TypeNode | undefined = node.type
 
   if (!typeNode) {

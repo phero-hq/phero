@@ -3,14 +3,9 @@ import {
   generateFunction,
   generateModel,
   generateNamespace,
-  makeReference,
+  ReferenceMaker,
 } from "./code-gen"
-import { ParseError } from "./errors"
-import {
-  Model,
-  ParsedSamenApp,
-  ParsedSamenFunctionDefinition,
-} from "./parseSamenApp"
+import { ParsedSamenApp } from "./parseSamenApp"
 import { VirtualCompilerHost } from "./VirtualCompilerHost"
 
 export default function generateAppDeclarationFile(
@@ -22,7 +17,7 @@ export default function generateAppDeclarationFile(
   const domainIdentifier = ts.factory.createIdentifier("domain")
   const versionIdentifier = ts.factory.createIdentifier("v_1_0_0")
 
-  const makeRef = makeReference(
+  const refMaker = new ReferenceMaker(
     app.models,
     typeChecker,
     ts.factory.createQualifiedName(domainIdentifier, versionIdentifier),
@@ -40,7 +35,7 @@ export default function generateAppDeclarationFile(
           versionIdentifier,
           app.models.map((m) =>
             // export interface MyModel {
-            generateModel(m, makeRef),
+            generateModel(m, refMaker),
           ),
         ),
       ]),
@@ -55,10 +50,10 @@ export default function generateAppDeclarationFile(
         generateNamespace(versionIdentifier, [
           ...service.models.map((m) =>
             // export interface MyModel {
-            generateModel(m, makeRef),
+            generateModel(m, refMaker),
           ),
           // export function myFunction(): Promise<void> {
-          ...service.funcs.map((func) => generateFunction(func, makeRef)),
+          ...service.funcs.map((func) => generateFunction(func, refMaker)),
         ]),
       ]),
     )
