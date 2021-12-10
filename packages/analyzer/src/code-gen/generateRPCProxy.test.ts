@@ -227,7 +227,7 @@ describe("RPCProxy", () => {
         const parserDeclaration = generateParser(model, typeChecker)
         expect(printCode(parserDeclaration)).toMatchSnapshot()
       })
-      test.only("xxx", () => {
+      test("deep nested object", () => {
         const { statement: model, typeChecker } = compileStatement(
           `
           interface MyModel {

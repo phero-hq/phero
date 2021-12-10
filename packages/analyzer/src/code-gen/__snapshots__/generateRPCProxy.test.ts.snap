@@ -72,6 +72,103 @@ exports[`RPCProxy should generate a Parser for an interface boolean member 1`] =
 }"
 `;
 
+exports[`RPCProxy should generate a Parser for an interface deep nested object 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+                errors.push({
+                    path: \\"a\\",
+                    message: \`not an array\`
+                });
+            }
+            else
+                for (let it_0 = 0; it_0 < data[\\"a\\"].length; it_0++)
+                    if (typeof data[\\"a\\"][it_0] !== \\"object\\" || data[\\"a\\"][it_0] === null) {
+                        errors.push({
+                            path: \`a[\${it_0}]\`,
+                            message: \`null or not an object\`
+                        });
+                    }
+                    else {
+                        if (data[\\"a\\"][it_0][\\"b\\"] !== undefined)
+                            if (typeof data[\\"a\\"][it_0][\\"b\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"] === null) {
+                                errors.push({
+                                    path: \`a[\${it_0}].b\`,
+                                    message: \`null or not an object\`
+                                });
+                            }
+                            else {
+                                if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"] === null) {
+                                    errors.push({
+                                        path: \`a[\${it_0}].b.c\`,
+                                        message: \`null or not an object\`
+                                    });
+                                }
+                                else {
+                                    if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"] === null) {
+                                        errors.push({
+                                            path: \`a[\${it_0}].b.c.d\`,
+                                            message: \`not an array\`
+                                        });
+                                    }
+                                    else
+                                        for (let it_1 = 0; it_1 < data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"].length; it_1++)
+                                            if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1] === null) {
+                                                errors.push({
+                                                    path: \`a[\${it_0}].b.c.d[\${it_1}]\`,
+                                                    message: \`null or not an object\`
+                                                });
+                                            }
+                                            else {
+                                                if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"] === null) {
+                                                    errors.push({
+                                                        path: \`a[\${it_0}].b.c.d[\${it_1}].e\`,
+                                                        message: \`null or not an object\`
+                                                    });
+                                                }
+                                                else {
+                                                    if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"][\\"f\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"][\\"f\\"] === null) {
+                                                        errors.push({
+                                                            path: \`a[\${it_0}].b.c.d[\${it_1}].e.f\`,
+                                                            message: \`not an array\`
+                                                        });
+                                                    }
+                                                    else
+                                                        for (let it_2 = 0; it_2 < data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"][\\"f\\"].length; it_2++)
+                                                            if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"][\\"f\\"][it_2] !== \\"boolean\\") {
+                                                                errors.push({
+                                                                    path: \`a[\${it_0}].b.c.d[\${it_1}].e.f[\${it_2}]\`,
+                                                                    message: \`not a boolean\`
+                                                                });
+                                                            }
+                                                }
+                                            }
+                                }
+                            }
+                    }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
 exports[`RPCProxy should generate a Parser for an interface null member 1`] = `
 "export class MyModelParser {
     static parse(data: unknown): ParseResult<MyModel> {
@@ -580,103 +677,6 @@ exports[`RPCProxy should generate a Parser for an interface with no members 1`] 
                 path: \\"data\\",
                 message: \`null or not an object\`
             });
-        }
-        if (errors.length) {
-            return {
-                ok: false,
-                errors
-            };
-        }
-        return {
-            ok: true,
-            result: data as MyModel
-        };
-    }
-}"
-`;
-
-exports[`RPCProxy should generate a Parser for an interface xxx 1`] = `
-"export class MyModelParser {
-    static parse(data: unknown): ParseResult<MyModel> {
-        const errors: ValidationError[] = [];
-        if (typeof data !== \\"object\\" || data === null) {
-            errors.push({
-                path: \\"data\\",
-                message: \`null or not an object\`
-            });
-        }
-        else {
-            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
-                errors.push({
-                    path: \\"a\\",
-                    message: \`not an array\`
-                });
-            }
-            else
-                for (let it_0 = 0; it_0 < data[\\"a\\"].length; it_0++)
-                    if (typeof data[\\"a\\"][it_0] !== \\"object\\" || data[\\"a\\"][it_0] === null) {
-                        errors.push({
-                            path: \`a[\${it_0}]\`,
-                            message: \`null or not an object\`
-                        });
-                    }
-                    else {
-                        if (data[\\"a\\"][it_0][\\"b\\"] !== undefined)
-                            if (typeof data[\\"a\\"][it_0][\\"b\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"] === null) {
-                                errors.push({
-                                    path: \`a[\${it_0}].b\`,
-                                    message: \`null or not an object\`
-                                });
-                            }
-                            else {
-                                if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"] === null) {
-                                    errors.push({
-                                        path: \`a[\${it_0}].b.c\`,
-                                        message: \`null or not an object\`
-                                    });
-                                }
-                                else {
-                                    if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"] === null) {
-                                        errors.push({
-                                            path: \`a[\${it_0}].b.c.d\`,
-                                            message: \`not an array\`
-                                        });
-                                    }
-                                    else
-                                        for (let it_1 = 0; it_1 < data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"].length; it_1++)
-                                            if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1] === null) {
-                                                errors.push({
-                                                    path: \`a[\${it_0}].b.c.d[\${it_1}]\`,
-                                                    message: \`null or not an object\`
-                                                });
-                                            }
-                                            else {
-                                                if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"] === null) {
-                                                    errors.push({
-                                                        path: \`a[\${it_0}].b.c.d[\${it_1}].e\`,
-                                                        message: \`null or not an object\`
-                                                    });
-                                                }
-                                                else {
-                                                    if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"][\\"f\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"][\\"f\\"] === null) {
-                                                        errors.push({
-                                                            path: \`a[\${it_0}].b.c.d[\${it_1}].e.f\`,
-                                                            message: \`not an array\`
-                                                        });
-                                                    }
-                                                    else
-                                                        for (let it_2 = 0; it_2 < data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"][\\"f\\"].length; it_2++)
-                                                            if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"][\\"f\\"][it_2] !== \\"boolean\\") {
-                                                                errors.push({
-                                                                    path: \`a[\${it_0}].b.c.d[\${it_1}].e.f[\${it_2}]\`,
-                                                                    message: \`not a boolean\`
-                                                                });
-                                                            }
-                                                }
-                                            }
-                                }
-                            }
-                    }
         }
         if (errors.length) {
             return {
