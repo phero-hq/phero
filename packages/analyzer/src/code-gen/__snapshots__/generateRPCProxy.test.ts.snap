@@ -1,0 +1,693 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RPCProxy should generate a Parser for an interface boolean array member 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+                errors.push({
+                    path: \\"a\\",
+                    message: \`not an array\`
+                });
+            }
+            else
+                for (let it_0 = 0; it_0 < data[\\"a\\"].length; it_0++)
+                    if (typeof data[\\"a\\"][it_0] !== \\"boolean\\") {
+                        errors.push({
+                            path: \`a[\${it_0}]\`,
+                            message: \`not a boolean\`
+                        });
+                    }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
+exports[`RPCProxy should generate a Parser for an interface boolean member 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (typeof data[\\"a\\"] !== \\"boolean\\") {
+                errors.push({
+                    path: \\"a\\",
+                    message: \`not a boolean\`
+                });
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
+exports[`RPCProxy should generate a Parser for an interface null member 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (typeof data[\\"a\\"] !== null) {
+                errors.push({
+                    path: \\"a\\",
+                    message: \`not null\`
+                });
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
+exports[`RPCProxy should generate a Parser for an interface number array member 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+                errors.push({
+                    path: \\"a\\",
+                    message: \`not an array\`
+                });
+            }
+            else
+                for (let it_0 = 0; it_0 < data[\\"a\\"].length; it_0++)
+                    if (typeof data[\\"a\\"][it_0] !== \\"number\\") {
+                        errors.push({
+                            path: \`a[\${it_0}]\`,
+                            message: \`not a number\`
+                        });
+                    }
+                    else if (isNaN(data[\\"a\\"][it_0])) {
+                        errors.push({
+                            path: \`a[\${it_0}]\`,
+                            message: \`invalid number\`
+                        });
+                    }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
+exports[`RPCProxy should generate a Parser for an interface number literal member 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (data[\\"a\\"] !== 123) {
+                errors.push({
+                    path: \\"a\\",
+                    message: \`not 123\`
+                });
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
+exports[`RPCProxy should generate a Parser for an interface number member 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (typeof data[\\"a\\"] !== \\"number\\") {
+                errors.push({
+                    path: \\"a\\",
+                    message: \`not a number\`
+                });
+            }
+            else if (isNaN(data[\\"a\\"])) {
+                errors.push({
+                    path: \\"a\\",
+                    message: \`invalid number\`
+                });
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
+exports[`RPCProxy should generate a Parser for an interface object literal member 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+                errors.push({
+                    path: \\"a\\",
+                    message: \`null or not an object\`
+                });
+            }
+            else {
+                if (typeof data[\\"a\\"][\\"b\\"] !== \\"number\\") {
+                    errors.push({
+                        path: \\"a.b\\",
+                        message: \`not a number\`
+                    });
+                }
+                else if (isNaN(data[\\"a\\"][\\"b\\"])) {
+                    errors.push({
+                        path: \\"a.b\\",
+                        message: \`invalid number\`
+                    });
+                }
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
+exports[`RPCProxy should generate a Parser for an interface optional member 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (data[\\"a\\"] !== undefined)
+                if (typeof data[\\"a\\"] !== \\"string\\") {
+                    errors.push({
+                        path: \\"a\\",
+                        message: \`not a string\`
+                    });
+                }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
+exports[`RPCProxy should generate a Parser for an interface optional object literal member 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (data[\\"a\\"] !== undefined)
+                if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+                    errors.push({
+                        path: \\"a\\",
+                        message: \`null or not an object\`
+                    });
+                }
+                else {
+                    if (typeof data[\\"a\\"][\\"b\\"] !== \\"number\\") {
+                        errors.push({
+                            path: \\"a.b\\",
+                            message: \`not a number\`
+                        });
+                    }
+                    else if (isNaN(data[\\"a\\"][\\"b\\"])) {
+                        errors.push({
+                            path: \\"a.b\\",
+                            message: \`invalid number\`
+                        });
+                    }
+                }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
+exports[`RPCProxy should generate a Parser for an interface optional object literal with optional member 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (data[\\"a\\"] !== undefined)
+                if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+                    errors.push({
+                        path: \\"a\\",
+                        message: \`null or not an object\`
+                    });
+                }
+                else {
+                    if (data[\\"a\\"][\\"b\\"] !== undefined)
+                        if (typeof data[\\"a\\"][\\"b\\"] !== \\"number\\") {
+                            errors.push({
+                                path: \\"a.b\\",
+                                message: \`not a number\`
+                            });
+                        }
+                        else if (isNaN(data[\\"a\\"][\\"b\\"])) {
+                            errors.push({
+                                path: \\"a.b\\",
+                                message: \`invalid number\`
+                            });
+                        }
+                }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
+exports[`RPCProxy should generate a Parser for an interface optional string array member 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (data[\\"a\\"] !== undefined)
+                if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+                    errors.push({
+                        path: \\"a\\",
+                        message: \`not an array\`
+                    });
+                }
+                else
+                    for (let it_0 = 0; it_0 < data[\\"a\\"].length; it_0++)
+                        if (typeof data[\\"a\\"][it_0] !== \\"string\\") {
+                            errors.push({
+                                path: \`a[\${it_0}]\`,
+                                message: \`not a string\`
+                            });
+                        }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
+exports[`RPCProxy should generate a Parser for an interface string array member 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+                errors.push({
+                    path: \\"a\\",
+                    message: \`not an array\`
+                });
+            }
+            else
+                for (let it_0 = 0; it_0 < data[\\"a\\"].length; it_0++)
+                    if (typeof data[\\"a\\"][it_0] !== \\"string\\") {
+                        errors.push({
+                            path: \`a[\${it_0}]\`,
+                            message: \`not a string\`
+                        });
+                    }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
+exports[`RPCProxy should generate a Parser for an interface string literal member 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (data[\\"a\\"] !== \\"aap\\") {
+                errors.push({
+                    path: \\"a\\",
+                    message: \`not 'aap'\`
+                });
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
+exports[`RPCProxy should generate a Parser for an interface string member 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (typeof data[\\"a\\"] !== \\"string\\") {
+                errors.push({
+                    path: \\"a\\",
+                    message: \`not a string\`
+                });
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
+exports[`RPCProxy should generate a Parser for an interface true literal member 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (data[\\"a\\"] !== true) {
+                errors.push({
+                    path: \\"a\\",
+                    message: \`not true\`
+                });
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
+exports[`RPCProxy should generate a Parser for an interface with no members 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;
+
+exports[`RPCProxy should generate a Parser for an interface xxx 1`] = `
+"export class MyModelParser {
+    static parse(data: unknown): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+                errors.push({
+                    path: \\"a\\",
+                    message: \`not an array\`
+                });
+            }
+            else
+                for (let it_0 = 0; it_0 < data[\\"a\\"].length; it_0++)
+                    if (typeof data[\\"a\\"][it_0] !== \\"object\\" || data[\\"a\\"][it_0] === null) {
+                        errors.push({
+                            path: \`a[\${it_0}]\`,
+                            message: \`null or not an object\`
+                        });
+                    }
+                    else {
+                        if (data[\\"a\\"][it_0][\\"b\\"] !== undefined)
+                            if (typeof data[\\"a\\"][it_0][\\"b\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"] === null) {
+                                errors.push({
+                                    path: \`a[\${it_0}].b\`,
+                                    message: \`null or not an object\`
+                                });
+                            }
+                            else {
+                                if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"] === null) {
+                                    errors.push({
+                                        path: \`a[\${it_0}].b.c\`,
+                                        message: \`null or not an object\`
+                                    });
+                                }
+                                else {
+                                    if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"] === null) {
+                                        errors.push({
+                                            path: \`a[\${it_0}].b.c.d\`,
+                                            message: \`not an array\`
+                                        });
+                                    }
+                                    else
+                                        for (let it_1 = 0; it_1 < data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"].length; it_1++)
+                                            if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1] === null) {
+                                                errors.push({
+                                                    path: \`a[\${it_0}].b.c.d[\${it_1}]\`,
+                                                    message: \`null or not an object\`
+                                                });
+                                            }
+                                            else {
+                                                if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"] === null) {
+                                                    errors.push({
+                                                        path: \`a[\${it_0}].b.c.d[\${it_1}].e\`,
+                                                        message: \`null or not an object\`
+                                                    });
+                                                }
+                                                else {
+                                                    if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"][\\"f\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"][\\"f\\"] === null) {
+                                                        errors.push({
+                                                            path: \`a[\${it_0}].b.c.d[\${it_1}].e.f\`,
+                                                            message: \`not an array\`
+                                                        });
+                                                    }
+                                                    else
+                                                        for (let it_2 = 0; it_2 < data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"][\\"f\\"].length; it_2++)
+                                                            if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"][\\"f\\"][it_2] !== \\"boolean\\") {
+                                                                errors.push({
+                                                                    path: \`a[\${it_0}].b.c.d[\${it_1}].e.f[\${it_2}]\`,
+                                                                    message: \`not a boolean\`
+                                                                });
+                                                            }
+                                                }
+                                            }
+                                }
+                            }
+                    }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: data as MyModel
+        };
+    }
+}"
+`;

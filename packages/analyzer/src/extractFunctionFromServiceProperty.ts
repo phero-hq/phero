@@ -8,11 +8,6 @@ import {
 } from "./parseSamenApp"
 import { resolveSymbol } from "./tsUtils"
 
-export type Model =
-  | ts.InterfaceDeclaration
-  | ts.TypeAliasDeclaration
-  | ts.EnumDeclaration // add more types of models
-
 function extractFunctionName(
   node: ts.ObjectLiteralElementLike | ts.VariableDeclaration,
 ): string {

@@ -1,6 +1,6 @@
 import ts from "typescript"
 
-interface KindToNodeMappings {
+export interface KindToNodeMappings {
   [kind: number]: ts.Node
   [ts.SyntaxKind.SourceFile]: ts.SourceFile
   [ts.SyntaxKind.ArrayBindingPattern]: ts.ArrayBindingPattern

@@ -4,6 +4,7 @@ import ts, {
 } from "typescript"
 import { TSFiles, VirtualCompilerHost } from "./VirtualCompilerHost"
 import { ParsedSamenApp } from "./parseSamenApp"
+import { KindToNodeMappings } from "./tsUtils"
 
 export function printSamenApp(app: ParsedSamenApp): string {
   return JSON.stringify(
@@ -39,7 +40,7 @@ export function printSamenApp(app: ParsedSamenApp): string {
   }
 }
 
-export function createTestProgram(input: TSFiles | string) {
+export function createTestProgram(input: TSFiles | string): ts.Program {
   const vHost = new VirtualCompilerHost()
 
   if (typeof input === "string") {
@@ -52,4 +53,45 @@ export function createTestProgram(input: TSFiles | string) {
 
   const program = vHost.createProgram("samen.ts")
   return program
+}
+
+export function compileStatement<SK extends ts.SyntaxKind>(
+  code: string,
+  syntaxKind: SK,
+): { statement: KindToNodeMappings[SK]; typeChecker: ts.TypeChecker } {
+  const prog = createTestProgram(code)
+  const statements = prog.getSourceFile("samen.ts")?.statements
+  if (statements?.length !== 1) {
+    throw new Error("Should provide exactly 1 statement")
+  }
+  const statement = statements[0]
+  if (statement.kind !== syntaxKind) {
+    throw new Error(
+      `SytaxKind of statement is ${statement.kind}, but ${syntaxKind} was expected`,
+    )
+  }
+
+  return {
+    typeChecker: prog.getTypeChecker(),
+    statement: statement as KindToNodeMappings[SK],
+  }
+}
+
+const printer = ts.createPrinter({
+  newLine: ts.NewLineKind.LineFeed,
+  noEmitHelpers: true,
+  removeComments: true,
+  omitTrailingSemicolon: false,
+})
+
+export function printCode(node: ts.Node): string {
+  const sf = ts.createSourceFile(
+    "a.ts",
+    "",
+    ts.ScriptTarget.ESNext,
+    undefined,
+    ts.ScriptKind.TS,
+  )
+
+  return printer.printNode(ts.EmitHint.Unspecified, node, sf)
 }

@@ -1,7 +1,5 @@
 import ts from "typescript"
-import { ParseError } from "./errors"
-import { Model } from "./extractFunctionFromServiceProperty"
-import { ParsedSamenFunctionDefinition } from "./parseSamenApp"
+import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
 
 export default function extractModels(
   funcs: ParsedSamenFunctionDefinition[],

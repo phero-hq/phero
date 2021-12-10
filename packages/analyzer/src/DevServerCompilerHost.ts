@@ -1,12 +1,12 @@
 import ts from "typescript"
 import path from "path"
-import { promises as fs } from "fs"
+import fs from "fs"
 
 export interface TSFiles {
   [fileName: string]: string
 }
 
-export class VirtualCompilerHost {
+export class DevServerCompilerHost {
   private readonly compilerOpts: ts.CompilerOptions
   private readonly host: ts.CompilerHost
   private readonly files: TSFiles = {}
@@ -30,16 +30,11 @@ export class VirtualCompilerHost {
 
     const host = ts.createCompilerHost(this.compilerOpts)
 
-    host.writeFile = async (fileName: string, contents: string) => {
-      // if (opts?.outDir && fileName.startsWith(opts.outDir)) {
-      //   await fs.mkdir(path.dirname(fileName), { recursive: true })
-      //   await fs.writeFile(fileName, contents, { encoding: "utf-8" })
-      //   console.log(fileName)
-      // } else {
-      //   throw new Error("HUHH" + fileName)
-      // }
-      console.log("fileName", fileName)
+    host.writeFile = (fileName: string, contents: string) => {
       this.files[fileName] = contents
+      fs.mkdirSync(path.dirname(fileName), { recursive: true })
+      fs.writeFileSync(fileName, contents, { encoding: "utf-8" })
+      console.log("WRITE", fileName)
     }
 
     host.resolveModuleNames = (
@@ -50,21 +45,8 @@ export class VirtualCompilerHost {
       options: ts.CompilerOptions,
     ): (ts.ResolvedModule | undefined)[] => {
       return moduleNames.map((moduleName) => {
-        // moduleName './kaas' -> fileName "kaas.ts"
-        const fileName = `${moduleName.substring("./".length)}.ts`
-        return {
-          resolvedFileName: fileName,
-          isExternalLibraryImport: false,
-        }
-
-        // const res = ress(moduleName, containingFile)
-        // console.log(
-        //   "m",
-        //   moduleName,
-        //   res?.isExternalLibraryImport,
-        //   res?.resolvedFileName,
-        // )
-        // return res
+        const res = ress(moduleName, containingFile)
+        return res
       })
     }
 
@@ -86,6 +68,7 @@ export class VirtualCompilerHost {
   }
 
   public addFile(fileName: string, source: string): void {
+    // this.host.
     this.files[fileName] = source
   }
 
