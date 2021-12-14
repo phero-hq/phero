@@ -1,4 +1,4 @@
-import ts from "typescript"
+import ts, { Type } from "typescript"
 import generateArrayParser from "./generateArrayParser"
 import {
   assignDataToResult,
@@ -6,6 +6,7 @@ import {
   generateTypeofIsObjectAndIsNotNullExpression,
 } from "./generateParserLib"
 import { generateTypeElementParser } from "./generateTypeElementParser"
+import generateTupleParser from "./generateTupleParser"
 import {
   TSArrayElementNode,
   TSModelNode,
@@ -14,18 +15,14 @@ import {
   TSTypeElementNode,
 } from "./TSNode"
 
-export default function generateObjectParser(
-  node: TSNode,
-  parent?: TSNode,
-): ts.Statement {
+export default function generateObjectParser(node: TSNode): ts.Statement {
   if (!node.typeNode) {
     throw new Error("Required typeNode")
   }
 
-  if (ts.isArrayTypeNode(node.typeNode)) {
-    // const elementType = node.typeChecker.getTypeFromTypeNode(
-    //   node.typeNode.elementType,
-    // )
+  if (ts.isTupleTypeNode(node.typeNode)) {
+    return generateTupleParser(node)
+  } else if (ts.isArrayTypeNode(node.typeNode)) {
     const arrayElementNode = new TSArrayElementNode(
       node.typeNode.elementType,
       node.typeChecker,
@@ -33,22 +30,9 @@ export default function generateObjectParser(
     )
     return generateArrayParser(node, arrayElementNode)
   } else if (ts.isTypeLiteralNode(node.typeNode)) {
-    return ts.factory.createIfStatement(
-      generateTypeofIsObjectAndIsNotNullExpression(node.dataVarExpr),
-      generatePushErrorExpressionStatement(
-        node.errorPath,
-        "null or not an object",
-      ),
-      ts.factory.createBlock([
-        assignDataToResult(
-          node.resultVarExpr,
-          ts.factory.createObjectLiteralExpression([], false),
-        ),
-        ...node.typeNode.members.map((member) => {
-          const subnode = new TSTypeElementNode(member, node.typeChecker, node)
-          return generateTypeElementParser(subnode)
-        }),
-      ]),
+    return generatePojoParser(
+      node,
+      node.typeNode.members.map((m) => m),
     )
   } else if (
     ts.isInterfaceDeclaration(node.compilerNode) &&
@@ -59,32 +43,33 @@ export default function generateObjectParser(
       node.typeChecker,
       node.name,
     )
-    return ts.factory.createIfStatement(
-      generateTypeofIsObjectAndIsNotNullExpression(objectNode.dataVarExpr),
-      generatePushErrorExpressionStatement(
-        objectNode.errorPath,
-        "null or not an object",
-      ),
-      ts.factory.createBlock([
-        assignDataToResult(
-          node.resultVarExpr,
-          ts.factory.createObjectLiteralExpression([], false),
-        ),
-        ...(objectNode.members.length
-          ? objectNode.members.flatMap((member) => {
-              const node = new TSTypeElementNode(
-                member,
-                objectNode.typeChecker,
-                objectNode,
-              )
-              return generateTypeElementParser(node)
-            })
-          : []),
-      ]),
-    )
-  } else if (ts.isTypeLiteralNode(node.compilerNode)) {
-    throw new Error(`${node.typeNode.kind} IS TYPELITERALLLLLL`)
+    return generatePojoParser(objectNode, objectNode.members)
+  } else if (ts.isInterfaceDeclaration(node.compilerNode)) {
+    throw new Error(`not implemented yet, referece to other parser`)
   } else {
-    throw new Error(`${node.typeNode.kind} not an array`)
+    throw new Error(`${node.typeNode.kind} not an object type`)
   }
+}
+
+function generatePojoParser(
+  node: TSNode,
+  members: ts.TypeElement[],
+): ts.Statement {
+  return ts.factory.createIfStatement(
+    generateTypeofIsObjectAndIsNotNullExpression(node.dataVarExpr),
+    generatePushErrorExpressionStatement(
+      node.errorPath,
+      "null or not an object",
+    ),
+    ts.factory.createBlock([
+      assignDataToResult(
+        node.resultVarExpr,
+        ts.factory.createObjectLiteralExpression([], false),
+      ),
+      ...members.map((member) => {
+        const subnode = new TSTypeElementNode(member, node.typeChecker, node)
+        return generateTypeElementParser(subnode)
+      }),
+    ]),
+  )
 }

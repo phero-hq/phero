@@ -16,7 +16,10 @@ export abstract class TSNode {
       this._dataVarExpr = this.parent
         ? ts.factory.createIdentifier(
             `${this.parent.dataVarExpr.text}[${
-              this instanceof TSArrayElementNode ? this.name : `"${this.name}"`
+              this instanceof TSArrayElementNode ||
+              this instanceof TSUnionElementNode
+                ? this.name
+                : `"${this.name}"`
             }]`,
           )
         : ts.factory.createIdentifier(this.name)
@@ -192,6 +195,21 @@ export class TSArrayElementNode extends TSNode {
 
   public get name(): string {
     return `it_${this.depth}`
+  }
+}
+
+export class TSUnionElementNode extends TSNode {
+  constructor(
+    public readonly compilerNode: ts.TypeNode,
+    public readonly typeChecker: ts.TypeChecker,
+    public readonly position: number,
+    public readonly parent: TSNode,
+  ) {
+    super(compilerNode, typeChecker, parent)
+  }
+
+  public get name(): string {
+    return `${this.position}`
   }
 }
 
