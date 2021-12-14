@@ -8,7 +8,7 @@ import { generateParserForNode } from "./parsers"
 import { TSNode, TSUnionElementNode } from "./TSNode"
 
 export default function generateTupleParser(node: TSNode): ts.Statement {
-  if (!node.typeNode || !ts.isTupleTypeNode(node.typeNode)) {
+  if (!ts.isTupleTypeNode(node.typeNode)) {
     throw new Error("Not a tuple type")
   }
 

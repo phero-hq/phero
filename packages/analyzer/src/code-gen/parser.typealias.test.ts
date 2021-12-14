@@ -242,11 +242,33 @@ describe("Parsers", () => {
       })
     })
 
-    describe("other", () => {
-      test("tuple", () => {
+    describe("tuple", () => {
+      test("simple", () => {
         const { statement: model, typeChecker } = compileStatement(
           `
           type MyModel = [string, number]
+        `,
+          ts.SyntaxKind.TypeAliasDeclaration,
+        )
+
+        const parserDeclaration = generateParser(model, typeChecker)
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("tuple with typealias", () => {
+        const { statement: model, typeChecker } = compileStatement(
+          `
+          type MyModel = [string, {a: number}]
+        `,
+          ts.SyntaxKind.TypeAliasDeclaration,
+        )
+
+        const parserDeclaration = generateParser(model, typeChecker)
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("tuple within tuple", () => {
+        const { statement: model, typeChecker } = compileStatement(
+          `
+          type MyModel = [string, [{a: number}, boolean]]
         `,
           ts.SyntaxKind.TypeAliasDeclaration,
         )

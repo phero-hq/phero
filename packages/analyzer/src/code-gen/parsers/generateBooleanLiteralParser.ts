@@ -9,7 +9,6 @@ export default function generateBooleanLiteralParser(
   node: TSNode,
 ): ts.Statement {
   if (
-    !node.typeNode ||
     !ts.isLiteralTypeNode(node.typeNode) ||
     (node.typeNode.literal.kind !== ts.SyntaxKind.TrueKeyword &&
       node.typeNode.literal.kind !== ts.SyntaxKind.FalseKeyword)

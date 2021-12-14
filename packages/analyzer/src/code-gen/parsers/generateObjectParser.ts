@@ -16,10 +16,6 @@ import {
 } from "./TSNode"
 
 export default function generateObjectParser(node: TSNode): ts.Statement {
-  if (!node.typeNode) {
-    throw new Error("Required typeNode")
-  }
-
   if (ts.isTupleTypeNode(node.typeNode)) {
     return generateTupleParser(node)
   } else if (ts.isArrayTypeNode(node.typeNode)) {

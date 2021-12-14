@@ -101,19 +101,10 @@ export abstract class TSNode {
   private _type?: ts.Type
   public get type(): ts.Type {
     if (!this._type) {
-      if (ts.isTypeAliasDeclaration(this.compilerNode)) {
+      if (ts.isPropertySignature(this.compilerNode) && this.compilerNode.type) {
         this._type = this.typeChecker.getTypeFromTypeNode(
           this.compilerNode.type,
         )
-      } else if (
-        ts.isPropertySignature(this.compilerNode) &&
-        this.compilerNode.type
-      ) {
-        this._type = this.typeChecker.getTypeFromTypeNode(
-          this.compilerNode.type,
-        )
-      } else if (ts.isTypeNode(this.compilerNode)) {
-        this._type = this.typeChecker.getTypeFromTypeNode(this.compilerNode)
       } else {
         this._type = this.typeChecker.getTypeAtLocation(this.compilerNode)
       }
@@ -122,9 +113,14 @@ export abstract class TSNode {
   }
 
   private _typeNode?: ts.TypeNode
-  public get typeNode(): ts.TypeNode | undefined {
+  public get typeNode(): ts.TypeNode {
     if (!this._typeNode) {
-      if (ts.isPropertySignature(this.compilerNode) && this.compilerNode.type) {
+      if (ts.isTypeNode(this.compilerNode)) {
+        this._typeNode = this.compilerNode
+      } else if (
+        ts.isPropertySignature(this.compilerNode) &&
+        this.compilerNode.type
+      ) {
         this._typeNode = this.compilerNode.type
       } else if (ts.isTypeAliasDeclaration(this.compilerNode)) {
         this._typeNode = this.compilerNode.type
@@ -136,6 +132,10 @@ export abstract class TSNode {
         )
       }
     }
+    if (this._typeNode === undefined) {
+      throw new Error("Node has no typeNode")
+    }
+
     return this._typeNode
   }
 }
