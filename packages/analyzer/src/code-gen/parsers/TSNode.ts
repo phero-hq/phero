@@ -8,21 +8,35 @@ export abstract class TSNode {
     public readonly parent?: TSNode,
   ) {}
 
-  public abstract get name(): string
-
   private _dataVarExpr?: ts.Identifier
   public get dataVarExpr(): ts.Identifier {
     if (!this._dataVarExpr) {
-      this._dataVarExpr = this.parent
-        ? ts.factory.createIdentifier(
-            `${this.parent.dataVarExpr.text}[${
-              this instanceof TSArrayElementNode ||
-              this instanceof TSUnionElementNode
-                ? this.name
-                : `"${this.name}"`
-            }]`,
-          )
-        : ts.factory.createIdentifier(this.name)
+      // if (this.parent instanceof TSModelNode) {
+      //   this._dataVarExpr = this.parent.dataVarExpr
+      // } else
+      if (this instanceof TSModelNode) {
+        this._dataVarExpr = ts.factory.createIdentifier(this.name)
+      } else if (this instanceof TSObjectNode) {
+        this._dataVarExpr = ts.factory.createIdentifier(
+          `${this.parent.dataVarExpr.text}["${this.name}"]`,
+        )
+      } else if (this instanceof TSArrayElementNode) {
+        this._dataVarExpr = ts.factory.createIdentifier(
+          `${this.parent.dataVarExpr.text}[${this.name}]`,
+        )
+      } else if (this instanceof TSTupleElementNode) {
+        this._dataVarExpr = ts.factory.createIdentifier(
+          `${this.parent.dataVarExpr.text}[${this.position}]`,
+        )
+      } else if (this instanceof TSUnionElementNode) {
+        this._dataVarExpr = this.parent.dataVarExpr
+      } else if (this instanceof TSTypeElementNode) {
+        this._dataVarExpr = ts.factory.createIdentifier(
+          `${this.parent.dataVarExpr.text}["${this.name}"]`,
+        )
+      } else {
+        throw new Error("Node type not yet implemented")
+      }
     }
     return this._dataVarExpr
   }
@@ -31,69 +45,34 @@ export abstract class TSNode {
   public get resultVarExpr(): ts.Identifier {
     if (!this._resultVarExpr) {
       this._resultVarExpr = ts.factory.createIdentifier(
-        this.dataVarExpr.text.replace(/^data/, "result"),
+        this.dataVarExpr.text.replace(/^[^\.\[]+/, "result"),
       )
     }
     return this._resultVarExpr
   }
 
-  private _errorPath?: ts.TemplateExpression | ts.StringLiteral
-  public get errorPath(): ts.TemplateExpression | ts.StringLiteral {
+  private _errorPath?: ts.Expression
+  public get errorPath(): ts.Expression {
     if (!this._errorPath) {
-      const parentErrorPath = this.parent?.errorPath
+      const [head, ...tail] = this.dataVarExpr.text
+        // replace ["propName"] with .propName
+        .replace(/\["(.+?)"\]+/g, ".$1")
+        // split on array indexers
+        .split(/\[it_\d+\]/)
 
-      if (!parentErrorPath) {
-        this._errorPath = ts.factory.createStringLiteral(this.name)
-      } else if (ts.isStringLiteral(parentErrorPath)) {
-        if (this instanceof TSTypeElementNode) {
-          this._errorPath = ts.factory.createStringLiteral(
-            `${parentErrorPath.text}.${this.name}`,
-          )
-        } else {
-          this._errorPath = ts.factory.createTemplateExpression(
-            ts.factory.createTemplateHead(`${parentErrorPath.text}[`),
-            [
+      this._errorPath = tail.length
+        ? ts.factory.createTemplateExpression(
+            ts.factory.createTemplateHead(`${head}[`),
+            tail.map((span, i) =>
               ts.factory.createTemplateSpan(
-                ts.factory.createIdentifier(this.name),
-                ts.factory.createTemplateTail(`]`),
+                ts.factory.createIdentifier(`it_${i}`),
+                i === tail.length - 1
+                  ? ts.factory.createTemplateTail(`]${span}`)
+                  : ts.factory.createTemplateMiddle(`]${span}[`),
               ),
-            ],
+            ),
           )
-        }
-      } else {
-        const lastIndex = parentErrorPath.templateSpans.length - 1
-        const previousSpans = parentErrorPath.templateSpans.slice(0, lastIndex)
-        const lastSpan = parentErrorPath.templateSpans[lastIndex]
-        if (this instanceof TSTypeElementNode) {
-          this._errorPath = ts.factory.createTemplateExpression(
-            parentErrorPath.head,
-            [
-              ...previousSpans,
-              ts.factory.createTemplateSpan(
-                lastSpan.expression,
-                ts.factory.createTemplateTail(
-                  `${lastSpan.literal.text}.${this.name}`,
-                ),
-              ),
-            ],
-          )
-        } else {
-          this._errorPath = ts.factory.createTemplateExpression(
-            parentErrorPath.head,
-            [
-              ...previousSpans,
-              ts.factory.createTemplateSpan(
-                lastSpan.expression,
-                ts.factory.createTemplateMiddle(`${lastSpan.literal.text}[`),
-              ),
-              ts.factory.createTemplateSpan(
-                ts.factory.createIdentifier(this.name),
-                ts.factory.createTemplateTail(`]`),
-              ),
-            ],
-          )
-        }
-      }
+        : ts.factory.createStringLiteral(head)
     }
     return this._errorPath
   }
@@ -144,12 +123,9 @@ export class TSModelNode extends TSNode {
   constructor(
     public readonly compilerNode: Model,
     public readonly typeChecker: ts.TypeChecker,
+    public readonly name: string,
   ) {
     super(compilerNode, typeChecker)
-  }
-
-  public get name(): string {
-    return "data"
   }
 }
 
@@ -157,8 +133,8 @@ export class TSObjectNode extends TSNode {
   constructor(
     public readonly compilerNode: ts.TypeLiteralNode | ts.InterfaceDeclaration,
     public readonly typeChecker: ts.TypeChecker,
+    public readonly parent: TSNode,
     public readonly name: string,
-    public readonly parent?: TSNode,
   ) {
     super(compilerNode, typeChecker, parent)
   }
@@ -198,18 +174,24 @@ export class TSArrayElementNode extends TSNode {
   }
 }
 
+export class TSTupleElementNode extends TSNode {
+  constructor(
+    public readonly compilerNode: ts.TypeNode,
+    public readonly typeChecker: ts.TypeChecker,
+    public readonly parent: TSNode,
+    public readonly position: number,
+  ) {
+    super(compilerNode, typeChecker, parent)
+  }
+}
+
 export class TSUnionElementNode extends TSNode {
   constructor(
     public readonly compilerNode: ts.TypeNode,
     public readonly typeChecker: ts.TypeChecker,
-    public readonly position: number,
     public readonly parent: TSNode,
   ) {
     super(compilerNode, typeChecker, parent)
-  }
-
-  public get name(): string {
-    return `${this.position}`
   }
 }
 
@@ -217,7 +199,7 @@ export class TSTypeElementNode extends TSNode {
   constructor(
     public readonly compilerNode: ts.TypeElement,
     public readonly typeChecker: ts.TypeChecker,
-    public readonly parent?: TSNode,
+    public readonly parent: TSNode,
   ) {
     super(compilerNode, typeChecker, parent)
   }

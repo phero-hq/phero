@@ -819,7 +819,7 @@ exports[`Parsers for a type alias tuple simple 1`] = `
             result = [];
             if (typeof data[0] !== \\"string\\") {
                 errors.push({
-                    path: \`data[\${0}]\`,
+                    path: \\"data[0]\\",
                     message: \`not a string\`
                 });
             }
@@ -827,13 +827,13 @@ exports[`Parsers for a type alias tuple simple 1`] = `
                 result[0] = data[0];
             if (typeof data[1] !== \\"number\\") {
                 errors.push({
-                    path: \`data[\${1}]\`,
+                    path: \\"data[1]\\",
                     message: \`not a number\`
                 });
             }
             else if (isNaN(data[1])) {
                 errors.push({
-                    path: \`data[\${1}]\`,
+                    path: \\"data[1]\\",
                     message: \`invalid number\`
                 });
             }
@@ -869,7 +869,7 @@ exports[`Parsers for a type alias tuple tuple with typealias 1`] = `
             result = [];
             if (typeof data[0] !== \\"string\\") {
                 errors.push({
-                    path: \`data[\${0}]\`,
+                    path: \\"data[0]\\",
                     message: \`not a string\`
                 });
             }
@@ -877,7 +877,7 @@ exports[`Parsers for a type alias tuple tuple with typealias 1`] = `
                 result[0] = data[0];
             if (typeof data[1] !== \\"object\\" || data[1] === null) {
                 errors.push({
-                    path: \`data[\${1}]\`,
+                    path: \\"data[1]\\",
                     message: \`null or not an object\`
                 });
             }
@@ -885,13 +885,13 @@ exports[`Parsers for a type alias tuple tuple with typealias 1`] = `
                 result[1] = {};
                 if (typeof data[1][\\"a\\"] !== \\"number\\") {
                     errors.push({
-                        path: \`data[\${1}].a\`,
+                        path: \\"data[1].a\\",
                         message: \`not a number\`
                     });
                 }
                 else if (isNaN(data[1][\\"a\\"])) {
                     errors.push({
-                        path: \`data[\${1}].a\`,
+                        path: \\"data[1].a\\",
                         message: \`invalid number\`
                     });
                 }
@@ -928,7 +928,7 @@ exports[`Parsers for a type alias tuple tuple within tuple 1`] = `
             result = [];
             if (typeof data[0] !== \\"string\\") {
                 errors.push({
-                    path: \`data[\${0}]\`,
+                    path: \\"data[0]\\",
                     message: \`not a string\`
                 });
             }
@@ -936,7 +936,7 @@ exports[`Parsers for a type alias tuple tuple within tuple 1`] = `
                 result[0] = data[0];
             if (typeof data[1] !== \\"object\\" || data[1] === null) {
                 errors.push({
-                    path: \`data[\${1}]\`,
+                    path: \\"data[1]\\",
                     message: \`null or not an object\`
                 });
             }
@@ -944,7 +944,7 @@ exports[`Parsers for a type alias tuple tuple within tuple 1`] = `
                 result[1] = [];
                 if (typeof data[1][0] !== \\"object\\" || data[1][0] === null) {
                     errors.push({
-                        path: \`data[\${1}][\${0}]\`,
+                        path: \\"data[1][0]\\",
                         message: \`null or not an object\`
                     });
                 }
@@ -952,13 +952,13 @@ exports[`Parsers for a type alias tuple tuple within tuple 1`] = `
                     result[1][0] = {};
                     if (typeof data[1][0][\\"a\\"] !== \\"number\\") {
                         errors.push({
-                            path: \`data[\${1}][\${0}].a\`,
+                            path: \\"data[1][0].a\\",
                             message: \`not a number\`
                         });
                     }
                     else if (isNaN(data[1][0][\\"a\\"])) {
                         errors.push({
-                            path: \`data[\${1}][\${0}].a\`,
+                            path: \\"data[1][0].a\\",
                             message: \`invalid number\`
                         });
                     }
@@ -967,12 +967,327 @@ exports[`Parsers for a type alias tuple tuple within tuple 1`] = `
                 }
                 if (typeof data[1][1] !== \\"boolean\\") {
                     errors.push({
-                        path: \`data[\${1}][\${1}]\`,
+                        path: \\"data[1][1]\\",
                         message: \`not a boolean\`
                     });
                 }
                 else
                     result[1][1] = data[1][1];
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias union simple 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        {
+            const errLength = errors.length;
+            {
+                if (typeof data !== \\"string\\") {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`not a string\`
+                    });
+                }
+                else
+                    result = data;
+                if (errors.length !== errLength) {
+                    errors.splice(errLength, errors.length - errLength);
+                    {
+                        if (typeof data !== \\"number\\") {
+                            errors.push({
+                                path: \\"data\\",
+                                message: \`not a number\`
+                            });
+                        }
+                        else if (isNaN(data)) {
+                            errors.push({
+                                path: \\"data\\",
+                                message: \`invalid number\`
+                            });
+                        }
+                        else
+                            result = data;
+                        if (errors.length !== errLength) {
+                            errors.splice(errLength, errors.length - errLength);
+                            {
+                                errors.push({
+                                    path: \\"data\\",
+                                    message: \`is none of the options of union\`
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias union with tuple 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        {
+            const errLength = errors.length;
+            {
+                if (typeof data !== \\"string\\") {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`not a string\`
+                    });
+                }
+                else
+                    result = data;
+                if (errors.length !== errLength) {
+                    errors.splice(errLength, errors.length - errLength);
+                    {
+                        if (typeof data !== \\"object\\" || data === null) {
+                            errors.push({
+                                path: \\"data\\",
+                                message: \`null or not an object\`
+                            });
+                        }
+                        else {
+                            result = [];
+                            if (typeof data[0] !== \\"object\\" || data[0] === null) {
+                                errors.push({
+                                    path: \\"data[0]\\",
+                                    message: \`null or not an object\`
+                                });
+                            }
+                            else {
+                                result[0] = {};
+                                if (typeof data[0][\\"a\\"] !== \\"number\\") {
+                                    errors.push({
+                                        path: \\"data[0].a\\",
+                                        message: \`not a number\`
+                                    });
+                                }
+                                else if (isNaN(data[0][\\"a\\"])) {
+                                    errors.push({
+                                        path: \\"data[0].a\\",
+                                        message: \`invalid number\`
+                                    });
+                                }
+                                else
+                                    result[0][\\"a\\"] = data[0][\\"a\\"];
+                            }
+                            if (typeof data[1] !== \\"string\\") {
+                                errors.push({
+                                    path: \\"data[1]\\",
+                                    message: \`not a string\`
+                                });
+                            }
+                            else
+                                result[1] = data[1];
+                        }
+                        if (errors.length !== errLength) {
+                            errors.splice(errLength, errors.length - errLength);
+                            {
+                                errors.push({
+                                    path: \\"data\\",
+                                    message: \`is none of the options of union\`
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias union with tuple 2`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        {
+            const errLength = errors.length;
+            {
+                if (typeof data !== \\"object\\" || data === null) {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`null or not an object\`
+                    });
+                }
+                else {
+                    result = {};
+                    if (typeof data[\\"a\\"] !== \\"string\\") {
+                        errors.push({
+                            path: \\"data.a\\",
+                            message: \`not a string\`
+                        });
+                    }
+                    else
+                        result[\\"a\\"] = data[\\"a\\"];
+                    if (typeof data[\\"b\\"] !== \\"number\\") {
+                        errors.push({
+                            path: \\"data.b\\",
+                            message: \`not a number\`
+                        });
+                    }
+                    else if (isNaN(data[\\"b\\"])) {
+                        errors.push({
+                            path: \\"data.b\\",
+                            message: \`invalid number\`
+                        });
+                    }
+                    else
+                        result[\\"b\\"] = data[\\"b\\"];
+                }
+                if (errors.length !== errLength) {
+                    errors.splice(errLength, errors.length - errLength);
+                    {
+                        if (typeof data !== \\"object\\" || data === null) {
+                            errors.push({
+                                path: \\"data\\",
+                                message: \`null or not an object\`
+                            });
+                        }
+                        else {
+                            result = {};
+                            if (typeof data[\\"a\\"] !== \\"number\\") {
+                                errors.push({
+                                    path: \\"data.a\\",
+                                    message: \`not a number\`
+                                });
+                            }
+                            else if (isNaN(data[\\"a\\"])) {
+                                errors.push({
+                                    path: \\"data.a\\",
+                                    message: \`invalid number\`
+                                });
+                            }
+                            else
+                                result[\\"a\\"] = data[\\"a\\"];
+                            if (typeof data[\\"b\\"] !== \\"string\\") {
+                                errors.push({
+                                    path: \\"data.b\\",
+                                    message: \`not a string\`
+                                });
+                            }
+                            else
+                                result[\\"b\\"] = data[\\"b\\"];
+                        }
+                        if (errors.length !== errLength) {
+                            errors.splice(errLength, errors.length - errLength);
+                            {
+                                errors.push({
+                                    path: \\"data\\",
+                                    message: \`is none of the options of union\`
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias union with type literal 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        {
+            const errLength = errors.length;
+            {
+                if (typeof data !== \\"string\\") {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`not a string\`
+                    });
+                }
+                else
+                    result = data;
+                if (errors.length !== errLength) {
+                    errors.splice(errLength, errors.length - errLength);
+                    {
+                        if (typeof data !== \\"object\\" || data === null) {
+                            errors.push({
+                                path: \\"data\\",
+                                message: \`null or not an object\`
+                            });
+                        }
+                        else {
+                            result = {};
+                            if (typeof data[\\"a\\"] !== \\"number\\") {
+                                errors.push({
+                                    path: \\"data.a\\",
+                                    message: \`not a number\`
+                                });
+                            }
+                            else if (isNaN(data[\\"a\\"])) {
+                                errors.push({
+                                    path: \\"data.a\\",
+                                    message: \`invalid number\`
+                                });
+                            }
+                            else
+                                result[\\"a\\"] = data[\\"a\\"];
+                        }
+                        if (errors.length !== errLength) {
+                            errors.splice(errLength, errors.length - errLength);
+                            {
+                                errors.push({
+                                    path: \\"data\\",
+                                    message: \`is none of the options of union\`
+                                });
+                            }
+                        }
+                    }
+                }
             }
         }
         if (errors.length) {

@@ -277,5 +277,51 @@ describe("Parsers", () => {
         expect(printCode(parserDeclaration)).toMatchSnapshot()
       })
     })
+    describe("union", () => {
+      test("simple", () => {
+        const { statement: model, typeChecker } = compileStatement(
+          `
+          type MyModel = string | number
+        `,
+          ts.SyntaxKind.TypeAliasDeclaration,
+        )
+
+        const parserDeclaration = generateParser(model, typeChecker)
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("with type literal", () => {
+        const { statement: model, typeChecker } = compileStatement(
+          `
+          type MyModel = string | {a: number}
+        `,
+          ts.SyntaxKind.TypeAliasDeclaration,
+        )
+
+        const parserDeclaration = generateParser(model, typeChecker)
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("with tuple", () => {
+        const { statement: model, typeChecker } = compileStatement(
+          `
+          type MyModel = string | [{a: number}, string]
+        `,
+          ts.SyntaxKind.TypeAliasDeclaration,
+        )
+
+        const parserDeclaration = generateParser(model, typeChecker)
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("with tuple", () => {
+        const { statement: model, typeChecker } = compileStatement(
+          `
+          type MyModel = {a: string, b: number} | {a: number, b: string}
+        `,
+          ts.SyntaxKind.TypeAliasDeclaration,
+        )
+
+        const parserDeclaration = generateParser(model, typeChecker)
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+    })
   })
 })

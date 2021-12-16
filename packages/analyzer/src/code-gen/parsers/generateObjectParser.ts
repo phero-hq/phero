@@ -37,6 +37,7 @@ export default function generateObjectParser(node: TSNode): ts.Statement {
     const objectNode = new TSObjectNode(
       node.compilerNode,
       node.typeChecker,
+      node,
       node.name,
     )
     return generatePojoParser(objectNode, objectNode.members)

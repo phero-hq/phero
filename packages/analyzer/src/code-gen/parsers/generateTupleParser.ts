@@ -5,7 +5,7 @@ import {
   generateTypeofIsObjectAndIsNotNullExpression,
 } from "./generateParserLib"
 import { generateParserForNode } from "./parsers"
-import { TSNode, TSUnionElementNode } from "./TSNode"
+import { TSNode, TSTupleElementNode } from "./TSNode"
 
 export default function generateTupleParser(node: TSNode): ts.Statement {
   if (!ts.isTupleTypeNode(node.typeNode)) {
@@ -24,11 +24,11 @@ export default function generateTupleParser(node: TSNode): ts.Statement {
         ts.factory.createArrayLiteralExpression([], false),
       ),
       ...node.typeNode.elements.map((elementTypeNode, position) => {
-        const subnode = new TSUnionElementNode(
+        const subnode = new TSTupleElementNode(
           elementTypeNode,
           node.typeChecker,
-          position,
           node,
+          position,
         )
         return generateParserForNode(subnode)
       }),

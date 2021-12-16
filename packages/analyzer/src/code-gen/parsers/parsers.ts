@@ -8,6 +8,7 @@ import generateObjectParser from "./generateObjectParser"
 import generateStringLiteralParser from "./generateStringLiteralParser"
 import generateStringParser from "./generateStringParser"
 import generateUndefinedParser from "./generateUndefinedParser"
+import generateUnionParser from "./generateUnionParser"
 import { TSNode } from "./TSNode"
 
 type Parser = (node: TSNode) => ts.Statement
@@ -34,6 +35,7 @@ const parsers: Array<{
   { flag: ts.TypeFlags.Null, parser: generateNullParser },
   { flag: ts.TypeFlags.Undefined, parser: generateUndefinedParser },
   { flag: ts.TypeFlags.Object, parser: generateObjectParser },
+  { flag: ts.TypeFlags.Union, parser: generateUnionParser },
 ]
 
 export function generateParserForNode(node: TSNode): ts.Statement {

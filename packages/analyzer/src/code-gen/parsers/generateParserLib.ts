@@ -1,5 +1,4 @@
 import ts from "typescript"
-import { TSNode } from "./TSNode"
 
 export function generateTypeofIsObjectAndIsNotNullExpression(
   exprOfVar: ts.Expression,

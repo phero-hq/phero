@@ -93,7 +93,7 @@ function generateParserBody(
     ),
   ]
 
-  const modelNode = new TSModelNode(model, typeChecker)
+  const modelNode = new TSModelNode(model, typeChecker, "data")
   sts.push(generateParserForNode(modelNode))
 
   sts.push(
