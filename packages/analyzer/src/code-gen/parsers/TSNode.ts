@@ -18,7 +18,9 @@ export abstract class TSNode {
         this._dataVarExpr = ts.factory.createIdentifier(this.name)
       } else if (this instanceof TSObjectNode) {
         this._dataVarExpr = ts.factory.createIdentifier(
-          `${this.parent.dataVarExpr.text}["${this.name}"]`,
+          this.parent instanceof TSModelNode
+            ? this.name
+            : `${this.parent.dataVarExpr.text}["${this.name}"]`,
         )
       } else if (this instanceof TSArrayElementNode) {
         this._dataVarExpr = ts.factory.createIdentifier(
