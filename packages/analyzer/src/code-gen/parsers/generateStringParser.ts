@@ -1,11 +1,14 @@
 import ts from "typescript"
+import { NewPointer } from "./generateParserFromModel"
 import {
   assignDataToResult,
   generatePushErrorExpressionStatement,
 } from "./generateParserLib"
-import { TSNode } from "./TSNode"
+import { StringParserModel } from "./generateParserModel"
 
-export default function generateStringValidator(node: TSNode): ts.Statement {
+export default function generateStringParser(
+  node: NewPointer<StringParserModel>,
+): ts.Statement {
   return ts.factory.createIfStatement(
     ts.factory.createBinaryExpression(
       ts.factory.createTypeOfExpression(node.dataVarExpr),

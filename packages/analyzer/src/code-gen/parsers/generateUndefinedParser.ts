@@ -1,18 +1,21 @@
 import ts from "typescript"
+import { NewPointer } from "./generateParserFromModel"
 import {
   assignDataToResult,
   generatePushErrorExpressionStatement,
 } from "./generateParserLib"
-import { TSNode } from "./TSNode"
+import { UndefinedParserModel } from "./generateParserModel"
 
-export default function generateUndefinedParser(node: TSNode): ts.Statement {
+export default function undefinedParser(
+  pointer: NewPointer<UndefinedParserModel>,
+): ts.Statement {
   return ts.factory.createIfStatement(
     ts.factory.createBinaryExpression(
-      ts.factory.createTypeOfExpression(node.dataVarExpr),
+      ts.factory.createTypeOfExpression(pointer.dataVarExpr),
       ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsEqualsToken),
       ts.factory.createIdentifier("undefined"),
     ),
-    generatePushErrorExpressionStatement(node.errorPath, "not undefined"),
-    assignDataToResult(node.resultVarExpr, node.dataVarExpr),
+    generatePushErrorExpressionStatement(pointer.errorPath, "not undefined"),
+    assignDataToResult(pointer.resultVarExpr, pointer.dataVarExpr),
   )
 }

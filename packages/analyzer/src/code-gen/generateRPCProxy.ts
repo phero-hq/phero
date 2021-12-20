@@ -1,7 +1,13 @@
 import ts from "typescript"
 import { ServerSource } from "../generateClient"
 import { Model } from "../parseSamenApp"
+import {
+  generateParserFromModel,
+  NewPointer,
+} from "./parsers/generateParserFromModel"
+import { generateParserModel } from "./parsers/generateParserModel"
 import { generateParserForNode } from "./parsers/parsers"
+import { NodePointer, Pointer } from "./parsers/Pointers"
 import { TSModelNode, TSNode } from "./parsers/TSNode"
 
 export default function generateRPCProxy(serverSource: ServerSource): string {
@@ -93,8 +99,9 @@ function generateParserBody(
     ),
   ]
 
-  const modelNode = new TSModelNode(model, typeChecker, "data")
-  sts.push(generateParserForNode(modelNode))
+  sts.push(
+    generateParserFromModel(generateParserModel(typeChecker, model, "data")),
+  )
 
   sts.push(
     ts.factory.createIfStatement(

@@ -1,6 +1,7 @@
 import ts from "typescript"
 import { compileStatement, printCode } from "../tsTestUtils"
 import { generateParser } from "./generateRPCProxy"
+import { TSModelNode } from "./parsers/TSNode"
 
 describe("Parsers", () => {
   describe("for a type alias", () => {
@@ -323,5 +324,55 @@ describe("Parsers", () => {
         expect(printCode(parserDeclaration)).toMatchSnapshot()
       })
     })
+    // describe("intersection", () => {
+    //   test.only("simple", () => {
+    //     const { statement: model, typeChecker } = compileStatement(
+    //       `
+    //       type MyModel = {a: string} & ({b: number} | {c: boolean})
+    //       // type MyModel = string[] & number[]
+    //     `,
+    //       ts.SyntaxKind.TypeAliasDeclaration,
+    //     )
+
+    //     // console.log("model.type.kind", model.type.kind)
+    //     // console.log("model.type.flags", model.type.flags)
+    //     // console.log("model.kind", model.kind)
+
+    //     const modelNode = new TSModelNode(model, typeChecker, "data")
+
+    //     // console.log("model.type.kind", modelNode.typeNode.kind)
+    //     // console.log("model.type.kind", modelNode.typeNode.flags)
+
+    //     // console.log("xxadlkjaskldj", modelNode.typeNode === model.type)
+
+    //     // console.log(
+    //     //   "xxadlkjaskldj2222",
+    //     //   typeChecker.getTypeAtLocation(model).flags,
+    //     // )
+
+    //     // if (ts.isUnionTypeNode(model.type)) {
+    //     //   console.log("ISSS UNIONNNN")
+    //     // }
+    //     expect(true).toBeFalsy()
+
+    //     // const parserDeclaration = generateParser(model, typeChecker)
+
+    //     // console.log(printCode(parserDeclaration))
+    //     // expect(printCode(parserDeclaration)).toMatchSnapshot()
+    //   })
+    //   // test("simple", () => {
+    //   //   const { statement: model, typeChecker } = compileStatement(
+    //   //     `
+    //   //     type MyModel = {a: string} & ({b: number} | {c: number})
+    //   //   `,
+    //   //     ts.SyntaxKind.TypeAliasDeclaration,
+    //   //   )
+
+    //   //   const parserDeclaration = generateParser(model, typeChecker)
+
+    //   //   console.log(printCode(parserDeclaration))
+    //   //   expect(printCode(parserDeclaration)).toMatchSnapshot()
+    //   // })
+    // })
   })
 })

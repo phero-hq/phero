@@ -1,37 +1,29 @@
 import ts from "typescript"
+import { generateParserFromModel, NewPointer } from "./generateParserFromModel"
 import {
   assignDataToResult,
   generatePushErrorExpressionStatement,
   generateTypeofIsObjectAndIsNotNullExpression,
 } from "./generateParserLib"
-import { generateParserForNode } from "./parsers"
-import { TSNode, TSTupleElementNode } from "./TSNode"
+import { TupleParserModel } from "./generateParserModel"
 
-export default function generateTupleParser(node: TSNode): ts.Statement {
-  if (!ts.isTupleTypeNode(node.typeNode)) {
-    throw new Error("Not a tuple type")
-  }
-
+export default function generateTupleParser(
+  pointer: NewPointer<TupleParserModel>,
+): ts.Statement {
   return ts.factory.createIfStatement(
-    generateTypeofIsObjectAndIsNotNullExpression(node.dataVarExpr),
+    generateTypeofIsObjectAndIsNotNullExpression(pointer.dataVarExpr),
     generatePushErrorExpressionStatement(
-      node.errorPath,
+      pointer.errorPath,
       "null or not an object",
     ),
     ts.factory.createBlock([
       assignDataToResult(
-        node.resultVarExpr,
+        pointer.resultVarExpr,
         ts.factory.createArrayLiteralExpression([], false),
       ),
-      ...node.typeNode.elements.map((elementTypeNode, position) => {
-        const subnode = new TSTupleElementNode(
-          elementTypeNode,
-          node.typeChecker,
-          node,
-          position,
-        )
-        return generateParserForNode(subnode)
-      }),
+      ...pointer.model.elements.map((element) =>
+        generateParserFromModel(element, pointer.path),
+      ),
     ]),
   )
 }

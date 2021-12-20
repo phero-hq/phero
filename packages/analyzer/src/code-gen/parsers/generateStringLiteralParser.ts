@@ -1,27 +1,24 @@
 import ts from "typescript"
+import { NewPointer } from "./generateParserFromModel"
 import {
   assignDataToResult,
   generatePushErrorExpressionStatement,
 } from "./generateParserLib"
-import { TSNode } from "./TSNode"
+import { StringLiteralParserModel } from "./generateParserModel"
 
 export default function generateStringLiteralParser(
-  node: TSNode,
+  pointer: NewPointer<StringLiteralParserModel>,
 ): ts.Statement {
-  if (!node.type.isStringLiteral()) {
-    throw new Error("Is not a StringLiteral")
-  }
-
   return ts.factory.createIfStatement(
     ts.factory.createBinaryExpression(
-      node.dataVarExpr,
+      pointer.dataVarExpr,
       ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsEqualsToken),
-      ts.factory.createStringLiteral(node.type.value),
+      ts.factory.createStringLiteral(pointer.model.literal),
     ),
     generatePushErrorExpressionStatement(
-      node.errorPath,
-      `not '${node.type.value}'`,
+      pointer.errorPath,
+      `not '${pointer.model.literal}'`,
     ),
-    assignDataToResult(node.resultVarExpr, node.dataVarExpr),
+    assignDataToResult(pointer.resultVarExpr, pointer.dataVarExpr),
   )
 }

@@ -1,26 +1,29 @@
 import ts from "typescript"
+import { NewPointer } from "./generateParserFromModel"
 import {
   assignDataToResult,
   generatePushErrorExpressionStatement,
 } from "./generateParserLib"
-import { TSNode } from "./TSNode"
+import { NumberParserModel } from "./generateParserModel"
 
-export default function generateNumberParser(node: TSNode): ts.Statement {
+export default function generateNumberParser(
+  pointer: NewPointer<NumberParserModel>,
+): ts.Statement {
   return ts.factory.createIfStatement(
     ts.factory.createBinaryExpression(
-      ts.factory.createTypeOfExpression(node.dataVarExpr),
+      ts.factory.createTypeOfExpression(pointer.dataVarExpr),
       ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsEqualsToken),
       ts.factory.createStringLiteral("number"),
     ),
-    generatePushErrorExpressionStatement(node.errorPath, "not a number"),
+    generatePushErrorExpressionStatement(pointer.errorPath, "not a number"),
     ts.factory.createIfStatement(
       ts.factory.createCallExpression(
         ts.factory.createIdentifier("isNaN"),
         undefined,
-        [node.dataVarExpr],
+        [pointer.dataVarExpr],
       ),
-      generatePushErrorExpressionStatement(node.errorPath, "invalid number"),
-      assignDataToResult(node.resultVarExpr, node.dataVarExpr),
+      generatePushErrorExpressionStatement(pointer.errorPath, "invalid number"),
+      assignDataToResult(pointer.resultVarExpr, pointer.dataVarExpr),
     ),
   )
 }

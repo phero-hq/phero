@@ -1,33 +1,26 @@
 import ts from "typescript"
+import { NewPointer } from "./generateParserFromModel"
 import {
   assignDataToResult,
   generatePushErrorExpressionStatement,
 } from "./generateParserLib"
-import { TSNode } from "./TSNode"
+import { BooleanLiteralParserModel } from "./generateParserModel"
 
 export default function generateBooleanLiteralParser(
-  node: TSNode,
+  pointer: NewPointer<BooleanLiteralParserModel>,
 ): ts.Statement {
-  if (
-    !ts.isLiteralTypeNode(node.typeNode) ||
-    (node.typeNode.literal.kind !== ts.SyntaxKind.TrueKeyword &&
-      node.typeNode.literal.kind !== ts.SyntaxKind.FalseKeyword)
-  ) {
-    throw new Error("Is not a BooleanLiteral")
-  }
-
-  const isTrue = node.typeNode.literal.kind === ts.SyntaxKind.TrueKeyword
-
   return ts.factory.createIfStatement(
     ts.factory.createBinaryExpression(
-      node.dataVarExpr,
+      pointer.dataVarExpr,
       ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsEqualsToken),
-      isTrue ? ts.factory.createTrue() : ts.factory.createFalse(),
+      pointer.model.literal
+        ? ts.factory.createTrue()
+        : ts.factory.createFalse(),
     ),
     generatePushErrorExpressionStatement(
-      node.errorPath,
-      isTrue ? `not true` : `not false`,
+      pointer.errorPath,
+      pointer.model.literal ? `not true` : `not false`,
     ),
-    assignDataToResult(node.resultVarExpr, node.dataVarExpr),
+    assignDataToResult(pointer.resultVarExpr, pointer.dataVarExpr),
   )
 }

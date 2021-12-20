@@ -1,0 +1,1318 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateParserModel for a type alias intersection simple 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "parsers": Array [
+      Object {
+        "members": Array [
+          Object {
+            "name": "a",
+            "optional": false,
+            "parser": Object {
+              "type": "string",
+            },
+            "type": "member",
+          },
+        ],
+        "type": "object",
+      },
+      Object {
+        "oneOf": Array [
+          Object {
+            "members": Array [
+              Object {
+                "name": "b",
+                "optional": false,
+                "parser": Object {
+                  "type": "number",
+                },
+                "type": "member",
+              },
+            ],
+            "type": "object",
+          },
+          Object {
+            "members": Array [
+              Object {
+                "name": "c",
+                "optional": true,
+                "parser": Object {
+                  "type": "boolean",
+                },
+                "type": "member",
+              },
+            ],
+            "type": "object",
+          },
+        ],
+        "type": "union",
+      },
+    ],
+    "type": "intersection",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal boolean array member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "element": Object {
+            "type": "boolean",
+          },
+          "type": "array",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal boolean member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "type": "boolean",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal deep nested object 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "members": Array [
+            Object {
+              "name": "b",
+              "optional": true,
+              "parser": Object {
+                "element": Object {
+                  "members": Array [
+                    Object {
+                      "name": "c",
+                      "optional": false,
+                      "parser": Object {
+                        "members": Array [
+                          Object {
+                            "name": "d",
+                            "optional": true,
+                            "parser": Object {
+                              "type": "number",
+                            },
+                            "type": "member",
+                          },
+                        ],
+                        "type": "object",
+                      },
+                      "type": "member",
+                    },
+                  ],
+                  "type": "object",
+                },
+                "type": "array",
+              },
+              "type": "member",
+            },
+          ],
+          "type": "object",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal null member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "type": "null",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal number array member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "element": Object {
+            "type": "number",
+          },
+          "type": "array",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal number literal member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "literal": 123,
+          "type": "number-literal",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal number member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "type": "number",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal number model 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "type": "number",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal object literal member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "element": Object {
+            "members": Array [
+              Object {
+                "name": "b",
+                "optional": false,
+                "parser": Object {
+                  "type": "number",
+                },
+                "type": "member",
+              },
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal optional member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": true,
+        "parser": Object {
+          "type": "string",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal optional object literal member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": true,
+        "parser": Object {
+          "element": Object {
+            "members": Array [
+              Object {
+                "name": "b",
+                "optional": false,
+                "parser": Object {
+                  "type": "number",
+                },
+                "type": "member",
+              },
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal optional object literal with optional member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": true,
+        "parser": Object {
+          "members": Array [
+            Object {
+              "name": "b",
+              "optional": true,
+              "parser": Object {
+                "type": "number",
+              },
+              "type": "member",
+            },
+          ],
+          "type": "object",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal optional string array member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": true,
+        "parser": Object {
+          "element": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal string array member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "element": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal string literal member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "literal": "xxx",
+          "type": "string-literal",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal string member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "type": "string",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal true literal member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "literal": true,
+          "type": "boolean-literal",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias object literal with no members 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias tuple simple 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "elements": Array [
+      Object {
+        "type": "string",
+      },
+      Object {
+        "type": "number",
+      },
+    ],
+    "type": "tuple",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias tuple tuple with typealias 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "elements": Array [
+      Object {
+        "type": "string",
+      },
+      Object {
+        "members": Array [
+          Object {
+            "name": "a",
+            "optional": false,
+            "parser": Object {
+              "type": "number",
+            },
+            "type": "member",
+          },
+        ],
+        "type": "object",
+      },
+    ],
+    "type": "tuple",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias tuple tuple within tuple 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "elements": Array [
+      Object {
+        "type": "string",
+      },
+      Object {
+        "elements": Array [
+          Object {
+            "members": Array [
+              Object {
+                "name": "a",
+                "optional": false,
+                "parser": Object {
+                  "type": "number",
+                },
+                "type": "member",
+              },
+            ],
+            "type": "object",
+          },
+          Object {
+            "type": "boolean",
+          },
+        ],
+        "type": "tuple",
+      },
+    ],
+    "type": "tuple",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias union simple 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "oneOf": Array [
+      Object {
+        "type": "string",
+      },
+      Object {
+        "type": "number",
+      },
+    ],
+    "type": "union",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias union with tuple 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "oneOf": Array [
+      Object {
+        "type": "string",
+      },
+      Object {
+        "elements": Array [
+          Object {
+            "members": Array [
+              Object {
+                "name": "a",
+                "optional": false,
+                "parser": Object {
+                  "type": "number",
+                },
+                "type": "member",
+              },
+            ],
+            "type": "object",
+          },
+          Object {
+            "type": "string",
+          },
+        ],
+        "type": "tuple",
+      },
+    ],
+    "type": "union",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias union with tuple 2`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "oneOf": Array [
+      Object {
+        "members": Array [
+          Object {
+            "name": "a",
+            "optional": false,
+            "parser": Object {
+              "type": "string",
+            },
+            "type": "member",
+          },
+          Object {
+            "name": "b",
+            "optional": false,
+            "parser": Object {
+              "type": "number",
+            },
+            "type": "member",
+          },
+        ],
+        "type": "object",
+      },
+      Object {
+        "members": Array [
+          Object {
+            "name": "a",
+            "optional": false,
+            "parser": Object {
+              "type": "number",
+            },
+            "type": "member",
+          },
+          Object {
+            "name": "b",
+            "optional": false,
+            "parser": Object {
+              "type": "string",
+            },
+            "type": "member",
+          },
+        ],
+        "type": "object",
+      },
+    ],
+    "type": "union",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for a type alias union with type literal 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "oneOf": Array [
+      Object {
+        "type": "string",
+      },
+      Object {
+        "members": Array [
+          Object {
+            "name": "a",
+            "optional": false,
+            "parser": Object {
+              "type": "number",
+            },
+            "type": "member",
+          },
+        ],
+        "type": "object",
+      },
+    ],
+    "type": "union",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface boolean array member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "element": Object {
+            "type": "boolean",
+          },
+          "type": "array",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface boolean member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "type": "boolean",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface deep nested object 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "element": Object {
+            "members": Array [
+              Object {
+                "name": "b",
+                "optional": true,
+                "parser": Object {
+                  "members": Array [
+                    Object {
+                      "name": "c",
+                      "optional": false,
+                      "parser": Object {
+                        "members": Array [
+                          Object {
+                            "name": "d",
+                            "optional": false,
+                            "parser": Object {
+                              "element": Object {
+                                "members": Array [
+                                  Object {
+                                    "name": "e",
+                                    "optional": false,
+                                    "parser": Object {
+                                      "members": Array [
+                                        Object {
+                                          "name": "f",
+                                          "optional": false,
+                                          "parser": Object {
+                                            "element": Object {
+                                              "type": "boolean",
+                                            },
+                                            "type": "array",
+                                          },
+                                          "type": "member",
+                                        },
+                                      ],
+                                      "type": "object",
+                                    },
+                                    "type": "member",
+                                  },
+                                ],
+                                "type": "object",
+                              },
+                              "type": "array",
+                            },
+                            "type": "member",
+                          },
+                        ],
+                        "type": "object",
+                      },
+                      "type": "member",
+                    },
+                  ],
+                  "type": "object",
+                },
+                "type": "member",
+              },
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface null member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "type": "null",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface number array member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "element": Object {
+            "type": "number",
+          },
+          "type": "array",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface number literal member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "literal": 123,
+          "type": "number-literal",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface number member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "type": "number",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface object literal array member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "element": Object {
+            "members": Array [
+              Object {
+                "name": "b",
+                "optional": false,
+                "parser": Object {
+                  "type": "number",
+                },
+                "type": "member",
+              },
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface object literal member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "members": Array [
+            Object {
+              "name": "b",
+              "optional": false,
+              "parser": Object {
+                "type": "number",
+              },
+              "type": "member",
+            },
+          ],
+          "type": "object",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface optional member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": true,
+        "parser": Object {
+          "type": "string",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface optional object literal member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": true,
+        "parser": Object {
+          "members": Array [
+            Object {
+              "name": "b",
+              "optional": false,
+              "parser": Object {
+                "type": "number",
+              },
+              "type": "member",
+            },
+          ],
+          "type": "object",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface optional object literal with optional member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": true,
+        "parser": Object {
+          "members": Array [
+            Object {
+              "name": "b",
+              "optional": true,
+              "parser": Object {
+                "type": "number",
+              },
+              "type": "member",
+            },
+          ],
+          "type": "object",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface optional string array member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": true,
+        "parser": Object {
+          "element": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface string array member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "element": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface string literal member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "literal": "aap",
+          "type": "string-literal",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface string member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "type": "string",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface true literal member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "literal": true,
+          "type": "boolean-literal",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for an interface with no members 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for enums enum member 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "en",
+        "optional": false,
+        "parser": Object {
+          "literal": 0,
+          "type": "number-literal",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for enums enum member model 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "literal": 1,
+    "type": "number-literal",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for enums enum model 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "literal": 0,
+        "type": "number-literal",
+      },
+      Object {
+        "literal": 1,
+        "type": "number-literal",
+      },
+      Object {
+        "literal": 2,
+        "type": "number-literal",
+      },
+    ],
+    "type": "enum",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for enums enum with auto number enum members 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "en",
+        "optional": false,
+        "parser": Object {
+          "members": Array [
+            Object {
+              "literal": 0,
+              "type": "number-literal",
+            },
+            Object {
+              "literal": 100,
+              "type": "number-literal",
+            },
+            Object {
+              "literal": 101,
+              "type": "number-literal",
+            },
+          ],
+          "type": "enum",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for enums enum with number enum members 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "en",
+        "optional": false,
+        "parser": Object {
+          "members": Array [
+            Object {
+              "literal": 0,
+              "type": "number-literal",
+            },
+            Object {
+              "literal": 1,
+              "type": "number-literal",
+            },
+          ],
+          "type": "enum",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for enums enum with string enum members 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "en",
+        "optional": false,
+        "parser": Object {
+          "members": Array [
+            Object {
+              "literal": "a",
+              "type": "string-literal",
+            },
+            Object {
+              "literal": "b",
+              "type": "string-literal",
+            },
+          ],
+          "type": "enum",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;

@@ -1,24 +1,21 @@
 import ts from "typescript"
+import { generateParserFromModel, NewPointer } from "./generateParserFromModel"
 import { generatePushErrorExpressionStatement } from "./generateParserLib"
-import { generateParserForNode } from "./parsers"
-import { TSNode, TSUnionElementNode } from "./TSNode"
+import { ParserModel, UnionParserModel } from "./generateParserModel"
 
-export default function generateUnionParser(node: TSNode): ts.Statement {
-  if (!ts.isUnionTypeNode(node.typeNode)) {
-    throw new Error("Not a union type")
-  }
-
+export default function generateUnionParser(
+  pointer: NewPointer<UnionParserModel>,
+): ts.Statement {
   const saveErrors = saveErrorsLengthBeforeUnionValidation()
   const errorFallback = generatePushErrorExpressionStatement(
-    node.errorPath,
+    pointer.errorPath,
     `is none of the options of union`,
   )
 
-  const validateUnionMembers = node.typeNode.types.reduceRight(
-    (st: ts.Statement, nodeType: ts.TypeNode) => {
-      const unionNode = new TSUnionElementNode(nodeType, node.typeChecker, node)
+  const validateUnionMembers = pointer.model.oneOf.reduceRight(
+    (st: ts.Statement, element: ParserModel) => {
       return ts.factory.createBlock([
-        generateParserForNode(unionNode),
+        generateParserFromModel(element, pointer.path),
         validateOrNext(st),
       ])
     },
