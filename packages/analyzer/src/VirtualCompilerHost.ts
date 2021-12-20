@@ -101,29 +101,3 @@ export class VirtualCompilerHost {
     )
   }
 }
-
-function ress(moduleName: string, containingFile: string) {
-  if (moduleName.includes(".") || moduleName.includes("/")) {
-    const dsmSrc = `/Users/kamilafsar/Projects/slimste-mens/api/src`
-    const fileName = `${moduleName.substring("./".length)}.ts`
-
-    if (fileName === "samen.ts") {
-      return {
-        resolvedFileName: `${dsmSrc}/${fileName}`,
-        isExternalLibraryImport: false,
-      }
-    }
-
-    const resolvedFileName = `${path.join(
-      path.dirname(containingFile),
-      moduleName,
-    )}.ts`
-
-    return {
-      resolvedFileName,
-      isExternalLibraryImport: false,
-    }
-  }
-
-  return undefined
-}
