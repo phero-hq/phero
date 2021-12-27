@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { compileStatement, compileStatements, printCode } from "../tsTestUtils"
-import { generateParser } from "./generateRPCProxy"
+import generateParser from "./parsers/generateParser"
 
 describe("Parsers", () => {
   describe("for a type alias", () => {
