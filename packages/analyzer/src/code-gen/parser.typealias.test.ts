@@ -1,7 +1,6 @@
 import ts from "typescript"
-import { compileStatement, printCode } from "../tsTestUtils"
+import { compileStatement, compileStatements, printCode } from "../tsTestUtils"
 import { generateParser } from "./generateRPCProxy"
-import { TSModelNode } from "./parsers/TSNode"
 
 describe("Parsers", () => {
   describe("for a type alias", () => {
@@ -324,55 +323,234 @@ describe("Parsers", () => {
         expect(printCode(parserDeclaration)).toMatchSnapshot()
       })
     })
-    // describe("intersection", () => {
-    //   test.only("simple", () => {
-    //     const { statement: model, typeChecker } = compileStatement(
-    //       `
-    //       type MyModel = {a: string} & ({b: number} | {c: boolean})
-    //       // type MyModel = string[] & number[]
-    //     `,
-    //       ts.SyntaxKind.TypeAliasDeclaration,
-    //     )
+    describe("intersection", () => {
+      test("simple", () => {
+        const { statement: model, typeChecker } = compileStatement(
+          `
+          type MyModel = {a: string} & {b: string}
+        `,
+          ts.SyntaxKind.TypeAliasDeclaration,
+        )
 
-    //     // console.log("model.type.kind", model.type.kind)
-    //     // console.log("model.type.flags", model.type.flags)
-    //     // console.log("model.kind", model.kind)
+        const parserDeclaration = generateParser(model, typeChecker)
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("object literal with union", () => {
+        const { statement: model, typeChecker } = compileStatement(
+          `
+          type MyModel = {a: string} & ({b: number} | {c: boolean})
+        `,
+          ts.SyntaxKind.TypeAliasDeclaration,
+        )
 
-    //     const modelNode = new TSModelNode(model, typeChecker, "data")
+        const parserDeclaration = generateParser(model, typeChecker)
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("object literal with complex union", () => {
+        const { statement: model, typeChecker } = compileStatement(
+          `
+          type MyModel = {a: string} & ({b: number, c: {d:123}} | {c: boolean, b: string})
+        `,
+          ts.SyntaxKind.TypeAliasDeclaration,
+        )
 
-    //     // console.log("model.type.kind", modelNode.typeNode.kind)
-    //     // console.log("model.type.kind", modelNode.typeNode.flags)
+        const parserDeclaration = generateParser(model, typeChecker)
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+    })
+    describe("typescript utility types", () => {
+      test("Pick", () => {
+        const { statement: model, typeChecker } = compileStatement(
+          `
+        type MyModel = {
+          a: Pick<{a: string, b: boolean, c:number}, "b">
+        }
+      `,
+          ts.SyntaxKind.TypeAliasDeclaration,
+        )
 
-    //     // console.log("xxadlkjaskldj", modelNode.typeNode === model.type)
+        const parserDeclaration = generateParser(model, typeChecker)
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("Omit", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+          type MyModel = {
+            a: Omit<Aad, "c">
+          }  
+          interface Aad {
+            kees: {
+              a: number
+            }
+            c: number
+          }
+          interface Aad {
+            kees: {
+              b: number
+            }
+          }
+      `,
+        )
 
-    //     // console.log(
-    //     //   "xxadlkjaskldj2222",
-    //     //   typeChecker.getTypeAtLocation(model).flags,
-    //     // )
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+    })
+    describe("Generics", () => {
+      test("native generic", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+        type MyModel<T> = {
+          a: T
+        }
+      `,
+        )
 
-    //     // if (ts.isUnionTypeNode(model.type)) {
-    //     //   console.log("ISSS UNIONNNN")
-    //     // }
-    //     expect(true).toBeFalsy()
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+    })
+    describe("Reference", () => {
+      test("to antoher interface", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+        type MyModel = {
+          a: Aad
+        }
+        interface Aad {
+          a: number
+        }
+      `,
+        )
 
-    //     // const parserDeclaration = generateParser(model, typeChecker)
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+    })
 
-    //     // console.log(printCode(parserDeclaration))
-    //     // expect(printCode(parserDeclaration)).toMatchSnapshot()
-    //   })
-    //   // test("simple", () => {
-    //   //   const { statement: model, typeChecker } = compileStatement(
-    //   //     `
-    //   //     type MyModel = {a: string} & ({b: number} | {c: number})
-    //   //   `,
-    //   //     ts.SyntaxKind.TypeAliasDeclaration,
-    //   //   )
+    describe("index types", () => {
+      test("string keys", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+        type MyModel = {
+          [key: string]: {
+            a: string
+          }
+        }
+      `,
+        )
 
-    //   //   const parserDeclaration = generateParser(model, typeChecker)
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("number keys", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+        type MyModel = {
+          [key: number]: {
+            a: string
+          }
+        }
+      `,
+        )
 
-    //   //   console.log(printCode(parserDeclaration))
-    //   //   expect(printCode(parserDeclaration)).toMatchSnapshot()
-    //   // })
-    // })
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("union string keys", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+        type MyModel = {
+          [name: "aap" | "noot"]: {
+            a: string
+          }
+        }
+      `,
+        )
+
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("union number keys", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+        type MyModel = {
+          [name: 10 | 20]: {
+            a: string
+          }
+        }
+      `,
+        )
+
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("keyof keys", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+        type MyModel = {
+          [name in keyof Kees]: {
+            a: string
+          }
+        }
+        interface Kees {
+          aap: string
+          noot: number
+        }
+      `,
+        )
+
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+    })
   })
 })

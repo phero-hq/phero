@@ -1,10 +1,11 @@
 import ts from "typescript"
-import { generateParserFromModel, NewPointer } from "./generateParserFromModel"
+import generateParserFromModel from "./generateParserFromModel"
 import { generatePushErrorExpressionStatement } from "./generateParserLib"
 import { ParserModel, UnionParserModel } from "./generateParserModel"
+import Pointer from "./Pointer"
 
 export default function generateUnionParser(
-  pointer: NewPointer<UnionParserModel>,
+  pointer: Pointer<UnionParserModel>,
 ): ts.Statement {
   const saveErrors = saveErrorsLengthBeforeUnionValidation()
   const errorFallback = generatePushErrorExpressionStatement(

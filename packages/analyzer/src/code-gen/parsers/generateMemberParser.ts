@@ -1,9 +1,10 @@
 import ts from "typescript"
-import { generateParserFromModel, NewPointer } from "./generateParserFromModel"
+import generateParserFromModel from "./generateParserFromModel"
 import { MemberParserModel } from "./generateParserModel"
+import Pointer from "./Pointer"
 
 export default function generateMemberParser(
-  pointer: NewPointer<MemberParserModel>,
+  pointer: Pointer<MemberParserModel>,
 ): ts.Statement {
   const memberParser = generateParserFromModel(
     pointer.model.parser,

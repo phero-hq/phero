@@ -13,7 +13,7 @@ exports[`Parsers for an interface boolean array member 1`] = `
         }
         else {
             result = {};
-            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+            if (!Array.isArray(data[\\"a\\"])) {
                 errors.push({
                     path: \\"data.a\\",
                     message: \`not an array\`
@@ -95,7 +95,7 @@ exports[`Parsers for an interface deep nested object 1`] = `
         }
         else {
             result = {};
-            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+            if (!Array.isArray(data[\\"a\\"])) {
                 errors.push({
                     path: \\"data.a\\",
                     message: \`not an array\`
@@ -129,7 +129,7 @@ exports[`Parsers for an interface deep nested object 1`] = `
                                 }
                                 else {
                                     result[\\"a\\"][it_0][\\"b\\"][\\"c\\"] = {};
-                                    if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"] === null) {
+                                    if (!Array.isArray(data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"])) {
                                         errors.push({
                                             path: \`data.a[\${it_0}].b.c.d\`,
                                             message: \`not an array\`
@@ -154,7 +154,7 @@ exports[`Parsers for an interface deep nested object 1`] = `
                                                 }
                                                 else {
                                                     result[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"] = {};
-                                                    if (typeof data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"][\\"f\\"] !== \\"object\\" || data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"][\\"f\\"] === null) {
+                                                    if (!Array.isArray(data[\\"a\\"][it_0][\\"b\\"][\\"c\\"][\\"d\\"][it_1][\\"e\\"][\\"f\\"])) {
                                                         errors.push({
                                                             path: \`data.a[\${it_0}].b.c.d[\${it_1}].e.f\`,
                                                             message: \`not an array\`
@@ -243,7 +243,7 @@ exports[`Parsers for an interface number array member 1`] = `
         }
         else {
             result = {};
-            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+            if (!Array.isArray(data[\\"a\\"])) {
                 errors.push({
                     path: \\"data.a\\",
                     message: \`not an array\`
@@ -373,7 +373,7 @@ exports[`Parsers for an interface object literal array member 1`] = `
         }
         else {
             result = {};
-            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+            if (!Array.isArray(data[\\"a\\"])) {
                 errors.push({
                     path: \\"data.a\\",
                     message: \`not an array\`
@@ -628,7 +628,7 @@ exports[`Parsers for an interface optional string array member 1`] = `
         else {
             result = {};
             if (data[\\"a\\"] !== undefined)
-                if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+                if (!Array.isArray(data[\\"a\\"])) {
                     errors.push({
                         path: \\"data.a\\",
                         message: \`not an array\`
@@ -674,7 +674,7 @@ exports[`Parsers for an interface string array member 1`] = `
         }
         else {
             result = {};
-            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+            if (!Array.isArray(data[\\"a\\"])) {
                 errors.push({
                     path: \\"data.a\\",
                     message: \`not an array\`

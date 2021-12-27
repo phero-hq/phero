@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { NewPointer } from "./generateParserFromModel"
+import Pointer from "./Pointer"
 import {
   assignDataToResult,
   generatePushErrorExpressionStatement,
@@ -7,15 +7,21 @@ import {
 import { StringParserModel } from "./generateParserModel"
 
 export default function generateStringParser(
-  node: NewPointer<StringParserModel>,
+  pointer: Pointer<StringParserModel>,
 ): ts.Statement {
   return ts.factory.createIfStatement(
-    ts.factory.createBinaryExpression(
-      ts.factory.createTypeOfExpression(node.dataVarExpr),
-      ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsEqualsToken),
-      ts.factory.createStringLiteral("string"),
-    ),
-    generatePushErrorExpressionStatement(node.errorPath, "not a string"),
-    assignDataToResult(node.resultVarExpr, node.dataVarExpr),
+    generateStringValidator(pointer),
+    generatePushErrorExpressionStatement(pointer.errorPath, "not a string"),
+    assignDataToResult(pointer.resultVarExpr, pointer.dataVarExpr),
+  )
+}
+
+export function generateStringValidator(
+  pointer: Pointer<StringParserModel>,
+): ts.Expression {
+  return ts.factory.createBinaryExpression(
+    ts.factory.createTypeOfExpression(pointer.dataVarExpr),
+    ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsEqualsToken),
+    ts.factory.createStringLiteral("string"),
   )
 }

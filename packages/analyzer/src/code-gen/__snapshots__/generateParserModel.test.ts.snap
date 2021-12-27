@@ -65,8 +65,13 @@ Object {
         "name": "a",
         "optional": false,
         "parser": Object {
+          "depth": 0,
           "element": Object {
-            "type": "boolean",
+            "depth": 0,
+            "parser": Object {
+              "type": "boolean",
+            },
+            "type": "arrayElement",
           },
           "type": "array",
         },
@@ -113,28 +118,33 @@ Object {
               "name": "b",
               "optional": true,
               "parser": Object {
+                "depth": 0,
                 "element": Object {
-                  "members": Array [
-                    Object {
-                      "name": "c",
-                      "optional": false,
-                      "parser": Object {
-                        "members": Array [
-                          Object {
-                            "name": "d",
-                            "optional": true,
-                            "parser": Object {
-                              "type": "number",
+                  "depth": 0,
+                  "parser": Object {
+                    "members": Array [
+                      Object {
+                        "name": "c",
+                        "optional": false,
+                        "parser": Object {
+                          "members": Array [
+                            Object {
+                              "name": "d",
+                              "optional": true,
+                              "parser": Object {
+                                "type": "number",
+                              },
+                              "type": "member",
                             },
-                            "type": "member",
-                          },
-                        ],
-                        "type": "object",
+                          ],
+                          "type": "object",
+                        },
+                        "type": "member",
                       },
-                      "type": "member",
-                    },
-                  ],
-                  "type": "object",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "arrayElement",
                 },
                 "type": "array",
               },
@@ -181,8 +191,13 @@ Object {
         "name": "a",
         "optional": false,
         "parser": Object {
+          "depth": 0,
           "element": Object {
-            "type": "number",
+            "depth": 0,
+            "parser": Object {
+              "type": "number",
+            },
+            "type": "arrayElement",
           },
           "type": "array",
         },
@@ -255,18 +270,23 @@ Object {
         "name": "a",
         "optional": false,
         "parser": Object {
+          "depth": 0,
           "element": Object {
-            "members": Array [
-              Object {
-                "name": "b",
-                "optional": false,
-                "parser": Object {
-                  "type": "number",
+            "depth": 0,
+            "parser": Object {
+              "members": Array [
+                Object {
+                  "name": "b",
+                  "optional": false,
+                  "parser": Object {
+                    "type": "number",
+                  },
+                  "type": "member",
                 },
-                "type": "member",
-              },
-            ],
-            "type": "object",
+              ],
+              "type": "object",
+            },
+            "type": "arrayElement",
           },
           "type": "array",
         },
@@ -308,18 +328,23 @@ Object {
         "name": "a",
         "optional": true,
         "parser": Object {
+          "depth": 0,
           "element": Object {
-            "members": Array [
-              Object {
-                "name": "b",
-                "optional": false,
-                "parser": Object {
-                  "type": "number",
+            "depth": 0,
+            "parser": Object {
+              "members": Array [
+                Object {
+                  "name": "b",
+                  "optional": false,
+                  "parser": Object {
+                    "type": "number",
+                  },
+                  "type": "member",
                 },
-                "type": "member",
-              },
-            ],
-            "type": "object",
+              ],
+              "type": "object",
+            },
+            "type": "arrayElement",
           },
           "type": "array",
         },
@@ -371,8 +396,13 @@ Object {
         "name": "a",
         "optional": true,
         "parser": Object {
+          "depth": 0,
           "element": Object {
-            "type": "string",
+            "depth": 0,
+            "parser": Object {
+              "type": "string",
+            },
+            "type": "arrayElement",
           },
           "type": "array",
         },
@@ -394,8 +424,13 @@ Object {
         "name": "a",
         "optional": false,
         "parser": Object {
+          "depth": 0,
           "element": Object {
-            "type": "string",
+            "depth": 0,
+            "parser": Object {
+              "type": "string",
+            },
+            "type": "arrayElement",
           },
           "type": "array",
         },
@@ -487,10 +522,18 @@ Object {
   "parser": Object {
     "elements": Array [
       Object {
-        "type": "string",
+        "parser": Object {
+          "type": "string",
+        },
+        "position": 0,
+        "type": "tupleElement",
       },
       Object {
-        "type": "number",
+        "parser": Object {
+          "type": "number",
+        },
+        "position": 1,
+        "type": "tupleElement",
       },
     ],
     "type": "tuple",
@@ -505,20 +548,28 @@ Object {
   "parser": Object {
     "elements": Array [
       Object {
-        "type": "string",
+        "parser": Object {
+          "type": "string",
+        },
+        "position": 0,
+        "type": "tupleElement",
       },
       Object {
-        "members": Array [
-          Object {
-            "name": "a",
-            "optional": false,
-            "parser": Object {
-              "type": "number",
+        "parser": Object {
+          "members": Array [
+            Object {
+              "name": "a",
+              "optional": false,
+              "parser": Object {
+                "type": "number",
+              },
+              "type": "member",
             },
-            "type": "member",
-          },
-        ],
-        "type": "object",
+          ],
+          "type": "object",
+        },
+        "position": 1,
+        "type": "tupleElement",
       },
     ],
     "type": "tuple",
@@ -533,28 +584,44 @@ Object {
   "parser": Object {
     "elements": Array [
       Object {
-        "type": "string",
+        "parser": Object {
+          "type": "string",
+        },
+        "position": 0,
+        "type": "tupleElement",
       },
       Object {
-        "elements": Array [
-          Object {
-            "members": Array [
-              Object {
-                "name": "a",
-                "optional": false,
-                "parser": Object {
-                  "type": "number",
-                },
-                "type": "member",
+        "parser": Object {
+          "elements": Array [
+            Object {
+              "parser": Object {
+                "members": Array [
+                  Object {
+                    "name": "a",
+                    "optional": false,
+                    "parser": Object {
+                      "type": "number",
+                    },
+                    "type": "member",
+                  },
+                ],
+                "type": "object",
               },
-            ],
-            "type": "object",
-          },
-          Object {
-            "type": "boolean",
-          },
-        ],
-        "type": "tuple",
+              "position": 0,
+              "type": "tupleElement",
+            },
+            Object {
+              "parser": Object {
+                "type": "boolean",
+              },
+              "position": 1,
+              "type": "tupleElement",
+            },
+          ],
+          "type": "tuple",
+        },
+        "position": 1,
+        "type": "tupleElement",
       },
     ],
     "type": "tuple",
@@ -592,20 +659,28 @@ Object {
       Object {
         "elements": Array [
           Object {
-            "members": Array [
-              Object {
-                "name": "a",
-                "optional": false,
-                "parser": Object {
-                  "type": "number",
+            "parser": Object {
+              "members": Array [
+                Object {
+                  "name": "a",
+                  "optional": false,
+                  "parser": Object {
+                    "type": "number",
+                  },
+                  "type": "member",
                 },
-                "type": "member",
-              },
-            ],
-            "type": "object",
+              ],
+              "type": "object",
+            },
+            "position": 0,
+            "type": "tupleElement",
           },
           Object {
-            "type": "string",
+            "parser": Object {
+              "type": "string",
+            },
+            "position": 1,
+            "type": "tupleElement",
           },
         ],
         "type": "tuple",
@@ -708,8 +783,13 @@ Object {
         "name": "a",
         "optional": false,
         "parser": Object {
+          "depth": 0,
           "element": Object {
-            "type": "boolean",
+            "depth": 0,
+            "parser": Object {
+              "type": "boolean",
+            },
+            "type": "arrayElement",
           },
           "type": "array",
         },
@@ -751,64 +831,79 @@ Object {
         "name": "a",
         "optional": false,
         "parser": Object {
+          "depth": 0,
           "element": Object {
-            "members": Array [
-              Object {
-                "name": "b",
-                "optional": true,
-                "parser": Object {
-                  "members": Array [
-                    Object {
-                      "name": "c",
-                      "optional": false,
-                      "parser": Object {
-                        "members": Array [
-                          Object {
-                            "name": "d",
-                            "optional": false,
-                            "parser": Object {
-                              "element": Object {
-                                "members": Array [
-                                  Object {
-                                    "name": "e",
-                                    "optional": false,
-                                    "parser": Object {
-                                      "members": Array [
-                                        Object {
-                                          "name": "f",
-                                          "optional": false,
-                                          "parser": Object {
-                                            "element": Object {
-                                              "type": "boolean",
+            "depth": 0,
+            "parser": Object {
+              "members": Array [
+                Object {
+                  "name": "b",
+                  "optional": true,
+                  "parser": Object {
+                    "members": Array [
+                      Object {
+                        "name": "c",
+                        "optional": false,
+                        "parser": Object {
+                          "members": Array [
+                            Object {
+                              "name": "d",
+                              "optional": false,
+                              "parser": Object {
+                                "depth": 1,
+                                "element": Object {
+                                  "depth": 1,
+                                  "parser": Object {
+                                    "members": Array [
+                                      Object {
+                                        "name": "e",
+                                        "optional": false,
+                                        "parser": Object {
+                                          "members": Array [
+                                            Object {
+                                              "name": "f",
+                                              "optional": false,
+                                              "parser": Object {
+                                                "depth": 2,
+                                                "element": Object {
+                                                  "depth": 2,
+                                                  "parser": Object {
+                                                    "type": "boolean",
+                                                  },
+                                                  "type": "arrayElement",
+                                                },
+                                                "type": "array",
+                                              },
+                                              "type": "member",
                                             },
-                                            "type": "array",
-                                          },
-                                          "type": "member",
+                                          ],
+                                          "type": "object",
                                         },
-                                      ],
-                                      "type": "object",
-                                    },
-                                    "type": "member",
+                                        "type": "member",
+                                      },
+                                    ],
+                                    "type": "object",
                                   },
-                                ],
-                                "type": "object",
+                                  "type": "arrayElement",
+                                },
+                                "type": "array",
                               },
-                              "type": "array",
+                              "type": "member",
                             },
-                            "type": "member",
-                          },
-                        ],
-                        "type": "object",
+                          ],
+                          "type": "object",
+                        },
+                        "type": "member",
                       },
-                      "type": "member",
-                    },
-                  ],
-                  "type": "object",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "member",
                 },
-                "type": "member",
-              },
-            ],
-            "type": "object",
+              ],
+              "type": "object",
+            },
+            "type": "arrayElement",
           },
           "type": "array",
         },
@@ -850,8 +945,13 @@ Object {
         "name": "a",
         "optional": false,
         "parser": Object {
+          "depth": 0,
           "element": Object {
-            "type": "number",
+            "depth": 0,
+            "parser": Object {
+              "type": "number",
+            },
+            "type": "arrayElement",
           },
           "type": "array",
         },
@@ -914,18 +1014,23 @@ Object {
         "name": "a",
         "optional": false,
         "parser": Object {
+          "depth": 0,
           "element": Object {
-            "members": Array [
-              Object {
-                "name": "b",
-                "optional": false,
-                "parser": Object {
-                  "type": "number",
+            "depth": 0,
+            "parser": Object {
+              "members": Array [
+                Object {
+                  "name": "b",
+                  "optional": false,
+                  "parser": Object {
+                    "type": "number",
+                  },
+                  "type": "member",
                 },
-                "type": "member",
-              },
-            ],
-            "type": "object",
+              ],
+              "type": "object",
+            },
+            "type": "arrayElement",
           },
           "type": "array",
         },
@@ -1057,8 +1162,13 @@ Object {
         "name": "a",
         "optional": true,
         "parser": Object {
+          "depth": 0,
           "element": Object {
-            "type": "string",
+            "depth": 0,
+            "parser": Object {
+              "type": "string",
+            },
+            "type": "arrayElement",
           },
           "type": "array",
         },
@@ -1080,8 +1190,13 @@ Object {
         "name": "a",
         "optional": false,
         "parser": Object {
+          "depth": 0,
           "element": Object {
-            "type": "string",
+            "depth": 0,
+            "parser": Object {
+              "type": "string",
+            },
+            "type": "arrayElement",
           },
           "type": "array",
         },
@@ -1307,6 +1422,490 @@ Object {
             },
           ],
           "type": "enum",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for generics type with default generic parameter 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "prop",
+        "optional": false,
+        "parser": Object {
+          "type": "number",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for generics type with generic parameter 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "prop",
+        "optional": false,
+        "parser": Object {
+          "type": "any",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel for generics type with parameterized generic parameter 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "members": Array [
+            Object {
+              "name": "b",
+              "optional": false,
+              "parser": Object {
+                "type": "number",
+              },
+              "type": "member",
+            },
+            Object {
+              "name": "c",
+              "optional": false,
+              "parser": Object {
+                "type": "boolean",
+              },
+              "type": "member",
+            },
+          ],
+          "type": "object",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel mapped types mapping props to booleans 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "darkMode",
+        "optional": true,
+        "parser": Object {
+          "type": "boolean",
+        },
+        "type": "member",
+      },
+      Object {
+        "name": "newUserProfile",
+        "optional": true,
+        "parser": Object {
+          "type": "boolean",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel mapped types mapping readonly keys to mutable keys 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "id",
+        "optional": false,
+        "parser": Object {
+          "type": "string",
+        },
+        "type": "member",
+      },
+      Object {
+        "name": "name",
+        "optional": false,
+        "parser": Object {
+          "type": "string",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel mapped types simple 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "x",
+        "optional": false,
+        "parser": Object {
+          "members": Array [
+            Object {
+              "depth": 0,
+              "keyParser": Object {
+                "oneOf": Array [
+                  Object {
+                    "literal": "aap",
+                    "type": "string-literal",
+                  },
+                  Object {
+                    "literal": "noot",
+                    "type": "string-literal",
+                  },
+                ],
+                "type": "union",
+              },
+              "optional": true,
+              "parser": Object {
+                "members": Array [
+                  Object {
+                    "name": "y",
+                    "optional": false,
+                    "parser": Object {
+                      "type": "string",
+                    },
+                    "type": "member",
+                  },
+                ],
+                "type": "object",
+              },
+              "type": "indexMember",
+            },
+          ],
+          "type": "object",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel other types Partial<Record<X, number>> 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "0",
+        "optional": true,
+        "parser": Object {
+          "type": "number",
+        },
+        "type": "member",
+      },
+      Object {
+        "name": "1",
+        "optional": true,
+        "parser": Object {
+          "type": "number",
+        },
+        "type": "member",
+      },
+      Object {
+        "name": "2",
+        "optional": true,
+        "parser": Object {
+          "type": "number",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel other types Partial<Record<X, string>> 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": true,
+        "parser": Object {
+          "type": "string",
+        },
+        "type": "member",
+      },
+      Object {
+        "name": "b",
+        "optional": true,
+        "parser": Object {
+          "type": "string",
+        },
+        "type": "member",
+      },
+      Object {
+        "name": "c",
+        "optional": true,
+        "parser": Object {
+          "type": "string",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel other types any / unknown 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "type": "any",
+        },
+        "type": "member",
+      },
+      Object {
+        "name": "b",
+        "optional": false,
+        "parser": Object {
+          "type": "any",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel other types date 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "type": "date",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel other types index type 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "depth": 0,
+        "keyParser": Object {
+          "type": "string",
+        },
+        "optional": false,
+        "parser": Object {
+          "members": Array [
+            Object {
+              "name": "kees",
+              "optional": false,
+              "parser": Object {
+                "type": "string",
+              },
+              "type": "member",
+            },
+          ],
+          "type": "object",
+        },
+        "type": "indexMember",
+      },
+      Object {
+        "name": "x",
+        "optional": false,
+        "parser": Object {
+          "members": Array [
+            Object {
+              "name": "kees",
+              "optional": false,
+              "parser": Object {
+                "type": "string",
+              },
+              "type": "member",
+            },
+            Object {
+              "name": "kaas",
+              "optional": false,
+              "parser": Object {
+                "members": Array [
+                  Object {
+                    "depth": 0,
+                    "keyParser": Object {
+                      "oneOf": Array [
+                        Object {
+                          "literal": "aad",
+                          "type": "string-literal",
+                        },
+                        Object {
+                          "literal": "banaan",
+                          "type": "string-literal",
+                        },
+                      ],
+                      "type": "union",
+                    },
+                    "optional": false,
+                    "parser": Object {
+                      "type": "string",
+                    },
+                    "type": "indexMember",
+                  },
+                ],
+                "type": "object",
+              },
+              "type": "member",
+            },
+          ],
+          "type": "object",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel reference insde a type literal 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "members": Array [
+            Object {
+              "name": "b",
+              "optional": false,
+              "parser": Object {
+                "name": "Test",
+                "type": "reference",
+              },
+              "type": "member",
+            },
+          ],
+          "type": "object",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel reference to another interface 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "a",
+        "optional": false,
+        "parser": Object {
+          "name": "Test",
+          "type": "reference",
+        },
+        "type": "member",
+      },
+    ],
+    "type": "object",
+  },
+  "type": "root",
+}
+`;
+
+exports[`generateParserModel type operator node keyof an interface 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "name": "props",
+        "optional": false,
+        "parser": Object {
+          "members": Array [
+            Object {
+              "depth": 0,
+              "keyParser": Object {
+                "oneOf": Array [
+                  Object {
+                    "literal": "kaas",
+                    "type": "string-literal",
+                  },
+                  Object {
+                    "literal": "koos",
+                    "type": "string-literal",
+                  },
+                ],
+                "type": "union",
+              },
+              "optional": true,
+              "parser": Object {
+                "type": "number",
+              },
+              "type": "indexMember",
+            },
+          ],
+          "type": "object",
         },
         "type": "member",
       },

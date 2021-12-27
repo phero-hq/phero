@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { NewPointer } from "./generateParserFromModel"
+import Pointer from "./Pointer"
 import {
   assignDataToResult,
   generatePushErrorExpressionStatement,
@@ -7,7 +7,7 @@ import {
 import { NumberLiteralParserModel } from "./generateParserModel"
 
 export default function generateNumberLiteralParser(
-  pointer: NewPointer<NumberLiteralParserModel>,
+  pointer: Pointer<NumberLiteralParserModel>,
 ): ts.Statement {
   return ts.factory.createIfStatement(
     ts.factory.createBinaryExpression(
@@ -21,5 +21,4 @@ export default function generateNumberLiteralParser(
     ),
     assignDataToResult(pointer.resultVarExpr, pointer.dataVarExpr),
   )
-  return ts.factory.createBlock([])
 }

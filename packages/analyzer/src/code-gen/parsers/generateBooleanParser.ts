@@ -1,23 +1,27 @@
 import ts from "typescript"
-import { NewPointer } from "./generateParserFromModel"
+import Pointer from "./Pointer"
 import {
   assignDataToResult,
   generatePushErrorExpressionStatement,
 } from "./generateParserLib"
 import { BooleanParserModel } from "./generateParserModel"
-import { Pointer } from "./Pointers"
-import { TSNode } from "./TSNode"
 
 export default function generateBooleanParser(
-  pointer: NewPointer<BooleanParserModel>,
+  pointer: Pointer<BooleanParserModel>,
 ): ts.Statement {
   return ts.factory.createIfStatement(
-    ts.factory.createBinaryExpression(
-      ts.factory.createTypeOfExpression(pointer.dataVarExpr),
-      ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsEqualsToken),
-      ts.factory.createStringLiteral("boolean"),
-    ),
+    generateBooleanValidator(pointer),
     generatePushErrorExpressionStatement(pointer.errorPath, "not a boolean"),
     assignDataToResult(pointer.resultVarExpr, pointer.dataVarExpr),
+  )
+}
+
+function generateBooleanValidator(
+  pointer: Pointer<BooleanParserModel>,
+): ts.Expression {
+  return ts.factory.createBinaryExpression(
+    ts.factory.createTypeOfExpression(pointer.dataVarExpr),
+    ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsEqualsToken),
+    ts.factory.createStringLiteral("boolean"),
   )
 }

@@ -1,21 +1,20 @@
 import ts from "typescript"
-import { generateParserFromModel, NewPointer } from "./generateParserFromModel"
+import generateParserFromModel from "./generateParserFromModel"
+import Pointer from "./Pointer"
 import {
   assignDataToResult,
+  generateOr,
   generatePushErrorExpressionStatement,
-  generateTypeofIsObjectAndIsNotNullExpression,
 } from "./generateParserLib"
-import { ArrayParserModel, ParserModelType } from "./generateParserModel"
-import { generateParserForNode } from "./parsers"
-import { TSArrayElementNode, TSNode } from "./TSNode"
+import { ArrayParserModel } from "./generateParserModel"
 
-export function newGenereteArrayParser(
-  pointer: NewPointer<ArrayParserModel>,
+export default function generateArrayParser(
+  pointer: Pointer<ArrayParserModel>,
 ): ts.Statement {
   const it_name = ts.factory.createIdentifier(`it_${pointer.model.depth}`)
 
   return ts.factory.createIfStatement(
-    generateTypeofIsObjectAndIsNotNullExpression(pointer.dataVarExpr),
+    generateIsArrayExpression(pointer),
     generatePushErrorExpressionStatement(pointer.errorPath, "not an array"),
     ts.factory.createBlock([
       assignDataToResult(
@@ -52,45 +51,18 @@ export function newGenereteArrayParser(
   )
 }
 
-export default function generateArrayValidator(
-  arrayNode: TSNode,
-  arrayElementNode: TSArrayElementNode,
-): ts.Statement {
-  return ts.factory.createIfStatement(
-    generateTypeofIsObjectAndIsNotNullExpression(arrayNode.dataVarExpr),
-    generatePushErrorExpressionStatement(arrayNode.errorPath, "not an array"),
-    ts.factory.createBlock([
-      assignDataToResult(
-        arrayNode.resultVarExpr,
-        ts.factory.createArrayLiteralExpression([], false),
+function generateIsArrayExpression(
+  pointer: Pointer<ArrayParserModel>,
+): ts.Expression {
+  return ts.factory.createPrefixUnaryExpression(
+    ts.SyntaxKind.ExclamationToken,
+    ts.factory.createCallExpression(
+      ts.factory.createPropertyAccessExpression(
+        ts.factory.createIdentifier("Array"),
+        ts.factory.createIdentifier("isArray"),
       ),
-      ts.factory.createForStatement(
-        ts.factory.createVariableDeclarationList(
-          [
-            ts.factory.createVariableDeclaration(
-              ts.factory.createIdentifier(arrayElementNode.name),
-              undefined,
-              undefined,
-              ts.factory.createNumericLiteral("0"),
-            ),
-          ],
-          ts.NodeFlags.Let,
-        ),
-        ts.factory.createBinaryExpression(
-          ts.factory.createIdentifier(arrayElementNode.name),
-          ts.factory.createToken(ts.SyntaxKind.LessThanToken),
-          ts.factory.createPropertyAccessExpression(
-            arrayNode.dataVarExpr,
-            ts.factory.createIdentifier("length"),
-          ),
-        ),
-        ts.factory.createPostfixUnaryExpression(
-          ts.factory.createIdentifier(arrayElementNode.name),
-          ts.SyntaxKind.PlusPlusToken,
-        ),
-        // generateParserForNode(arrayElementNode),
-        ts.factory.createBlock([]),
-      ),
-    ]),
+      undefined,
+      [pointer.dataVarExpr],
+    ),
   )
 }

@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { NewPointer } from "./generateParserFromModel"
+import Pointer from "./Pointer"
 import {
   assignDataToResult,
   generatePushErrorExpressionStatement,
@@ -7,15 +7,21 @@ import {
 import { NullParserModel } from "./generateParserModel"
 
 export default function generateNullParser(
-  pointer: NewPointer<NullParserModel>,
+  pointer: Pointer<NullParserModel>,
 ): ts.Statement {
   return ts.factory.createIfStatement(
-    ts.factory.createBinaryExpression(
-      ts.factory.createTypeOfExpression(pointer.dataVarExpr),
-      ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsEqualsToken),
-      ts.factory.createNull(),
-    ),
+    generateNullValidator(pointer),
     generatePushErrorExpressionStatement(pointer.errorPath, "not null"),
     assignDataToResult(pointer.resultVarExpr, pointer.dataVarExpr),
+  )
+}
+
+function generateNullValidator(
+  pointer: Pointer<NullParserModel>,
+): ts.Expression {
+  return ts.factory.createBinaryExpression(
+    ts.factory.createTypeOfExpression(pointer.dataVarExpr),
+    ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsEqualsToken),
+    ts.factory.createNull(),
   )
 }

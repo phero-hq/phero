@@ -1,14 +1,8 @@
 import ts from "typescript"
 import { ServerSource } from "../generateClient"
 import { Model } from "../parseSamenApp"
-import {
-  generateParserFromModel,
-  NewPointer,
-} from "./parsers/generateParserFromModel"
-import { generateParserModel } from "./parsers/generateParserModel"
-import { generateParserForNode } from "./parsers/parsers"
-import { NodePointer, Pointer } from "./parsers/Pointers"
-import { TSModelNode, TSNode } from "./parsers/TSNode"
+import generateParserFromModel from "./parsers/generateParserFromModel"
+import generateParserModel from "./parsers/generateParserModel"
 
 export default function generateRPCProxy(serverSource: ServerSource): string {
   // const funcProxies = serverSource.services.flatMap(service => service.functions.map(func => generateFunctionProxy(service.name, func)))

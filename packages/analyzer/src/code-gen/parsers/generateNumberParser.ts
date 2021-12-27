@@ -1,13 +1,14 @@
 import ts from "typescript"
-import { NewPointer } from "./generateParserFromModel"
+import Pointer from "./Pointer"
 import {
   assignDataToResult,
   generatePushErrorExpressionStatement,
+  generateOr,
 } from "./generateParserLib"
 import { NumberParserModel } from "./generateParserModel"
 
 export default function generateNumberParser(
-  pointer: NewPointer<NumberParserModel>,
+  pointer: Pointer<NumberParserModel>,
 ): ts.Statement {
   return ts.factory.createIfStatement(
     ts.factory.createBinaryExpression(

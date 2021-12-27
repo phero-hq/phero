@@ -1,5 +1,595 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Parsers for a type alias Generics native generic 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            result[\\"a\\"] = data[\\"a\\"];
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias Reference to antoher interface 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            if (!AadParser.parse(data[\\"a\\"]).ok) {
+                errors.push({
+                    path: \\"data.a\\",
+                    message: \`not an Aad\`
+                });
+            }
+            else
+                result[\\"a\\"] = data[\\"a\\"];
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias index types keyof keys 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            if (data[key_0] !== undefined)
+                for (let it_0 = 0, keys = Object.keys(data); it_0 < keys.length; it_0++) {
+                    const key_0 = keys[it_0];
+                    if (![\\"aap\\", \\"noot\\"].includes(key_0))
+                        continue;
+                    else if (typeof data[key_0] !== \\"object\\" || data[key_0] === null) {
+                        errors.push({
+                            path: \\"data[key_0]\\",
+                            message: \`null or not an object\`
+                        });
+                    }
+                    else {
+                        result[key_0] = {};
+                        if (typeof data[key_0][\\"a\\"] !== \\"string\\") {
+                            errors.push({
+                                path: \\"data[key_0].a\\",
+                                message: \`not a string\`
+                            });
+                        }
+                        else
+                            result[key_0][\\"a\\"] = data[key_0][\\"a\\"];
+                    }
+                }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias index types number keys 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            for (let it_0 = 0, keys = Object.keys(data); it_0 < keys.length; it_0++) {
+                const key_0 = keys[it_0];
+                if (isNaN(parseInt(key_0, 10)))
+                    continue;
+                else if (typeof data[key_0] !== \\"object\\" || data[key_0] === null) {
+                    errors.push({
+                        path: \\"data[key_0]\\",
+                        message: \`null or not an object\`
+                    });
+                }
+                else {
+                    result[key_0] = {};
+                    if (typeof data[key_0][\\"a\\"] !== \\"string\\") {
+                        errors.push({
+                            path: \\"data[key_0].a\\",
+                            message: \`not a string\`
+                        });
+                    }
+                    else
+                        result[key_0][\\"a\\"] = data[key_0][\\"a\\"];
+                }
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias index types string keys 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            for (let it_0 = 0, keys = Object.keys(data); it_0 < keys.length; it_0++) {
+                const key_0 = keys[it_0];
+                if (typeof key_0 !== \\"string\\")
+                    continue;
+                else if (typeof data[key_0] !== \\"object\\" || data[key_0] === null) {
+                    errors.push({
+                        path: \\"data[key_0]\\",
+                        message: \`null or not an object\`
+                    });
+                }
+                else {
+                    result[key_0] = {};
+                    if (typeof data[key_0][\\"a\\"] !== \\"string\\") {
+                        errors.push({
+                            path: \\"data[key_0].a\\",
+                            message: \`not a string\`
+                        });
+                    }
+                    else
+                        result[key_0][\\"a\\"] = data[key_0][\\"a\\"];
+                }
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias index types union number keys 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            for (let it_0 = 0, keys = Object.keys(data); it_0 < keys.length; it_0++) {
+                const key_0 = keys[it_0];
+                if (![10, 20].includes(key_0))
+                    continue;
+                else if (typeof data[key_0] !== \\"object\\" || data[key_0] === null) {
+                    errors.push({
+                        path: \\"data[key_0]\\",
+                        message: \`null or not an object\`
+                    });
+                }
+                else {
+                    result[key_0] = {};
+                    if (typeof data[key_0][\\"a\\"] !== \\"string\\") {
+                        errors.push({
+                            path: \\"data[key_0].a\\",
+                            message: \`not a string\`
+                        });
+                    }
+                    else
+                        result[key_0][\\"a\\"] = data[key_0][\\"a\\"];
+                }
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias index types union string keys 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            for (let it_0 = 0, keys = Object.keys(data); it_0 < keys.length; it_0++) {
+                const key_0 = keys[it_0];
+                if (![\\"aap\\", \\"noot\\"].includes(key_0))
+                    continue;
+                else if (typeof data[key_0] !== \\"object\\" || data[key_0] === null) {
+                    errors.push({
+                        path: \\"data[key_0]\\",
+                        message: \`null or not an object\`
+                    });
+                }
+                else {
+                    result[key_0] = {};
+                    if (typeof data[key_0][\\"a\\"] !== \\"string\\") {
+                        errors.push({
+                            path: \\"data[key_0].a\\",
+                            message: \`not a string\`
+                        });
+                    }
+                    else
+                        result[key_0][\\"a\\"] = data[key_0][\\"a\\"];
+                }
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias intersection object literal with complex union 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        {
+            if (typeof data !== \\"object\\" || data === null) {
+                errors.push({
+                    path: \\"data\\",
+                    message: \`null or not an object\`
+                });
+            }
+            else {
+                result = {};
+                if (typeof data[\\"a\\"] !== \\"string\\") {
+                    errors.push({
+                        path: \\"data.a\\",
+                        message: \`not a string\`
+                    });
+                }
+                else
+                    result[\\"a\\"] = data[\\"a\\"];
+            }
+            {
+                const errLength = errors.length;
+                {
+                    if (typeof data !== \\"object\\" || data === null) {
+                        errors.push({
+                            path: \\"data\\",
+                            message: \`null or not an object\`
+                        });
+                    }
+                    else {
+                        result = {};
+                        if (typeof data[\\"b\\"] !== \\"number\\") {
+                            errors.push({
+                                path: \\"data.b\\",
+                                message: \`not a number\`
+                            });
+                        }
+                        else if (isNaN(data[\\"b\\"])) {
+                            errors.push({
+                                path: \\"data.b\\",
+                                message: \`invalid number\`
+                            });
+                        }
+                        else
+                            result[\\"b\\"] = data[\\"b\\"];
+                        if (typeof data[\\"c\\"] !== \\"object\\" || data[\\"c\\"] === null) {
+                            errors.push({
+                                path: \\"data.c\\",
+                                message: \`null or not an object\`
+                            });
+                        }
+                        else {
+                            result[\\"c\\"] = {};
+                            if (data[\\"c\\"][\\"d\\"] !== 123) {
+                                errors.push({
+                                    path: \\"data.c.d\\",
+                                    message: \`not 123\`
+                                });
+                            }
+                            else
+                                result[\\"c\\"][\\"d\\"] = data[\\"c\\"][\\"d\\"];
+                        }
+                    }
+                    if (errors.length !== errLength) {
+                        errors.splice(errLength, errors.length - errLength);
+                        {
+                            if (typeof data !== \\"object\\" || data === null) {
+                                errors.push({
+                                    path: \\"data\\",
+                                    message: \`null or not an object\`
+                                });
+                            }
+                            else {
+                                result = {};
+                                if (typeof data[\\"c\\"] !== \\"boolean\\") {
+                                    errors.push({
+                                        path: \\"data.c\\",
+                                        message: \`not a boolean\`
+                                    });
+                                }
+                                else
+                                    result[\\"c\\"] = data[\\"c\\"];
+                                if (typeof data[\\"b\\"] !== \\"string\\") {
+                                    errors.push({
+                                        path: \\"data.b\\",
+                                        message: \`not a string\`
+                                    });
+                                }
+                                else
+                                    result[\\"b\\"] = data[\\"b\\"];
+                            }
+                            if (errors.length !== errLength) {
+                                errors.splice(errLength, errors.length - errLength);
+                                {
+                                    errors.push({
+                                        path: \\"data\\",
+                                        message: \`is none of the options of union\`
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias intersection object literal with union 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        {
+            if (typeof data !== \\"object\\" || data === null) {
+                errors.push({
+                    path: \\"data\\",
+                    message: \`null or not an object\`
+                });
+            }
+            else {
+                result = {};
+                if (typeof data[\\"a\\"] !== \\"string\\") {
+                    errors.push({
+                        path: \\"data.a\\",
+                        message: \`not a string\`
+                    });
+                }
+                else
+                    result[\\"a\\"] = data[\\"a\\"];
+            }
+            {
+                const errLength = errors.length;
+                {
+                    if (typeof data !== \\"object\\" || data === null) {
+                        errors.push({
+                            path: \\"data\\",
+                            message: \`null or not an object\`
+                        });
+                    }
+                    else {
+                        result = {};
+                        if (typeof data[\\"b\\"] !== \\"number\\") {
+                            errors.push({
+                                path: \\"data.b\\",
+                                message: \`not a number\`
+                            });
+                        }
+                        else if (isNaN(data[\\"b\\"])) {
+                            errors.push({
+                                path: \\"data.b\\",
+                                message: \`invalid number\`
+                            });
+                        }
+                        else
+                            result[\\"b\\"] = data[\\"b\\"];
+                    }
+                    if (errors.length !== errLength) {
+                        errors.splice(errLength, errors.length - errLength);
+                        {
+                            if (typeof data !== \\"object\\" || data === null) {
+                                errors.push({
+                                    path: \\"data\\",
+                                    message: \`null or not an object\`
+                                });
+                            }
+                            else {
+                                result = {};
+                                if (typeof data[\\"c\\"] !== \\"boolean\\") {
+                                    errors.push({
+                                        path: \\"data.c\\",
+                                        message: \`not a boolean\`
+                                    });
+                                }
+                                else
+                                    result[\\"c\\"] = data[\\"c\\"];
+                            }
+                            if (errors.length !== errLength) {
+                                errors.splice(errLength, errors.length - errLength);
+                                {
+                                    errors.push({
+                                        path: \\"data\\",
+                                        message: \`is none of the options of union\`
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias intersection simple 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        {
+            if (typeof data !== \\"object\\" || data === null) {
+                errors.push({
+                    path: \\"data\\",
+                    message: \`null or not an object\`
+                });
+            }
+            else {
+                result = {};
+                if (typeof data[\\"a\\"] !== \\"string\\") {
+                    errors.push({
+                        path: \\"data.a\\",
+                        message: \`not a string\`
+                    });
+                }
+                else
+                    result[\\"a\\"] = data[\\"a\\"];
+            }
+            if (typeof data !== \\"object\\" || data === null) {
+                errors.push({
+                    path: \\"data\\",
+                    message: \`null or not an object\`
+                });
+            }
+            else {
+                result = {};
+                if (typeof data[\\"b\\"] !== \\"string\\") {
+                    errors.push({
+                        path: \\"data.b\\",
+                        message: \`not a string\`
+                    });
+                }
+                else
+                    result[\\"b\\"] = data[\\"b\\"];
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
 exports[`Parsers for a type alias object literal boolean array member 1`] = `
 "export class MyModelParser {
     static parse(data: any): ParseResult<MyModel> {
@@ -13,7 +603,7 @@ exports[`Parsers for a type alias object literal boolean array member 1`] = `
         }
         else {
             result = {};
-            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+            if (!Array.isArray(data[\\"a\\"])) {
                 errors.push({
                     path: \\"data.a\\",
                     message: \`not an array\`
@@ -104,7 +694,7 @@ exports[`Parsers for a type alias object literal deep nested object 1`] = `
             else {
                 result[\\"a\\"] = {};
                 if (data[\\"a\\"][\\"b\\"] !== undefined)
-                    if (typeof data[\\"a\\"][\\"b\\"] !== \\"object\\" || data[\\"a\\"][\\"b\\"] === null) {
+                    if (!Array.isArray(data[\\"a\\"][\\"b\\"])) {
                         errors.push({
                             path: \\"data.a.b\\",
                             message: \`not an array\`
@@ -212,7 +802,7 @@ exports[`Parsers for a type alias object literal number array member 1`] = `
         }
         else {
             result = {};
-            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+            if (!Array.isArray(data[\\"a\\"])) {
                 errors.push({
                     path: \\"data.a\\",
                     message: \`not an array\`
@@ -375,7 +965,7 @@ exports[`Parsers for a type alias object literal object literal member 1`] = `
         }
         else {
             result = {};
-            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+            if (!Array.isArray(data[\\"a\\"])) {
                 errors.push({
                     path: \\"data.a\\",
                     message: \`not an array\`
@@ -474,7 +1064,7 @@ exports[`Parsers for a type alias object literal optional object literal member 
         else {
             result = {};
             if (data[\\"a\\"] !== undefined)
-                if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+                if (!Array.isArray(data[\\"a\\"])) {
                     errors.push({
                         path: \\"data.a\\",
                         message: \`not an array\`
@@ -589,7 +1179,7 @@ exports[`Parsers for a type alias object literal optional string array member 1`
         else {
             result = {};
             if (data[\\"a\\"] !== undefined)
-                if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+                if (!Array.isArray(data[\\"a\\"])) {
                     errors.push({
                         path: \\"data.a\\",
                         message: \`not an array\`
@@ -635,7 +1225,7 @@ exports[`Parsers for a type alias object literal string array member 1`] = `
         }
         else {
             result = {};
-            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+            if (!Array.isArray(data[\\"a\\"])) {
                 errors.push({
                     path: \\"data.a\\",
                     message: \`not an array\`
@@ -809,7 +1399,7 @@ exports[`Parsers for a type alias tuple simple 1`] = `
     static parse(data: any): ParseResult<MyModel> {
         const errors: ValidationError[] = [];
         let result: any;
-        if (typeof data !== \\"object\\" || data === null) {
+        if (!Array.isArray(data) || data.length !== 2) {
             errors.push({
                 path: \\"data\\",
                 message: \`null or not an object\`
@@ -859,7 +1449,7 @@ exports[`Parsers for a type alias tuple tuple with typealias 1`] = `
     static parse(data: any): ParseResult<MyModel> {
         const errors: ValidationError[] = [];
         let result: any;
-        if (typeof data !== \\"object\\" || data === null) {
+        if (!Array.isArray(data) || data.length !== 2) {
             errors.push({
                 path: \\"data\\",
                 message: \`null or not an object\`
@@ -918,7 +1508,7 @@ exports[`Parsers for a type alias tuple tuple within tuple 1`] = `
     static parse(data: any): ParseResult<MyModel> {
         const errors: ValidationError[] = [];
         let result: any;
-        if (typeof data !== \\"object\\" || data === null) {
+        if (!Array.isArray(data) || data.length !== 2) {
             errors.push({
                 path: \\"data\\",
                 message: \`null or not an object\`
@@ -934,7 +1524,7 @@ exports[`Parsers for a type alias tuple tuple within tuple 1`] = `
             }
             else
                 result[0] = data[0];
-            if (typeof data[1] !== \\"object\\" || data[1] === null) {
+            if (!Array.isArray(data[1]) || data[1].length !== 2) {
                 errors.push({
                     path: \\"data[1]\\",
                     message: \`null or not an object\`
@@ -973,6 +1563,111 @@ exports[`Parsers for a type alias tuple tuple within tuple 1`] = `
                 }
                 else
                     result[1][1] = data[1][1];
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias typescript utility types Omit 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+                errors.push({
+                    path: \\"data.a\\",
+                    message: \`null or not an object\`
+                });
+            }
+            else {
+                result[\\"a\\"] = {};
+                if (typeof data[\\"a\\"][\\"kees\\"] !== \\"object\\" || data[\\"a\\"][\\"kees\\"] === null) {
+                    errors.push({
+                        path: \\"data.a.kees\\",
+                        message: \`null or not an object\`
+                    });
+                }
+                else {
+                    result[\\"a\\"][\\"kees\\"] = {};
+                    if (typeof data[\\"a\\"][\\"kees\\"][\\"a\\"] !== \\"number\\") {
+                        errors.push({
+                            path: \\"data.a.kees.a\\",
+                            message: \`not a number\`
+                        });
+                    }
+                    else if (isNaN(data[\\"a\\"][\\"kees\\"][\\"a\\"])) {
+                        errors.push({
+                            path: \\"data.a.kees.a\\",
+                            message: \`invalid number\`
+                        });
+                    }
+                    else
+                        result[\\"a\\"][\\"kees\\"][\\"a\\"] = data[\\"a\\"][\\"kees\\"][\\"a\\"];
+                }
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias typescript utility types Pick 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            if (typeof data[\\"a\\"] !== \\"object\\" || data[\\"a\\"] === null) {
+                errors.push({
+                    path: \\"data.a\\",
+                    message: \`null or not an object\`
+                });
+            }
+            else {
+                result[\\"a\\"] = {};
+                if (typeof data[\\"a\\"][\\"b\\"] !== \\"boolean\\") {
+                    errors.push({
+                        path: \\"data.a.b\\",
+                        message: \`not a boolean\`
+                    });
+                }
+                else
+                    result[\\"a\\"][\\"b\\"] = data[\\"a\\"][\\"b\\"];
             }
         }
         if (errors.length) {
@@ -1068,7 +1763,7 @@ exports[`Parsers for a type alias union with tuple 1`] = `
                 if (errors.length !== errLength) {
                     errors.splice(errLength, errors.length - errLength);
                     {
-                        if (typeof data !== \\"object\\" || data === null) {
+                        if (!Array.isArray(data) || data.length !== 2) {
                             errors.push({
                                 path: \\"data\\",
                                 message: \`null or not an object\`

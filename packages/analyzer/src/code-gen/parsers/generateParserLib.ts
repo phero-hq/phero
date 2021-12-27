@@ -1,23 +1,5 @@
 import ts from "typescript"
 
-export function generateTypeofIsObjectAndIsNotNullExpression(
-  exprOfVar: ts.Expression,
-) {
-  return ts.factory.createBinaryExpression(
-    ts.factory.createBinaryExpression(
-      ts.factory.createTypeOfExpression(exprOfVar),
-      ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsEqualsToken),
-      ts.factory.createStringLiteral("object"),
-    ),
-    ts.factory.createToken(ts.SyntaxKind.BarBarToken),
-    ts.factory.createBinaryExpression(
-      exprOfVar,
-      ts.factory.createToken(ts.SyntaxKind.EqualsEqualsEqualsToken),
-      ts.factory.createNull(),
-    ),
-  )
-}
-
 export function generatePushErrorExpressionStatement(
   errorPath: ts.Expression,
   message: string,
@@ -63,5 +45,34 @@ export function assignDataToResult(
       ts.factory.createToken(ts.SyntaxKind.EqualsToken),
       dataExpr,
     ),
+  )
+}
+
+export function generateOr(
+  left: ts.Expression,
+  right: ts.Expression,
+): ts.Expression {
+  if (left.kind === ts.SyntaxKind.FalseKeyword) {
+    return right
+  }
+  return ts.factory.createBinaryExpression(
+    ts.factory.createParenthesizedExpression(left),
+    ts.factory.createToken(ts.SyntaxKind.BarBarToken),
+    ts.factory.createParenthesizedExpression(right),
+  )
+}
+
+export function generateAnd(
+  left: ts.Expression,
+  right: ts.Expression,
+): ts.Expression {
+  if (left.kind === ts.SyntaxKind.TrueKeyword) {
+    return right
+  }
+
+  return ts.factory.createBinaryExpression(
+    ts.factory.createParenthesizedExpression(left),
+    ts.factory.createToken(ts.SyntaxKind.AmpersandAmpersandToken),
+    ts.factory.createParenthesizedExpression(right),
   )
 }

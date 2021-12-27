@@ -1,6 +1,6 @@
 import ts from "typescript"
-import { compileStatement, compileStatements } from "../../tsTestUtils"
-import { generateParserModel } from "./generateParserModel"
+import { compileStatement, compileStatements } from "../tsTestUtils"
+import generateParserModel from "./parsers/generateParserModel"
 
 describe("generateParserModel", () => {
   describe("for an interface", () => {
@@ -705,6 +705,276 @@ describe("generateParserModel", () => {
             A,
             B,
             C,
+          }
+        `,
+      )
+
+      const parserModel = generateParserModel(typeChecker, model, "data")
+      expect(parserModel).toMatchSnapshot()
+    })
+  })
+  describe("for generics", () => {
+    test("type with generic parameter", () => {
+      const { statement: model, typeChecker } = compileStatement(
+        `
+          type MyModel<T> = {
+            prop: T
+          }
+        `,
+        ts.SyntaxKind.TypeAliasDeclaration,
+      )
+
+      const parserModel = generateParserModel(typeChecker, model, "data")
+      expect(parserModel).toMatchSnapshot()
+    })
+    test("type with default generic parameter", () => {
+      const { statement: model, typeChecker } = compileStatement(
+        `
+          type MyModel<T = number> = {
+            prop: T
+          }
+        `,
+        ts.SyntaxKind.TypeAliasDeclaration,
+      )
+
+      const parserModel = generateParserModel(typeChecker, model, "data")
+      expect(parserModel).toMatchSnapshot()
+    })
+    test("type with parameterized generic parameter", () => {
+      const {
+        statements: [model],
+        typeChecker,
+      } = compileStatements(
+        `
+          type MyModel = {
+            a: Test<number>
+          }
+          interface Test<T> {
+            b: T
+            c: boolean
+          }
+        `,
+      )
+
+      const parserModel = generateParserModel(typeChecker, model, "data")
+      expect(parserModel).toMatchSnapshot()
+    })
+  })
+  describe("reference", () => {
+    test("to another interface", () => {
+      const {
+        statements: [model],
+        typeChecker,
+      } = compileStatements(
+        `
+          type MyModel = {
+            a: Test
+          }
+          interface Test {
+            b: number
+            c: boolean
+          }
+        `,
+      )
+
+      const parserModel = generateParserModel(typeChecker, model, "data")
+      expect(parserModel).toMatchSnapshot()
+    })
+    test("insde a type literal", () => {
+      const {
+        statements: [model],
+        typeChecker,
+      } = compileStatements(
+        `
+          type MyModel = {
+            a: {
+              b: Test
+            }
+          }
+          interface Test {
+            b: number
+            c: boolean
+          }
+        `,
+      )
+
+      const parserModel = generateParserModel(typeChecker, model, "data")
+      expect(parserModel).toMatchSnapshot()
+    })
+  })
+  describe("other types", () => {
+    test("any / unknown", () => {
+      const { statement: model, typeChecker } = compileStatement(
+        `
+          type MyModel = {
+            a: any
+            b: unknown
+          }
+        `,
+        ts.SyntaxKind.TypeAliasDeclaration,
+      )
+
+      const parserModel = generateParserModel(typeChecker, model, "data")
+      expect(parserModel).toMatchSnapshot()
+    })
+    test("date", () => {
+      const { statement: model, typeChecker } = compileStatement(
+        `
+          type MyModel = {
+            a: Date
+          }
+        `,
+        ts.SyntaxKind.TypeAliasDeclaration,
+      )
+
+      const parserModel = generateParserModel(typeChecker, model, "data")
+      expect(parserModel).toMatchSnapshot()
+    })
+    test("Partial<Record<X, number>>", () => {
+      const {
+        statements: [model],
+        typeChecker,
+      } = compileStatements(
+        `
+        type Noot = Partial<Record<X, number>>;
+        enum X {
+          A,
+          B, 
+          C,
+        }
+      `,
+      )
+
+      const parserModel = generateParserModel(typeChecker, model, "data")
+      expect(parserModel).toMatchSnapshot()
+    })
+    test("Partial<Record<X, string>>", () => {
+      const {
+        statements: [model],
+        typeChecker,
+      } = compileStatements(
+        `
+        type Noot = Partial<Record<X, string>>;
+        enum X {
+          A = "a",
+          B = "b", 
+          C = "c",
+        }
+      `,
+      )
+
+      const parserModel = generateParserModel(typeChecker, model, "data")
+      expect(parserModel).toMatchSnapshot()
+    })
+    test("index type", () => {
+      const { statement: model, typeChecker } = compileStatement(
+        `
+          type MyModel = {
+            [name: string]: {
+              kees: string
+            }
+
+            x: {
+              kees: string
+              kaas: {
+                [xx: "aad" | "banaan"]: string
+              }
+            }
+          }
+        `,
+        ts.SyntaxKind.TypeAliasDeclaration,
+      )
+
+      const parserModel = generateParserModel(typeChecker, model, "data")
+      expect(parserModel).toMatchSnapshot()
+    })
+  })
+
+  describe("mapped types", () => {
+    test("simple", () => {
+      const {
+        statements: [model],
+        typeChecker,
+      } = compileStatements(
+        `
+          interface MyModel {
+            x: {
+              [key in "aap" | "noot"]: {
+                y: string
+              }
+            }
+          }
+        `,
+      )
+
+      const parserModel = generateParserModel(typeChecker, model, "data")
+
+      expect(parserModel).toMatchSnapshot()
+    })
+    test("mapping readonly keys to mutable keys", () => {
+      // Example from https://www.typescriptlang.org/docs/handbook/2/mapped-types.html
+      const {
+        statements: [model],
+        typeChecker,
+      } = compileStatements(
+        `
+        type UnlockedAccount = CreateMutable<LockedAccount>;
+
+        type CreateMutable<Type> = {
+          readonly [Property in keyof Type]: Type[Property];
+        };
+
+        type LockedAccount = {
+          readonly id: string;
+          readonly name: string;
+        };
+        `,
+      )
+
+      const parserModel = generateParserModel(typeChecker, model, "data")
+      expect(parserModel).toMatchSnapshot()
+    })
+    test("mapping props to booleans", () => {
+      // Example from https://www.typescriptlang.org/docs/handbook/2/mapped-types.html
+      const {
+        statements: [model],
+        typeChecker,
+      } = compileStatements(
+        `
+      type FeatureOptions = Partial<OptionsFlags<FeatureFlags>>;
+
+      type FeatureFlags = {
+        darkMode: () => void;
+        newUserProfile: () => void;
+      };
+ 
+      type OptionsFlags<Type> = {
+        [Property in keyof Type]: boolean;
+      };
+        `,
+      )
+
+      const parserModel = generateParserModel(typeChecker, model, "data")
+      expect(parserModel).toMatchSnapshot()
+    })
+  })
+
+  describe("type operator node", () => {
+    test("keyof an interface", () => {
+      const {
+        statements: [model],
+        typeChecker,
+      } = compileStatements(
+        `
+          interface MyModel {
+            props: {
+              [prop in keyof MyOtherModel]: number
+            }
+          }
+
+          interface MyOtherModel {
+            kaas: number
+            koos: string  
           }
         `,
       )

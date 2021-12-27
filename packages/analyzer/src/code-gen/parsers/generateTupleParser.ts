@@ -1,17 +1,17 @@
 import ts from "typescript"
-import { generateParserFromModel, NewPointer } from "./generateParserFromModel"
+import generateParserFromModel from "./generateParserFromModel"
 import {
   assignDataToResult,
   generatePushErrorExpressionStatement,
-  generateTypeofIsObjectAndIsNotNullExpression,
 } from "./generateParserLib"
 import { TupleParserModel } from "./generateParserModel"
+import Pointer from "./Pointer"
 
 export default function generateTupleParser(
-  pointer: NewPointer<TupleParserModel>,
+  pointer: Pointer<TupleParserModel>,
 ): ts.Statement {
   return ts.factory.createIfStatement(
-    generateTypeofIsObjectAndIsNotNullExpression(pointer.dataVarExpr),
+    generateTupleValidator(pointer),
     generatePushErrorExpressionStatement(
       pointer.errorPath,
       "null or not an object",
@@ -25,5 +25,32 @@ export default function generateTupleParser(
         generateParserFromModel(element, pointer.path),
       ),
     ]),
+  )
+}
+
+function generateTupleValidator(
+  pointer: Pointer<TupleParserModel>,
+): ts.Expression {
+  return ts.factory.createBinaryExpression(
+    ts.factory.createPrefixUnaryExpression(
+      ts.SyntaxKind.ExclamationToken,
+      ts.factory.createCallExpression(
+        ts.factory.createPropertyAccessExpression(
+          ts.factory.createIdentifier("Array"),
+          ts.factory.createIdentifier("isArray"),
+        ),
+        undefined,
+        [pointer.dataVarExpr],
+      ),
+    ),
+    ts.factory.createToken(ts.SyntaxKind.BarBarToken),
+    ts.factory.createBinaryExpression(
+      ts.factory.createPropertyAccessExpression(
+        pointer.dataVarExpr,
+        ts.factory.createIdentifier("length"),
+      ),
+      ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsEqualsToken),
+      ts.factory.createNumericLiteral(pointer.model.elements.length),
+    ),
   )
 }
