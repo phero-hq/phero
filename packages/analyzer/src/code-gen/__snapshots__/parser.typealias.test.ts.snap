@@ -128,26 +128,26 @@ exports[`Parsers for a type alias index types number keys 1`] = `
         }
         else {
             result = {};
-            for (let it_0 = 0, keys = Object.keys(data); it_0 < keys.length; it_0++) {
-                const key_0 = keys[it_0];
-                if (isNaN(parseInt(key_0, 10)))
+            for (let itk_0 = 0, keys = Object.keys(data); itk_0 < keys.length; itk_0++) {
+                const it_0 = keys[itk_0];
+                if (isNaN(parseInt(it_0, 10)))
                     continue;
-                else if (typeof data[key_0] !== \\"object\\" || data[key_0] === null) {
+                else if (typeof data[it_0] !== \\"object\\" || data[it_0] === null) {
                     errors.push({
-                        path: \\"data[key_0]\\",
+                        path: \`data[\${it_0}]\`,
                         message: \`null or not an object\`
                     });
                 }
                 else {
-                    result[key_0] = {};
-                    if (typeof data[key_0][\\"a\\"] !== \\"string\\") {
+                    result[it_0] = {};
+                    if (typeof data[it_0][\\"a\\"] !== \\"string\\") {
                         errors.push({
-                            path: \\"data[key_0].a\\",
+                            path: \`data[\${it_0}].a\`,
                             message: \`not a string\`
                         });
                     }
                     else
-                        result[key_0][\\"a\\"] = data[key_0][\\"a\\"];
+                        result[it_0][\\"a\\"] = data[it_0][\\"a\\"];
                 }
             }
         }
@@ -178,26 +178,26 @@ exports[`Parsers for a type alias index types string keys 1`] = `
         }
         else {
             result = {};
-            for (let it_0 = 0, keys = Object.keys(data); it_0 < keys.length; it_0++) {
-                const key_0 = keys[it_0];
-                if (typeof key_0 !== \\"string\\")
+            for (let itk_0 = 0, keys = Object.keys(data); itk_0 < keys.length; itk_0++) {
+                const it_0 = keys[itk_0];
+                if (typeof it_0 !== \\"string\\")
                     continue;
-                else if (typeof data[key_0] !== \\"object\\" || data[key_0] === null) {
+                else if (typeof data[it_0] !== \\"object\\" || data[it_0] === null) {
                     errors.push({
-                        path: \\"data[key_0]\\",
+                        path: \`data[\${it_0}]\`,
                         message: \`null or not an object\`
                     });
                 }
                 else {
-                    result[key_0] = {};
-                    if (typeof data[key_0][\\"a\\"] !== \\"string\\") {
+                    result[it_0] = {};
+                    if (typeof data[it_0][\\"a\\"] !== \\"string\\") {
                         errors.push({
-                            path: \\"data[key_0].a\\",
+                            path: \`data[\${it_0}].a\`,
                             message: \`not a string\`
                         });
                     }
                     else
-                        result[key_0][\\"a\\"] = data[key_0][\\"a\\"];
+                        result[it_0][\\"a\\"] = data[it_0][\\"a\\"];
                 }
             }
         }
@@ -228,26 +228,26 @@ exports[`Parsers for a type alias index types union number keys 1`] = `
         }
         else {
             result = {};
-            for (let it_0 = 0, keys = Object.keys(data); it_0 < keys.length; it_0++) {
-                const key_0 = keys[it_0];
-                if (![10, 20].includes(key_0))
+            for (let itk_0 = 0, keys = Object.keys(data); itk_0 < keys.length; itk_0++) {
+                const it_0 = keys[itk_0];
+                if (![10, 20].includes(it_0))
                     continue;
-                else if (typeof data[key_0] !== \\"object\\" || data[key_0] === null) {
+                else if (typeof data[it_0] !== \\"object\\" || data[it_0] === null) {
                     errors.push({
-                        path: \\"data[key_0]\\",
+                        path: \`data[\${it_0}]\`,
                         message: \`null or not an object\`
                     });
                 }
                 else {
-                    result[key_0] = {};
-                    if (typeof data[key_0][\\"a\\"] !== \\"string\\") {
+                    result[it_0] = {};
+                    if (typeof data[it_0][\\"a\\"] !== \\"string\\") {
                         errors.push({
-                            path: \\"data[key_0].a\\",
+                            path: \`data[\${it_0}].a\`,
                             message: \`not a string\`
                         });
                     }
                     else
-                        result[key_0][\\"a\\"] = data[key_0][\\"a\\"];
+                        result[it_0][\\"a\\"] = data[it_0][\\"a\\"];
                 }
             }
         }
@@ -278,26 +278,26 @@ exports[`Parsers for a type alias index types union string keys 1`] = `
         }
         else {
             result = {};
-            for (let it_0 = 0, keys = Object.keys(data); it_0 < keys.length; it_0++) {
-                const key_0 = keys[it_0];
-                if (![\\"aap\\", \\"noot\\"].includes(key_0))
+            for (let itk_0 = 0, keys = Object.keys(data); itk_0 < keys.length; itk_0++) {
+                const it_0 = keys[itk_0];
+                if (![\\"aap\\", \\"noot\\"].includes(it_0))
                     continue;
-                else if (typeof data[key_0] !== \\"object\\" || data[key_0] === null) {
+                else if (typeof data[it_0] !== \\"object\\" || data[it_0] === null) {
                     errors.push({
-                        path: \\"data[key_0]\\",
+                        path: \`data[\${it_0}]\`,
                         message: \`null or not an object\`
                     });
                 }
                 else {
-                    result[key_0] = {};
-                    if (typeof data[key_0][\\"a\\"] !== \\"string\\") {
+                    result[it_0] = {};
+                    if (typeof data[it_0][\\"a\\"] !== \\"string\\") {
                         errors.push({
-                            path: \\"data[key_0].a\\",
+                            path: \`data[\${it_0}].a\`,
                             message: \`not a string\`
                         });
                     }
                     else
-                        result[key_0][\\"a\\"] = data[key_0][\\"a\\"];
+                        result[it_0][\\"a\\"] = data[it_0][\\"a\\"];
                 }
             }
         }
