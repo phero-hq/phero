@@ -1,5 +1,6 @@
 import ts from "typescript"
 import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
+import { isExternalDeclaration, isExternalTypeNode } from "./tsUtils"
 
 export default function extractModels(
   funcs: ParsedSamenFunctionDefinition[],
@@ -24,11 +25,7 @@ export default function extractModels(
         doType(typeArgument)
       }
 
-      if (
-        typeNode.typeName
-          .getSourceFile()
-          .fileName.includes("node_modules/typescript/lib/lib.")
-      ) {
+      if (isExternalTypeNode(typeNode)) {
         return
       }
 
@@ -42,10 +39,8 @@ export default function extractModels(
       addedSymbols.push(symbol)
 
       for (const declaration of symbol.declarations ?? []) {
-        const declarationFileName = declaration.getSourceFile().fileName
-
         // prevent that we include TS lib types
-        if (declarationFileName.includes("node_modules/typescript/lib/lib.")) {
+        if (isExternalDeclaration(declaration)) {
           declaration
           continue
         }

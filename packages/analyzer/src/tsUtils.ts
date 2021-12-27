@@ -241,3 +241,27 @@ export function resolveSymbol(
   }
   return symbol
 }
+
+// TODO use ts.Program API instead:
+// isSourceFileFromExternalLibrary(file: SourceFile): boolean;
+// isSourceFileDefaultLibrary(file: SourceFile): boolean;
+
+export function isExternalDeclaration(declr: ts.Declaration): boolean {
+  return isExternalSourceFile(declr.getSourceFile())
+}
+
+export function isExternalSymbol(symbol: ts.Symbol): boolean {
+  return !!symbol.getDeclarations()?.some(isExternalDeclaration)
+}
+
+export function isExternalType(type: ts.Type): boolean {
+  return isExternalSymbol(type.symbol)
+}
+
+export function isExternalTypeNode(typeNode: ts.TypeNode): boolean {
+  return isExternalSourceFile(typeNode.getSourceFile())
+}
+
+export function isExternalSourceFile(sourceFile: ts.SourceFile): boolean {
+  return sourceFile.fileName.includes("node_modules/typescript/lib/lib.")
+}

@@ -2,7 +2,7 @@ import ts from "typescript"
 import { ParseError } from "./errors"
 import { getReturnType } from "./extractFunctionFromServiceProperty"
 import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
-import { resolveSymbol } from "./tsUtils"
+import { isExternalType } from "./tsUtils"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
 const asyncModifier = ts.factory.createModifier(ts.SyntaxKind.AsyncKeyword)
@@ -386,14 +386,7 @@ export class ReferenceMaker {
 
     const modelName = cleanTypeName(name, this.typeChecker)
 
-    const isExternalType = type.getSymbol()?.declarations?.some((d) =>
-      // TODO ts.Program:
-      //isSourceFileFromExternalLibrary(file: SourceFile): boolean;
-      //isSourceFileDefaultLibrary(file: SourceFile): boolean;
-      d.getSourceFile().fileName.includes("node_modules/typescript/lib/lib."),
-    )
-
-    if (isExternalType) {
+    if (isExternalType(type)) {
       return [modelName]
     }
 
