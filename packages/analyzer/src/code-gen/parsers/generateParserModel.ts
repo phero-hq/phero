@@ -400,7 +400,7 @@ export default function generateParserModel(
             type: ParserModelType.IndexMember,
             depth,
             keyParser: generate(node.typeParameter.constraint, depth + 1),
-            optional: true,
+            optional: false,
             parser: generate(node.type, depth + 1),
           },
         ],

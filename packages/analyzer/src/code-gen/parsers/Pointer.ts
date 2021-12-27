@@ -29,7 +29,7 @@ export default class Pointer<TParserModel extends ParserModel> {
             case ParserModelType.Member:
               return `["${element.name}"]`
             case ParserModelType.IndexMember:
-              return `[key_${element.depth}]`
+              return `[it_${element.depth}]`
             case ParserModelType.ArrayElement:
               return `[it_${element.depth}]`
             case ParserModelType.TupleElement:

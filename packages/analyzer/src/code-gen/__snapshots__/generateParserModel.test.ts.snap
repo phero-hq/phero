@@ -1591,7 +1591,7 @@ Object {
                 ],
                 "type": "union",
               },
-              "optional": true,
+              "optional": false,
               "parser": Object {
                 "members": Array [
                   Object {
@@ -1898,7 +1898,7 @@ Object {
                 ],
                 "type": "union",
               },
-              "optional": true,
+              "optional": false,
               "parser": Object {
                 "type": "number",
               },

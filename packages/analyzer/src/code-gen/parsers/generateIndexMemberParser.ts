@@ -42,7 +42,7 @@ function generateDynamicMemberLoop(
     ts.factory.createVariableDeclarationList(
       [
         ts.factory.createVariableDeclaration(
-          ts.factory.createIdentifier(`it_${depth}`),
+          ts.factory.createIdentifier(`itk_${depth}`),
           undefined,
           undefined,
           ts.factory.createNumericLiteral("0"),
@@ -64,7 +64,7 @@ function generateDynamicMemberLoop(
       ts.NodeFlags.Let,
     ),
     ts.factory.createBinaryExpression(
-      ts.factory.createIdentifier(`it_${depth}`),
+      ts.factory.createIdentifier(`itk_${depth}`),
       ts.factory.createToken(ts.SyntaxKind.LessThanToken),
       ts.factory.createPropertyAccessExpression(
         ts.factory.createIdentifier("keys"),
@@ -72,7 +72,7 @@ function generateDynamicMemberLoop(
       ),
     ),
     ts.factory.createPostfixUnaryExpression(
-      ts.factory.createIdentifier(`it_${depth}`),
+      ts.factory.createIdentifier(`itk_${depth}`),
       ts.SyntaxKind.PlusPlusToken,
     ),
     ts.factory.createBlock(
@@ -82,12 +82,12 @@ function generateDynamicMemberLoop(
           ts.factory.createVariableDeclarationList(
             [
               ts.factory.createVariableDeclaration(
-                ts.factory.createIdentifier(`key_${pointer.model.depth}`),
+                ts.factory.createIdentifier(`it_${pointer.model.depth}`),
                 undefined,
                 undefined,
                 ts.factory.createElementAccessExpression(
                   ts.factory.createIdentifier("keys"),
-                  ts.factory.createIdentifier(`it_${depth}`),
+                  ts.factory.createIdentifier(`itk_${depth}`),
                 ),
               ),
             ],
@@ -97,7 +97,7 @@ function generateDynamicMemberLoop(
         ts.factory.createIfStatement(
           generateKeyValidator(
             pointer.model.keyParser,
-            ts.factory.createIdentifier(`key_${pointer.model.depth}`),
+            ts.factory.createIdentifier(`it_${pointer.model.depth}`),
           ),
           ts.factory.createContinueStatement(undefined),
           valueParser,
