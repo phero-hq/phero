@@ -544,6 +544,79 @@ describe("Parsers", () => {
         }
       `,
         )
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+    })
+    describe("IndexedAccessTypeNode", () => {
+      test("native member", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+            type Tree = {
+              aad: Aad["banaan"]
+            }
+
+            type Aad = {
+              banaan: number
+            }
+          `,
+        )
+
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("type element member", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+            type Tree = {
+              aad: Aad["banaan"]
+            }
+
+            type Aad = {
+              banaan: {
+                kaas: number
+              }
+            }
+          `,
+        )
+
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("reference member", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+            type Tree = {
+              aad: Aad["banaan"]
+            }
+
+            type Aad = {
+              banaan: Banaan
+            }
+
+            interface Banaan {
+              kaas: number
+            }
+          `,
+        )
 
         const parserDeclaration = generateParser(
           model as ts.TypeAliasDeclaration,

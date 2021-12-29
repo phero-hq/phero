@@ -422,6 +422,20 @@ export default function generateParserModel(
       }
     }
 
+    if (
+      ts.isIndexedAccessTypeNode(node) &&
+      ts.isLiteralTypeNode(node.indexType) &&
+      ts.isStringLiteral(node.indexType.literal)
+    ) {
+      const prop = typeChecker
+        .getTypeAtLocation(node.objectType)
+        .getProperty(node.indexType.literal.text)
+
+      if (prop?.valueDeclaration) {
+        return generate(prop.valueDeclaration, depth)
+      }
+    }
+
     throw new Error("ParserModel not implemented yet: " + node.kind)
   }
 

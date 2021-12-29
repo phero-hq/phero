@@ -29,6 +29,135 @@ exports[`Parsers for a type alias Generics native generic 1`] = `
 }"
 `;
 
+exports[`Parsers for a type alias IndexedAccessTypeNode native member 1`] = `
+"export class TreeParser {
+    static parse(data: any): ParseResult<Tree> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            if (typeof data[\\"aad\\"] !== \\"number\\") {
+                errors.push({
+                    path: \\"data.aad\\",
+                    message: \`not a number\`
+                });
+            }
+            else if (isNaN(data[\\"aad\\"])) {
+                errors.push({
+                    path: \\"data.aad\\",
+                    message: \`invalid number\`
+                });
+            }
+            else
+                result[\\"aad\\"] = data[\\"aad\\"];
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as Tree
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias IndexedAccessTypeNode reference member 1`] = `
+"export class TreeParser {
+    static parse(data: any): ParseResult<Tree> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            if (!BanaanParser.parse(data[\\"aad\\"]).ok) {
+                errors.push({
+                    path: \\"data.aad\\",
+                    message: \`not an Banaan\`
+                });
+            }
+            else
+                result[\\"aad\\"] = data[\\"aad\\"];
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as Tree
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias IndexedAccessTypeNode type element member 1`] = `
+"export class TreeParser {
+    static parse(data: any): ParseResult<Tree> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            if (typeof data[\\"aad\\"] !== \\"object\\" || data[\\"aad\\"] === null) {
+                errors.push({
+                    path: \\"data.aad\\",
+                    message: \`null or not an object\`
+                });
+            }
+            else {
+                result[\\"aad\\"] = {};
+                if (typeof data[\\"aad\\"][\\"kaas\\"] !== \\"number\\") {
+                    errors.push({
+                        path: \\"data.aad.kaas\\",
+                        message: \`not a number\`
+                    });
+                }
+                else if (isNaN(data[\\"aad\\"][\\"kaas\\"])) {
+                    errors.push({
+                        path: \\"data.aad.kaas\\",
+                        message: \`invalid number\`
+                    });
+                }
+                else
+                    result[\\"aad\\"][\\"kaas\\"] = data[\\"aad\\"][\\"kaas\\"];
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as Tree
+        };
+    }
+}"
+`;
+
 exports[`Parsers for a type alias Reference to antoher interface 1`] = `
 "export class MyModelParser {
     static parse(data: any): ParseResult<MyModel> {
