@@ -742,7 +742,7 @@ describe("generateParserModel", () => {
     })
     test("type with parameterized generic parameter", () => {
       const {
-        statements: [model],
+        statements: [model, testModel],
         typeChecker,
       } = compileStatements(
         `

@@ -24,6 +24,7 @@ export enum ParserModelType {
   Reference = "reference",
   Date = "date",
   Any = "any",
+  TypeParameter = "typeParameter",
 }
 
 export type ParserModel =
@@ -49,9 +50,21 @@ export type ParserModel =
   | ReferenceParserModel
   | DateParserModel
   | AnyParserModel
+  | TypeParameterParserModel
 
 export type RootParserModel = {
   type: ParserModelType.Root
+  rootTypeParser?: {
+    typeName: string
+    baseTypeName: string
+    typeParameters: {
+      typeName: string
+      defaultParser?: {
+        typeName: string
+        parser: ParserModel
+      }
+    }[]
+  }
   name: string
   parser: ParserModel
 }
@@ -74,6 +87,7 @@ export type NullParserModel = { type: ParserModelType.Null }
 export type UndefinedParserModel = { type: ParserModelType.Undefined }
 export type ObjectParserModel = {
   type: ParserModelType.Object
+  dbg: number
   members: (MemberParserModel | IndexMemberParserModel)[]
 }
 export type MemberParserModel = {
@@ -122,7 +136,12 @@ export type EnumParserModel = {
 }
 export type ReferenceParserModel = {
   type: ParserModelType.Reference
-  name: string
+  typeName: string
+  baseTypeName: string
+  typeArguments: {
+    typeName: string
+    parser: ParserModel
+  }[]
 }
 export type DateParserModel = {
   type: ParserModelType.Date
@@ -130,23 +149,46 @@ export type DateParserModel = {
 export type AnyParserModel = {
   type: ParserModelType.Any
 }
+export type TypeParameterParserModel = {
+  type: ParserModelType.TypeParameter
+  typeName: string
+  position: number
+  defaultParser?: {
+    typeName: string
+    parser: ParserModel
+  }
+}
 
 export default function generateParserModel(
   typeChecker: ts.TypeChecker,
   rootNode: ts.Node,
   rootName: string,
-): ParserModel {
-  return {
-    type: ParserModelType.Root,
-    name: rootName,
-    parser: generate(rootNode, 0),
-  }
-
-  function generate(node: ts.Node, depth: number): ParserModel {
-    if (ts.isInterfaceDeclaration(node) && node === rootNode) {
-      return {
+): RootParserModel {
+  if (ts.isInterfaceDeclaration(rootNode)) {
+    const type = typeChecker.getTypeAtLocation(rootNode)
+    return {
+      type: ParserModelType.Root,
+      name: rootName,
+      rootTypeParser: {
+        baseTypeName: rootNode.name.text,
+        typeName: typeChecker.typeToString(type, rootNode, undefined),
+        typeParameters:
+          rootNode.typeParameters?.map((typeParam) => ({
+            typeName: typeParam.name.text,
+            defaultParser: typeParam.default && {
+              typeName: typeChecker.typeToString(
+                typeChecker.getTypeFromTypeNode(typeParam.default),
+                rootNode,
+                undefined,
+              ),
+              parser: generate(typeParam.default, 0),
+            },
+          })) ?? [],
+      },
+      parser: {
         type: ParserModelType.Object,
-        members: node.members.reduce((members, member) => {
+        dbg: 1,
+        members: rootNode.members.reduce((members, member) => {
           return member.name
             ? [
                 ...members,
@@ -154,14 +196,45 @@ export default function generateParserModel(
                   type: ParserModelType.Member,
                   name: getMemberName(member),
                   optional: !!member.questionToken,
-                  parser: generate(member, depth),
+                  parser: generate(member, 0),
                 },
               ]
             : members
         }, [] as MemberParserModel[]),
-      }
+      },
     }
+  } else if (ts.isTypeAliasDeclaration(rootNode)) {
+    const type = typeChecker.getTypeAtLocation(rootNode)
+    return {
+      type: ParserModelType.Root,
+      name: rootName,
+      rootTypeParser: {
+        baseTypeName: rootNode.name.text,
+        typeName: typeChecker.typeToString(type, rootNode, undefined),
+        typeParameters:
+          rootNode.typeParameters?.map((typeParam) => ({
+            typeName: typeParam.name.text,
+            defaultParser: typeParam.default && {
+              typeName: typeChecker.typeToString(
+                typeChecker.getTypeFromTypeNode(typeParam.default),
+                rootNode,
+                undefined,
+              ),
+              parser: generate(typeParam.default, 0),
+            },
+          })) ?? [],
+      },
+      parser: generate(rootNode.type, 0),
+    }
+  }
 
+  return {
+    type: ParserModelType.Root,
+    name: rootName,
+    parser: generate(rootNode, 0),
+  }
+
+  function generate(node: ts.Node, depth: number): ParserModel {
     if (ts.isPropertySignature(node)) {
       if (!node.type) {
         throw new Error("Property has no type")
@@ -230,6 +303,7 @@ export default function generateParserModel(
     if (ts.isTypeLiteralNode(node)) {
       return {
         type: ParserModelType.Object,
+        dbg: 2,
         members: node.members.reduce((members, member) => {
           if (
             ts.isIndexSignatureDeclaration(member) &&
@@ -274,10 +348,6 @@ export default function generateParserModel(
       }
     }
 
-    if (ts.isTypeAliasDeclaration(node)) {
-      return generate(node.type, depth)
-    }
-
     if (ts.isUnionTypeNode(node)) {
       return {
         type: ParserModelType.Union,
@@ -310,7 +380,7 @@ export default function generateParserModel(
 
     if (ts.isTypeReferenceNode(node)) {
       const type = typeChecker.getTypeAtLocation(node)
-      const declr = type.symbol.valueDeclaration
+      const declr = type.symbol?.valueDeclaration
       if (declr) {
         if (isExternalType(type) && type.symbol.name === "Date") {
           return {
@@ -334,25 +404,39 @@ export default function generateParserModel(
           defaultType &&
           typeChecker.typeToTypeNode(defaultType, node, undefined)
 
-        if (defaultTypeNode) {
-          return generate(defaultTypeNode, depth)
-        }
+        const defaultParser = defaultTypeNode
+          ? {
+              typeName: typeChecker.typeToString(defaultType, node, undefined),
+              parser: generate(defaultTypeNode, depth),
+            }
+          : undefined
 
-        return { type: ParserModelType.Any }
-      } else if ((type.flags & ts.TypeFlags.Object) === ts.TypeFlags.Object) {
-        // in case of "non-generic" Interface or TypeAlias
-        if (!node.typeArguments || node.typeArguments.length === 0) {
-          return {
-            type: ParserModelType.Reference,
-            name: node.typeName.getText(),
+        const declr = type.symbol.declarations?.[0]
+        let position = -1
+        if (declr && ts.isTypeParameterDeclaration(declr)) {
+          if (
+            ts.isInterfaceDeclaration(declr.parent) ||
+            ts.isTypeAliasDeclaration(declr.parent)
+          ) {
+            position = declr.parent.typeParameters?.indexOf(declr) ?? -1
+          } else {
+            throw new Error("Should ve either inteface or TypeAlias")
           }
         }
-        // in case of a generic Interface or TypeAlias or TypeLiteral
-        else {
+
+        return {
+          type: ParserModelType.TypeParameter,
+          typeName: typeChecker.typeToString(type, node, undefined),
+          position,
+          defaultParser,
+        }
+      } else if ((type.flags & ts.TypeFlags.Object) === ts.TypeFlags.Object) {
+        if (isExternalType(type)) {
           const props = typeChecker.getAugmentedPropertiesOfType(type)
 
           return {
             type: ParserModelType.Object,
+            dbg: 3,
             members: props.reduce((members, member) => {
               const memberType = typeChecker.getTypeOfSymbolAtLocation(
                 member,
@@ -381,6 +465,19 @@ export default function generateParserModel(
             }, [] as MemberParserModel[]),
           }
         }
+
+        return {
+          type: ParserModelType.Reference,
+          baseTypeName: node.typeName.getText(),
+          typeName: typeChecker.typeToString(type, node, undefined),
+          typeArguments:
+            node.typeArguments?.map((typeArg) => ({
+              typeName: typeChecker.typeToString(
+                typeChecker.getTypeFromTypeNode(typeArg),
+              ),
+              parser: generate(typeArg, depth),
+            })) ?? [],
+        }
       }
     }
 
@@ -395,6 +492,7 @@ export default function generateParserModel(
     ) {
       return {
         type: ParserModelType.Object,
+        dbg: 4,
         members: [
           {
             type: ParserModelType.IndexMember,

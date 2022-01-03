@@ -158,6 +158,42 @@ exports[`Parsers for a type alias IndexedAccessTypeNode type element member 1`] 
 }"
 `;
 
+exports[`Parsers for a type alias Reference to another interface with parameters 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            if (!AadParser.parse(data[\\"a\\"]).ok) {
+                errors.push({
+                    path: \\"data.a\\",
+                    message: \`not an Aad\`
+                });
+            }
+            else
+                result[\\"a\\"] = data[\\"a\\"];
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
 exports[`Parsers for a type alias Reference to antoher interface 1`] = `
 "export class MyModelParser {
     static parse(data: any): ParseResult<MyModel> {

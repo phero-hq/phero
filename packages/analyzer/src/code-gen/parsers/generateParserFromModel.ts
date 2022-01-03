@@ -17,6 +17,7 @@ import generateReferenceParser from "./generateReferenceParser"
 import generateStringLiteralParser from "./generateStringLiteralParser"
 import generateStringParser from "./generateStringParser"
 import generateTupleParser from "./generateTupleParser"
+import generateTypeParameterParser from "./generateTypeParameterParser"
 import generateUndefinedParser from "./generateUndefinedParser"
 import generateUnionParser from "./generateUnionParser"
 import Pointer from "./Pointer"
@@ -69,5 +70,7 @@ export default function generateParserFromModel(
       return generateDateParser(new Pointer(model, ancestors))
     case ParserModelType.Any:
       return generateAnyParser(new Pointer(model, ancestors))
+    case ParserModelType.TypeParameter:
+      return generateTypeParameterParser(new Pointer(model, ancestors))
   }
 }

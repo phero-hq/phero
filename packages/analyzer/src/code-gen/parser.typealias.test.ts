@@ -423,7 +423,7 @@ describe("Parsers", () => {
       })
     })
     describe("Reference", () => {
-      test("to antoher interface", () => {
+      test("to another interface", () => {
         const {
           statements: [model],
           typeChecker,
@@ -443,6 +443,74 @@ describe("Parsers", () => {
           typeChecker,
         )
         expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test.only("to another interface with parameters", () => {
+        const {
+          statements: [model1, model2, model3, model4],
+          typeChecker,
+        } = compileStatements(
+          `
+          type NumberTree = Tree<number>
+
+          type Tree<T> = Leaf<T> | Branch<T>;
+          
+          type Leaf<A> = {
+            type: "leaf"
+            value: A;
+          }
+          
+          type Branch<A> = {
+            type: "branch"
+            left: Tree<A>;
+            right: Tree<A>;
+          }
+
+
+          // interface MyModel<T> {
+          //   aad: Banaan<T>
+          // }
+
+          // interface Banaan<T> { 
+          //   value: T
+          // }
+          // type MyModel<X, Y = string, Z = number> = {
+          //   a: Aad<X>
+          //   b: Aad<Y>
+          //   c: Aad<Z>
+          //   d: Aad<boolean>
+          //   e: Aad
+          // }
+          // interface Aad<T = number, A = number> {
+          //   v: T
+          //   a: A
+          // }
+
+          
+
+      `,
+        )
+
+        const parserDeclaration1 = generateParser(
+          model1 as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        // const parserDeclaration2 = generateParser(
+        //   model2 as ts.InterfaceDeclaration,
+        //   typeChecker,
+        // )
+        // const parserDeclaration3 = generateParser(
+        //   model3 as ts.InterfaceDeclaration,
+        //   typeChecker,
+        // )
+        // const parserDeclaration4 = generateParser(
+        //   model4 as ts.InterfaceDeclaration,
+        //   typeChecker,
+        // )
+        console.log(printCode(parserDeclaration1))
+        // console.log(printCode(parserDeclaration2))
+        // console.log(printCode(parserDeclaration3))
+        // console.log(printCode(parserDeclaration4))
+        expect(printCode(parserDeclaration1)).toMatchSnapshot()
       })
     })
 
