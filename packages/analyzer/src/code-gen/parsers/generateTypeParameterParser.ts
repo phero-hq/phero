@@ -50,7 +50,7 @@ export default function generateTypeParameterParser(
     // TODO populate the errors with the actual errors
     generatePushErrorExpressionStatement(
       pointer.errorPath,
-      `not an ${pointer.model.typeName}`,
+      `not a ${pointer.model.typeName}`,
     ),
     assignDataToResult(pointer.resultVarExpr, pointer.dataVarExpr),
   )
