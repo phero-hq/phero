@@ -16,7 +16,6 @@ export default function generateModelParser(
     throw new Error("Expected interface or typealias")
   }
 
-  console.log(JSON.stringify(rootParserModel, null, 4))
   const parserStatement: ts.Statement = generateParserFromModel(rootParserModel)
 
   return ts.factory.createClassDeclaration(

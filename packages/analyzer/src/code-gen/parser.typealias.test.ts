@@ -1,6 +1,7 @@
 import ts from "typescript"
 import { compileStatement, compileStatements, printCode } from "../tsTestUtils"
 import generateParser from "./parsers/generateParser"
+import generateParserModel from "./parsers/generateParserModel"
 
 describe("Parsers", () => {
   describe("for a type alias", () => {
@@ -444,7 +445,137 @@ describe("Parsers", () => {
         )
         expect(printCode(parserDeclaration)).toMatchSnapshot()
       })
-      test.only("to another interface with parameters", () => {
+      test("to another interface with a type parameter", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+        type MyModel = {
+          a: Aad<number>
+        }
+        interface Aad<T> {
+          a: T
+        }
+      `,
+        )
+
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("to another interface with a type parameter with a default", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+        type MyModel = {
+          a: Aad<number>
+        }
+        interface Aad<T = number> {
+          a: T
+        }
+      `,
+        )
+
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("to another interface with the default type parameter", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+        type MyModel = {
+          a: Aad
+        }
+        interface Aad<T = number> {
+          a: T
+        }
+      `,
+        )
+
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("to another interface with own default type parameter", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+        type MyModel<T = number> = {
+          a: Aad<T>
+        }
+        interface Aad<T> {
+          a: T
+        }
+      `,
+        )
+
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("to another interface with mixed type parameters", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+        type MyModel<T, X = number> = {
+          a: Aad<T>
+          b: Aad<string>
+          c: Aad<number>
+          d: Aad<X>
+          e: Aad
+        }
+        interface Aad<T = boolean> {
+          a: T
+        }
+      `,
+        )
+
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+    })
+    describe("recursive types", () => {
+      test("simple", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+        type MyModel = {
+          prop1: number
+          prop2?: MyModel
+        }
+      `,
+        )
+
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("Tree", () => {
         const {
           statements: [model1, model2, model3, model4],
           typeChecker,
@@ -452,41 +583,18 @@ describe("Parsers", () => {
           `
           type NumberTree = Tree<number>
 
-          type Tree<T> = Leaf<T> | Branch<T>;
-          
+          type Tree<T> = Leaf<T> | Branch<T>
+
           type Leaf<A> = {
             type: "leaf"
             value: A;
           }
-          
+
           type Branch<A> = {
             type: "branch"
             left: Tree<A>;
             right: Tree<A>;
           }
-
-
-          // interface MyModel<T> {
-          //   aad: Banaan<T>
-          // }
-
-          // interface Banaan<T> { 
-          //   value: T
-          // }
-          // type MyModel<X, Y = string, Z = number> = {
-          //   a: Aad<X>
-          //   b: Aad<Y>
-          //   c: Aad<Z>
-          //   d: Aad<boolean>
-          //   e: Aad
-          // }
-          // interface Aad<T = number, A = number> {
-          //   v: T
-          //   a: A
-          // }
-
-          
-
       `,
         )
 
@@ -494,23 +602,22 @@ describe("Parsers", () => {
           model1 as ts.TypeAliasDeclaration,
           typeChecker,
         )
-        // const parserDeclaration2 = generateParser(
-        //   model2 as ts.InterfaceDeclaration,
-        //   typeChecker,
-        // )
-        // const parserDeclaration3 = generateParser(
-        //   model3 as ts.InterfaceDeclaration,
-        //   typeChecker,
-        // )
-        // const parserDeclaration4 = generateParser(
-        //   model4 as ts.InterfaceDeclaration,
-        //   typeChecker,
-        // )
-        console.log(printCode(parserDeclaration1))
-        // console.log(printCode(parserDeclaration2))
-        // console.log(printCode(parserDeclaration3))
-        // console.log(printCode(parserDeclaration4))
+        const parserDeclaration2 = generateParser(
+          model2 as ts.InterfaceDeclaration,
+          typeChecker,
+        )
+        const parserDeclaration3 = generateParser(
+          model3 as ts.InterfaceDeclaration,
+          typeChecker,
+        )
+        const parserDeclaration4 = generateParser(
+          model4 as ts.InterfaceDeclaration,
+          typeChecker,
+        )
         expect(printCode(parserDeclaration1)).toMatchSnapshot()
+        expect(printCode(parserDeclaration2)).toMatchSnapshot()
+        expect(printCode(parserDeclaration3)).toMatchSnapshot()
+        expect(printCode(parserDeclaration4)).toMatchSnapshot()
       })
     })
 

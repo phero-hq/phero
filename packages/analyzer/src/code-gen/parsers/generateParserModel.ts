@@ -1,4 +1,5 @@
 import ts from "typescript"
+import { printCode } from "../../tsTestUtils"
 import { isExternalType } from "../../tsUtils"
 
 export enum ParserModelType {
@@ -87,7 +88,6 @@ export type NullParserModel = { type: ParserModelType.Null }
 export type UndefinedParserModel = { type: ParserModelType.Undefined }
 export type ObjectParserModel = {
   type: ParserModelType.Object
-  dbg: number
   members: (MemberParserModel | IndexMemberParserModel)[]
 }
 export type MemberParserModel = {
@@ -187,14 +187,13 @@ export default function generateParserModel(
       },
       parser: {
         type: ParserModelType.Object,
-        dbg: 1,
         members: rootNode.members.reduce((members, member) => {
           return member.name
             ? [
                 ...members,
                 {
                   type: ParserModelType.Member,
-                  name: getMemberName(member),
+                  name: getMemberName(member.name),
                   optional: !!member.questionToken,
                   parser: generate(member, 0),
                 },
@@ -210,7 +209,9 @@ export default function generateParserModel(
       name: rootName,
       rootTypeParser: {
         baseTypeName: rootNode.name.text,
-        typeName: typeChecker.typeToString(type, rootNode, undefined),
+        typeName: rootNode.typeParameters?.length
+          ? typeChecker.typeToString(type, rootNode, undefined)
+          : rootNode.name.text,
         typeParameters:
           rootNode.typeParameters?.map((typeParam) => ({
             typeName: typeParam.name.text,
@@ -303,7 +304,6 @@ export default function generateParserModel(
     if (ts.isTypeLiteralNode(node)) {
       return {
         type: ParserModelType.Object,
-        dbg: 2,
         members: node.members.reduce((members, member) => {
           if (
             ts.isIndexSignatureDeclaration(member) &&
@@ -325,7 +325,7 @@ export default function generateParserModel(
               ...members,
               {
                 type: ParserModelType.Member,
-                name: getMemberName(member),
+                name: getMemberName(member.name),
                 optional: !!member.questionToken,
                 parser: generate(member, depth),
               },
@@ -364,7 +364,7 @@ export default function generateParserModel(
 
     if (
       ts.isTypeReferenceNode(node) &&
-      node.typeName.getText() === "Array" &&
+      getMemberName(node.typeName) === "Array" &&
       node.typeArguments?.length === 1
     ) {
       return {
@@ -431,44 +431,11 @@ export default function generateParserModel(
           defaultParser,
         }
       } else if ((type.flags & ts.TypeFlags.Object) === ts.TypeFlags.Object) {
-        if (isExternalType(type)) {
-          const props = typeChecker.getAugmentedPropertiesOfType(type)
-
-          return {
-            type: ParserModelType.Object,
-            dbg: 3,
-            members: props.reduce((members, member) => {
-              const memberType = typeChecker.getTypeOfSymbolAtLocation(
-                member,
-                node,
-              )
-              const actualType = typeChecker.typeToTypeNode(
-                memberType,
-                node,
-                undefined,
-              )
-              const optional =
-                (member.flags & ts.SymbolFlags.Optional) ===
-                ts.SymbolFlags.Optional
-
-              return member.name && actualType
-                ? [
-                    ...members,
-                    {
-                      type: ParserModelType.Member,
-                      name: member.name,
-                      optional,
-                      parser: generate(actualType, depth),
-                    },
-                  ]
-                : members
-            }, [] as MemberParserModel[]),
-          }
-        }
-
+        return generateObjectType(type, node, depth)
+      } else if (type.isUnion()) {
         return {
           type: ParserModelType.Reference,
-          baseTypeName: node.typeName.getText(),
+          baseTypeName: getMemberName(node.typeName),
           typeName: typeChecker.typeToString(type, node, undefined),
           typeArguments:
             node.typeArguments?.map((typeArg) => ({
@@ -492,7 +459,6 @@ export default function generateParserModel(
     ) {
       return {
         type: ParserModelType.Object,
-        dbg: 4,
         members: [
           {
             type: ParserModelType.IndexMember,
@@ -534,10 +500,63 @@ export default function generateParserModel(
       }
     }
 
-    throw new Error("ParserModel not implemented yet: " + node.kind)
+    throw new Error(
+      `ParserModel not implemented yet: \`${printCode(node)}\` (kind:${
+        node.kind
+      })`,
+    )
   }
 
-  function getMemberName({ name }: ts.TypeElement): string {
+  function generateObjectType(
+    type: ts.Type,
+    node: ts.TypeReferenceNode,
+    depth: number,
+  ): ParserModel {
+    if (isExternalType(type)) {
+      const props = typeChecker.getAugmentedPropertiesOfType(type)
+
+      return {
+        type: ParserModelType.Object,
+        members: props.reduce((members, member) => {
+          const memberType = typeChecker.getTypeOfSymbolAtLocation(member, node)
+          const actualType = typeChecker.typeToTypeNode(
+            memberType,
+            node,
+            undefined,
+          )
+          const optional =
+            (member.flags & ts.SymbolFlags.Optional) === ts.SymbolFlags.Optional
+
+          return member.name && actualType
+            ? [
+                ...members,
+                {
+                  type: ParserModelType.Member,
+                  name: member.name,
+                  optional,
+                  parser: generate(actualType, depth),
+                },
+              ]
+            : members
+        }, [] as MemberParserModel[]),
+      }
+    }
+
+    return {
+      type: ParserModelType.Reference,
+      baseTypeName: getMemberName(node.typeName),
+      typeName: typeChecker.typeToString(type, node, undefined),
+      typeArguments:
+        node.typeArguments?.map((typeArg) => ({
+          typeName: typeChecker.typeToString(
+            typeChecker.getTypeFromTypeNode(typeArg),
+          ),
+          parser: generate(typeArg, depth),
+        })) ?? [],
+    }
+  }
+
+  function getMemberName(name: ts.PropertyName | ts.EntityName): string {
     if (!name) {
       throw new Error("No member name")
     }
@@ -548,9 +567,15 @@ export default function generateParserModel(
       return name.text
     } else if (ts.isNumericLiteral(name)) {
       return name.text
+    } else if (ts.isQualifiedName(name)) {
+      return name.right.text
+    } else if (ts.isComputedPropertyName(name)) {
+      throw new Error(`No support for computed names ${printCode(name)}`)
+    } else if (ts.isPrivateIdentifier(name)) {
+      throw new Error(`No support for private names ${printCode(name)}`)
     }
 
-    throw new Error("Member name is either computed or private")
+    throw new Error("Name not supported")
   }
 
   function getEnumParser(enumDeclr: ts.EnumDeclaration): EnumParserModel {

@@ -2,7 +2,7 @@
 
 exports[`Parsers for a type alias Generics native generic 1`] = `
 "export class MyModelParser {
-    static parse(data: any): ParseResult<MyModel> {
+    static parse<T>(data: any, t0: (data: any) => ParseResult<T>): ParseResult<MyModel<T>> {
         const errors: ValidationError[] = [];
         let result: any;
         if (typeof data !== \\"object\\" || data === null) {
@@ -13,7 +13,14 @@ exports[`Parsers for a type alias Generics native generic 1`] = `
         }
         else {
             result = {};
-            result[\\"a\\"] = data[\\"a\\"];
+            if (!t0(data[\\"a\\"]).ok) {
+                errors.push({
+                    path: \\"data.a\\",
+                    message: \`not a T\`
+                });
+            }
+            else
+                result[\\"a\\"] = data[\\"a\\"];
         }
         if (errors.length) {
             return {
@@ -23,7 +30,7 @@ exports[`Parsers for a type alias Generics native generic 1`] = `
         }
         return {
             ok: true,
-            result: result as MyModel
+            result: result as MyModel<T>
         };
     }
 }"
@@ -87,7 +94,7 @@ exports[`Parsers for a type alias IndexedAccessTypeNode reference member 1`] = `
             if (!BanaanParser.parse(data[\\"aad\\"]).ok) {
                 errors.push({
                     path: \\"data.aad\\",
-                    message: \`not an Banaan\`
+                    message: \`not a Banaan\`
                 });
             }
             else
@@ -158,7 +165,7 @@ exports[`Parsers for a type alias IndexedAccessTypeNode type element member 1`] 
 }"
 `;
 
-exports[`Parsers for a type alias Reference to another interface with parameters 1`] = `
+exports[`Parsers for a type alias Reference to another interface 1`] = `
 "export class MyModelParser {
     static parse(data: any): ParseResult<MyModel> {
         const errors: ValidationError[] = [];
@@ -174,7 +181,7 @@ exports[`Parsers for a type alias Reference to another interface with parameters
             if (!AadParser.parse(data[\\"a\\"]).ok) {
                 errors.push({
                     path: \\"data.a\\",
-                    message: \`not an Aad\`
+                    message: \`not a Aad\`
                 });
             }
             else
@@ -194,7 +201,339 @@ exports[`Parsers for a type alias Reference to another interface with parameters
 }"
 `;
 
-exports[`Parsers for a type alias Reference to antoher interface 1`] = `
+exports[`Parsers for a type alias Reference to another interface with a type parameter 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            if (!AadParser.parse<number>(data[\\"a\\"], (data: any): ParseResult<number> => {
+                const errors: ValidationError[] = [];
+                let result: any;
+                if (typeof data !== \\"number\\") {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`not a number\`
+                    });
+                }
+                else if (isNaN(data)) {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`invalid number\`
+                    });
+                }
+                else
+                    result = data;
+                if (errors.length) {
+                    return {
+                        ok: false,
+                        errors
+                    };
+                }
+                return {
+                    ok: true,
+                    result: result as number
+                };
+            }).ok) {
+                errors.push({
+                    path: \\"data.a\\",
+                    message: \`not a Aad<number>\`
+                });
+            }
+            else
+                result[\\"a\\"] = data[\\"a\\"];
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias Reference to another interface with a type parameter with a default 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            if (!AadParser.parse<number>(data[\\"a\\"], (data: any): ParseResult<number> => {
+                const errors: ValidationError[] = [];
+                let result: any;
+                if (typeof data !== \\"number\\") {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`not a number\`
+                    });
+                }
+                else if (isNaN(data)) {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`invalid number\`
+                    });
+                }
+                else
+                    result = data;
+                if (errors.length) {
+                    return {
+                        ok: false,
+                        errors
+                    };
+                }
+                return {
+                    ok: true,
+                    result: result as number
+                };
+            }).ok) {
+                errors.push({
+                    path: \\"data.a\\",
+                    message: \`not a Aad<number>\`
+                });
+            }
+            else
+                result[\\"a\\"] = data[\\"a\\"];
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias Reference to another interface with mixed type parameters 1`] = `
+"export class MyModelParser {
+    static parse<T, X>(data: any, t0: (data: any) => ParseResult<T>, t1?: (data: any) => ParseResult<X>): ParseResult<MyModel<T, X>> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            if (!AadParser.parse<T>(data[\\"a\\"], t0).ok) {
+                errors.push({
+                    path: \\"data.a\\",
+                    message: \`not a Aad<T>\`
+                });
+            }
+            else
+                result[\\"a\\"] = data[\\"a\\"];
+            if (!AadParser.parse<string>(data[\\"b\\"], (data: any): ParseResult<string> => {
+                const errors: ValidationError[] = [];
+                let result: any;
+                if (typeof data !== \\"string\\") {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`not a string\`
+                    });
+                }
+                else
+                    result = data;
+                if (errors.length) {
+                    return {
+                        ok: false,
+                        errors
+                    };
+                }
+                return {
+                    ok: true,
+                    result: result as string
+                };
+            }).ok) {
+                errors.push({
+                    path: \\"data.b\\",
+                    message: \`not a Aad<string>\`
+                });
+            }
+            else
+                result[\\"b\\"] = data[\\"b\\"];
+            if (!AadParser.parse<number>(data[\\"c\\"], (data: any): ParseResult<number> => {
+                const errors: ValidationError[] = [];
+                let result: any;
+                if (typeof data !== \\"number\\") {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`not a number\`
+                    });
+                }
+                else if (isNaN(data)) {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`invalid number\`
+                    });
+                }
+                else
+                    result = data;
+                if (errors.length) {
+                    return {
+                        ok: false,
+                        errors
+                    };
+                }
+                return {
+                    ok: true,
+                    result: result as number
+                };
+            }).ok) {
+                errors.push({
+                    path: \\"data.c\\",
+                    message: \`not a Aad<number>\`
+                });
+            }
+            else
+                result[\\"c\\"] = data[\\"c\\"];
+            if (!AadParser.parse<X>(data[\\"d\\"], t1 ?? ((data: any): ParseResult<X> => {
+                const errors: ValidationError[] = [];
+                let result: any;
+                if (typeof data !== \\"number\\") {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`not a number\`
+                    });
+                }
+                else if (isNaN(data)) {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`invalid number\`
+                    });
+                }
+                else
+                    result = data;
+                if (errors.length) {
+                    return {
+                        ok: false,
+                        errors
+                    };
+                }
+                return {
+                    ok: true,
+                    result: result as X
+                };
+            })).ok) {
+                errors.push({
+                    path: \\"data.d\\",
+                    message: \`not a Aad<X>\`
+                });
+            }
+            else
+                result[\\"d\\"] = data[\\"d\\"];
+            if (!AadParser.parse(data[\\"e\\"]).ok) {
+                errors.push({
+                    path: \\"data.e\\",
+                    message: \`not a Aad<boolean>\`
+                });
+            }
+            else
+                result[\\"e\\"] = data[\\"e\\"];
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel<T, X>
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias Reference to another interface with own default type parameter 1`] = `
+"export class MyModelParser {
+    static parse<T>(data: any, t0?: (data: any) => ParseResult<T>): ParseResult<MyModel<T>> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            if (!AadParser.parse<T>(data[\\"a\\"], t0 ?? ((data: any): ParseResult<T> => {
+                const errors: ValidationError[] = [];
+                let result: any;
+                if (typeof data !== \\"number\\") {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`not a number\`
+                    });
+                }
+                else if (isNaN(data)) {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`invalid number\`
+                    });
+                }
+                else
+                    result = data;
+                if (errors.length) {
+                    return {
+                        ok: false,
+                        errors
+                    };
+                }
+                return {
+                    ok: true,
+                    result: result as T
+                };
+            })).ok) {
+                errors.push({
+                    path: \\"data.a\\",
+                    message: \`not a Aad<T>\`
+                });
+            }
+            else
+                result[\\"a\\"] = data[\\"a\\"];
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel<T>
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias Reference to another interface with the default type parameter 1`] = `
 "export class MyModelParser {
     static parse(data: any): ParseResult<MyModel> {
         const errors: ValidationError[] = [];
@@ -210,7 +549,7 @@ exports[`Parsers for a type alias Reference to antoher interface 1`] = `
             if (!AadParser.parse(data[\\"a\\"]).ok) {
                 errors.push({
                     path: \\"data.a\\",
-                    message: \`not an Aad\`
+                    message: \`not a Aad<number>\`
                 });
             }
             else
@@ -1543,6 +1882,261 @@ exports[`Parsers for a type alias object literal with no members 1`] = `
         }
         else {
             result = {};
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias recursive types Tree 1`] = `
+"export class NumberTreeParser {
+    static parse(data: any): ParseResult<NumberTree> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (!TreeParser.parse<number>(data, (data: any): ParseResult<number> => {
+            const errors: ValidationError[] = [];
+            let result: any;
+            if (typeof data !== \\"number\\") {
+                errors.push({
+                    path: \\"data\\",
+                    message: \`not a number\`
+                });
+            }
+            else if (isNaN(data)) {
+                errors.push({
+                    path: \\"data\\",
+                    message: \`invalid number\`
+                });
+            }
+            else
+                result = data;
+            if (errors.length) {
+                return {
+                    ok: false,
+                    errors
+                };
+            }
+            return {
+                ok: true,
+                result: result as number
+            };
+        }).ok) {
+            errors.push({
+                path: \\"data\\",
+                message: \`not a NumberTree\`
+            });
+        }
+        else
+            result = data;
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as NumberTree
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias recursive types Tree 2`] = `
+"export class TreeParser {
+    static parse<T>(data: any, t0: (data: any) => ParseResult<T>): ParseResult<Tree<T>> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        {
+            const errLength = errors.length;
+            {
+                if (!LeafParser.parse<T>(data, t0).ok) {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`not a Leaf<T>\`
+                    });
+                }
+                else
+                    result = data;
+                if (errors.length !== errLength) {
+                    errors.splice(errLength, errors.length - errLength);
+                    {
+                        if (!BranchParser.parse<T>(data, t0).ok) {
+                            errors.push({
+                                path: \\"data\\",
+                                message: \`not a Branch<T>\`
+                            });
+                        }
+                        else
+                            result = data;
+                        if (errors.length !== errLength) {
+                            errors.splice(errLength, errors.length - errLength);
+                            {
+                                errors.push({
+                                    path: \\"data\\",
+                                    message: \`is none of the options of union\`
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as Tree<T>
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias recursive types Tree 3`] = `
+"export class LeafParser {
+    static parse<A>(data: any, t0: (data: any) => ParseResult<A>): ParseResult<Leaf<A>> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            if (data[\\"type\\"] !== \\"leaf\\") {
+                errors.push({
+                    path: \\"data.type\\",
+                    message: \`not 'leaf'\`
+                });
+            }
+            else
+                result[\\"type\\"] = data[\\"type\\"];
+            if (!t0(data[\\"value\\"]).ok) {
+                errors.push({
+                    path: \\"data.value\\",
+                    message: \`not a A\`
+                });
+            }
+            else
+                result[\\"value\\"] = data[\\"value\\"];
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as Leaf<A>
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias recursive types Tree 4`] = `
+"export class BranchParser {
+    static parse<A>(data: any, t0: (data: any) => ParseResult<A>): ParseResult<Branch<A>> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            if (data[\\"type\\"] !== \\"branch\\") {
+                errors.push({
+                    path: \\"data.type\\",
+                    message: \`not 'branch'\`
+                });
+            }
+            else
+                result[\\"type\\"] = data[\\"type\\"];
+            if (!TreeParser.parse<A>(data[\\"left\\"], t0).ok) {
+                errors.push({
+                    path: \\"data.left\\",
+                    message: \`not a Tree<A>\`
+                });
+            }
+            else
+                result[\\"left\\"] = data[\\"left\\"];
+            if (!TreeParser.parse<A>(data[\\"right\\"], t0).ok) {
+                errors.push({
+                    path: \\"data.right\\",
+                    message: \`not a Tree<A>\`
+                });
+            }
+            else
+                result[\\"right\\"] = data[\\"right\\"];
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as Branch<A>
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias recursive types simple 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        if (typeof data !== \\"object\\" || data === null) {
+            errors.push({
+                path: \\"data\\",
+                message: \`null or not an object\`
+            });
+        }
+        else {
+            result = {};
+            if (typeof data[\\"prop1\\"] !== \\"number\\") {
+                errors.push({
+                    path: \\"data.prop1\\",
+                    message: \`not a number\`
+                });
+            }
+            else if (isNaN(data[\\"prop1\\"])) {
+                errors.push({
+                    path: \\"data.prop1\\",
+                    message: \`invalid number\`
+                });
+            }
+            else
+                result[\\"prop1\\"] = data[\\"prop1\\"];
+            if (data[\\"prop2\\"] !== undefined)
+                if (!MyModelParser.parse(data[\\"prop2\\"]).ok) {
+                    errors.push({
+                        path: \\"data.prop2\\",
+                        message: \`not a MyModel\`
+                    });
+                }
+                else
+                    result[\\"prop2\\"] = data[\\"prop2\\"];
         }
         if (errors.length) {
             return {
