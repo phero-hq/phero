@@ -174,7 +174,7 @@ function requestListener() {
               res.statusCode = 200
               res.write(JSON.stringify(responseData))
             }
-          } catch (e) {
+          } catch (e: any) { // TODO
             if (e.errorCode === "INVALID_INPUT_ERROR") {
               res.statusCode = 400
               console.error(e)

@@ -39,24 +39,24 @@ export class SamenClientNotInstalledError extends Error {
 }
 
 export class ManifestCompilerError extends Error {
-  public originalError: Error
-  constructor(originalError: Error) {
+  public originalError: unknown
+  constructor(originalError: unknown) {
     super(`Could not generate manifest`)
     this.originalError = originalError
   }
 }
 
 export class ClientSDKCompilerError extends Error {
-  public originalError: Error
-  constructor(originalError: Error) {
+  public originalError: unknown
+  constructor(originalError: unknown) {
     super(`Could not generate client SDK`)
     this.originalError = originalError
   }
 }
 
 export class ApiEndpointCompilerError extends Error {
-  public originalError: Error
-  constructor(originalError: Error) {
+  public originalError: unknown
+  constructor(originalError: unknown) {
     super(`Could not generate API endpoints`)
     this.originalError = originalError
   }
@@ -79,7 +79,7 @@ export function validateProject(project: Project) {
   }
 }
 
-export function handleError(error: Error) {
+export function handleError(error: unknown) {
   console.log("\n\n")
   console.log("--------")
   console.log(" Error! ")
