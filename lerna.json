@@ -1,6 +1,7 @@
 {
   "packages": [
     "packages/core",
+    "packages/cli",
     "packages/samen",
     "packages/client"
   ],
