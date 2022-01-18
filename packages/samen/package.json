@@ -2,7 +2,7 @@
   "name": "@samen/samen",
   "version": "0.8.0",
   "bin": {
-    "samen": "dist/cli.js"
+    "samen-server": "dist/cli.js"
   },
   "publishConfig": {
     "access": "public"

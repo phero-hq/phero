@@ -2,9 +2,7 @@
   "packages": [
     "packages/core",
     "packages/samen",
-    "packages/client",
-    "example/client",
-    "example/server"
+    "packages/client"
   ],
   "version": "0.8.0"
 }
