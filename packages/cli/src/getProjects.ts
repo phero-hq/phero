@@ -1,10 +1,17 @@
 import path from "path"
 import { promises as fs } from "fs"
 
-export interface Project {
-  type: "client" | "server"
+export interface ClientProject {
+  type: "client"
   path: string
 }
+
+export interface ServerProject {
+  type: "server"
+  path: string
+}
+
+export type Project = ClientProject | ServerProject
 
 async function getProject(path: string): Promise<Project | undefined> {
   if (!path.endsWith("package.json")) {
