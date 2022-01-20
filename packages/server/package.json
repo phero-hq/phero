@@ -1,9 +1,9 @@
 {
-  "name": "@samen/client",
+  "name": "@samen/server",
   "version": "0.8.0-alpha.6",
   "main": "build/index.js",
   "bin": {
-    "samen-client": "dist/cli.js"
+    "samen-server": "dist/cli.js"
   },
   "publishConfig": {
     "access": "public"

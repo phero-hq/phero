@@ -1,11 +1,4 @@
 {
-  "packages": [
-    "packages/analyzer",
-    "packages/core",
-    "packages/samen",
-    "packages/client",
-    "example/client",
-    "example/server"
-  ],
+  "packages": ["packages/core", "packages/server", "packages/client"],
   "version": "0.8.0-alpha.6"
 }

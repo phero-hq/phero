@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`minimal options 1`] = `"testName()"`;
-
-exports[`multiple paramaters 1`] = `"testName(first: number, second: string)"`;
-
-exports[`return type 1`] = `"testName(): Promise<number>"`;
-
-exports[`single paramater 1`] = `"testName(first: number)"`;
