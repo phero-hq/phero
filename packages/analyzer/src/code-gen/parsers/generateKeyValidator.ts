@@ -1,7 +1,5 @@
 import ts from "typescript"
-import { generateAnd } from "./generateParserLib"
 import { ParserModel, ParserModelType } from "./generateParserModel"
-import { generateStringLiteralValidator } from "./generateStringLiteralParser"
 import { generateStringValidator } from "./generateStringParser"
 import Pointer from "./Pointer"
 
@@ -12,7 +10,11 @@ export function generateKeyValidator(
   if (model.type === ParserModelType.String) {
     return generateStringValidator(
       new Pointer(model, [
-        { type: ParserModelType.Root, name: keyName.text, parser: model },
+        {
+          type: ParserModelType.Root,
+          name: keyName.text,
+          parser: model,
+        },
       ]),
     )
   }

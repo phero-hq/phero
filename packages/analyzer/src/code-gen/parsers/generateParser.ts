@@ -1,27 +1,34 @@
 import ts from "typescript"
-import { Model } from "../../parseSamenApp"
+import { getReturnType } from "../../extractFunctionFromServiceProperty"
+import { printCode } from "../../tsTestUtils"
+import { capitalize } from "../../utils"
 import generateParserFromModel from "./../parsers/generateParserFromModel"
-import generateParserModel from "./../parsers/generateParserModel"
+import generateParserModel, {
+  ParserModelType,
+} from "./../parsers/generateParserModel"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
 const staticModifier = ts.factory.createModifier(ts.SyntaxKind.StaticKeyword)
 
 export default function generateModelParser(
-  model: Model,
+  model: ts.Node,
   typeChecker: ts.TypeChecker,
 ): ts.ClassDeclaration {
   const rootParserModel = generateParserModel(typeChecker, model, "data")
   if (!rootParserModel.rootTypeParser) {
-    // TODO enum
-    throw new Error("Expected interface or typealias")
+    throw new Error("Expected rootTypeParser")
   }
 
   const parserStatement: ts.Statement = generateParserFromModel(rootParserModel)
 
+  const parserName = capitalize(
+    `${rootParserModel.rootTypeParser.baseTypeName}Parser`,
+  )
+
   return ts.factory.createClassDeclaration(
     undefined,
     [exportModifier],
-    `${rootParserModel.rootTypeParser.baseTypeName}Parser`,
+    parserName,
     undefined,
     undefined,
     [
@@ -191,4 +198,97 @@ export function generateParserBody(
     ],
     true,
   )
+}
+
+function getFunctionName(name?: ts.PropertyName): string {
+  if (!name) {
+    throw new Error(`Function has no name`)
+  }
+  if (ts.isIdentifier(name)) {
+    return name.text
+  }
+  if (ts.isStringLiteral(name)) {
+    return name.text
+  }
+
+  throw new Error(`Function has unsupported name`)
+}
+
+export function generateRPCParser(
+  func: ts.FunctionLikeDeclarationBase,
+  typeChecker: ts.TypeChecker,
+): ts.ClassDeclaration {
+  if (!func.type) {
+    throw new Error("Function should have return type")
+  }
+
+  const intputParserModel = generateParserModel(typeChecker, func, "data")
+
+  const outputParserModel = generateParserModel(
+    typeChecker,
+    getReturnType(func),
+    "data",
+  )
+
+  const inputParserStatement: ts.Statement =
+    generateParserFromModel(intputParserModel)
+  const outputParserStatement: ts.Statement =
+    generateParserFromModel(outputParserModel)
+
+  console.log("input")
+  console.log(printCode(inputParserStatement))
+  console.log("output")
+  console.log(printCode(outputParserStatement))
+
+  const parserName = capitalize(`${getFunctionName(func.name)}Parser`)
+
+  return ts.factory.createClassDeclaration(
+    undefined,
+    undefined,
+    parserName,
+    undefined,
+    undefined,
+    [],
+  )
+  // return ts.factory.createClassDeclaration(
+  //   undefined,
+  //   [exportModifier],
+  //   parserName,
+  //   undefined,
+  //   undefined,
+  //   [
+  //     ts.factory.createMethodDeclaration(
+  //       undefined,
+  //       [staticModifier],
+  //       undefined,
+  //       "parse",
+  //       undefined,
+  //       undefined,
+  //       [
+  //         ts.factory.createParameterDeclaration(
+  //           undefined,
+  //           undefined,
+  //           undefined,
+  //           "data",
+  //           undefined,
+  //           ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword),
+  //           undefined,
+  //         ),
+  //       ],
+  //       ts.factory.createTypeReferenceNode(
+  //         ts.factory.createIdentifier("ParseResult"),
+  //         [
+  //           ts.factory.createTypeReferenceNode(
+  //             rootParserModel.rootTypeParser.typeName,
+  //             undefined,
+  //           ),
+  //         ],
+  //       ),
+  //       generateParserBody(
+  //         rootParserModel.rootTypeParser.typeName,
+  //         parserStatement,
+  //       ),
+  //     ),
+  //   ],
+  // )
 }

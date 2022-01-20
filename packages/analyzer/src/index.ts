@@ -10,8 +10,8 @@ import { VirtualCompilerHost } from "./VirtualCompilerHost"
 import WatchProgram from "./WatchProgram"
 import writeClientSource from "./writeClientSource"
 
-// const input = "/Users/kamilafsar/Projects/samen/example/design"
-const input = "/Users/kamilafsar/Projects/slimste-mens/api"
+const input = "/Users/kamilafsar/Projects/samen/example/server"
+// const input = "/Users/kamilafsar/Projects/slimste-mens/api"
 const outputClient = "/Users/kamilafsar/Projects/samen/packages/analyzer/out"
 const outputServer =
   "/Users/kamilafsar/Projects/samen/packages/analyzer/samen_dist"
@@ -39,34 +39,34 @@ const host = new DevServerCompilerHost({
   outDir: outputServer,
 })
 
-host.addFile(
-  "rpc-proxy.ts",
-  `
-  import * as s from './samen'
+// host.addFile(
+//   "rpc-proxy.ts",
+//   `
+//   import * as s from './samen'
 
-  export function kees(aap: number) {
-    console.log(\`halloY \${aap} kees\`)
-  }
-`,
-)
+//   export function kees(aap: number) {
+//     console.log(\`halloY \${aap} kees\`)
+//   }
+// `,
+// )
 
-const prog = host.createProgram(["rpc-proxy.ts"])
+// const prog = host.createProgram(["rpc-proxy.ts"])
 
-const result = prog.emit()
+// const result = prog.emit()
 
 // prog.emit()
 
-const x = require("/Users/kamilafsar/Projects/samen/packages/analyzer/samen_dist/samen/packages/analyzer/rpc-proxy")
-console.log("AAP", x.kees(123))
+// const x = require("/Users/kamilafsar/Projects/samen/packages/analyzer/samen_dist/samen/packages/analyzer/rpc-proxy")
+// console.log("AAP", x.kees(123))
 
-console.log("result", result)
+// console.log("result", result)
 
-// const devServer = new DevServer({
-//   projectPath: input,
-// })
+const devServer = new DevServer({
+  projectPath: input,
+})
 
-// devServer.on("update", (evt) => {
-//   console.log("DEV SERVER UPDATE", evt)
-// })
+devServer.on("update", (evt) => {
+  console.log("DEV SERVER UPDATE", evt)
+})
 
 // console.log("result", prog.getSemanticDiagnostics())

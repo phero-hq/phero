@@ -7,6 +7,7 @@ import {
 import { ParserModelType, ReferenceParserModel } from "./generateParserModel"
 import { generateParserBody } from "./generateParser"
 import generateParserFromModel from "./generateParserFromModel"
+import { capitalize } from "../../utils"
 
 export default function generateReferenceParser(
   pointer: Pointer<ReferenceParserModel>,
@@ -33,7 +34,9 @@ function generateReferenceValidator(
     ts.factory.createPropertyAccessExpression(
       ts.factory.createCallExpression(
         ts.factory.createPropertyAccessExpression(
-          ts.factory.createIdentifier(`${pointer.model.baseTypeName}Parser`),
+          ts.factory.createIdentifier(
+            capitalize(`${pointer.model.baseTypeName}Parser`),
+          ),
           ts.factory.createIdentifier("parse"),
         ),
         undefined,
@@ -52,7 +55,9 @@ function generateReferenceValidatorWithTypeArguments(
     ts.factory.createPropertyAccessExpression(
       ts.factory.createCallExpression(
         ts.factory.createPropertyAccessExpression(
-          ts.factory.createIdentifier(`${pointer.model.baseTypeName}Parser`),
+          ts.factory.createIdentifier(
+            capitalize(`${pointer.model.baseTypeName}Parser`),
+          ),
           ts.factory.createIdentifier("parse"),
         ),
         pointer.model.typeArguments.map((typeArg) =>

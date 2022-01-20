@@ -13,6 +13,9 @@ import WatchProgram from "../WatchProgram"
 import { printSourceFile } from "../writeClientSource"
 import generateAppDeclarationFile from "../generateAppDeclarationFile"
 import { parseAppDeclarationFileContent } from "../parseAppDeclaration"
+import generateModelParser from "../code-gen/parsers/generateParser"
+import { printCode } from "../tsTestUtils"
+import generateRPCProxy from "../code-gen/generateRPCProxy"
 
 export enum DevServerEventType {
   ClientConnecting = "clientConnecting",
@@ -137,41 +140,45 @@ export default class DevServer extends EventEmitter {
     this.emit("update", { type: DevServerEventType.CodeReloading })
 
     const app = parseSamenApp(samenSourceFile, typeChecker)
-    this.routes = generateRoutes(app)
+
+    this.routes = generateRoutes(app, typeChecker)
+    const serverSource = mapSamenAppAppToServerSource(app)
+    generateRPCProxy(serverSource, typeChecker)
+
     // TODO optimize this
     // const clientSource = generateClient(
     //   mapSamenAppAppToServerSource(app),
     //   typeChecker,
     // )
-    const dts = generateAppDeclarationFile(app, typeChecker)
-    const dclr = parseAppDeclarationFileContent(dts)
-    const clientSource = generateClient(
-      mapParsedAppDeclarationToServerSource(dclr),
-      typeChecker,
-    )
+    // const dts = generateAppDeclarationFile(app, typeChecker)
+    // const dclr = parseAppDeclarationFileContent(dts)
+    // const clientSource = generateClient(
+    //   mapParsedAppDeclarationToServerSource(dclr),
+    //   typeChecker,
+    // )
 
-    const printedClientSource: PrintedClientCode = {
-      domainSource: printSourceFile(clientSource.domainSource),
-      samenClientSource: printSourceFile(clientSource.samenClientSource),
-      baseSamenClientSource: await this.readBaseSamenClientSource(),
-    }
+    // const printedClientSource: PrintedClientCode = {
+    //   domainSource: printSourceFile(clientSource.domainSource),
+    //   samenClientSource: printSourceFile(clientSource.samenClientSource),
+    //   baseSamenClientSource: await this.readBaseSamenClientSource(),
+    // }
 
-    const hash = computeClientCodeHash(printedClientSource)
-    if (this.currentClientCodeHash !== hash) {
-      this.notifyClients(
-        {
-          type: DevServerEventType.CodeReloaded,
-          source: printedClientSource,
-        },
-        this.clients,
-      )
-      this.currentClientCodeHash = hash
-    }
+    // const hash = computeClientCodeHash(printedClientSource)
+    // if (this.currentClientCodeHash !== hash) {
+    //   this.notifyClients(
+    //     {
+    //       type: DevServerEventType.CodeReloaded,
+    //       source: printedClientSource,
+    //     },
+    //     this.clients,
+    //   )
+    //   this.currentClientCodeHash = hash
+    // }
 
-    this.emit("update", {
-      type: DevServerEventType.CodeReloaded,
-      printedClientSource,
-    })
+    // this.emit("update", {
+    //   type: DevServerEventType.CodeReloaded,
+    //   printedClientSource,
+    // })
   }
 
   private codeErrored(diagnostics: readonly ts.Diagnostic[]) {
@@ -293,7 +300,10 @@ export default class DevServer extends EventEmitter {
 //   })
 // }
 
-function generateRoutes(app: ParsedSamenApp): RPCRoutes {
+function generateRoutes(
+  app: ParsedSamenApp,
+  typeChecker: ts.TypeChecker,
+): RPCRoutes {
   const routes: RPCRoutes = {}
   for (const service of app.services) {
     for (const func of service.funcs) {

@@ -164,14 +164,16 @@ export default function generateParserModel(
   rootNode: ts.Node,
   rootName: string,
 ): RootParserModel {
+  const type = typeChecker.getTypeAtLocation(rootNode)
+  const typeName = typeChecker.typeToString(type, rootNode, undefined)
+
   if (ts.isInterfaceDeclaration(rootNode)) {
-    const type = typeChecker.getTypeAtLocation(rootNode)
     return {
       type: ParserModelType.Root,
       name: rootName,
       rootTypeParser: {
         baseTypeName: rootNode.name.text,
-        typeName: typeChecker.typeToString(type, rootNode, undefined),
+        typeName,
         typeParameters:
           rootNode.typeParameters?.map((typeParam) => ({
             typeName: typeParam.name.text,
@@ -203,14 +205,13 @@ export default function generateParserModel(
       },
     }
   } else if (ts.isTypeAliasDeclaration(rootNode)) {
-    const type = typeChecker.getTypeAtLocation(rootNode)
     return {
       type: ParserModelType.Root,
       name: rootName,
       rootTypeParser: {
         baseTypeName: rootNode.name.text,
         typeName: rootNode.typeParameters?.length
-          ? typeChecker.typeToString(type, rootNode, undefined)
+          ? typeName
           : rootNode.name.text,
         typeParameters:
           rootNode.typeParameters?.map((typeParam) => ({
@@ -227,11 +228,42 @@ export default function generateParserModel(
       },
       parser: generate(rootNode.type, 0),
     }
+  } else if (ts.isFunctionDeclaration(rootNode)) {
+    console.log("HALLO?")
+    // if (!rootNode.name) {
+    //   throw new Error("Function should have name")
+    // }
+
+    return {
+      type: ParserModelType.Root,
+      name: rootName,
+      parser: {
+        type: ParserModelType.Object,
+        members: rootNode.parameters.map((param) => {
+          if (!param.type) {
+            throw new Error("Function parameter has no returnType")
+          }
+          console.log("is 162?", param.type.kind)
+          return {
+            type: ParserModelType.Member,
+            name: getMemberName(param.name),
+            optional: !!param.questionToken,
+            parser: generate(param.type, 0),
+          }
+        }),
+      },
+      // parser: generate(rootNode, 0),
+    }
   }
 
   return {
     type: ParserModelType.Root,
     name: rootName,
+    rootTypeParser: {
+      typeName,
+      baseTypeName: typeName,
+      typeParameters: [],
+    },
     parser: generate(rootNode, 0),
   }
 
@@ -556,7 +588,9 @@ export default function generateParserModel(
     }
   }
 
-  function getMemberName(name: ts.PropertyName | ts.EntityName): string {
+  function getMemberName(
+    name: ts.PropertyName | ts.EntityName | ts.BindingName,
+  ): string {
     if (!name) {
       throw new Error("No member name")
     }
@@ -573,6 +607,8 @@ export default function generateParserModel(
       throw new Error(`No support for computed names ${printCode(name)}`)
     } else if (ts.isPrivateIdentifier(name)) {
       throw new Error(`No support for private names ${printCode(name)}`)
+    } else if (ts.isBindingName(name)) {
+      throw new Error(`No support for binding names ${printCode(name)}`)
     }
 
     throw new Error("Name not supported")
