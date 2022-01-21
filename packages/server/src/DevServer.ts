@@ -1,58 +1,20 @@
-import EventEmitter from "events"
-import http from "http"
+import {
+  DevEventEmitter,
+  ensureDir,
+  generateAppDeclarationFile,
+  generateRPCProxy,
+  parseAppDeclarationFileContent,
+  ParsedSamenApp,
+  parseSamenApp,
+  ServeServerCommand,
+} from "@samen/core"
 import crypto from "crypto"
-import path from "path"
 import { promises as fs } from "fs"
+import http from "http"
+import path from "path"
 import ts from "typescript"
-import WatchProgram from "./WatchProgram"
-import { parseSamenApp, generateRPCProxy, ParsedSamenApp } from "@samen/core"
 import { mapSamenAppAppToServerSource } from "./mapSamenAppAppToServerSource"
-
-export enum DevServerEventType {
-  ClientConnecting = "clientConnecting",
-  ClientConnected = "clientConnected",
-  ClientRegistered = "clientRegistered",
-  ClientDisconnecting = "clientDisconnecting",
-  ClientDisconnected = "clientDisconnected",
-  ServerStarting = "serverStarting",
-  ServerStarted = "serverStarted",
-  CodeReloading = "codeReloading",
-  CodeReloaded = "codeReloaded",
-  CodeErrored = "codeErrored",
-}
-
-export type DevServerEvent =
-  | {
-      type:
-        | DevServerEventType.ClientConnecting
-        | DevServerEventType.ClientDisconnecting
-        | DevServerEventType.ServerStarting
-        | DevServerEventType.CodeReloading
-        | DevServerEventType.ClientRegistered
-    }
-  | {
-      type:
-        | DevServerEventType.ClientConnected
-        | DevServerEventType.ClientDisconnected
-      clients: number
-    }
-  | {
-      type: DevServerEventType.ServerStarted
-      opts: ServerOpts
-    }
-  | {
-      type: DevServerEventType.CodeReloaded
-      source: PrintedClientCode
-    }
-  | {
-      type: DevServerEventType.CodeErrored
-      diagnostics: ts.Diagnostic[]
-    }
-
-export interface ServerOpts {
-  projectPath: string
-  port?: number
-}
+import WatchProgram from "./WatchProgram"
 
 export interface PrintedClientCode {
   domainSource: string
@@ -68,48 +30,47 @@ interface RPCRoutes {
   [name: string]: (request: { headers: Headers; body: any }) => Promise<any>
 }
 
-const DEFAULT_PORT = 4321
-
-export default class DevServer extends EventEmitter {
+export default class DevServer {
   private readonly server: http.Server
   private readonly program: WatchProgram
-  private readonly opts: ServerOpts & { port: number }
+  private readonly command: ServeServerCommand
+  private readonly eventEmitter: DevEventEmitter
 
   private routes: RPCRoutes = {}
   private currentClientCodeHash = ""
   private clients: http.ServerResponse[] = []
 
-  constructor(opts: ServerOpts) {
-    super({
-      captureRejections: true,
-    })
-    this.opts = {
-      ...opts,
-      port: opts.port ?? DEFAULT_PORT,
-    }
+  constructor(cmd: ServeServerCommand) {
+    this.command = cmd
+    this.eventEmitter = new DevEventEmitter()
     this.program = this.startWatch()
     this.server = this.startHttpServer()
   }
 
+  private get samenDirPath(): string {
+    return path.join(this.command.projectPath, ".samen")
+  }
+
+  private get manifestPath(): string {
+    return path.join(this.samenDirPath, "manifest.d.ts")
+  }
+
   private startWatch(): WatchProgram {
     // Start code watch
-    const program = new WatchProgram(this.opts.projectPath)
+    const program = new WatchProgram(this.command.projectPath)
     program.onCompileSucceeded(this.codeCompiled.bind(this))
     program.onError(this.codeErrored.bind(this))
     return program
   }
 
   private startHttpServer(): http.Server {
-    this.emit("update", { type: DevServerEventType.ServerStarting })
+    this.eventEmitter.emit({ type: "SERVER_SERVE_INIT" })
     const server = http.createServer()
     server.on("request", this.requestHandler.bind(this))
     server.on("listening", () => {
-      this.emit("update", {
-        type: DevServerEventType.ServerStarted,
-        opts: this.opts,
-      })
+      this.eventEmitter.emit({ type: "SERVER_SERVE_READY" })
     })
-    server.listen(this.opts.port)
+    server.listen(this.command.port)
     return server
   }
 
@@ -128,55 +89,38 @@ export default class DevServer extends EventEmitter {
     samenSourceFile: ts.SourceFile,
     typeChecker: ts.TypeChecker,
   ): Promise<void> {
-    this.emit("update", { type: DevServerEventType.CodeReloading })
+    console.log("hallo?")
+    let app: ParsedSamenApp
+    try {
+      this.eventEmitter.emit({ type: "SERVER_BUILD_MANIFEST_START" })
+      app = parseSamenApp(samenSourceFile, typeChecker)
+      const dts = generateAppDeclarationFile(app, typeChecker)
+      await fs.mkdir(this.samenDirPath, { recursive: true })
+      await fs.writeFile(this.manifestPath, dts)
+      this.eventEmitter.emit({ type: "SERVER_BUILD_MANIFEST_SUCCESS" })
+    } catch (error) {
+      this.eventEmitter.emit({ type: "SERVER_BUILD_MANIFEST_FAILED", error })
+      return
+    }
 
-    const app = parseSamenApp(samenSourceFile, typeChecker)
-
-    this.routes = generateRoutes(app, typeChecker)
-    const serverSource = mapSamenAppAppToServerSource(app)
-    generateRPCProxy(serverSource, typeChecker)
-
-    // TODO optimize this
-    // const clientSource = generateClient(
-    //   mapSamenAppAppToServerSource(app),
-    //   typeChecker,
-    // )
-    // const dts = generateAppDeclarationFile(app, typeChecker)
-    // const dclr = parseAppDeclarationFileContent(dts)
-    // const clientSource = generateClient(
-    //   mapParsedAppDeclarationToServerSource(dclr),
-    //   typeChecker,
-    // )
-
-    // const printedClientSource: PrintedClientCode = {
-    //   domainSource: printSourceFile(clientSource.domainSource),
-    //   samenClientSource: printSourceFile(clientSource.samenClientSource),
-    //   baseSamenClientSource: await this.readBaseSamenClientSource(),
-    // }
-
-    // const hash = computeClientCodeHash(printedClientSource)
-    // if (this.currentClientCodeHash !== hash) {
-    //   this.notifyClients(
-    //     {
-    //       type: DevServerEventType.CodeReloaded,
-    //       source: printedClientSource,
-    //     },
-    //     this.clients,
-    //   )
-    //   this.currentClientCodeHash = hash
-    // }
-
-    // this.emit("update", {
-    //   type: DevServerEventType.CodeReloaded,
-    //   printedClientSource,
-    // })
+    try {
+      this.eventEmitter.emit({ type: "SERVER_BUILD_RPCS_START" })
+      this.routes = generateRoutes(app, typeChecker)
+      const serverSource = mapSamenAppAppToServerSource(app)
+      generateRPCProxy(serverSource, typeChecker)
+      this.eventEmitter.emit({ type: "SERVER_BUILD_RPCS_SUCCESS" })
+    } catch (error) {
+      this.eventEmitter.emit({ type: "SERVER_BUILD_RPCS_FAILED", error })
+      return
+    }
   }
 
   private codeErrored(diagnostics: readonly ts.Diagnostic[]) {
-    this.emit("update", {
-      type: DevServerEventType.CodeErrored,
-      diagnostics,
-    })
+    // TODO: add event for this?
+    // this.emit("update", {
+    //   type: DevServerEventType.CodeErrored,
+    //   diagnostics,
+    // })
   }
 
   private async requestHandler(
@@ -193,13 +137,20 @@ export default class DevServer extends EventEmitter {
       return
     }
 
-    if (req.headers.accept?.includes("text/event-stream")) {
-      this.registerClient(res)
-      this.notifyClients({ type: DevServerEventType.ClientRegistered }, [res])
-      return
+    if (this.eventEmitter.shouldRegisterListener(req)) {
+      return this.eventEmitter.registerListener(res)
     }
 
-    console.log("REQUEST", req.method, req.url)
+    if (req.method === "GET") {
+      if (req.url === "/manifest") {
+        res.statusCode = 200
+        res.write(await fs.readFile(this.manifestPath, "utf-8"))
+        res.end()
+        return
+      }
+    }
+
+    this.eventEmitter.emit({ type: "SERVER_RPC_START", url: req.url })
 
     if (req.method === "POST") {
       res.setHeader("Content-Type", "application/json")
@@ -217,7 +168,9 @@ export default class DevServer extends EventEmitter {
               res.statusCode = 200
               res.write(JSON.stringify(responseData))
             }
+            this.eventEmitter.emit({ type: "SERVER_RPC_SUCCESS" })
           } catch (e: any) {
+            this.eventEmitter.emit({ type: "SERVER_RPC_FAILED", error: e })
             if (e?.errorCode === "INVALID_INPUT_ERROR") {
               res.statusCode = 400
               console.error(e)
@@ -242,45 +195,6 @@ export default class DevServer extends EventEmitter {
     res.statusCode = 404
     res.write(`{ "error": "RPC not found" }`)
     res.end()
-  }
-
-  private registerClient(res: http.ServerResponse): void {
-    this.emit("update", { type: DevServerEventType.ClientConnecting })
-    this.clients.push(res)
-    res.on("close", () => this.unregisterClient(res))
-    res.writeHead(200, {
-      Connection: "keep-alive",
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      "X-Accel-Buffering": "no",
-    })
-    this.emit("update", {
-      type: DevServerEventType.ClientConnected,
-      clients: this.clients.length,
-    })
-  }
-
-  private unregisterClient(res: http.ServerResponse): void {
-    this.emit("update", { type: DevServerEventType.ClientDisconnecting })
-    this.clients = this.clients.filter((client) => client !== res)
-    this.emit("update", {
-      type: DevServerEventType.ClientDisconnected,
-      clients: this.clients.length,
-    })
-  }
-
-  private notifyClients(
-    event: DevServerEvent,
-    clients: http.ServerResponse[],
-  ): void {
-    if (!clients.length) return
-
-    clients.forEach((connection) => {
-      const id = new Date().toISOString()
-      connection.write("id: " + id + "\n")
-      connection.write("retry: 2000\n")
-      connection.write("data: " + JSON.stringify(event) + "\n\n")
-    })
   }
 }
 

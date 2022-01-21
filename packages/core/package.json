@@ -12,10 +12,12 @@
     "prepublish": "npm run clean && npm run build"
   },
   "dependencies": {
+    "eventsource": "^1.1.0",
     "typescript": "^4.4.4"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
+    "@types/eventsource": "^1.1.8",
     "@types/jest": "^27.0.2",
     "@types/node": "^16.11.7",
     "jest": "^27.3.1",

@@ -6,7 +6,7 @@ import {
   ReferenceMaker,
   ParsedAppDeclaration,
   ParsedSamenApp,
-  ServerSource,
+  ParsedAppDeclarationVersion,
 } from "@samen/core"
 
 export interface ClientSource {
@@ -14,27 +14,13 @@ export interface ClientSource {
   samenClientSource: ts.SourceFile
 }
 
-export function mapParsedAppDeclarationToServerSource(
-  app: ParsedAppDeclaration,
-  version = "v_1_0_0",
-): ServerSource {
-  return {
-    domainModels: app.domain[version].models,
-    services: app.services.map((service) => ({
-      name: service.name,
-      models: service.versions[version].models,
-      functions: service.versions[version].functions,
-    })),
-  }
-}
-
 export default function generateClient(
-  serverSource: ServerSource,
+  appDeclarationVersion: ParsedAppDeclarationVersion,
   typeChecker: ts.TypeChecker,
 ): ClientSource {
   const t1 = Date.now()
 
-  const { domainModels, services } = serverSource
+  const { domainModels, services } = appDeclarationVersion
   const domainRefMaker = new ReferenceMaker(
     domainModels,
     typeChecker,

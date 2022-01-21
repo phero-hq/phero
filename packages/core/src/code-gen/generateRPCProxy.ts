@@ -1,27 +1,27 @@
 import ts from "typescript"
-import { ServerSource } from "../ServerSource"
+import { ParsedAppDeclarationVersion } from ".."
 import generateParser, { generateRPCParser } from "./parsers/generateParser"
 import generateModelParser from "./parsers/generateParser"
 
 export default function generateRPCProxy(
-  serverSource: ServerSource,
+  appDeclrationVersion: ParsedAppDeclarationVersion,
   typeChecker: ts.TypeChecker,
 ): string {
   // generateRPCParser(serverSource.services[0].functions[0], typeChecker)
   // generateRPCParser(serverSource.services[0].functions[1], typeChecker)
-  const modelParsers = serverSource.services[0].models.map((m) => {
+  const modelParsers = appDeclrationVersion.services[0].models.map((m) => {
     return generateModelParser(m, typeChecker)
   })
   // serverSource.domainModels.forEach(m => {
   //   console.log("domain model", m.name)
   // })
   const rpcParsers = generateRPCParser(
-    serverSource.services[0].functions[2],
+    appDeclrationVersion.services[0].functions[2],
     typeChecker,
   )
 
-  console.log("modelParsers", modelParsers)
-  console.log("rpcParsers", rpcParsers)
+  // console.log("modelParsers", modelParsers)
+  // console.log("rpcParsers", rpcParsers)
 
   // generateRPCParser(
   //   serverSource.services[0].functions[2],
@@ -40,6 +40,6 @@ export default function generateRPCProxy(
 
   // serverSource.domainModels.map((model) => generateParser(model))
   // generateModelParser()
-  console.log("XX")
+  // console.log("XX")
   return ""
 }

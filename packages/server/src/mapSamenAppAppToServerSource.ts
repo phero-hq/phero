@@ -1,8 +1,8 @@
-import { ParsedSamenApp, ServerSource } from "@samen/core"
+import { ParsedSamenApp, ParsedAppDeclarationVersion } from "@samen/core"
 
 export function mapSamenAppAppToServerSource(
   app: ParsedSamenApp,
-): ServerSource {
+): ParsedAppDeclarationVersion {
   return {
     domainModels: app.models,
     services: app.services.map((service) => ({

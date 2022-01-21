@@ -26,9 +26,10 @@ export interface ParsedServiceDeclarationVersions {
   }
 }
 
-export function parseAppDeclarationFileContent(
-  dts: string,
-): ParsedAppDeclaration {
+export function parseAppDeclarationFileContent(dts: string): {
+  result: ParsedAppDeclaration
+  typeChecker: ts.TypeChecker
+} {
   const t1 = Date.now()
 
   const vHost = new VirtualCompilerHost()
@@ -50,7 +51,7 @@ export function parseAppDeclarationFileContent(
 
   console.debug("parseAppDeclaration in", t2 - t1)
 
-  return result
+  return { result, typeChecker: program.getTypeChecker() }
 }
 
 function parseAppDeclarationSourceFile(
