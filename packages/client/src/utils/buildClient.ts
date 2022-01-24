@@ -31,7 +31,7 @@ async function getManifestSource(
   server: BuildClientCommand["server"],
 ): Promise<string> {
   if ("path" in server) {
-    return getManifestFromFS(server.path)
+    return getManifestFromPath(server.path)
   } else if ("url" in server) {
     return getManifestFromUrl(server.url)
   } else {
@@ -55,8 +55,14 @@ async function getManifestFromUrl(serverUrl: string): Promise<string> {
   })
 }
 
-async function getManifestFromFS(serverPath: string): Promise<string> {
-  const file = await fs.readFile(serverPath)
-  if (!file) throw new Error(`No manifest file found at ${serverPath}`)
-  return file.toString()
+async function getManifestFromPath(serverPath: string): Promise<string> {
+  const path = `${serverPath}/samen-manifest.d.ts`
+
+  try {
+    await fs.access(path)
+  } catch (error) {
+    throw new Error(`No manifest file found at ${path}`)
+  }
+
+  return (await fs.readFile(path)).toString()
 }
