@@ -9,7 +9,7 @@
     "access": "public"
   },
   "scripts": {
-    "clean": "rm -rf dist && rm -rf build",
+    "clean": "rm -rf dist && rm -rf generated",
     "build": "tsc",
     "test": "jest src",
     "prepublish": "npm run clean && npm run build"

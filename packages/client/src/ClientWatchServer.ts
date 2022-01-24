@@ -2,60 +2,55 @@ import {
   addServerDevEventListener,
   ClientDevEventEmitter,
   ServerDevEvent,
-  getDeclarationForVersion,
-  parseAppDeclarationFileContent,
   WatchServerCommand,
 } from "@samen/core"
 import http from "http"
-import path from "path"
-import generateClient from "./generateClient"
-import writeClientSource from "./writeClientSource"
+import buildClient from "./utils/buildClient"
 
 export default class ClientWatchServer {
   private readonly server: http.Server
   private readonly command: WatchServerCommand
   private readonly eventEmitter: ClientDevEventEmitter
 
-  constructor(cmd: WatchServerCommand) {
-    this.command = cmd
-    this.eventEmitter = new ClientDevEventEmitter()
-    this.server = this.startHttpServer()
+  constructor(command: WatchServerCommand) {
+    this.command = command
     addServerDevEventListener(
-      cmd.server.url,
+      this.command.server.url,
       this.serverEventHandler.bind(this),
     )
+
+    this.eventEmitter = new ClientDevEventEmitter()
+    this.server = this.startHttpServer()
   }
 
   private async serverEventHandler(event: ServerDevEvent) {
     switch (event.type) {
       case "SERVER_CONNECTED":
+        this.eventEmitter.emit(event)
+        await this.buildClient()
+        break
+
       case "SERVER_DISCONNECTED":
-      case "SERVER_NOT_FOUND": {
+      case "SERVER_NOT_FOUND":
         this.eventEmitter.emit(event)
         break
-      }
 
-      case "BUILD_MANIFEST_SUCCESS": {
-        try {
-          this.eventEmitter.emit({ type: "BUILD_START" })
-          const dts = await this.getManifestSource()
-          const { result: dclr, typeChecker } =
-            parseAppDeclarationFileContent(dts)
-          const declarationVersion = getDeclarationForVersion(dclr)
-          const clientSource = generateClient(declarationVersion, typeChecker)
-          await writeClientSource(
-            path.join("node_modules", "@samen", "client", "generated"),
-            clientSource,
-          )
-          this.eventEmitter.emit({ type: "BUILD_SUCCESS" })
-        } catch (error) {
-          this.eventEmitter.emit({
-            type: "BUILD_FAILED",
-            error: JSON.stringify(error),
-          })
-        }
+      case "BUILD_MANIFEST_SUCCESS":
+        this.buildClient()
         break
-      }
+    }
+  }
+
+  private async buildClient(): Promise<void> {
+    try {
+      this.eventEmitter.emit({ type: "BUILD_START" })
+      await buildClient(this.command.server)
+      this.eventEmitter.emit({ type: "BUILD_SUCCESS" })
+    } catch (error) {
+      this.eventEmitter.emit({
+        type: "BUILD_FAILED",
+        error: JSON.stringify(error),
+      })
     }
   }
 
@@ -91,21 +86,5 @@ export default class ClientWatchServer {
     res.statusCode = 404
     res.write(`{ "error": "Method not found" }`)
     res.end()
-  }
-
-  private async getManifestSource(): Promise<string> {
-    const url = `${this.command.server.url}/manifest`
-
-    return new Promise((resolve, reject) => {
-      http.get(url, (res) => {
-        res.setEncoding("utf8")
-        let body = ""
-        res.on("data", (data) => {
-          body += data
-        })
-        res.on("end", () => resolve(body))
-        res.on("error", reject)
-      })
-    })
   }
 }

@@ -14,7 +14,7 @@ export interface ClientSource {
   samenClientSource: ts.SourceFile
 }
 
-export default function generateClient(
+export default function getClientSource(
   appDeclarationVersion: ParsedAppDeclarationVersion,
   typeChecker: ts.TypeChecker,
 ): ClientSource {
