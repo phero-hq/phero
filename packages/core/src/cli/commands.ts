@@ -7,7 +7,6 @@ const DEFAULT_CLIENT_PORT = 4040
 export interface ServeServerCommand {
   name: "serve"
   port: number
-  projectPath: string
 }
 
 export interface BuildServerCommand {
@@ -18,6 +17,7 @@ export type ServerCommand = ServeServerCommand | BuildServerCommand
 
 // Assumes that the process and file path are already stripped out (https://nodejs.org/en/knowledge/command-line/how-to-parse-command-line-arguments/)
 // > serve
+// > serve --p 3031
 // > serve --port 3031
 // > build
 export function parseServerCommand(args: string[]): ServerCommand {
@@ -25,11 +25,7 @@ export function parseServerCommand(args: string[]): ServerCommand {
 
   switch (name) {
     case "serve":
-      return {
-        name,
-        port: getPort(args) ?? DEFAULT_SERVER_PORT,
-        projectPath: process.cwd(),
-      }
+      return { name, port: getPort(args) ?? DEFAULT_SERVER_PORT }
 
     case "build":
       return { name }
@@ -43,8 +39,8 @@ export function parseServerCommand(args: string[]): ServerCommand {
 
 export interface WatchServerCommand {
   name: "watch"
-  clientPort: number
-  serverPort: number
+  port: number
+  server: { url: string }
 }
 
 export interface BuildClientCommand {
@@ -56,7 +52,10 @@ export type ClientCommand = WatchServerCommand | BuildClientCommand
 
 // Assumes that the process and file path are already stripped out (https://nodejs.org/en/knowledge/command-line/how-to-parse-command-line-arguments/)
 // > watch
-// > watch --clientPort 4041 --serverPort 3031
+// > watch --p 4041
+// > watch --port 4041
+// > watch http://localhost:3031
+// > watch http://localhost:3031 --port 4041
 // > build
 // > build ../server
 // > build http://localhost:4321
@@ -66,23 +65,18 @@ export function parseClientCommand(args: string[]): ClientCommand {
 
   switch (name) {
     case "watch": {
-      return {
-        name,
-        clientPort: DEFAULT_CLIENT_PORT,
-        serverPort: DEFAULT_SERVER_PORT,
+      const location = !args[1]?.startsWith("-") && args[1]
+      if (!location) {
+        return { name, port, server: { url: DEFAULT_SERVER_URL } }
+      } else if (location.startsWith("http")) {
+        return { name, port, server: { url: location } }
+      } else {
+        throw new Error("Watching based on file path is not supported ")
       }
-      // const location = args[1]
-      // if (!location) {
-      //   return { name, port, server: { url: DEFAULT_SERVER_URL } }
-      // } else if (location.startsWith("http")) {
-      //   return { name, port, server: { url: location } }
-      // } else {
-      //   throw new Error("Watching based on file path is not supported ")
-      // }
     }
 
     case "build": {
-      const location = args[1]
+      const location = !args[1]?.startsWith("-") && args[1]
       if (!location) {
         return { name, server: { url: DEFAULT_SERVER_URL } }
       } else if (location.startsWith("http")) {
@@ -100,6 +94,6 @@ export function parseClientCommand(args: string[]): ClientCommand {
 // Helpers
 
 function getPort(args: string[]): number | undefined {
-  const portIndex = args.findIndex((a) => a === "--port")
+  const portIndex = args.findIndex((a) => ["-p", "--port"].includes(a))
   return portIndex > -1 ? parseInt(args[portIndex + 1]) : undefined
 }

@@ -7,7 +7,7 @@ const command = parseServerCommand(process.argv.slice(2))
 
 switch (command.name) {
   case "serve": {
-    const devServer = new DevServer(command)
+    const devServer = new DevServer(command, process.cwd())
     break
   }
 

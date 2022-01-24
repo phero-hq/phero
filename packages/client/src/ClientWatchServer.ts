@@ -20,7 +20,7 @@ export default class ClientWatchServer {
     this.command = cmd
     this.eventEmitter = new DevEventEmitter()
     this.server = this.startHttpServer()
-    addEventListener(cmd.serverPort, this.serverEventHandler.bind(this))
+    addEventListener(cmd.server.url, this.serverEventHandler.bind(this))
   }
 
   private async serverEventHandler(event: DevEvent) {
@@ -51,7 +51,7 @@ export default class ClientWatchServer {
     server.on("listening", () => {
       this.eventEmitter.emit({ type: "CLIENT_WATCH_READY" })
     })
-    server.listen(this.command.clientPort)
+    server.listen(this.command.port)
     return server
   }
 
@@ -79,7 +79,7 @@ export default class ClientWatchServer {
   }
 
   private async getManifestSource(): Promise<string> {
-    const url = `http://localhost:${this.command.serverPort}/manifest`
+    const url = `${this.command.server.url}/manifest`
 
     return new Promise((resolve, reject) => {
       http.get(url, (res) => {

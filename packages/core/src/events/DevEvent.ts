@@ -83,10 +83,9 @@ export class DevEventEmitter {
 // Event listener
 
 export function addEventListener(
-  port: number,
+  url: string,
   callback: (event: DevEvent) => void,
 ): () => void {
-  const url = `http://localhost:${port}/watch`
   const eventSource = new EventSource(url)
 
   let didConnect = false

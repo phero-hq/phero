@@ -6,6 +6,5 @@
     "target": "ES2019",
     "lib": ["ES2020"]
   },
-  "include": ["src"],
-  "exclude": ["src/**/*.test.ts", "src/**/*.spec.ts"]
+  "include": ["src"]
 }

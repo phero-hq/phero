@@ -1,9 +1,7 @@
 import {
   DevEventEmitter,
-  ensureDir,
   generateAppDeclarationFile,
   generateRPCProxy,
-  parseAppDeclarationFileContent,
   ParsedSamenApp,
   parseSamenApp,
   ServeServerCommand,
@@ -34,21 +32,23 @@ export default class DevServer {
   private readonly server: http.Server
   private readonly program: WatchProgram
   private readonly command: ServeServerCommand
+  private readonly projectPath: string
   private readonly eventEmitter: DevEventEmitter
 
   private routes: RPCRoutes = {}
   private currentClientCodeHash = ""
   private clients: http.ServerResponse[] = []
 
-  constructor(cmd: ServeServerCommand) {
-    this.command = cmd
+  constructor(command: ServeServerCommand, projectPath: string) {
+    this.command = command
+    this.projectPath = projectPath
     this.eventEmitter = new DevEventEmitter()
     this.program = this.startWatch()
     this.server = this.startHttpServer()
   }
 
   private get samenDirPath(): string {
-    return path.join(this.command.projectPath, ".samen")
+    return path.join(this.projectPath, ".samen")
   }
 
   private get manifestPath(): string {
@@ -57,7 +57,7 @@ export default class DevServer {
 
   private startWatch(): WatchProgram {
     // Start code watch
-    const program = new WatchProgram(this.command.projectPath)
+    const program = new WatchProgram(this.projectPath)
     program.onCompileSucceeded(this.codeCompiled.bind(this))
     program.onError(this.codeErrored.bind(this))
     return program
