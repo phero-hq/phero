@@ -235,10 +235,10 @@ export function generateRPCParser(
   const outputParserStatement: ts.Statement =
     generateParserFromModel(outputParserModel)
 
-  console.log("input")
-  console.log(printCode(inputParserStatement))
-  console.log("output")
-  console.log(printCode(outputParserStatement))
+  // console.log("input")
+  // console.log(printCode(inputParserStatement))
+  // console.log("output")
+  // console.log(printCode(outputParserStatement))
 
   const parserName = capitalize(`${getFunctionName(func.name)}Parser`)
 

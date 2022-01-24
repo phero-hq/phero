@@ -15,7 +15,6 @@ export function getDeclarationForVersion(
   app: ParsedAppDeclaration,
   version = "v_1_0_0",
 ): ParsedAppDeclarationVersion {
-  console.log({ version, app })
   return {
     domainModels: app.domain[version]?.models ?? [],
     services: app.services.map((service) => ({

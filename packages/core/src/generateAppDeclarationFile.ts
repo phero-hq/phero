@@ -76,7 +76,7 @@ export default function generateAppDeclarationFile(
   // console.log("ssss", program.getSemanticDiagnostics()[1].messageText)
 
   const t2 = Date.now()
-  console.log("generateAppDeclarationFile in", t2 - t1)
+  // console.log("generateAppDeclarationFile in", t2 - t1)
 
   const declrFile = vHost.getFile("api.d.ts")
 

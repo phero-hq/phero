@@ -229,7 +229,6 @@ export default function generateParserModel(
       parser: generate(rootNode.type, 0),
     }
   } else if (ts.isFunctionDeclaration(rootNode)) {
-    console.log("HALLO?")
     // if (!rootNode.name) {
     //   throw new Error("Function should have name")
     // }
@@ -243,7 +242,7 @@ export default function generateParserModel(
           if (!param.type) {
             throw new Error("Function parameter has no returnType")
           }
-          console.log("is 162?", param.type.kind)
+          // console.log("is 162?", param.type.kind)
           return {
             type: ParserModelType.Member,
             name: getMemberName(param.name),

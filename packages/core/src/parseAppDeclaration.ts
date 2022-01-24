@@ -49,7 +49,7 @@ export function parseAppDeclarationFileContent(dts: string): {
 
   const t2 = Date.now()
 
-  console.debug("parseAppDeclaration in", t2 - t1)
+  // console.debug("parseAppDeclaration in", t2 - t1)
 
   return { result, typeChecker: program.getTypeChecker() }
 }

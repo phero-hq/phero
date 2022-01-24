@@ -34,7 +34,7 @@ export class DevServerCompilerHost {
       this.files[fileName] = contents
       fs.mkdirSync(path.dirname(fileName), { recursive: true })
       fs.writeFileSync(fileName, contents, { encoding: "utf-8" })
-      console.log("WRITE", fileName)
+      // console.log("WRITE", fileName)
     }
 
     host.resolveModuleNames = (

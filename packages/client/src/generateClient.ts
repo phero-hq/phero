@@ -172,7 +172,7 @@ export default function generateClient(
   )
 
   const t2 = Date.now()
-  console.log("Generate client in ", t2 - t1)
+  // console.log("Generate client in ", t2 - t1)
 
   return {
     samenClientSource,

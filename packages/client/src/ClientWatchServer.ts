@@ -1,7 +1,7 @@
 import {
-  addEventListener,
-  DevEvent,
-  DevEventEmitter,
+  addServerDevEventListener,
+  ClientDevEventEmitter,
+  ServerDevEvent,
   getDeclarationForVersion,
   parseAppDeclarationFileContent,
   WatchServerCommand,
@@ -14,42 +14,57 @@ import writeClientSource from "./writeClientSource"
 export default class ClientWatchServer {
   private readonly server: http.Server
   private readonly command: WatchServerCommand
-  private readonly eventEmitter: DevEventEmitter
+  private readonly eventEmitter: ClientDevEventEmitter
 
   constructor(cmd: WatchServerCommand) {
     this.command = cmd
-    this.eventEmitter = new DevEventEmitter()
+    this.eventEmitter = new ClientDevEventEmitter()
     this.server = this.startHttpServer()
-    addEventListener(cmd.server.url, this.serverEventHandler.bind(this))
+    addServerDevEventListener(
+      cmd.server.url,
+      this.serverEventHandler.bind(this),
+    )
   }
 
-  private async serverEventHandler(event: DevEvent) {
-    console.log("serverEventHandler", event)
-    if (event.type === "SERVER_BUILD_MANIFEST_SUCCESS") {
-      try {
-        this.eventEmitter.emit({ type: "CLIENT_BUILD_START" })
-        const dts = await this.getManifestSource()
-        const { result: dclr, typeChecker } =
-          parseAppDeclarationFileContent(dts)
-        const declarationVersion = getDeclarationForVersion(dclr)
-        const clientSource = generateClient(declarationVersion, typeChecker)
-        await writeClientSource(
-          path.join("node_modules", "@samen", "client", "generated"),
-          clientSource,
-        )
-        this.eventEmitter.emit({ type: "CLIENT_BUILD_SUCCESS" })
-      } catch (error) {
-        this.eventEmitter.emit({ type: "CLIENT_BUILD_FAILED", error })
+  private async serverEventHandler(event: ServerDevEvent) {
+    switch (event.type) {
+      case "SERVER_CONNECTED":
+      case "SERVER_DISCONNECTED":
+      case "SERVER_NOT_FOUND": {
+        this.eventEmitter.emit(event)
+        break
+      }
+
+      case "BUILD_MANIFEST_SUCCESS": {
+        try {
+          this.eventEmitter.emit({ type: "BUILD_START" })
+          const dts = await this.getManifestSource()
+          const { result: dclr, typeChecker } =
+            parseAppDeclarationFileContent(dts)
+          const declarationVersion = getDeclarationForVersion(dclr)
+          const clientSource = generateClient(declarationVersion, typeChecker)
+          await writeClientSource(
+            path.join("node_modules", "@samen", "client", "generated"),
+            clientSource,
+          )
+          this.eventEmitter.emit({ type: "BUILD_SUCCESS" })
+        } catch (error) {
+          this.eventEmitter.emit({
+            type: "BUILD_FAILED",
+            error: JSON.stringify(error),
+          })
+        }
+        break
       }
     }
   }
 
   private startHttpServer(): http.Server {
-    this.eventEmitter.emit({ type: "CLIENT_WATCH_INIT" })
+    this.eventEmitter.emit({ type: "WATCH_INIT" })
     const server = http.createServer()
     server.on("request", this.requestHandler.bind(this))
     server.on("listening", () => {
-      this.eventEmitter.emit({ type: "CLIENT_WATCH_READY" })
+      this.eventEmitter.emit({ type: "WATCH_READY" })
     })
     server.listen(this.command.port)
     return server

@@ -1,9 +1,9 @@
 import {
-  DevEventEmitter,
   generateAppDeclarationFile,
   generateRPCProxy,
   ParsedSamenApp,
   parseSamenApp,
+  ServerDevEventEmitter,
   ServeServerCommand,
 } from "@samen/core"
 import crypto from "crypto"
@@ -33,7 +33,7 @@ export default class DevServer {
   private readonly program: WatchProgram
   private readonly command: ServeServerCommand
   private readonly projectPath: string
-  private readonly eventEmitter: DevEventEmitter
+  private readonly eventEmitter: ServerDevEventEmitter
 
   private routes: RPCRoutes = {}
   private currentClientCodeHash = ""
@@ -42,9 +42,9 @@ export default class DevServer {
   constructor(command: ServeServerCommand, projectPath: string) {
     this.command = command
     this.projectPath = projectPath
-    this.eventEmitter = new DevEventEmitter()
-    this.program = this.startWatch()
+    this.eventEmitter = new ServerDevEventEmitter()
     this.server = this.startHttpServer()
+    this.program = this.startWatch()
   }
 
   private get samenDirPath(): string {
@@ -64,11 +64,11 @@ export default class DevServer {
   }
 
   private startHttpServer(): http.Server {
-    this.eventEmitter.emit({ type: "SERVER_SERVE_INIT" })
+    this.eventEmitter.emit({ type: "SERVE_INIT" })
     const server = http.createServer()
     server.on("request", this.requestHandler.bind(this))
     server.on("listening", () => {
-      this.eventEmitter.emit({ type: "SERVER_SERVE_READY" })
+      this.eventEmitter.emit({ type: "SERVE_READY" })
     })
     server.listen(this.command.port)
     return server
@@ -89,28 +89,33 @@ export default class DevServer {
     samenSourceFile: ts.SourceFile,
     typeChecker: ts.TypeChecker,
   ): Promise<void> {
-    console.log("hallo?")
     let app: ParsedSamenApp
     try {
-      this.eventEmitter.emit({ type: "SERVER_BUILD_MANIFEST_START" })
+      this.eventEmitter.emit({ type: "BUILD_MANIFEST_START" })
       app = parseSamenApp(samenSourceFile, typeChecker)
       const dts = generateAppDeclarationFile(app, typeChecker)
       await fs.mkdir(this.samenDirPath, { recursive: true })
       await fs.writeFile(this.manifestPath, dts)
-      this.eventEmitter.emit({ type: "SERVER_BUILD_MANIFEST_SUCCESS" })
+      this.eventEmitter.emit({ type: "BUILD_MANIFEST_SUCCESS" })
     } catch (error) {
-      this.eventEmitter.emit({ type: "SERVER_BUILD_MANIFEST_FAILED", error })
+      this.eventEmitter.emit({
+        type: "BUILD_MANIFEST_FAILED",
+        error: JSON.stringify(error),
+      })
       return
     }
 
     try {
-      this.eventEmitter.emit({ type: "SERVER_BUILD_RPCS_START" })
+      this.eventEmitter.emit({ type: "BUILD_RPCS_START" })
       this.routes = generateRoutes(app, typeChecker)
       const serverSource = mapSamenAppAppToServerSource(app)
       generateRPCProxy(serverSource, typeChecker)
-      this.eventEmitter.emit({ type: "SERVER_BUILD_RPCS_SUCCESS" })
+      this.eventEmitter.emit({ type: "BUILD_RPCS_SUCCESS" })
     } catch (error) {
-      this.eventEmitter.emit({ type: "SERVER_BUILD_RPCS_FAILED", error })
+      this.eventEmitter.emit({
+        type: "BUILD_RPCS_FAILED",
+        error: JSON.stringify(error),
+      })
       return
     }
   }
@@ -150,7 +155,7 @@ export default class DevServer {
       }
     }
 
-    this.eventEmitter.emit({ type: "SERVER_RPC_START", url: req.url })
+    this.eventEmitter.emit({ type: "RPC_START", url: req.url })
 
     if (req.method === "POST") {
       res.setHeader("Content-Type", "application/json")
@@ -168,9 +173,9 @@ export default class DevServer {
               res.statusCode = 200
               res.write(JSON.stringify(responseData))
             }
-            this.eventEmitter.emit({ type: "SERVER_RPC_SUCCESS" })
+            this.eventEmitter.emit({ type: "RPC_SUCCESS" })
           } catch (e: any) {
-            this.eventEmitter.emit({ type: "SERVER_RPC_FAILED", error: e })
+            this.eventEmitter.emit({ type: "RPC_FAILED", error: e })
             if (e?.errorCode === "INVALID_INPUT_ERROR") {
               res.statusCode = 400
               console.error(e)
@@ -213,7 +218,7 @@ function generateRoutes(
   for (const service of app.services) {
     for (const func of service.funcs) {
       routes[`/${service.name}/${func.name}`] = async () => {
-        console.log("HOI!", service.name, func.name)
+        // console.log("HOI!", service.name, func.name)
       }
     }
   }

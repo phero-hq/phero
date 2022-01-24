@@ -38,7 +38,7 @@ export class VirtualCompilerHost {
       // } else {
       //   throw new Error("HUHH" + fileName)
       // }
-      console.log("fileName", fileName)
+      // console.log("fileName", fileName)
       this.files[fileName] = contents
     }
 

@@ -97,7 +97,7 @@ export default function parseSamenApp(
   }
 
   const t2 = Date.now()
-  console.log("parseSamenApp in", t2 - t1)
+  // console.log("parseSamenApp in", t2 - t1)
   return {
     models: shared,
     services: services.map((service) => ({
