@@ -7,6 +7,7 @@ const DEFAULT_CLIENT_PORT = 4040
 export interface ServeServerCommand {
   name: "serve"
   port: number
+  quiet: boolean // `npx samen` has its own eventlistener, no need to output anything
 }
 
 export interface BuildServerCommand {
@@ -25,7 +26,11 @@ export function parseServerCommand(args: string[]): ServerCommand {
 
   switch (name) {
     case "serve":
-      return { name, port: getPort(args) ?? DEFAULT_SERVER_PORT }
+      return {
+        name,
+        port: getPort(args) ?? DEFAULT_SERVER_PORT,
+        quiet: getQuiet(args),
+      }
 
     case "build":
       return { name }
@@ -41,6 +46,7 @@ export interface WatchServerCommand {
   name: "watch"
   port: number
   server: { url: string }
+  quiet: boolean // `npx samen` has its own eventlistener, no need to output anything
 }
 
 export interface BuildClientCommand {
@@ -67,9 +73,19 @@ export function parseClientCommand(args: string[]): ClientCommand {
     case "watch": {
       const location = !args[1]?.startsWith("-") && args[1]
       if (!location) {
-        return { name, port, server: { url: DEFAULT_SERVER_URL } }
+        return {
+          name,
+          port,
+          server: { url: DEFAULT_SERVER_URL },
+          quiet: getQuiet(args),
+        }
       } else if (location.startsWith("http")) {
-        return { name, port, server: { url: location } }
+        return {
+          name,
+          port,
+          server: { url: location },
+          quiet: getQuiet(args),
+        }
       } else {
         throw new Error("Watching based on file path is not supported ")
       }
@@ -96,4 +112,8 @@ export function parseClientCommand(args: string[]): ClientCommand {
 function getPort(args: string[]): number | undefined {
   const portIndex = args.findIndex((a) => ["-p", "--port"].includes(a))
   return portIndex > -1 ? parseInt(args[portIndex + 1]) : undefined
+}
+
+function getQuiet(args: string[]): boolean {
+  return args.some((a) => a === "--quiet")
 }

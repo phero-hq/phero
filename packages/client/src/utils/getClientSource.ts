@@ -122,7 +122,7 @@ export default function getClientSource(
             "url",
             undefined,
             undefined,
-            ts.factory.createStringLiteral("http://localhost:4321"),
+            ts.factory.createStringLiteral("http://localhost:4040"),
           ),
         ],
         ts.factory.createBlock([

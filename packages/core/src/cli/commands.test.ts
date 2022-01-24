@@ -6,6 +6,15 @@ describe("parseServerCommand", () => {
       expect(parseServerCommand(["serve"])).toEqual({
         name: "serve",
         port: 3030,
+        quiet: false,
+      })
+    })
+
+    test("serve --quiet", () => {
+      expect(parseServerCommand(["serve", "--quiet"])).toEqual({
+        name: "serve",
+        port: 3030,
+        quiet: true,
       })
     })
 
@@ -13,6 +22,7 @@ describe("parseServerCommand", () => {
       expect(parseServerCommand(["serve", "-p", "1234"])).toEqual({
         name: "serve",
         port: 1234,
+        quiet: false,
       })
     })
 
@@ -20,6 +30,7 @@ describe("parseServerCommand", () => {
       expect(parseServerCommand(["serve", "--port", "1234"])).toEqual({
         name: "serve",
         port: 1234,
+        quiet: false,
       })
     })
   })
@@ -38,6 +49,16 @@ describe("parseClientCommand", () => {
         name: "watch",
         port: 4040,
         server: { url: "http://localhost:3030" },
+        quiet: false,
+      })
+    })
+
+    test("watch --quiet", () => {
+      expect(parseClientCommand(["watch", "--quiet"])).toEqual({
+        name: "watch",
+        port: 4040,
+        server: { url: "http://localhost:3030" },
+        quiet: true,
       })
     })
 
@@ -46,6 +67,7 @@ describe("parseClientCommand", () => {
         name: "watch",
         port: 4040,
         server: { url: "http://localhost:1234" },
+        quiet: false,
       })
     })
 
@@ -54,6 +76,7 @@ describe("parseClientCommand", () => {
         name: "watch",
         port: 1234,
         server: { url: "http://localhost:3030" },
+        quiet: false,
       })
     })
 
@@ -62,6 +85,7 @@ describe("parseClientCommand", () => {
         name: "watch",
         port: 1234,
         server: { url: "http://localhost:3030" },
+        quiet: false,
       })
     })
 
@@ -72,6 +96,7 @@ describe("parseClientCommand", () => {
         name: "watch",
         port: 4444,
         server: { url: "http://localhost:1234" },
+        quiet: false,
       })
     })
   })

@@ -47,12 +47,8 @@ export default class DevServer {
     this.program = this.startWatch()
   }
 
-  private get samenDirPath(): string {
-    return path.join(this.projectPath, ".samen")
-  }
-
   private get manifestPath(): string {
-    return path.join(this.samenDirPath, "manifest.d.ts")
+    return path.join(this.projectPath, "samen-manifest.d.ts")
   }
 
   private startWatch(): WatchProgram {
@@ -94,7 +90,6 @@ export default class DevServer {
       this.eventEmitter.emit({ type: "BUILD_MANIFEST_START" })
       app = parseSamenApp(samenSourceFile, typeChecker)
       const dts = generateAppDeclarationFile(app, typeChecker)
-      await fs.mkdir(this.samenDirPath, { recursive: true })
       await fs.writeFile(this.manifestPath, dts)
       this.eventEmitter.emit({ type: "BUILD_MANIFEST_SUCCESS" })
     } catch (error) {
@@ -173,21 +168,39 @@ export default class DevServer {
               res.statusCode = 200
               res.write(JSON.stringify(responseData))
             }
-            this.eventEmitter.emit({ type: "RPC_SUCCESS" })
+            this.eventEmitter.emit({
+              type: "RPC_SUCCESS",
+              url: req.url,
+              status: res.statusCode,
+            })
           } catch (e: any) {
-            this.eventEmitter.emit({ type: "RPC_FAILED", error: e })
             if (e?.errorCode === "INVALID_INPUT_ERROR") {
               res.statusCode = 400
               console.error(e)
               res.write(JSON.stringify({ error: e.message, errors: e.errors }))
+              this.eventEmitter.emit({
+                type: "RPC_FAILED",
+                url: req.url,
+                status: 400,
+              })
             } else if (e.errorCode === "AUTHORIZATION_ERROR") {
               res.statusCode = 401
               console.error(e)
               res.write(JSON.stringify({ error: e.message }))
+              this.eventEmitter.emit({
+                type: "RPC_FAILED",
+                url: req.url,
+                status: 401,
+              })
             } else {
               res.statusCode = 500
               console.error(e)
               res.write(JSON.stringify({ error: e.message }))
+              this.eventEmitter.emit({
+                type: "RPC_FAILED",
+                url: req.url,
+                status: 500,
+              })
             }
           } finally {
             res.end()

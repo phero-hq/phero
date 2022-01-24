@@ -9,11 +9,11 @@ export interface SamenRequest {
 export type Fetch = (
   url: string,
   request: SamenRequest,
-) => {
+) => Promise<{
   ok: boolean
   status: number
-  json(): unknown
-}
+  json(): Promise<unknown>
+}>
 
 export type RequestInterceptor = (
   request: SamenRequest,
