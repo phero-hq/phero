@@ -1,4 +1,4 @@
-import http from "http"
+import http, { Server } from "http"
 import EventSource from "eventsource"
 
 const SSE_RESPONSE_HEADER = {
@@ -8,16 +8,16 @@ const SSE_RESPONSE_HEADER = {
   "X-Accel-Buffering": "no",
 }
 
-export type ServerDevEvent =
-  // Connecting a listener, from the emitter's perspective
+type DevEventEmitterConnectionEvent =
   | { type: "LISTENER_CONNECTED"; id: string }
   | { type: "LISTENER_DISCONNECTED"; id: string }
 
-  // Connecting a listener, from the listeners's perspective
-  | { type: "SERVER_CONNECTED" }
-  | { type: "SERVER_DISCONNECTED" }
-  | { type: "SERVER_NOT_FOUND" }
+export type DevEventListenerConnectionStatus =
+  | "CONNECTED"
+  | "DISCONNECTED"
+  | "EMITTER_NOT_FOUND"
 
+export type ServerDevEvent =
   // Init
   | { type: "SERVE_INIT" }
   | { type: "SERVE_READY" }
@@ -38,23 +38,14 @@ export type ServerDevEvent =
   | { type: "RPC_FAILED"; url?: string; status: number }
 
 export type ClientDevEvent =
-  // Connecting a listener, from the emitter's perspective
-  | { type: "LISTENER_CONNECTED"; id: string }
-  | { type: "LISTENER_DISCONNECTED"; id: string }
-
-  // Connecting a listener, from the listeners's perspective
-  | { type: "SERVER_CONNECTED" }
-  | { type: "SERVER_DISCONNECTED" }
-  | { type: "SERVER_NOT_FOUND" }
-
-  // Connecting a listener, from the listeners's perspective
-  | { type: "CLIENT_CONNECTED" }
-  | { type: "CLIENT_DISCONNECTED" }
-  | { type: "CLIENT_NOT_FOUND" }
-
   // Watch init
   | { type: "WATCH_INIT" }
   | { type: "WATCH_READY" }
+
+  // Connecting to a server's emitter
+  | { type: "SERVER_CONNECTED" }
+  | { type: "SERVER_DISCONNECTED" }
+  | { type: "SERVER_NOT_FOUND" }
 
   // Building the client
   | { type: "BUILD_START" }
@@ -63,7 +54,7 @@ export type ClientDevEvent =
 
 // Event emitters
 
-export class ServerDevEventEmitter {
+class DevEventEmitter<T extends ServerDevEvent | ClientDevEvent> {
   public listeners: http.ServerResponse[] = []
 
   public shouldRegisterListener(req: http.IncomingMessage): boolean {
@@ -72,7 +63,10 @@ export class ServerDevEventEmitter {
 
   public registerListener(res: http.ServerResponse) {
     const id = new Date().toISOString()
-    const connectedEvent: ServerDevEvent = { type: "LISTENER_CONNECTED", id }
+    const connectedEvent: DevEventEmitterConnectionEvent = {
+      type: "LISTENER_CONNECTED",
+      id,
+    }
 
     this.listeners.push(res)
     res.on("close", () => {
@@ -86,7 +80,7 @@ export class ServerDevEventEmitter {
     res.write("data: " + JSON.stringify(connectedEvent) + "\n\n")
   }
 
-  public emit(event: ServerDevEvent) {
+  public emit(event: DevEventEmitterConnectionEvent | T) {
     this.listeners.forEach((connection) => {
       const id = new Date().toISOString()
       connection.write("id: " + id + "\n")
@@ -96,92 +90,34 @@ export class ServerDevEventEmitter {
   }
 }
 
-export class ClientDevEventEmitter {
-  public listeners: http.ServerResponse[] = []
+export class ServerDevEventEmitter extends DevEventEmitter<ServerDevEvent> {}
+export class ClientDevEventEmitter extends DevEventEmitter<ClientDevEvent> {}
 
-  public shouldRegisterListener(req: http.IncomingMessage): boolean {
-    return !!req.headers.accept?.includes("text/event-stream")
-  }
+// Event listener
 
-  public registerListener(res: http.ServerResponse) {
-    const id = new Date().toISOString()
-    const connectedEvent: ClientDevEvent = { type: "LISTENER_CONNECTED", id }
-
-    this.listeners.push(res)
-    res.on("close", () => {
-      this.listeners = this.listeners.filter((listener) => listener !== res)
-      this.emit({ type: "LISTENER_DISCONNECTED", id })
-    })
-    res.writeHead(200, SSE_RESPONSE_HEADER)
-
-    res.write("id: " + id + "\n")
-    res.write("retry: 2000\n")
-    res.write("data: " + JSON.stringify(connectedEvent) + "\n\n")
-  }
-
-  public emit(event: ClientDevEvent) {
-    this.listeners.forEach((connection) => {
-      const id = new Date().toISOString()
-      connection.write("id: " + id + "\n")
-      connection.write("retry: 2000\n")
-      connection.write("data: " + JSON.stringify(event) + "\n\n")
-    })
-  }
-}
-
-// Event listeners
-
-export function addServerDevEventListener(
+export function addDevEventListener<T extends ServerDevEvent | ClientDevEvent>(
   url: string,
-  callback: (event: ServerDevEvent) => void,
+  onEvent: (event: T) => void,
+  onChangeConnectionStatus: (status: DevEventListenerConnectionStatus) => void,
 ): () => void {
   const eventSource = new EventSource(url)
 
   let didConnect = false
   eventSource.onopen = () => {
     didConnect = true
-    callback({ type: "SERVER_CONNECTED" })
-  }
-
-  eventSource.onmessage = async (message) => {
-    const event = JSON.parse(message.data) as ServerDevEvent
-    callback(event)
+    onChangeConnectionStatus("CONNECTED")
   }
 
   eventSource.onerror = () => {
     if (didConnect) {
-      callback({ type: "SERVER_DISCONNECTED" })
+      onChangeConnectionStatus("DISCONNECTED")
     } else {
-      callback({ type: "SERVER_NOT_FOUND" })
+      onChangeConnectionStatus("EMITTER_NOT_FOUND")
     }
-  }
-
-  return () => eventSource.close()
-}
-
-export function addClientDevEventListener(
-  url: string,
-  callback: (event: ClientDevEvent) => void,
-): () => void {
-  const eventSource = new EventSource(url)
-
-  let didConnect = false
-  eventSource.onopen = () => {
-    didConnect = true
-    callback({ type: "CLIENT_CONNECTED" })
   }
 
   eventSource.onmessage = async (message) => {
-    const event = JSON.parse(message.data) as ClientDevEvent
-    callback(event)
-  }
-
-  eventSource.onerror = () => {
-    if (didConnect) {
-      callback({ type: "CLIENT_DISCONNECTED" })
-    } else {
-      callback({ type: "CLIENT_NOT_FOUND" })
-    }
+    onEvent(JSON.parse(message.data) as T)
   }
 
   return () => eventSource.close()

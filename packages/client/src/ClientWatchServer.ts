@@ -1,6 +1,7 @@
 import {
-  addServerDevEventListener,
+  addDevEventListener,
   ClientDevEventEmitter,
+  DevEventListenerConnectionStatus,
   ServerDevEvent,
   WatchServerCommand,
 } from "@samen/core"
@@ -11,32 +12,44 @@ export default class ClientWatchServer {
   private readonly server: http.Server
   private readonly command: WatchServerCommand
   private readonly eventEmitter: ClientDevEventEmitter
+  private isListening = false
 
   constructor(command: WatchServerCommand) {
     this.command = command
-    addServerDevEventListener(
+    this.eventEmitter = new ClientDevEventEmitter()
+
+    addDevEventListener(
       this.command.server.url,
-      this.serverEventHandler.bind(this),
+      this.onServerEvent.bind(this),
+      this.onChangeServerEventConnectionStatus.bind(this),
     )
 
-    this.eventEmitter = new ClientDevEventEmitter()
     this.server = this.startHttpServer()
   }
 
-  private async serverEventHandler(event: ServerDevEvent) {
+  private async onServerEvent(event: ServerDevEvent) {
     switch (event.type) {
-      case "SERVER_CONNECTED":
-        this.eventEmitter.emit(event)
+      case "BUILD_MANIFEST_SUCCESS":
         await this.buildClient()
         break
+    }
+  }
 
-      case "SERVER_DISCONNECTED":
-      case "SERVER_NOT_FOUND":
-        this.eventEmitter.emit(event)
+  private async onChangeServerEventConnectionStatus(
+    status: DevEventListenerConnectionStatus,
+  ) {
+    switch (status) {
+      case "CONNECTED":
+        await this.buildClient()
+        this.eventEmitter.emit({ type: "SERVER_CONNECTED" })
         break
 
-      case "BUILD_MANIFEST_SUCCESS":
-        this.buildClient()
+      case "DISCONNECTED":
+        this.eventEmitter.emit({ type: "SERVER_DISCONNECTED" })
+        break
+
+      case "EMITTER_NOT_FOUND":
+        this.eventEmitter.emit({ type: "SERVER_NOT_FOUND" })
         break
     }
   }
@@ -59,6 +72,7 @@ export default class ClientWatchServer {
     const server = http.createServer()
     server.on("request", this.requestHandler.bind(this))
     server.on("listening", () => {
+      this.isListening = true
       this.eventEmitter.emit({ type: "WATCH_READY" })
     })
     server.listen(this.command.port)
@@ -80,7 +94,13 @@ export default class ClientWatchServer {
     }
 
     if (this.eventEmitter.shouldRegisterListener(req)) {
-      return this.eventEmitter.registerListener(res)
+      this.eventEmitter.registerListener(res)
+      if (this.isListening) {
+        // It could be the event listener started to late and missed this important one!
+        // TODO: Find a better way to do this..
+        this.eventEmitter.emit({ type: "WATCH_READY" })
+      }
+      return
     }
 
     res.statusCode = 404

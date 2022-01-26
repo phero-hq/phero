@@ -107,6 +107,18 @@ export function parseClientCommand(args: string[]): ClientCommand {
   }
 }
 
+// Samen
+
+export interface SamenCommand {
+  debug: boolean
+}
+
+export function parseSamenCommand(args: string[]): SamenCommand {
+  return {
+    debug: args.includes("--debug"),
+  }
+}
+
 // Helpers
 
 function getPort(args: string[]): number | undefined {

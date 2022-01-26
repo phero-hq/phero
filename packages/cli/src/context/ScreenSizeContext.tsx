@@ -8,11 +8,6 @@ interface ScreenSize {
   orientation: "portrait" | "landscape"
 }
 
-function getOrientation(): ScreenSize["orientation"] {
-  const { columns, rows } = process.stdout
-  return columns > rows * 2 ? "landscape" : "portrait"
-}
-
 const initialScreenSize: ScreenSize = {
   columns: process.stdout.columns,
   rows: process.stdout.rows,
@@ -25,7 +20,11 @@ export function useScreenSize(): ScreenSize {
   return useContext(Context)
 }
 
-export default function FullScreen({ children }: { children: ReactNode }) {
+export function ScreenSizeProvider({
+  children,
+}: {
+  children: ReactNode
+}): JSX.Element {
   const [screenSize, setScreenSize] = useState(initialScreenSize)
 
   useEffect(() => {
@@ -47,9 +46,14 @@ export default function FullScreen({ children }: { children: ReactNode }) {
 
   return (
     <Context.Provider value={screenSize}>
-      <Box width={screenSize.columns} height={screenSize.rows}>
-        {children}
-      </Box>
+      {/* <Box width={screenSize.columns} height={screenSize.rows}> */}
+      {children}
+      {/* </Box> */}
     </Context.Provider>
   )
+}
+
+function getOrientation(): ScreenSize["orientation"] {
+  const { columns, rows } = process.stdout
+  return columns > rows * 2 ? "landscape" : "portrait"
 }

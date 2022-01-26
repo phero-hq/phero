@@ -1,22 +1,24 @@
 import {
+  addDevEventListener,
   ClientDevEvent,
-  addClientDevEventListener,
+  DevEventListenerConnectionStatus,
   ServerDevEvent,
-  addServerDevEventListener,
 } from "@samen/core"
 import path from "path"
 import { spawn } from "child_process"
 
 export function spawnClientWatch(
   projectPath: string,
-  callback: (event: ClientDevEvent) => void,
+  onEvent: (event: ClientDevEvent) => void,
+  onChangeConnectionStatus: (status: DevEventListenerConnectionStatus) => void,
 ) {
   const port = 4040
   const cwd = path.resolve(projectPath)
 
-  const removeEventListener = addClientDevEventListener(
+  const removeEventListener = addDevEventListener(
     `http://localhost:${port}`,
-    callback,
+    onEvent,
+    onChangeConnectionStatus,
   )
 
   const proc = spawn(
@@ -48,14 +50,16 @@ export function spawnClientWatch(
 
 export function spawnServerWatch(
   projectPath: string,
-  callback: (event: ServerDevEvent) => void,
+  onEvent: (event: ServerDevEvent) => void,
+  onChangeConnectionStatus: (status: DevEventListenerConnectionStatus) => void,
 ) {
   const port = 3030
   const cwd = path.resolve(projectPath)
 
-  const removeEventListener = addServerDevEventListener(
+  const removeEventListener = addDevEventListener(
     `http://localhost:${port}`,
-    callback,
+    onEvent,
+    onChangeConnectionStatus,
   )
 
   const proc = spawn(

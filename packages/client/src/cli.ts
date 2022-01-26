@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { addClientDevEventListener, parseClientCommand } from "@samen/core"
+import { addDevEventListener, parseClientCommand } from "@samen/core"
 import ClientWatchServer from "./ClientWatchServer"
 import buildClient from "./utils/buildClient"
 
@@ -8,7 +8,13 @@ const command = parseClientCommand(process.argv.slice(2))
 
 switch (command.name) {
   case "watch": {
-    addClientDevEventListener(`http://localhost:${command.port}`, console.log)
+    if (!command.quiet) {
+      addDevEventListener(
+        `http://localhost:${command.port}`,
+        console.log,
+        console.log,
+      )
+    }
     const watchServer = new ClientWatchServer(command)
     break
   }

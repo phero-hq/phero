@@ -1,13 +1,19 @@
 #!/usr/bin/env node
 
-import { addServerDevEventListener, parseServerCommand } from "@samen/core"
+import { addDevEventListener, parseServerCommand } from "@samen/core"
 import DevServer from "./DevServer"
 
 const command = parseServerCommand(process.argv.slice(2))
 
 switch (command.name) {
   case "serve": {
-    addServerDevEventListener(`http://localhost:${command.port}`, console.log)
+    if (!command.quiet) {
+      addDevEventListener(
+        `http://localhost:${command.port}`,
+        console.log,
+        console.log,
+      )
+    }
     const devServer = new DevServer(command, process.cwd())
     break
   }
