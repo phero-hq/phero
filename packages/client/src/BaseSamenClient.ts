@@ -29,6 +29,7 @@ export class HttpError extends Error {
 export class BaseSamenClient {
   private interceptors: RequestInterceptor[] = []
 
+  // TODO: Strip out trailing slash from url:
   constructor(private readonly _fetch: Fetch, private readonly url: string) {}
 
   public addRequestInterceptor(interceptor: RequestInterceptor): this {
