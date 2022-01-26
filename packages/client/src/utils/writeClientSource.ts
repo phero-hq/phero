@@ -33,6 +33,20 @@ export default async function writeClientSource(
     printSourceFile(client.samenClientSource),
     { encoding: "utf-8" },
   )
+
+  const program = ts.createProgram(
+    [
+      path.join(outputPath, "domain.ts"),
+      path.join(outputPath, "BaseSamenClient.ts"),
+      path.join(outputPath, "SamenClient.ts"),
+    ],
+    { declaration: true },
+  )
+  const emitResult = program.emit()
+
+  if (emitResult.emitSkipped) {
+    throw new Error("compilation failed")
+  }
 }
 
 export function printSourceFile(source: ts.SourceFile): string {
