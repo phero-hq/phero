@@ -22,6 +22,11 @@ export type ServerDevEvent =
   | { type: "SERVE_INIT" }
   | { type: "SERVE_READY" }
 
+  // Building the project
+  | { type: "BUILD_PROJECT_START" }
+  | { type: "BUILD_PROJECT_SUCCESS" }
+  | { type: "BUILD_PROJECT_FAILED"; error: string }
+
   // Building the manifest file
   | { type: "BUILD_MANIFEST_START" }
   | { type: "BUILD_MANIFEST_SUCCESS" }

@@ -53,6 +53,7 @@ export default class DevServer {
 
   private startWatch(): WatchProgram {
     // Start code watch
+    this.eventEmitter.emit({ type: "BUILD_PROJECT_START" })
     const program = new WatchProgram(this.projectPath)
     program.onCompileSucceeded(this.codeCompiled.bind(this))
     program.onError(this.codeErrored.bind(this))
@@ -85,6 +86,8 @@ export default class DevServer {
     samenSourceFile: ts.SourceFile,
     typeChecker: ts.TypeChecker,
   ): Promise<void> {
+    this.eventEmitter.emit({ type: "BUILD_PROJECT_SUCCESS" })
+
     let app: ParsedSamenApp
     try {
       this.eventEmitter.emit({ type: "BUILD_MANIFEST_START" })
@@ -116,11 +119,7 @@ export default class DevServer {
   }
 
   private codeErrored(diagnostics: readonly ts.Diagnostic[]) {
-    // TODO: add event for this?
-    // this.emit("update", {
-    //   type: DevServerEventType.CodeErrored,
-    //   diagnostics,
-    // })
+    this.eventEmitter.emit({ type: "BUILD_PROJECT_FAILED", error: "TODO" })
   }
 
   private async requestHandler(

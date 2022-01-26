@@ -31,6 +31,18 @@ export default function ServerProjectStatus({
         isReady.current = true
         break
 
+      case "BUILD_PROJECT_START":
+        setEvent(["default", "Building project..."])
+        break
+
+      case "BUILD_PROJECT_SUCCESS":
+        setEvent(["default", "Project is ready."])
+        break
+
+      case "BUILD_PROJECT_FAILED":
+        setEvent(["error", "Could not build project!"])
+        break
+
       case "BUILD_MANIFEST_START":
         setEvent(["default", "Building manifest..."])
         break
