@@ -71,17 +71,6 @@ export default class DevServer {
     return server
   }
 
-  private baseSamenClientSource?: string
-  private async readBaseSamenClientSource(): Promise<string> {
-    if (!this.baseSamenClientSource) {
-      this.baseSamenClientSource = await fs.readFile(
-        path.join(__dirname, "../../src/BaseSamenClient.ts"),
-        { encoding: "utf-8" },
-      )
-    }
-    return this.baseSamenClientSource
-  }
-
   private async codeCompiled(
     samenSourceFile: ts.SourceFile,
     typeChecker: ts.TypeChecker,
@@ -96,9 +85,10 @@ export default class DevServer {
       await fs.writeFile(this.manifestPath, dts)
       this.eventEmitter.emit({ type: "BUILD_MANIFEST_SUCCESS" })
     } catch (error) {
+      console.error(error)
       this.eventEmitter.emit({
         type: "BUILD_MANIFEST_FAILED",
-        error: JSON.stringify(error),
+        error: "TODO",
       })
       return
     }
@@ -110,9 +100,10 @@ export default class DevServer {
       generateRPCProxy(serverSource, typeChecker)
       this.eventEmitter.emit({ type: "BUILD_RPCS_SUCCESS" })
     } catch (error) {
+      console.error(error)
       this.eventEmitter.emit({
         type: "BUILD_RPCS_FAILED",
-        error: JSON.stringify(error),
+        error: "TODO",
       })
       return
     }

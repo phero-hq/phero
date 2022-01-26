@@ -46,12 +46,16 @@ export class BaseSamenClient {
     return _result
   }
 
-  protected async request<T>(name: string, body: object): Promise<T> {
+  protected async request<T>(
+    serviceName: string,
+    functionName: string,
+    body: object,
+  ): Promise<T> {
     let result
 
     try {
       result = await this._fetch(
-        this.url + name,
+        `${this.url}/${serviceName}/${functionName}`,
         await this.runRequestInterceptors({
           method: "POST",
           headers: {
@@ -73,12 +77,16 @@ export class BaseSamenClient {
     return data as T
   }
 
-  protected async requestVoid(name: string, body: object): Promise<void> {
+  protected async requestVoid(
+    serviceName: string,
+    functionName: string,
+    body: object,
+  ): Promise<void> {
     let result
 
     try {
       result = await this._fetch(
-        this.url + name,
+        `${this.url}/${serviceName}/${functionName}`,
         await this.runRequestInterceptors({
           method: "POST",
           headers: {

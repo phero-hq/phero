@@ -57,6 +57,7 @@ export function generateFunction(
 }
 
 export function generateClientFunction(
+  serviceName: string,
   func: ts.FunctionLikeDeclarationBase,
   refMaker: ReferenceMaker,
 ): ts.PropertyAssignment {
@@ -79,12 +80,13 @@ export function generateClientFunction(
       func.type && generateTypeNode(func.type, refMaker),
       undefined,
       // ts.factory.createBlock([], false),
-      generateClientFunctionBlock(func, refMaker),
+      generateClientFunctionBlock(serviceName, func, refMaker),
     ),
   )
 }
 
 function generateClientFunctionBlock(
+  serviceName: string,
   func: ts.FunctionLikeDeclarationBase,
   refMaker: ReferenceMaker,
 ): ts.Block {
@@ -103,9 +105,10 @@ function generateClientFunctionBlock(
         ),
         isVoid ? undefined : [generateTypeNode(returnType, refMaker)], //typeArgs,
         [
+          ts.factory.createStringLiteral(serviceName),
           ts.factory.createStringLiteral(func.name!.getText()),
           ts.factory.createObjectLiteralExpression(
-            func.parameters.map((p, index) => {
+            func.parameters.map((p) => {
               if (ts.isIdentifier(p.name)) {
                 return ts.factory.createShorthandPropertyAssignment(
                   ts.factory.createIdentifier(p.name.getText()),

@@ -45,13 +45,15 @@ export function parseServerCommand(args: string[]): ServerCommand {
 export interface WatchServerCommand {
   name: "watch"
   port: number
-  server: { url: string }
+  server: { url: string } // TODO: Strip trailing slash
   quiet: boolean // `npx samen` has its own eventlistener, no need to output anything
 }
 
 export interface BuildClientCommand {
   name: "build"
-  server: { url: string } | { path: string }
+  server:
+    | { url: string } // TODO: Strip trailing slash
+    | { path: string }
 }
 
 export type ClientCommand = WatchServerCommand | BuildClientCommand

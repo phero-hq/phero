@@ -156,7 +156,7 @@ export default function getClientSource(
           undefined,
           ts.factory.createObjectLiteralExpression(
             functions.map((func) =>
-              generateClientFunction(func, serviceRefMaker),
+              generateClientFunction(name, func, serviceRefMaker),
             ),
             true,
           ),
