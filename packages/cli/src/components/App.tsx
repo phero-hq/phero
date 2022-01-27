@@ -1,5 +1,6 @@
 import { SamenCommand } from "@samen/core"
 import { Box, Text } from "ink"
+import React, { ErrorInfo } from "react"
 import { useCallback, useEffect, useState } from "react"
 
 import { CommandProvider, useCommand } from "../context/CommandContext"
@@ -9,17 +10,30 @@ import getProjects, { Project } from "../utils/getProjects"
 import ClientProjectStatus from "./ProjectStatus/ClientProjectStatus"
 import ServerProjectStatus from "./ProjectStatus/ServerProjectStatus"
 
-export default function App(command: SamenCommand) {
-  return (
-    <CommandProvider value={command}>
-      <ScreenSizeProvider>
-        <AppContent />
-      </ScreenSizeProvider>
-    </CommandProvider>
-  )
+export default class App extends React.Component<SamenCommand> {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    if (this.props.debug) {
+      console.error(error)
+      console.error(errorInfo)
+    } else {
+      console.error("Something went wrong, try again.")
+    }
+    process.exit(1)
+  }
+
+  render() {
+    return (
+      <CommandProvider value={this.props}>
+        <ScreenSizeProvider>
+          <AppContent />
+        </ScreenSizeProvider>
+      </CommandProvider>
+    )
+  }
 }
 
 function AppContent() {
+  const [isLoading, setLoading] = useState(true)
   const [projects, setProjects] = useState<Project[]>([])
   const { orientation, columns, rows } = useScreenSize()
   const command = useCommand()
@@ -30,9 +44,13 @@ function AppContent() {
 
   useEffect(() => {
     const interval = setInterval(updateProjects, 10000)
-    updateProjects()
+    updateProjects().then(() => setLoading(false))
     return () => clearInterval(interval)
   }, [])
+
+  if (isLoading) {
+    return <Text>Initializing...</Text>
+  }
 
   return (
     <>
@@ -49,8 +67,8 @@ function AppContent() {
               key={project.path}
               flexGrow={1}
               flexBasis="100%"
-              alignItems="center"
-              padding={2}
+              paddingY={1}
+              paddingX={2}
               borderStyle="round"
               borderColor="blue"
             >

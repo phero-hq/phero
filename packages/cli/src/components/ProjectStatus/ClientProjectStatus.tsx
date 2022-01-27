@@ -1,116 +1,79 @@
-import { ClientDevEvent, DevEventListenerConnectionStatus } from "@samen/core"
+import { ClientDevEvent } from "@samen/core"
 import { Box, Text } from "ink"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useCommand } from "../../context/CommandContext"
 import { ClientProject } from "../../utils/getProjects"
 import { spawnClientWatch } from "../../utils/processes"
-
-type StyledEvent = ["default" | "error" | "dimmed", string]
+import ProjectStatusEventList, { StyledEvent } from "./ProjectStatusEventList"
 
 export default function ClientProjectStatus({
   project,
 }: {
   project: ClientProject
 }) {
-  const [event, setEvent] = useState<StyledEvent>()
-  const isReady = useRef(false)
+  const [events, setEvents] = useState<StyledEvent[]>([
+    ["default", "Initializing..."],
+  ])
   const command = useCommand()
+
+  const addEvent = useCallback((addedEvent: StyledEvent) => {
+    setEvents((oldEvents) => [...oldEvents, addedEvent])
+  }, [])
 
   const onEvent = useCallback((event: ClientDevEvent) => {
     if (command.debug) {
-      console.log({ event })
+      console.log("client", event)
     }
 
     switch (event.type) {
       case "WATCH_INIT":
-        setEvent(["default", "Initializing client watch server..."])
+        addEvent(["default", "Initializing client watch server..."])
         break
 
       case "WATCH_READY":
-        setEvent(["default", "Client watch server ready."])
-        isReady.current = true
+        // addEvent(["default", "Client watch server ready."])
         break
 
       case "SERVER_CONNECTED":
-        setEvent(["default", "Connected to server, watching for changes..."])
+        // addEvent(["default", "Connected to server, watching for changes..."])
         break
 
       case "SERVER_DISCONNECTED":
-        setEvent(["error", "Disconnected from server!"])
+        addEvent(["error", "Disconnected from server!"])
         break
 
       case "SERVER_NOT_FOUND":
-        setEvent(["error", "Could not find server!"])
+        addEvent(["error", "Could not find server!"])
         break
 
       case "BUILD_START":
-        setEvent(["default", "Building client..."])
+        addEvent(["default", "Building client..."])
         break
 
       case "BUILD_SUCCESS":
-        setEvent(["default", "Client is ready."])
+        addEvent(["default", "Client is ready."])
         break
 
       case "BUILD_FAILED":
-        setEvent(["error", "Build failed!"])
+        addEvent(["error", "Build failed!"])
         break
 
       default:
         if (command.debug) {
-          console.log("unhandled event: ", event)
+          console.log("unhandled client event: ", event)
         }
     }
   }, [])
 
-  const onChangeConnectionStatus = useCallback(
-    (status: DevEventListenerConnectionStatus) => {
-      if (command.debug) {
-        console.log({ status })
-      }
-
-      if (!isReady.current) {
-        return
-      }
-
-      switch (status) {
-        case "CONNECTED":
-          // we can safely ignore this
-          break
-
-        case "DISCONNECTED":
-          setEvent(["error", "Disconnected from client process!"])
-          process.exit(-1) // TODO: Kill child processes
-
-        case "EMITTER_NOT_FOUND":
-          setEvent(["error", "Could not find client process!"])
-          process.exit(-1) // TODO: Kill child processes
-      }
-    },
-    [],
-  )
-
   useEffect(() => {
-    const kill = spawnClientWatch(
-      project.path,
-      onEvent,
-      onChangeConnectionStatus,
-    )
+    const kill = spawnClientWatch(project.path, onEvent, command.debug)
     return () => kill()
   }, [])
 
   return (
-    <Box flexDirection="column">
+    <Box flexDirection="column" flexGrow={1}>
       <Text>samen-client @ {project.path}</Text>
-      {event ? (
-        <Text
-          dimColor={event[0] === "dimmed"}
-          color={event[0] === "error" ? "red" : undefined}
-        >
-          {event[1]}
-        </Text>
-      ) : (
-        <Text dimColor>Initializing...</Text>
-      )}
+      <ProjectStatusEventList events={events} />
     </Box>
   )
 }

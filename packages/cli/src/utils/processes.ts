@@ -4,16 +4,32 @@ import {
   DevEventListenerConnectionStatus,
   ServerDevEvent,
 } from "@samen/core"
-import path from "path"
 import { spawn } from "child_process"
+import path from "path"
 
 export function spawnClientWatch(
   projectPath: string,
   onEvent: (event: ClientDevEvent) => void,
-  onChangeConnectionStatus: (status: DevEventListenerConnectionStatus) => void,
+  debug: boolean,
 ) {
   const port = 4040
   const cwd = path.resolve(projectPath)
+  let hasBeenConnected = false
+
+  function onChangeConnectionStatus(status: DevEventListenerConnectionStatus) {
+    if (debug) {
+      console.log({ status })
+    }
+
+    if (status === "CONNECTED") {
+      hasBeenConnected = true
+    } else if (hasBeenConnected) {
+      // the process that we started ourselves is gone, something is seriously gone bad
+      throw new Error(`client child process is disconnected (${status})`)
+    } else {
+      // we should be safe to ignore this
+    }
+  }
 
   const removeEventListener = addDevEventListener(
     `http://localhost:${port}`,
@@ -51,10 +67,26 @@ export function spawnClientWatch(
 export function spawnServerWatch(
   projectPath: string,
   onEvent: (event: ServerDevEvent) => void,
-  onChangeConnectionStatus: (status: DevEventListenerConnectionStatus) => void,
+  debug: boolean,
 ) {
   const port = 3030
   const cwd = path.resolve(projectPath)
+  let hasBeenConnected = false
+
+  function onChangeConnectionStatus(status: DevEventListenerConnectionStatus) {
+    if (debug) {
+      console.log({ status })
+    }
+
+    if (status === "CONNECTED") {
+      hasBeenConnected = true
+    } else if (hasBeenConnected) {
+      // the process that we started ourselves is gone, something is seriously gone bad
+      throw new Error(`server child process is disconnected (${status})`)
+    } else {
+      // we should be safe to ignore this
+    }
+  }
 
   const removeEventListener = addDevEventListener(
     `http://localhost:${port}`,

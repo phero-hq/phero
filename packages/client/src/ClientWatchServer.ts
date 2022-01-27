@@ -12,7 +12,6 @@ export default class ClientWatchServer {
   private readonly server: http.Server
   private readonly command: WatchServerCommand
   private readonly eventEmitter: ClientDevEventEmitter
-  private isListening = false
 
   constructor(command: WatchServerCommand) {
     this.command = command
@@ -72,7 +71,6 @@ export default class ClientWatchServer {
     const server = http.createServer()
     server.on("request", this.requestHandler.bind(this))
     server.on("listening", () => {
-      this.isListening = true
       this.eventEmitter.emit({ type: "WATCH_READY" })
     })
     server.listen(this.command.port)
@@ -94,13 +92,7 @@ export default class ClientWatchServer {
     }
 
     if (this.eventEmitter.shouldRegisterListener(req)) {
-      this.eventEmitter.registerListener(res)
-      if (this.isListening) {
-        // It could be the event listener started to late and missed this important one!
-        // TODO: Find a better way to do this..
-        this.eventEmitter.emit({ type: "WATCH_READY" })
-      }
-      return
+      return this.eventEmitter.registerListener(res)
     }
 
     res.statusCode = 404
