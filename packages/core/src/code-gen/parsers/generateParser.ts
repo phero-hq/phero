@@ -200,7 +200,7 @@ export function generateParserBody(
   )
 }
 
-function getFunctionName(name?: ts.PropertyName): string {
+export function getFunctionName(name?: ts.PropertyName): string {
   if (!name) {
     throw new Error(`Function has no name`)
   }
@@ -230,8 +230,9 @@ export function generateRPCParser(
     "data",
   )
 
-  const inputParserStatement: ts.Statement =
-    generateParserFromModel(intputParserModel)
+  const inputParserStatement: ts.Statement = generateParserFromModel(
+    generateParserModel(typeChecker, func, "data"),
+  )
   const outputParserStatement: ts.Statement =
     generateParserFromModel(outputParserModel)
 

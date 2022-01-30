@@ -11,7 +11,6 @@ import { promises as fs } from "fs"
 import http from "http"
 import path from "path"
 import ts from "typescript"
-import { mapSamenAppAppToServerSource } from "./mapSamenAppAppToServerSource"
 import WatchProgram from "./WatchProgram"
 
 export interface PrintedClientCode {
@@ -49,6 +48,11 @@ export default class DevServer {
 
   private get manifestPath(): string {
     return path.join(this.projectPath, "samen-manifest.d.ts")
+  }
+
+  // TODO should find the output path based on tsconfig
+  private get samenExecutionJS(): string {
+    return path.join(this.projectPath, "dist", "samen-execution.js")
   }
 
   private startWatch(): WatchProgram {
@@ -95,9 +99,11 @@ export default class DevServer {
 
     try {
       this.eventEmitter.emit({ type: "BUILD_RPCS_START" })
-      this.routes = generateRoutes(app, typeChecker)
-      const serverSource = mapSamenAppAppToServerSource(app)
-      generateRPCProxy(serverSource, typeChecker)
+      this.routes = this.generateRoutes(app)
+      const output = generateRPCProxy(app, typeChecker)
+      await fs.writeFile(this.samenExecutionJS, output.js)
+      this.clearRequireCache()
+
       this.eventEmitter.emit({ type: "BUILD_RPCS_SUCCESS" })
     } catch (error) {
       console.error(error)
@@ -151,47 +157,44 @@ export default class DevServer {
           try {
             const { headers } = req
             const body = await readBody(req)
-            const responseData = await route({ headers, body })
-            if (responseData === undefined) {
-              res.statusCode = 204
+            const rpcResult = await route({ headers, body })
+
+            res.statusCode = rpcResult.status
+
+            if (rpcResult.status === 200) {
+              res.write(JSON.stringify(rpcResult.result))
+              this.eventEmitter.emit({
+                type: "RPC_SUCCESS",
+                url: req.url,
+                status: res.statusCode,
+              })
+            } else if (rpcResult.status === 400) {
+              res.write(JSON.stringify(rpcResult.errors, null, 4))
+              this.eventEmitter.emit({
+                type: "RPC_FAILED",
+                url: req.url,
+                status: res.statusCode,
+              })
+            } else if (rpcResult.status === 500) {
+              console.error(rpcResult.error)
+              this.eventEmitter.emit({
+                type: "RPC_FAILED",
+                url: req.url,
+                status: res.statusCode,
+              })
             } else {
-              res.statusCode = 200
-              res.write(JSON.stringify(responseData))
+              throw new Error("Unsupported http status")
             }
-            this.eventEmitter.emit({
-              type: "RPC_SUCCESS",
-              url: req.url,
-              status: res.statusCode,
-            })
           } catch (e: any) {
-            if (e?.errorCode === "INVALID_INPUT_ERROR") {
-              res.statusCode = 400
-              console.error(e)
-              res.write(JSON.stringify({ error: e.message, errors: e.errors }))
-              this.eventEmitter.emit({
-                type: "RPC_FAILED",
-                url: req.url,
-                status: 400,
-              })
-            } else if (e.errorCode === "AUTHORIZATION_ERROR") {
-              res.statusCode = 401
-              console.error(e)
-              res.write(JSON.stringify({ error: e.message }))
-              this.eventEmitter.emit({
-                type: "RPC_FAILED",
-                url: req.url,
-                status: 401,
-              })
-            } else {
-              res.statusCode = 500
-              console.error(e)
-              res.write(JSON.stringify({ error: e.message }))
-              this.eventEmitter.emit({
-                type: "RPC_FAILED",
-                url: req.url,
-                status: 500,
-              })
-            }
+            // Indicates a bug in Samen
+            res.statusCode = 500
+            console.error(e)
+            res.write(JSON.stringify({ error: e.message }))
+            this.eventEmitter.emit({
+              type: "RPC_FAILED",
+              url: req.url,
+              status: 500,
+            })
           } finally {
             res.end()
             return
@@ -204,28 +207,26 @@ export default class DevServer {
     res.write(`{ "error": "RPC not found" }`)
     res.end()
   }
-}
 
-// TODO: Make this more exact?
-// function clearRequireCache() {
-//   Object.keys(require.cache).forEach((key) => {
-//     delete require.cache[key]
-//   })
-// }
-
-function generateRoutes(
-  app: ParsedSamenApp,
-  typeChecker: ts.TypeChecker,
-): RPCRoutes {
-  const routes: RPCRoutes = {}
-  for (const service of app.services) {
-    for (const func of service.funcs) {
-      routes[`/${service.name}/${func.name}`] = async () => {
-        // console.log("HOI!", service.name, func.name)
+  private generateRoutes(app: ParsedSamenApp): RPCRoutes {
+    const routes: RPCRoutes = {}
+    for (const service of app.services) {
+      for (const func of service.funcs) {
+        routes[`/${service.name}/${func.name}`] = async (input: any) => {
+          const api = require(this.samenExecutionJS)
+          return api[`rpc_executor_${service.name}__${func.name}`](input.body)
+        }
       }
     }
+    return routes
   }
-  return routes
+
+  // TODO: Make this more exact?
+  private clearRequireCache() {
+    Object.keys(require.cache).forEach((key) => {
+      delete require.cache[key]
+    })
+  }
 }
 
 function readBody(request: http.IncomingMessage): Promise<object> {
