@@ -8,7 +8,7 @@ export {
   generateModel,
   generateNamespace,
   ReferenceMaker,
-} from "./code-gen"
+} from "./code-gen-lib"
 export { default as generateAppDeclarationFile } from "./generateAppDeclarationFile"
 export { default as generateRPCProxy } from "./code-gen/generateRPCProxy"
 export { default as parseSamenApp, ParsedSamenApp } from "./parseSamenApp"

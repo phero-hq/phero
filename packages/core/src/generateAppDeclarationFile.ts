@@ -4,7 +4,7 @@ import {
   generateModel,
   generateNamespace,
   ReferenceMaker,
-} from "./code-gen"
+} from "./code-gen-lib"
 import { ParsedSamenApp } from "./parseSamenApp"
 import { VirtualCompilerHost } from "./VirtualCompilerHost"
 
