@@ -1,6 +1,5 @@
+import { BuildClientCommand, ClientCommand } from "@samen/cli-lib"
 import {
-  BuildClientCommand,
-  ClientCommand,
   getDeclarationForVersion,
   parseAppDeclarationFileContent,
 } from "@samen/core"

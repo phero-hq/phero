@@ -4,8 +4,6 @@ import {
   generateModel,
   generateNamespace,
   ReferenceMaker,
-  ParsedAppDeclaration,
-  ParsedSamenApp,
   ParsedAppDeclarationVersion,
 } from "@samen/core"
 

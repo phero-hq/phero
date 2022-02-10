@@ -1,4 +1,4 @@
-import { SamenCommand } from "@samen/core"
+import { SamenCommand } from "@samen/cli-lib"
 import { createContext, ReactNode, useContext } from "react"
 
 const Context = createContext<SamenCommand>({

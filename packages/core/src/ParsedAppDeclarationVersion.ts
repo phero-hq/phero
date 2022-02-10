@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { ParsedAppDeclaration } from "."
+import { ParsedAppDeclaration } from "./parseAppDeclaration"
 import { Model } from "./parseSamenApp"
 
 export interface ParsedAppDeclarationVersion {

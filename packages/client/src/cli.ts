@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { addDevEventListener, parseClientCommand } from "@samen/core"
+import { addDevEventListener, parseClientCommand } from "@samen/cli-lib"
 import ClientWatchServer from "./ClientWatchServer"
 import buildClient from "./utils/buildClient"
 

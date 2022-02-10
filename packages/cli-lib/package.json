@@ -1,5 +1,5 @@
 {
-  "name": "@samen/core",
+  "name": "@samen/cli-lib",
   "version": "0.8.0-alpha.6",
   "main": "dist/index.js",
   "publishConfig": {
@@ -12,10 +12,12 @@
     "prepublish": "npm run clean && npm run build"
   },
   "dependencies": {
-    "typescript": "^4.4.4"
+    "typescript": "^4.4.4",
+    "eventsource": "^1.1.0"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
+    "@types/eventsource": "^1.1.8",
     "@types/jest": "^27.0.2",
     "@types/node": "^16.11.7",
     "jest": "^27.3.1",
