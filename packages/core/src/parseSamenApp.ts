@@ -35,7 +35,13 @@ export interface ParsedSamenFunctionConfig {
 
   minInstance?: number
   maxInstance?: number
-  middleware?: ts.FunctionLikeDeclarationBase[]
+  middleware?: ParsedMiddlewareConfig[]
+}
+
+export interface ParsedMiddlewareConfig {
+  nextType: ts.TypeNode | undefined
+  ctxType: ts.TypeNode | undefined
+  middleware: ts.FunctionLikeDeclarationBase
 }
 
 export enum SamenLibFunctions {

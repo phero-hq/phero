@@ -1,7 +1,8 @@
 import ts from "typescript"
 import { ParseError } from "./errors"
+import parseFunctionConfigMiddlewares from "./parseMiddlewares"
 import { ParsedSamenFunctionConfig } from "./parseSamenApp"
-import { getFirstChildOfKind, resolveSymbol } from "./tsUtils"
+import { resolveSymbol } from "./tsUtils"
 
 export default function parseFunctionConfig(
   node: ts.Node | undefined,
@@ -99,48 +100,6 @@ function parseFunctionConfigNumberPropValue(
       node,
     )
   }
-}
-
-function parseFunctionConfigMiddlewares(
-  configObject: ts.ObjectLiteralExpression,
-  name: string,
-  typeChecker: ts.TypeChecker,
-): ts.FunctionLikeDeclarationBase[] | undefined {
-  const prop = configObject.properties.find((p) => p.name?.getText() === name)
-
-  if (!prop) {
-    return undefined
-  }
-
-  const middlewareArrayLiteralExpr = getFirstChildOfKind(
-    prop,
-    ts.SyntaxKind.ArrayLiteralExpression,
-  )
-
-  if (
-    !middlewareArrayLiteralExpr ||
-    middlewareArrayLiteralExpr.elements.length === 0
-  ) {
-    return undefined
-  }
-
-  const functionDeclrs: ts.FunctionLikeDeclarationBase[] = []
-  for (const middlewareArrayElement of middlewareArrayLiteralExpr.elements) {
-    // we need getAliasedSymbol to resolve imports
-    const symbol = resolveSymbol(middlewareArrayElement, typeChecker)
-    if (symbol?.valueDeclaration) {
-      if (ts.isFunctionDeclaration(symbol.valueDeclaration)) {
-        functionDeclrs.push(symbol.valueDeclaration)
-      } else if (
-        ts.isVariableDeclaration(symbol.valueDeclaration) &&
-        symbol.valueDeclaration.initializer &&
-        ts.isArrowFunction(symbol.valueDeclaration.initializer)
-      ) {
-        functionDeclrs.push(symbol.valueDeclaration.initializer)
-      }
-    }
-  }
-  return functionDeclrs
 }
 
 export function mergeFunctionConfigs(

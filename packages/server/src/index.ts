@@ -31,8 +31,19 @@ export interface SamenFunctionConfig {
   timeout?: number
   minInstance?: number
   maxInstance?: number
-  middleware?: Function[]
+  middleware?: SamenMiddlewareFunction[]
 }
+
+export type NextFunction<T = void> = T extends void
+  ? () => Promise<void>
+  : (ctx: T) => Promise<void>
+
+export type SamenContext<TIn> = TIn
+
+export type SamenMiddlewareFunction = <COut, CIn>(
+  next: NextFunction<COut>,
+  ctx?: SamenContext<CIn>,
+) => Promise<void>
 
 export function createService<TFuncsDef extends ServiceFunctionsDefinitions>(
   functions: TFuncsDef,
