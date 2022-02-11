@@ -1,4 +1,4 @@
-import { ServerDevEvent } from "@samen/cli-lib"
+import { ServerDevEvent } from "@samen/dev"
 import { Box, Text } from "ink"
 import { useCallback, useEffect, useState } from "react"
 import { useCommand } from "../../context/CommandContext"

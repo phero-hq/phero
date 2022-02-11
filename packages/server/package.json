@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@samen/core": "^0.8.0-alpha.6",
-    "@samen/cli-lib": "^0.8.0-alpha.6",
+    "@samen/dev": "^0.8.0-alpha.6",
     "typescript": "^4.4.4"
   },
   "devDependencies": {

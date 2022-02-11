@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { parseSamenCommand } from "@samen/cli-lib"
+import { parseSamenCommand } from "@samen/dev"
 import { render } from "ink"
 import React from "react"
 import App from "./components/App"

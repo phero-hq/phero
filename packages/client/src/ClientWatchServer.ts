@@ -4,7 +4,7 @@ import {
   DevEventListenerConnectionStatus,
   ServerDevEvent,
   WatchServerCommand,
-} from "@samen/cli-lib"
+} from "@samen/dev"
 import http from "http"
 import buildClient from "./utils/buildClient"
 

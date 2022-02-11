@@ -1,5 +1,5 @@
 {
-  "name": "@samen/cli-lib",
+  "name": "@samen/dev",
   "version": "0.8.0-alpha.6",
   "main": "dist/index.js",
   "publishConfig": {

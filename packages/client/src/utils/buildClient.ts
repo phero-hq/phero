@@ -1,4 +1,4 @@
-import { BuildClientCommand, ClientCommand } from "@samen/cli-lib"
+import { BuildClientCommand, ClientCommand } from "@samen/dev"
 import {
   getDeclarationForVersion,
   parseAppDeclarationFileContent,

@@ -1,4 +1,4 @@
-import { ServerDevEventEmitter, ServeServerCommand } from "@samen/cli-lib"
+import { ServerDevEventEmitter, ServeServerCommand } from "@samen/dev"
 import {
   generateAppDeclarationFile,
   generateRPCProxy,
