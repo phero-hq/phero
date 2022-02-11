@@ -23,10 +23,8 @@
     "@babel/preset-react": "^7.16.7",
     "@babel/register": "^7.16.9",
     "@tsconfig/recommended": "^1.0.1",
-    "@types/eventsource": "^1.1.8",
     "@types/react": "^17.0.38",
     "chalk": "^4.1.2",
-    "eventsource": "^1.1.0",
     "ink-testing-library": "^2.1.0"
   },
   "babel": {
