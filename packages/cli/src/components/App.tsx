@@ -1,4 +1,4 @@
-import { SamenCommand } from "@samen/core"
+import { SamenCommand } from "@samen/dev"
 import { Box, Text } from "ink"
 import React, { ErrorInfo } from "react"
 import { useCallback, useEffect, useState } from "react"

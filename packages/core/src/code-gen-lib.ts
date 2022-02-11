@@ -369,7 +369,7 @@ export class ReferenceMaker {
 
   fromTypeNode(typeNode: ts.TypeReferenceNode): ts.EntityName {
     const type = this.typeChecker.getTypeFromTypeNode(typeNode)
-    const result = this.xx(typeNode.typeName, type)
+    const result = this.toEntityNames(typeNode.typeName, type)
     return combineAsEntityName(result.flatMap(unpack))
   }
 
@@ -377,11 +377,11 @@ export class ReferenceMaker {
     identifier: ts.Identifier,
   ): ts.Identifier | ts.PropertyAccessExpression {
     const type = this.typeChecker.getTypeAtLocation(identifier)
-    const result = this.xx(identifier, type)
+    const result = this.toEntityNames(identifier, type)
     return combineAsExpr(result.flatMap(unpack))
   }
 
-  xx(name: ts.EntityName, type: ts.Type): ts.EntityName[] {
+  toEntityNames(name: ts.EntityName, type: ts.Type): ts.EntityName[] {
     const isSharedType = this.sharedTypes.some(
       (st) =>
         (st.symbol ?? st.aliasSymbol) === (type.symbol ?? type.aliasSymbol),

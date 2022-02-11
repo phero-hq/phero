@@ -1,26 +1,23 @@
 {
-  "name": "@samen/server",
+  "name": "@samen/dev",
   "version": "0.8.0-alpha.6",
   "main": "dist/index.js",
-  "bin": {
-    "samen-server": "dist/cli.js"
-  },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "clean": "rm -rf dist && rm -rf generated",
+    "clean": "rm -rf dist",
     "build": "tsc",
     "test": "jest src",
     "prepublish": "npm run clean && npm run build"
   },
   "dependencies": {
-    "@samen/core": "^0.8.0-alpha.6",
-    "@samen/dev": "^0.8.0-alpha.6",
-    "typescript": "^4.4.4"
+    "typescript": "^4.4.4",
+    "eventsource": "^1.1.0"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
+    "@types/eventsource": "^1.1.8",
     "@types/jest": "^27.0.2",
     "@types/node": "^16.11.7",
     "jest": "^27.3.1",

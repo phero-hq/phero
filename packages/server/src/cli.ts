@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { addDevEventListener, parseServerCommand } from "@samen/core"
+import { addDevEventListener, parseServerCommand } from "@samen/dev"
 import DevServer from "./DevServer"
 
 const command = parseServerCommand(process.argv.slice(2))

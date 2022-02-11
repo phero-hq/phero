@@ -34,20 +34,6 @@ export class DevServerCompilerHost {
       this.files[fileName] = contents
       fs.mkdirSync(path.dirname(fileName), { recursive: true })
       fs.writeFileSync(fileName, contents, { encoding: "utf-8" })
-      // console.log("WRITE", fileName)
-    }
-
-    host.resolveModuleNames = (
-      moduleNames: string[],
-      containingFile: string,
-      reusedNames: string[] | undefined,
-      redirectedReference: ts.ResolvedProjectReference | undefined,
-      options: ts.CompilerOptions,
-    ): (ts.ResolvedModule | undefined)[] => {
-      return moduleNames.map((moduleName) => {
-        const res = ress(moduleName, containingFile)
-        return res
-      })
     }
 
     const originalReadFile = host.readFile
@@ -60,7 +46,6 @@ export class DevServerCompilerHost {
     }
 
     host.fileExists = (fileName: string) => {
-      // console.log("fileName", fileName)
       return !!this.files[fileName]
     }
 
@@ -68,7 +53,6 @@ export class DevServerCompilerHost {
   }
 
   public addFile(fileName: string, source: string): void {
-    // this.host.
     this.files[fileName] = source
   }
 
@@ -83,30 +67,4 @@ export class DevServerCompilerHost {
       this.host,
     )
   }
-}
-
-function ress(moduleName: string, containingFile: string) {
-  if (moduleName.includes(".") || moduleName.includes("/")) {
-    const dsmSrc = `/Users/kamilafsar/Projects/slimste-mens/api/src`
-    const fileName = `${moduleName.substring("./".length)}.ts`
-
-    if (fileName === "samen.ts") {
-      return {
-        resolvedFileName: `${dsmSrc}/${fileName}`,
-        isExternalLibraryImport: false,
-      }
-    }
-
-    const resolvedFileName = `${path.join(
-      path.dirname(containingFile),
-      moduleName,
-    )}.ts`
-
-    return {
-      resolvedFileName,
-      isExternalLibraryImport: false,
-    }
-  }
-
-  return undefined
 }

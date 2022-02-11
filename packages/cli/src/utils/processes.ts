@@ -3,7 +3,7 @@ import {
   ClientDevEvent,
   DevEventListenerConnectionStatus,
   ServerDevEvent,
-} from "@samen/core"
+} from "@samen/dev"
 import { spawn } from "child_process"
 import path from "path"
 

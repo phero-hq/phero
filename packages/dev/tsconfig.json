@@ -1,0 +1,15 @@
+{
+  "extends": "@tsconfig/recommended/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "declaration": true,
+    "target": "ES2019",
+    "lib": [
+      "ES2020"
+    ],
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "src"
+  ]
+}

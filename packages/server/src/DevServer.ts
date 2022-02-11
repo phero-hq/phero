@@ -1,10 +1,9 @@
+import { ServerDevEventEmitter, ServeServerCommand } from "@samen/dev"
 import {
   generateAppDeclarationFile,
   generateRPCProxy,
   ParsedSamenApp,
   parseSamenApp,
-  ServerDevEventEmitter,
-  ServeServerCommand,
 } from "@samen/core"
 import crypto from "crypto"
 import { promises as fs } from "fs"
