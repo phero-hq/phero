@@ -18,6 +18,8 @@ export type DevEventListenerConnectionStatus =
   | "EMITTER_NOT_FOUND"
 
 export type ServerDevEvent =
+  | DevEventEmitterConnectionEvent
+
   // Init
   | { type: "SERVE_INIT" }
   | { type: "SERVE_READY" }
@@ -43,6 +45,8 @@ export type ServerDevEvent =
   | { type: "RPC_FAILED"; url?: string; status: number }
 
 export type ClientDevEvent =
+  | DevEventEmitterConnectionEvent
+
   // Watch init
   | { type: "WATCH_INIT" }
   | { type: "WATCH_READY" }

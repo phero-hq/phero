@@ -26,6 +26,10 @@ export default function ServerProjectStatus({
     }
 
     switch (event.type) {
+      case "LISTENER_CONNECTED":
+        addEvent(["default", "Listening for events..."])
+        break
+
       case "SERVE_INIT":
         addEvent(["default", "Initializing server..."])
         break
