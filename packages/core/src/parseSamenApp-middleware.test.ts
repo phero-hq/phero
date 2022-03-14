@@ -78,10 +78,6 @@ describe("parseSamenApp middleware", () => {
       ],
     })
 
-    console.log(
-      "parsedApp.services[0].funcs",
-      parsedApp.services[0].funcs[0].parameters,
-    )
     expectFunctionDeclarationWithName(
       parsedApp.services[0].funcs[0].actualFunction,
       "getArticle",

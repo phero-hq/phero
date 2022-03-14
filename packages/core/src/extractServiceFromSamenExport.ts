@@ -32,7 +32,7 @@ export default function extractServiceFromSamenExport(
   // parsing arguments of createService
   const [functionDefs, serviceConfig] = createServiceCallExpr.arguments
   const parsedServiceConfig = parseServiceConfig(serviceConfig, typeChecker)
-  console.log("parsedServiceConfig", parsedServiceConfig.middleware?.length)
+
   const functionDefinitions = parseFunctionDefinitions(
     functionDefs,
     typeChecker,

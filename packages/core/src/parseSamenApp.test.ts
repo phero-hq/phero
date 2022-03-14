@@ -302,6 +302,8 @@ describe("parseSamenApp", () => {
     test("should parse middleware config", () => {
       const parsedApp = parseProgram(
         createTestProgram(`
+        interface NextFunction {}
+
         async function getArticle(): Promise<string> {
           return "ok"
         }
@@ -310,7 +312,7 @@ describe("parseSamenApp", () => {
           return "ok"
         }
         
-        async function requireCMSUser(): Promise<string> {
+        async function requireCMSUser(next: NextFunction): Promise<string> {
           return "ok"
         }
         
@@ -357,12 +359,12 @@ describe("parseSamenApp", () => {
       )
       expect(parsedApp.services[0].funcs[0].config.middleware).toHaveLength(1)
       expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[0].config.middleware?.[0],
+        parsedApp.services[0].funcs[0].config.middleware?.[0].middleware,
         "requireCMSUser",
       )
       expect(parsedApp.services[0].funcs[1].config.middleware).toHaveLength(1)
       expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[1].config.middleware?.[0],
+        parsedApp.services[0].funcs[1].config.middleware?.[0].middleware,
         "requireCMSUser",
       )
     })
@@ -370,6 +372,8 @@ describe("parseSamenApp", () => {
     test("should parse multiple services", () => {
       const parsedApp = parseProgram(
         createTestProgram(`
+        interface NextFunction {}
+
         async function getArticle(): Promise<string> {
           return "ok"
         }
@@ -378,7 +382,7 @@ describe("parseSamenApp", () => {
           return "ok"
         }
         
-        async function requireCMSUser(): Promise<string> {
+        async function requireCMSUser(next: NextFunction): Promise<string> {
           return "ok"
         }
         
@@ -433,7 +437,7 @@ describe("parseSamenApp", () => {
       )
       expect(parsedApp.services[1].funcs[0].config.middleware).toHaveLength(1)
       expectFunctionDeclrWithName(
-        parsedApp.services[1].funcs[0].config.middleware?.[0],
+        parsedApp.services[1].funcs[0].config.middleware?.[0].middleware,
         "requireCMSUser",
       )
     })
