@@ -66,7 +66,17 @@ export default function generateAppDeclarationFile(
   // console.log("---123----")
   // console.log(generateTS(namespaceDeclrs))
   // console.log("---123----")
-  vHost.addFile("api.ts", generateTS(namespaceDeclrs))
+  const isUsingSamenContext = app.services.some((s) =>
+    s.funcs.some((f) => !!f.context),
+  )
+  vHost.addFile(
+    "api.ts",
+    generateTS(
+      isUsingSamenContext
+        ? [samenContextImport, ...namespaceDeclrs]
+        : namespaceDeclrs,
+    ),
+  )
 
   const program = vHost.createProgram("api.ts")
   program.emit()
@@ -86,6 +96,25 @@ export default function generateAppDeclarationFile(
 
   return declrFile
 }
+
+const samenContextImport = ts.factory.createImportDeclaration(
+  undefined,
+  undefined,
+  ts.factory.createImportClause(
+    false,
+    undefined,
+    ts.factory.createNamedImports([
+      ts.factory.createImportSpecifier(
+        false,
+        undefined,
+        ts.factory.createIdentifier("SamenContext"),
+      ),
+    ]),
+  ),
+  // TODO, where should this type come from?
+  ts.factory.createStringLiteral("@samen/server"),
+  undefined,
+)
 
 function generateTS(nodes: ts.Node[]): string {
   const printer = ts.createPrinter({

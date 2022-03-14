@@ -26,16 +26,22 @@ export interface ParsedSamenFunctionDefinition {
   actualFunction: ts.FunctionLikeDeclarationBase
   parameters: ts.ParameterDeclaration[]
   returnType: ts.TypeNode
-  config: ParsedSamenFunctionConfig
+  config: ParsedSamenServiceConfig
+  context?: ts.TypeNode
 }
 
-export interface ParsedSamenFunctionConfig {
+export interface ParsedSamenServiceConfig {
   memory?: number
   timeout?: number
 
   minInstance?: number
   maxInstance?: number
   middleware?: ParsedMiddlewareConfig[]
+}
+
+export interface ParsedSamenFunctionConfig {
+  memory?: number
+  timeout?: number
 }
 
 export interface ParsedMiddlewareConfig {

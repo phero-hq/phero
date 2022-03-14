@@ -42,11 +42,13 @@ export default function extractFunctionFromServiceProperty(
 
   const [funcArgument, functionConfig] = createFunctionCallExpr.arguments
 
-  return {
+  const parsedSamenFunctionDef = {
     name: functionName,
     config: parseFunctionConfig(functionConfig, typeChecker),
     ...parseActualFunction(funcArgument, typeChecker),
   }
+
+  return parsedSamenFunctionDef
 }
 
 function parseActualFunction(

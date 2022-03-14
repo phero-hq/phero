@@ -1,11 +1,8 @@
 import ts from "typescript"
 import { getReturnType } from "../../extractFunctionFromServiceProperty"
-import { printCode } from "../../tsTestUtils"
 import { capitalize } from "../../utils"
 import generateParserFromModel from "./../parsers/generateParserFromModel"
-import generateParserModel, {
-  ParserModelType,
-} from "./../parsers/generateParserModel"
+import generateParserModel from "./../parsers/generateParserModel"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
 const staticModifier = ts.factory.createModifier(ts.SyntaxKind.StaticKeyword)

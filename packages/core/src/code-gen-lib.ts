@@ -2,7 +2,7 @@ import ts from "typescript"
 import { ParseError } from "./errors"
 import { getReturnType } from "./extractFunctionFromServiceProperty"
 import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
-import { isExternalType } from "./tsUtils"
+import { getNameAsString, isExternalType } from "./tsUtils"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
 const asyncModifier = ts.factory.createModifier(ts.SyntaxKind.AsyncKeyword)
@@ -30,17 +30,7 @@ export function generateFunction(
     undefined, // TODO asteriks is prohibited
     func.name,
     undefined, // TODO typeParameters are prohibited
-    func.parameters.map((p) =>
-      ts.factory.createParameterDeclaration(
-        undefined,
-        p.modifiers,
-        p.dotDotDotToken,
-        p.name,
-        p.questionToken,
-        p.type && generateTypeNode(p.type, refMaker),
-        undefined, // initializer is prohibited, only on classes
-      ),
-    ),
+    generateFunctionParameters(func, refMaker),
     ts.factory.createTypeReferenceNode("Promise", [
       generateTypeNode(func.returnType, refMaker),
     ]),
@@ -54,6 +44,43 @@ export function generateFunction(
       ),
     ]),
   )
+}
+
+function generateFunctionParameters(
+  func: ParsedSamenFunctionDefinition,
+  refMaker: ReferenceMaker,
+): ts.ParameterDeclaration[] {
+  const params = func.parameters.map((param) => {
+    if (!param.type) {
+      throw new ParseError(`Parameter should have a type`, param)
+    }
+
+    return ts.factory.createParameterDeclaration(
+      undefined,
+      param.modifiers,
+      param.dotDotDotToken,
+      param.name,
+      param.questionToken,
+      generateTypeNode(param.type, refMaker),
+      undefined, // initializer is prohibited, only on classes
+    )
+  })
+
+  if (func.context) {
+    params.push(
+      ts.factory.createParameterDeclaration(
+        undefined,
+        undefined,
+        undefined,
+        "ctx",
+        undefined,
+        generateTypeNode(func.context, refMaker),
+        undefined,
+      ),
+    )
+  }
+
+  return params
 }
 
 export function generateClientFunction(
@@ -382,6 +409,10 @@ export class ReferenceMaker {
   }
 
   toEntityNames(name: ts.EntityName, type: ts.Type): ts.EntityName[] {
+    if (name.getText() === "SamenContext") {
+      return [ts.factory.createIdentifier("SamenContext")]
+    }
+
     const isSharedType = this.sharedTypes.some(
       (st) =>
         (st.symbol ?? st.aliasSymbol) === (type.symbol ?? type.aliasSymbol),

@@ -3,16 +3,14 @@ import { ParseError } from "./errors"
 import extractFunctionFromServiceProperty from "./extractFunctionFromServiceProperty"
 import extractModels from "./extractModels"
 import getLibFunctionCall from "./getLibFunctionCall"
-import parseFunctionConfig, {
-  mergeFunctionConfigs,
-} from "./parseFunctionConfig"
+import { parseContext } from "./parseContext"
 import {
-  ParsedSamenFunctionConfig,
   ParsedSamenFunctionDefinition,
   ParsedSamenServiceDefinition,
   SamenLibFunctions,
 } from "./parseSamenApp"
-import { getFirstChildOfKind, hasModifier, resolveSymbol } from "./tsUtils"
+import parseServiceConfig, { mergeFunctionConfigs } from "./parseServiceConfig"
+import { hasModifier, resolveSymbol } from "./tsUtils"
 
 export default function extractServiceFromSamenExport(
   serviceExport: ts.VariableDeclaration | ts.ExportSpecifier,
@@ -33,14 +31,20 @@ export default function extractServiceFromSamenExport(
 
   // parsing arguments of createService
   const [functionDefs, serviceConfig] = createServiceCallExpr.arguments
-  const parsedServiceConfig = parseFunctionConfig(serviceConfig, typeChecker)
+  const parsedServiceConfig = parseServiceConfig(serviceConfig, typeChecker)
+  console.log("parsedServiceConfig", parsedServiceConfig.middleware?.length)
   const functionDefinitions = parseFunctionDefinitions(
     functionDefs,
     typeChecker,
-  )?.map((func) => ({
-    ...func,
-    config: mergeFunctionConfigs(parsedServiceConfig, func.config),
-  }))
+  )?.map((func) =>
+    parseContext(
+      {
+        ...func,
+        config: mergeFunctionConfigs(parsedServiceConfig, func.config),
+      },
+      typeChecker,
+    ),
+  )
 
   if (!functionDefinitions || functionDefinitions.length === 0) {
     throw new ParseError("Can't find function definitions", functionDefs)

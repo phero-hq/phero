@@ -1,4 +1,5 @@
 import ts from "typescript"
+import { printCode } from "./tsTestUtils"
 
 export interface KindToNodeMappings {
   [kind: number]: ts.Node
@@ -264,4 +265,30 @@ export function isExternalTypeNode(typeNode: ts.TypeNode): boolean {
 
 export function isExternalSourceFile(sourceFile: ts.SourceFile): boolean {
   return sourceFile.fileName.includes("node_modules/typescript/lib/lib.")
+}
+
+export function getNameAsString(
+  name: ts.PropertyName | ts.EntityName | ts.BindingName,
+): string {
+  if (!name) {
+    throw new Error("No name")
+  }
+
+  if (ts.isIdentifier(name)) {
+    return name.text
+  } else if (ts.isStringLiteral(name)) {
+    return name.text
+  } else if (ts.isNumericLiteral(name)) {
+    return name.text
+  } else if (ts.isQualifiedName(name)) {
+    return name.right.text
+  } else if (ts.isComputedPropertyName(name)) {
+    throw new Error(`No support for computed names ${printCode(name)}`)
+  } else if (ts.isPrivateIdentifier(name)) {
+    throw new Error(`No support for private names ${printCode(name)}`)
+  } else if (ts.isBindingName(name)) {
+    throw new Error(`No support for binding names ${printCode(name)}`)
+  }
+
+  throw new Error("Name not supported")
 }
