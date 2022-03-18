@@ -63,49 +63,41 @@ async function runWithMiddlewares<T>(
     actualFunctionResolver,
   ]
 
-  try {
-    resolvers[0].inputContext.resolve(context)
+  resolvers[0].inputContext.resolve(context)
 
-    for (let i = 0; i < middlewares.length; i++) {
-      const middleware = middlewares[i]
-      const currResolverIndex = i
-      const nextResolverIndex = i + 1
+  for (let i = 0; i < middlewares.length; i++) {
+    const middleware = middlewares[i]
+    const currResolverIndex = i
+    const nextResolverIndex = i + 1
 
-      const ctx = await resolvers[currResolverIndex].inputContext.promise
-      const parsedContext = parseMiddlewareContext(i, ctx)
+    const ctx = await resolvers[currResolverIndex].inputContext.promise
+    const parsedContext = parseMiddlewareContext(i, ctx)
 
-      middleware(async (nextOutput: Ctx) => {
-        const parsedOut = parseMiddlewareNextOut(i, nextOutput)
+    middleware(async (nextOutput: Ctx) => {
+      const parsedOut = parseMiddlewareNextOut(i, nextOutput)
 
-        resolvers[nextResolverIndex].inputContext.resolve({
-          // this way we don't lose any accumulated context
-          ...ctx,
-          ...parsedOut,
-        })
-
-        await resolvers[nextResolverIndex].exec.promise
-      }, parsedContext).then(() => {
-        resolvers[currResolverIndex].exec.resolve()
+      resolvers[nextResolverIndex].inputContext.resolve({
+        // this way we don't lose any accumulated context
+        ...ctx,
+        ...parsedOut,
       })
-    }
 
-    const middlewareOutput: Ctx = await actualFunctionResolver.inputContext
-      .promise
-
-    // parse middlewareOutput into function context
-
-    const result = await func(middlewareOutput)
-    actualFunctionResolver.exec.resolve()
-    await resolvers[0].exec.promise
-
-    return result
-  } catch (e: unknown) {
-    for (const r of resolvers) {
-      r.inputContext.reject(e as Error)
-      r.exec.reject(e as Error)
-    }
-    throw e
+      await resolvers[nextResolverIndex].exec.promise
+    }, parsedContext).then(() => {
+      resolvers[currResolverIndex].exec.resolve()
+    })
   }
+
+  const middlewareOutput: Ctx = await actualFunctionResolver.inputContext
+    .promise
+
+  // parse middlewareOutput into function context
+
+  const result = await func(middlewareOutput)
+  actualFunctionResolver.exec.resolve()
+  await resolvers[0].exec.promise
+
+  return result
 }
 
 function parseMiddlewareContext(i: number, x: any): Ctx {
@@ -132,10 +124,6 @@ function parseMiddlewareNextOut(i: number, x: any): Ctx {
     console.log("all done")
   } catch (e) {
     console.error(e)
-  } finally {
-    // for (const l of logs) {
-    //   console.console.log(...l)
-    // }
   }
 })()
 
