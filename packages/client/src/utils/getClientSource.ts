@@ -80,7 +80,7 @@ export default function getClientSource(
         ),
       ]),
     ),
-    ts.factory.createStringLiteral("./BaseSamenClient"),
+    ts.factory.createStringLiteral("@samen/client"),
   )
 
   const hertitageClause: ts.HeritageClause = ts.factory.createHeritageClause(
