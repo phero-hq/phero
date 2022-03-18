@@ -106,9 +106,6 @@ function parseMiddlewareContext(i: number, x: any): Ctx {
 }
 
 function parseMiddlewareNextOut(i: number, x: any): Ctx {
-  if (i === 1) {
-    throw new Error()
-  }
   console.log("Parsing Next", i, x)
   return x as Ctx
 }
@@ -141,10 +138,7 @@ function defer<T>(): Defer<T> {
   const deferred: Defer<T> = {} as Defer<T>
   const promise = new Promise<T>((resolve, reject) => {
     deferred.resolve = (result: T) => resolve(result)
-    deferred.reject = (err: Error) => {
-      console.log("err", err)
-      reject(err)
-    }
+    deferred.reject = (err: Error) => reject(err)
   })
   deferred.promise = promise
   return deferred
