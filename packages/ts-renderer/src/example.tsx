@@ -78,6 +78,7 @@ export const render = () => (
             init={
               <ts-object-literal>
                 <ts-property-assignment name="kees" init={<ts-true />} />
+                <ts-shorthand-property-assignment name="kaas" />
               </ts-object-literal>
             }
           />

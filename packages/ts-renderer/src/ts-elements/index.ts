@@ -31,6 +31,10 @@ import {
   TSPropertyAssignmentElement,
 } from "./ts-property-assignment"
 import { TSReturn, TSReturnElement } from "./ts-return"
+import {
+  TSShorthandPropertyAssignment,
+  TSShorthandPropertyAssignmentElement,
+} from "./ts-shorthand-property-assignment"
 import { TSString, TSStringElement } from "./ts-string"
 import { TSStringLiteral, TSStringLiteralElement } from "./ts-string-literal"
 import { TSTrue, TSTrueElement } from "./ts-true"
@@ -51,6 +55,7 @@ export type TSElements =
   | TSParameterElement
   | TSImportElement
   | TSPropertyAssignmentElement
+  | TSShorthandPropertyAssignmentElement
   | TSArrowFunctionElement
   | TSCallExpressionElement
   | TSBinaryExpressionElement
@@ -85,6 +90,7 @@ declare global {
       "ts-parameter": TSParameter
       "ts-import": TSImport
       "ts-property-assignment": TSPropertyAssignment
+      "ts-shorthand-property-assignment": TSShorthandPropertyAssignment
 
       // expression
       "ts-arrow-function": TSArrowFunction
