@@ -71,6 +71,23 @@ export const render = () => (
               </ts-object-literal>
             }
           />
+
+          <ts-try>
+            <ts-block>
+              <ts-const name="a" init={<ts-undefined />} />
+            </ts-block>
+            <ts-catch errorName="error">
+              <ts-block>
+                <ts-const name="b" init={<ts-undefined />} />
+              </ts-block>
+            </ts-catch>
+            <ts-finally>
+              <ts-block>
+                <ts-const name="c" init={<ts-undefined />} />
+              </ts-block>
+            </ts-finally>
+          </ts-try>
+
           <ts-return expression={<ts-false />} />
         </ts-block>
       }

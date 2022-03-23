@@ -32,6 +32,14 @@ import { TSReturn, TSReturnElement } from "./ts-return"
 import { TSString, TSStringElement } from "./ts-string"
 import { TSStringLiteral, TSStringLiteralElement } from "./ts-string-literal"
 import { TSTrue, TSTrueElement } from "./ts-true"
+import {
+  TSCatch,
+  TSCatchElement,
+  TSFinally,
+  TSFinallyElement,
+  TSTry,
+  TSTryElement,
+} from "./ts-try"
 import { TSTypeReference, TSTypeReferenceElement } from "./ts-type-reference"
 import { TSUndefined, TSUndefinedElement } from "./ts-undefined"
 import { UnsupportedElementSupportedError } from "./utils"
@@ -61,6 +69,9 @@ export type TSElements =
   | TSStringLiteralElement
   | TSNumberLiteralElement
   | TSNullElement
+  | TSTryElement
+  | TSCatchElement
+  | TSFinallyElement
 
 declare global {
   namespace JSX {
@@ -82,6 +93,9 @@ declare global {
       "ts-block": TSBlock
       "ts-if": TSIf
       "ts-return": TSReturn
+      "ts-try": TSTry
+      "ts-catch": TSCatch
+      "ts-finally": TSFinally
 
       // literal
       "ts-false": TSFalse
