@@ -57,6 +57,20 @@ export const render = () => (
       }
       then={
         <ts-block>
+          <ts-const name="a" init={<ts-number-literal value={10} />} />
+          <ts-const name="a" init={<ts-string-literal value="xxx" />} />
+          <ts-const name="a" init={<ts-false />} />
+          <ts-const name="a" init={<ts-true />} />
+          <ts-const name="a" init={<ts-null />} />
+          <ts-const name="a" init={<ts-undefined />} />
+          <ts-const
+            name="a"
+            init={
+              <ts-object-literal>
+                <ts-property-assignment name="kees" init={<ts-true />} />
+              </ts-object-literal>
+            }
+          />
           <ts-return expression={<ts-false />} />
         </ts-block>
       }

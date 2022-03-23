@@ -18,11 +18,16 @@ import { TSLiteralType, TSLiteralTypeElement } from "./ts-literal-type"
 import { TSNull, TSNullElement } from "./ts-null"
 import { TSNumber, TSNumberElement } from "./ts-number"
 import { TSNumberLiteral, TSNumberLiteralElement } from "./ts-number-literal"
+import { TSObjectLiteral } from "./ts-object-literal"
 import { TSParameter, TSParameterElement } from "./ts-parameter"
 import {
   TSPropertyAccessExpression,
   TSPropertyAccessExpressionElement,
 } from "./ts-property-access-expression"
+import {
+  TSPropertyAssignment,
+  TSPropertyAssignmentElement,
+} from "./ts-property-assignment"
 import { TSReturn, TSReturnElement } from "./ts-return"
 import { TSString, TSStringElement } from "./ts-string"
 import { TSStringLiteral, TSStringLiteralElement } from "./ts-string-literal"
@@ -35,6 +40,7 @@ export type TSElements =
   | TSFunctionElement
   | TSParameterElement
   | TSImportElement
+  | TSPropertyAssignmentElement
   | TSArrowFunctionElement
   | TSCallExpressionElement
   | TSBinaryExpressionElement
@@ -63,6 +69,7 @@ declare global {
       "ts-function": TSFunction
       "ts-parameter": TSParameter
       "ts-import": TSImport
+      "ts-property-assignment": TSPropertyAssignment
 
       // expression
       "ts-arrow-function": TSArrowFunction
@@ -89,6 +96,7 @@ declare global {
       "ts-undefined": TSUndefined
       "ts-literal-type": TSLiteralType
       // literals
+      "ts-object-literal": TSObjectLiteral
       "ts-string-literal": TSStringLiteral
       "ts-number-literal": TSNumberLiteral
       "ts-null": TSNull

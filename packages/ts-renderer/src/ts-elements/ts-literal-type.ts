@@ -22,7 +22,7 @@ export interface TSLiteralType {
 
 export type TSLiteralTypeElement = React.ReactElement<
   TSLiteralType,
-  "ts-number-literal"
+  "ts-literal-type"
 >
 
 export function generateLiteralType(
