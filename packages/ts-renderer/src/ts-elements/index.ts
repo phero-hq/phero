@@ -17,6 +17,11 @@ import { TSFalse, TSFalseElement } from "./ts-false"
 import { generateFunction, TSFunction, TSFunctionElement } from "./ts-function"
 import { TSIf, TSIfElement } from "./ts-if"
 import { generateImport, TSImport, TSImportElement } from "./ts-import"
+import {
+  generateInterface,
+  TSInterface,
+  TSInterfaceElement,
+} from "./ts-interface"
 import { TSLiteralType, TSLiteralTypeElement } from "./ts-literal-type"
 import { TSNull, TSNullElement } from "./ts-null"
 import { TSNumber, TSNumberElement } from "./ts-number"
@@ -31,6 +36,10 @@ import {
   TSPropertyAssignment,
   TSPropertyAssignmentElement,
 } from "./ts-property-assignment"
+import {
+  TSPropertySignature,
+  TSPropertySignatureElement,
+} from "./ts-property-signature"
 import { TSReturn, TSReturnElement } from "./ts-return"
 import {
   TSShorthandPropertyAssignment,
@@ -98,6 +107,8 @@ export type TSElements =
   | TSTypeParameterElement
   | TSTypeAliasElement
   | TSSourceFileElement
+  | TSInterfaceElement
+  | TSPropertySignatureElement
 
 declare global {
   namespace JSX {
@@ -110,8 +121,10 @@ declare global {
       "ts-import": TSImport
       "ts-property-assignment": TSPropertyAssignment
       "ts-shorthand-property-assignment": TSShorthandPropertyAssignment
-      "ts-type-alias": TSTypeAlias
       "ts-type-parameter": TSTypeParameter
+      "ts-type-alias": TSTypeAlias
+      "ts-interface": TSInterface
+      "ts-property-signature": TSPropertySignature
 
       // expression
       "ts-arrow-function": TSArrowFunction
@@ -161,6 +174,8 @@ export function generateAST(element: TSElements): ts.Node {
       return generateImport(element)
     case "ts-type-alias":
       return generateTypeAlias(element)
+    case "ts-interface":
+      return generateInterface(element)
     case "ts-source-file":
       return generateSourceFile(element)
     default:

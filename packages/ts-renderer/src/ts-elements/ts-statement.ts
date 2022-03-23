@@ -3,6 +3,7 @@ import { generateBlock, TSBlock, TSBlockElement } from "./ts-block"
 import { generateConst, TSConst, TSConstElement } from "./ts-const"
 import { generateFunction, TSFunctionElement } from "./ts-function"
 import { generateIf, TSIf, TSIfElement } from "./ts-if"
+import { generateInterface, TSInterfaceElement } from "./ts-interface"
 import { generateReturn, TSReturn, TSReturnElement } from "./ts-return"
 import { generateSourceFile, TSSourceFileElement } from "./ts-source-file"
 import { generateTry, TSTry, TSTryElement } from "./ts-try"
@@ -19,6 +20,7 @@ export type TSStatementElement =
   | TSTryElement
   | TSSourceFileElement
   | TSTypeAliasElement
+  | TSInterfaceElement
   | TSFunctionElement
 
 export function generateStatement(element: TSStatementElement): ts.Statement {
@@ -35,6 +37,8 @@ export function generateStatement(element: TSStatementElement): ts.Statement {
       return generateTry(element)
     case "ts-type-alias":
       return generateTypeAlias(element)
+    case "ts-interface":
+      return generateInterface(element)
     case "ts-function":
       return generateFunction(element)
     default:

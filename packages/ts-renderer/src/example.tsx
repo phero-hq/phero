@@ -116,5 +116,19 @@ export const render = () => (
         <ts-union types={[<ts-string />, <ts-number-literal value={10} />]} />
       }
     />
+    <ts-interface
+      name="RPCOkResult"
+      typeParameters={[<ts-type-parameter name="T" />]}
+    >
+      <ts-property-signature
+        name="status"
+        optional
+        type={<ts-number-literal value={200} />}
+      />
+      <ts-property-signature
+        name="result"
+        type={<ts-type-reference name="T" />}
+      />
+    </ts-interface>
   </ts-source-file>
 )
