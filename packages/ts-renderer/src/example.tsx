@@ -29,7 +29,11 @@ export const render = () => (
     />
     <ts-const
       name="inputParseResult"
-      init={<ts-call-expression name="inputParser" args={["input"]} />}
+      init={
+        <ts-await>
+          <ts-call-expression name="inputParser" args={["input"]} />
+        </ts-await>
+      }
     />
     <ts-const
       name="outputParser"

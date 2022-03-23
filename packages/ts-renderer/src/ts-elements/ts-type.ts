@@ -2,18 +2,18 @@ import ts from "typescript"
 import { generateAny, TSAny, TSAnyElement } from "./ts-any"
 import { generateArray, TSArray, TSArrayElement } from "./ts-array"
 import { generateBoolean, TSBoolean, TSBooleanElement } from "./ts-boolean"
-import { TSImport, TSImportElement, generateImport } from "./ts-import"
-import { TSNumber, TSNumberElement, generateNumber } from "./ts-number"
-import { TSString, TSStringElement, generateString } from "./ts-string"
+import { TSImport } from "./ts-import"
+import { generateNumber, TSNumber, TSNumberElement } from "./ts-number"
+import { generateString, TSString, TSStringElement } from "./ts-string"
 import {
   generateTypeReference,
   TSTypeReference,
   TSTypeReferenceElement,
 } from "./ts-type-reference"
 import {
+  generateUndefined,
   TSUndefined,
   TSUndefinedElement,
-  generateUndefined,
 } from "./ts-undefined"
 import { UnsupportedElementSupportedError } from "./utils"
 

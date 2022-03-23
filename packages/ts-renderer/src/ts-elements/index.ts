@@ -3,6 +3,7 @@ import ts from "typescript"
 import { TSAny, TSAnyElement } from "./ts-any"
 import { TSArray, TSArrayElement } from "./ts-array"
 import { TSArrowFunction, TSArrowFunctionElement } from "./ts-arrow-function"
+import { TSAwait, TSAwaitElement } from "./ts-await"
 import {
   TSBinaryExpression,
   TSBinaryExpressionElement,
@@ -74,6 +75,7 @@ export type TSElements =
   | TSCatchElement
   | TSFinallyElement
   | TSArrayElement
+  | TSAwaitElement
 
 declare global {
   namespace JSX {
@@ -89,6 +91,7 @@ declare global {
       "ts-call-expression": TSCallExpression
       "ts-binary-expression": TSBinaryExpression
       "ts-property-access-expression": TSPropertyAccessExpression
+      "ts-await": TSAwait
 
       // statement
       "ts-const": TSConst

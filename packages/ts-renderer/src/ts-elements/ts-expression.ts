@@ -4,6 +4,7 @@ import {
   TSArrowFunction,
   TSArrowFunctionElement,
 } from "./ts-arrow-function"
+import { generateAwait, TSAwait, TSAwaitElement } from "./ts-await"
 import {
   generateBinaryExpression,
   TSBinaryExpression,
@@ -32,7 +33,6 @@ import {
   TSPropertyAccessExpressionElement,
 } from "./ts-property-access-expression"
 import {
-  generatePropertyAssignment,
   TSPropertyAssignment,
   TSPropertyAssignmentElement,
 } from "./ts-property-assignment"
@@ -42,11 +42,7 @@ import {
   TSStringLiteralElement,
 } from "./ts-string-literal"
 import { generateTrue, TSTrue, TSTrueElement } from "./ts-true"
-import {
-  generateUndefined,
-  TSUndefined,
-  TSUndefinedElement,
-} from "./ts-undefined"
+import { TSUndefined, TSUndefinedElement } from "./ts-undefined"
 import { UnsupportedElementSupportedError } from "./utils"
 
 export type TSExpression =
@@ -62,6 +58,7 @@ export type TSExpression =
   | TSStringLiteral
   | TSNull
   | TSUndefined
+  | TSAwait
 
 export type TSExpressionElement =
   | TSArrowFunctionElement
@@ -76,6 +73,7 @@ export type TSExpressionElement =
   | TSStringLiteralElement
   | TSNullElement
   | TSUndefinedElement
+  | TSAwaitElement
 
 export function generateExpression(
   element: TSExpressionElement,
@@ -103,6 +101,8 @@ export function generateExpression(
       return generateNull()
     case "ts-undefined":
       return ts.factory.createIdentifier("undefined")
+    case "ts-await":
+      return generateAwait(element)
     default:
       throw new UnsupportedElementSupportedError(element)
   }
