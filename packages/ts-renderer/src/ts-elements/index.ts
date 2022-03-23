@@ -48,6 +48,7 @@ import {
 } from "./ts-try"
 import { TSTypeReference, TSTypeReferenceElement } from "./ts-type-reference"
 import { TSUndefined, TSUndefinedElement } from "./ts-undefined"
+import { TSUnion, TSUnionElement } from "./ts-union"
 import { UnsupportedElementSupportedError } from "./utils"
 
 export type TSElements =
@@ -80,6 +81,7 @@ export type TSElements =
   | TSCatchElement
   | TSFinallyElement
   | TSArrayElement
+  | TSUnionElement
   | TSAwaitElement
 
 declare global {
@@ -121,6 +123,7 @@ declare global {
       "ts-undefined": TSUndefined
       "ts-literal-type": TSLiteralType
       "ts-array": TSArray
+      "ts-union": TSUnion
 
       // literals
       "ts-object-literal": TSObjectLiteral
