@@ -117,6 +117,7 @@ export const render = () => (
       }
     />
     <ts-interface
+      export
       name="RPCOkResult"
       typeParameters={[<ts-type-parameter name="T" />]}
     >
@@ -130,5 +131,18 @@ export const render = () => (
         type={<ts-type-reference name="T" />}
       />
     </ts-interface>
+    <ts-type-alias
+      export
+      name="ParseResult2"
+      typeParameters={[<ts-type-parameter name="T" />]}
+      type={
+        <ts-type-literal>
+          <ts-property-signature
+            name="aad"
+            type={<ts-type-reference name="T" />}
+          />
+        </ts-type-literal>
+      }
+    />
   </ts-source-file>
 )

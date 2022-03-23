@@ -66,6 +66,7 @@ import {
   TSTypeAlias,
   TSTypeAliasElement,
 } from "./ts-type-alias"
+import { TSTypeLiteral, TSTypeLiteralElement } from "./ts-type-literal"
 import { TSTypeParameter, TSTypeParameterElement } from "./ts-type-parameter"
 import { TSTypeReference, TSTypeReferenceElement } from "./ts-type-reference"
 import { TSUndefined, TSUndefinedElement } from "./ts-undefined"
@@ -108,6 +109,7 @@ export type TSElements =
   | TSTypeAliasElement
   | TSSourceFileElement
   | TSInterfaceElement
+  | TSTypeLiteralElement
   | TSPropertySignatureElement
 
 declare global {
@@ -124,6 +126,7 @@ declare global {
       "ts-type-parameter": TSTypeParameter
       "ts-type-alias": TSTypeAlias
       "ts-interface": TSInterface
+      "ts-type-literal": TSTypeLiteral
       "ts-property-signature": TSPropertySignature
 
       // expression
