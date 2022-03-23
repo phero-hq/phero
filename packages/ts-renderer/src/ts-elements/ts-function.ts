@@ -1,18 +1,12 @@
 import React from "react"
 import ts from "typescript"
-
 import { generateParameter, TSParameterElement } from "./ts-parameter"
-import {
-  generateStatement,
-  TSStatement,
-  TSStatementElement,
-} from "./ts-statement"
+import { generateStatement, TSStatementElement } from "./ts-statement"
 import { generateTypeNode, TSTypeElement } from "./ts-type"
 import { generateModifiers } from "./utils"
 
 export interface TSFunction {
   export?: boolean
-  // exportDefault?: boolean
   async?: boolean
   name: string
   params: TSParameterElement[]
