@@ -1,6 +1,7 @@
 import ts from "typescript"
 
 import { TSAny, TSAnyElement } from "./ts-any"
+import { TSArray, TSArrayElement } from "./ts-array"
 import { TSArrowFunction, TSArrowFunctionElement } from "./ts-arrow-function"
 import {
   TSBinaryExpression,
@@ -72,6 +73,7 @@ export type TSElements =
   | TSTryElement
   | TSCatchElement
   | TSFinallyElement
+  | TSArrayElement
 
 declare global {
   namespace JSX {
@@ -109,6 +111,8 @@ declare global {
       "ts-string": TSString
       "ts-undefined": TSUndefined
       "ts-literal-type": TSLiteralType
+      "ts-array": TSArray
+
       // literals
       "ts-object-literal": TSObjectLiteral
       "ts-string-literal": TSStringLiteral

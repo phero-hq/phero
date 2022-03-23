@@ -1,5 +1,6 @@
 import ts from "typescript"
 import { generateAny, TSAny, TSAnyElement } from "./ts-any"
+import { generateArray, TSArray, TSArrayElement } from "./ts-array"
 import { generateBoolean, TSBoolean, TSBooleanElement } from "./ts-boolean"
 import { TSImport, TSImportElement, generateImport } from "./ts-import"
 import { TSNumber, TSNumberElement, generateNumber } from "./ts-number"
@@ -24,6 +25,7 @@ export type TSType =
   | TSNumber
   | TSString
   | TSUndefined
+  | TSArray
 
 export type TSTypeElement =
   | TSAnyElement
@@ -32,6 +34,7 @@ export type TSTypeElement =
   | TSNumberElement
   | TSStringElement
   | TSUndefinedElement
+  | TSArrayElement
 
 export function generateTypeNode(element: TSTypeElement): ts.TypeNode {
   switch (element.type) {
@@ -47,6 +50,8 @@ export function generateTypeNode(element: TSTypeElement): ts.TypeNode {
       return generateString()
     case "ts-undefined":
       return generateUndefined()
+    case "ts-array":
+      return generateArray(element)
     default:
       throw new UnsupportedElementSupportedError(element)
   }

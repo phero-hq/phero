@@ -35,7 +35,13 @@ export const render = () => (
       name="outputParser"
       init={
         <ts-arrow-function
-          params={[<ts-parameter name="data" type={<ts-any />} />]}
+          params={[
+            <ts-parameter name="data" type={<ts-any />} />,
+            <ts-parameter
+              name="xxx"
+              type={<ts-array elementType={<ts-string />} />}
+            />,
+          ]}
           returnType={
             <ts-type-reference name="ParseResult" args={[<ts-any />]} />
           }
@@ -83,7 +89,7 @@ export const render = () => (
             </ts-catch>
             <ts-finally>
               <ts-block>
-                <ts-const name="c" init={<ts-undefined />} />
+                <ts-const name="c" />
               </ts-block>
             </ts-finally>
           </ts-try>
