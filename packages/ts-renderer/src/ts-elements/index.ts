@@ -1,3 +1,4 @@
+import React from "react"
 import ts from "typescript"
 
 import { TSAny, TSAnyElement } from "./ts-any"
@@ -15,7 +16,7 @@ import { TSConst, TSConstElement } from "./ts-const"
 import { TSFalse, TSFalseElement } from "./ts-false"
 import { generateFunction, TSFunction, TSFunctionElement } from "./ts-function"
 import { TSIf, TSIfElement } from "./ts-if"
-import { TSImport, TSImportElement } from "./ts-import"
+import { generateImport, TSImport, TSImportElement } from "./ts-import"
 import { TSLiteralType, TSLiteralTypeElement } from "./ts-literal-type"
 import { TSNull, TSNullElement } from "./ts-null"
 import { TSNumber, TSNumberElement } from "./ts-number"
@@ -35,6 +36,11 @@ import {
   TSShorthandPropertyAssignment,
   TSShorthandPropertyAssignmentElement,
 } from "./ts-shorthand-property-assignment"
+import {
+  generateSourceFile,
+  TSSourceFile,
+  TSSourceFileElement,
+} from "./ts-source-file"
 import { TSString, TSStringElement } from "./ts-string"
 import { TSStringLiteral, TSStringLiteralElement } from "./ts-string-literal"
 import { TSTrue, TSTrueElement } from "./ts-true"
@@ -46,6 +52,12 @@ import {
   TSTry,
   TSTryElement,
 } from "./ts-try"
+import {
+  generateTypeAlias,
+  TSTypeAlias,
+  TSTypeAliasElement,
+} from "./ts-type-alias"
+import { TSTypeParameter, TSTypeParameterElement } from "./ts-type-parameter"
 import { TSTypeReference, TSTypeReferenceElement } from "./ts-type-reference"
 import { TSUndefined, TSUndefinedElement } from "./ts-undefined"
 import { TSUnion, TSUnionElement } from "./ts-union"
@@ -83,16 +95,23 @@ export type TSElements =
   | TSArrayElement
   | TSUnionElement
   | TSAwaitElement
+  | TSTypeParameterElement
+  | TSTypeAliasElement
+  | TSSourceFileElement
 
 declare global {
   namespace JSX {
     interface IntrinsicElements {
+      "ts-source-file": TSSourceFile
+
       // declaration
       "ts-function": TSFunction
       "ts-parameter": TSParameter
       "ts-import": TSImport
       "ts-property-assignment": TSPropertyAssignment
       "ts-shorthand-property-assignment": TSShorthandPropertyAssignment
+      "ts-type-alias": TSTypeAlias
+      "ts-type-parameter": TSTypeParameter
 
       // expression
       "ts-arrow-function": TSArrowFunction
@@ -138,6 +157,12 @@ export function generateAST(element: TSElements): ts.Node {
   switch (element.type) {
     case "ts-function":
       return generateFunction(element)
+    case "ts-import":
+      return generateImport(element)
+    case "ts-type-alias":
+      return generateTypeAlias(element)
+    case "ts-source-file":
+      return generateSourceFile(element)
     default:
       throw new UnsupportedElementSupportedError(element)
   }

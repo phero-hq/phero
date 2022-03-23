@@ -16,7 +16,9 @@ export interface TSFunction {
 
 export type TSFunctionElement = React.ReactElement<TSFunction, "ts-function">
 
-export function generateFunction(element: TSFunctionElement) {
+export function generateFunction(
+  element: TSFunctionElement,
+): ts.FunctionDeclaration {
   const body = element.props.children
     ? ts.factory.createBlock(
         React.Children.map<ts.Statement, TSStatementElement>(

@@ -3,8 +3,23 @@ import { generateAny, TSAny, TSAnyElement } from "./ts-any"
 import { generateArray, TSArray, TSArrayElement } from "./ts-array"
 import { generateBoolean, TSBoolean, TSBooleanElement } from "./ts-boolean"
 import { TSImport } from "./ts-import"
+import {
+  generateLiteralType,
+  TSLiteralType,
+  TSLiteralTypeElement,
+} from "./ts-literal-type"
 import { generateNumber, TSNumber, TSNumberElement } from "./ts-number"
+import {
+  generateNumberLiteral,
+  TSNumberLiteral,
+  TSNumberLiteralElement,
+} from "./ts-number-literal"
 import { generateString, TSString, TSStringElement } from "./ts-string"
+import {
+  generateStringLiteral,
+  TSStringLiteral,
+  TSStringLiteralElement,
+} from "./ts-string-literal"
 import {
   generateTypeReference,
   TSTypeReference,
@@ -15,6 +30,7 @@ import {
   TSUndefined,
   TSUndefinedElement,
 } from "./ts-undefined"
+import { generateUnion, TSUnion, TSUnionElement } from "./ts-union"
 import { UnsupportedElementSupportedError } from "./utils"
 
 export type TSType =
@@ -26,6 +42,10 @@ export type TSType =
   | TSString
   | TSUndefined
   | TSArray
+  | TSUnion
+  | TSLiteralType
+  | TSNumberLiteral
+  | TSStringLiteral
 
 export type TSTypeElement =
   | TSAnyElement
@@ -35,6 +55,10 @@ export type TSTypeElement =
   | TSStringElement
   | TSUndefinedElement
   | TSArrayElement
+  | TSUnionElement
+  | TSLiteralTypeElement
+  | TSNumberLiteralElement
+  | TSStringLiteralElement
 
 export function generateTypeNode(element: TSTypeElement): ts.TypeNode {
   switch (element.type) {
@@ -52,6 +76,14 @@ export function generateTypeNode(element: TSTypeElement): ts.TypeNode {
       return generateUndefined()
     case "ts-array":
       return generateArray(element)
+    case "ts-union":
+      return generateUnion(element)
+    case "ts-literal-type":
+      return generateLiteralType(element)
+    case "ts-number-literal":
+      return ts.factory.createLiteralTypeNode(generateNumberLiteral(element))
+    case "ts-string-literal":
+      return ts.factory.createLiteralTypeNode(generateStringLiteral(element))
     default:
       throw new UnsupportedElementSupportedError(element)
   }
