@@ -5,7 +5,6 @@ import { generateFunction, TSFunctionElement } from "./ts-function"
 import { generateIf, TSIf, TSIfElement } from "./ts-if"
 import { generateInterface, TSInterfaceElement } from "./ts-interface"
 import { generateReturn, TSReturn, TSReturnElement } from "./ts-return"
-import { generateSourceFile, TSSourceFileElement } from "./ts-source-file"
 import { generateTry, TSTry, TSTryElement } from "./ts-try"
 import { generateTypeAlias, TSTypeAliasElement } from "./ts-type-alias"
 import { UnsupportedElementSupportedError } from "./utils"
@@ -18,7 +17,6 @@ export type TSStatementElement =
   | TSIfElement
   | TSReturnElement
   | TSTryElement
-  | TSSourceFileElement
   | TSTypeAliasElement
   | TSInterfaceElement
   | TSFunctionElement

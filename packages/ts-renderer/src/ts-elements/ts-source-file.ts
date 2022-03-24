@@ -20,6 +20,7 @@ export function generateSourceFile(
         generateStatement,
       )
     : []
+
   return ts.factory.createSourceFile(
     statements,
     ts.factory.createToken(ts.SyntaxKind.EndOfFileToken),
