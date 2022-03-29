@@ -1,7 +1,9 @@
 import React from "react"
 import ts from "typescript"
 
-export interface TSFalse {}
+export interface TSFalse {
+  children?: undefined
+}
 
 export type TSFalseElement = React.ReactElement<TSFalse, "ts-false">
 

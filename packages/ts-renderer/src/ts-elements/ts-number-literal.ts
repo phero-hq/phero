@@ -3,6 +3,7 @@ import ts from "typescript"
 
 export interface TSNumberLiteral {
   value: number
+  children?: undefined
 }
 
 export type TSNumberLiteralElement = React.ReactElement<

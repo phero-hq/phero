@@ -3,6 +3,7 @@ import ts from "typescript"
 
 export interface TSShorthandPropertyAssignment {
   name: string
+  children?: undefined
 }
 
 export type TSShorthandPropertyAssignmentElement = React.ReactElement<

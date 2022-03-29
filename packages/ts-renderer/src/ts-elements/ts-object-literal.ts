@@ -8,9 +8,10 @@ import {
   generateShorthandPropertyAssignment,
   TSShorthandPropertyAssignmentElement,
 } from "./ts-shorthand-property-assignment"
+import { mapChildren } from "./utils"
 
 export interface TSObjectLiteral {
-  children: TSPropertyElement | TSPropertyElement[]
+  children?: TSPropertyElement | TSPropertyElement[]
 }
 
 export type TSObjectLiteralElement = React.ReactElement<
@@ -21,10 +22,7 @@ export type TSObjectLiteralElement = React.ReactElement<
 export function generateObjectLiteral(
   element: TSObjectLiteralElement,
 ): ts.ObjectLiteralExpression {
-  const elements = React.Children.map<
-    ts.ObjectLiteralElementLike,
-    TSPropertyElement
-  >(element.props.children, generateProperty)
+  const elements = mapChildren(element.props.children, generateProperty)
   return ts.factory.createObjectLiteralExpression(elements)
 }
 

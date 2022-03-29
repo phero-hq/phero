@@ -5,6 +5,7 @@ export interface TSTypeParameter {
   name: string
   // TODO constraint
   default?: TSTypeElement
+  children?: undefined
 }
 
 export type TSTypeParameterElement = React.ReactElement<

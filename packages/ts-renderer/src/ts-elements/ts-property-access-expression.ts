@@ -3,6 +3,7 @@ import ts from "typescript"
 
 export interface TSPropertyAccessExpression {
   chain: string
+  children?: undefined
 }
 
 export type TSPropertyAccessExpressionElement = React.ReactElement<

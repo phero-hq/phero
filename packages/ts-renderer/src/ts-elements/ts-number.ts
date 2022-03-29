@@ -1,6 +1,8 @@
 import ts from "typescript"
 
-export interface TSNumber {}
+export interface TSNumber {
+  children?: undefined
+}
 
 export type TSNumberElement = React.ReactElement<TSNumber, "ts-number">
 

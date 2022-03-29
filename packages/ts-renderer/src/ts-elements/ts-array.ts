@@ -3,6 +3,7 @@ import { generateTypeNode, TSTypeElement } from "./ts-type"
 
 export interface TSArray {
   elementType: TSTypeElement
+  children?: undefined
 }
 
 export type TSArrayElement = React.ReactElement<TSArray, "ts-array">

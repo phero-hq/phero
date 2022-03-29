@@ -1,4 +1,7 @@
-export const render = () => (
+import { TSAnyElement } from "./ts-elements/ts-any"
+import { TSTypeElement } from "./ts-elements/ts-type"
+
+const RootRender = () => (
   <ts-source-file>
     <ts-function
       export
@@ -131,9 +134,19 @@ export const render = () => (
         type={<ts-type-reference name="T" />}
       />
     </ts-interface>
+    <ParseResult name="ParseResult2" />
+    <ParseResult name="ParseResult3" isExport />
+    <ParseResult name="ParseResult4" />
+  </ts-source-file>
+)
+
+export const render = () => <RootRender />
+
+function ParseResult({ name, isExport }: { name: string; isExport?: boolean }) {
+  return (
     <ts-type-alias
-      export
-      name="ParseResult2"
+      export={isExport}
+      name={name}
       typeParameters={[<ts-type-parameter name="T" />]}
       type={
         <ts-type-literal>
@@ -144,5 +157,5 @@ export const render = () => (
         </ts-type-literal>
       }
     />
-  </ts-source-file>
-)
+  )
+}

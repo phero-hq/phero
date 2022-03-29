@@ -11,6 +11,7 @@ export interface TSTypeAlias {
   name: string
   typeParameters: TSTypeParameterElement[]
   type: TSTypeElement
+  children?: undefined
 }
 
 export type TSTypeAliasElement = React.ReactElement<

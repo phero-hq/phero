@@ -14,3 +14,16 @@ export class UnsupportedElementSupportedError extends Error {
     super(`Doesn't support ${element.type} yet.`)
   }
 }
+
+export function mapChildren<T, X>(
+  children: undefined | T | T[],
+  mapper: (T: T) => X,
+): X[] {
+  if (!children) {
+    return []
+  }
+  if (Array.isArray(children)) {
+    return children.map(mapper)
+  }
+  return [mapper(children)]
+}

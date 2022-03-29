@@ -4,6 +4,7 @@ import {
   generatePropertySignature,
   TSPropertySignatureElement,
 } from "./ts-property-signature"
+import { mapChildren } from "./utils"
 
 export interface TSTypeLiteral {
   children?: TSPropertySignatureElement | TSPropertySignatureElement[]
@@ -17,12 +18,6 @@ export type TSTypeLiteralElement = React.ReactElement<
 export function generateTypeLiteral(
   element: TSTypeLiteralElement,
 ): ts.TypeLiteralNode {
-  const members = element.props.children
-    ? React.Children.map<ts.PropertySignature, TSPropertySignatureElement>(
-        element.props.children,
-        generatePropertySignature,
-      )
-    : []
-
+  const members = mapChildren(element.props.children, generatePropertySignature)
   return ts.factory.createTypeLiteralNode(members)
 }

@@ -5,6 +5,7 @@ export interface TSPropertySignature {
   optional?: boolean
   name: string
   type: TSTypeElement
+  children?: undefined
 }
 
 export type TSPropertySignatureElement = React.ReactElement<

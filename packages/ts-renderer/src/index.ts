@@ -1,13 +1,8 @@
-// import TestRenderer from "react-test-renderer"
 import ts from "typescript"
-
 import { render } from "./example"
-import { generateAST } from "./ts-elements"
+import { renderAST } from "./renderer"
 
-const json = render()
-// const json = TestRenderer.create(render()).toTree() as any
-
-console.log(printCode(generateAST(json)))
+console.log(printCode(renderAST(render())))
 
 function printCode(node: ts.Node): string {
   const printer = ts.createPrinter({

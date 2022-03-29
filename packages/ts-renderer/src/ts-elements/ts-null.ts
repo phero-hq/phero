@@ -1,7 +1,9 @@
 import React from "react"
 import ts from "typescript"
 
-export interface TSNull {}
+export interface TSNull {
+  children?: undefined
+}
 
 export type TSNullElement = React.ReactElement<TSNull, "ts-null">
 

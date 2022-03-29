@@ -3,7 +3,7 @@ import ts from "typescript"
 import { generateParameter, TSParameterElement } from "./ts-parameter"
 import { generateStatement, TSStatementElement } from "./ts-statement"
 import { generateTypeNode, TSTypeElement } from "./ts-type"
-import { generateModifiers } from "./utils"
+import { generateModifiers, mapChildren } from "./utils"
 
 export interface TSFunction {
   export?: boolean
@@ -21,10 +21,7 @@ export function generateFunction(
 ): ts.FunctionDeclaration {
   const body = element.props.children
     ? ts.factory.createBlock(
-        React.Children.map<ts.Statement, TSStatementElement>(
-          element.props.children,
-          generateStatement,
-        ),
+        mapChildren(element.props.children, generateStatement),
       )
     : undefined
 

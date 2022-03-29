@@ -1,6 +1,8 @@
 import ts from "typescript"
 
-export interface TSBoolean {}
+export interface TSBoolean {
+  children?: undefined
+}
 
 export type TSBooleanElement = React.ReactElement<TSBoolean, "ts-boolean">
 

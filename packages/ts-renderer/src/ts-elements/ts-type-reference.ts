@@ -5,6 +5,7 @@ import { generateTypeNode, TSTypeElement } from "./ts-type"
 export interface TSTypeReference {
   name: string
   args?: TSTypeElement[]
+  children?: undefined
 }
 
 export type TSTypeReferenceElement = React.ReactElement<

@@ -5,6 +5,7 @@ export interface TSParameter {
   name: string
   questionToken?: boolean
   type: TSTypeElement
+  children?: undefined
 }
 
 export type TSParameterElement = React.ReactElement<TSParameter, "ts-parameter">

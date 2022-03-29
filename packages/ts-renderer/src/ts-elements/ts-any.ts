@@ -1,6 +1,8 @@
 import ts from "typescript"
 
-export interface TSAny {}
+export interface TSAny {
+  children?: undefined
+}
 
 export type TSAnyElement = React.ReactElement<TSAny, "ts-any">
 

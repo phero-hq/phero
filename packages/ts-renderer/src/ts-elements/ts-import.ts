@@ -4,6 +4,7 @@ import ts from "typescript"
 export interface TSImport {
   names: string[]
   module: string
+  children?: undefined
 }
 
 export type TSImportElement = React.ReactElement<TSImport, "ts-import">

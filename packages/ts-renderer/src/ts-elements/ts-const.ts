@@ -5,6 +5,7 @@ import { generateExpression, TSExpressionElement } from "./ts-expression"
 export interface TSConst {
   name: string
   init?: TSExpressionElement
+  children?: undefined
 }
 
 export type TSConstElement = React.ReactElement<TSConst, "ts-const">

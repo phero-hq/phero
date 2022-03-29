@@ -4,6 +4,7 @@ import { generateExpression, TSExpressionElement } from "./ts-expression"
 
 export interface TSReturn {
   expression: TSExpressionElement
+  children?: undefined
 }
 
 export type TSReturnElement = React.ReactElement<TSReturn, "ts-return">

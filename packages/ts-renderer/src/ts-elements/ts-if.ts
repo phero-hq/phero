@@ -7,6 +7,7 @@ export interface TSIf {
   expression: TSExpressionElement
   then: TSStatementElement
   else?: TSStatementElement
+  children?: undefined
 }
 
 export type TSIfElement = React.ReactElement<TSIf, "ts-if">

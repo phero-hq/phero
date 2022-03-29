@@ -14,6 +14,7 @@ export interface TSArrowFunction {
   returnType: TSTypeElement
   // body: TSExpression | TSStatement
   body: TSBlockElement
+  children?: undefined
 }
 
 export type TSArrowFunctionElement = React.ReactElement<

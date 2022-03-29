@@ -28,6 +28,7 @@ import { TSNumber, TSNumberElement } from "./ts-number"
 import { TSNumberLiteral, TSNumberLiteralElement } from "./ts-number-literal"
 import { TSObjectLiteral } from "./ts-object-literal"
 import { TSParameter, TSParameterElement } from "./ts-parameter"
+import { generateBundle, TSBundle, TSBundleElement } from "./ts-bundle"
 import {
   TSPropertyAccessExpression,
   TSPropertyAccessExpressionElement,
@@ -111,10 +112,12 @@ export type TSElements =
   | TSInterfaceElement
   | TSTypeLiteralElement
   | TSPropertySignatureElement
+  | TSBundleElement
 
 declare global {
   namespace JSX {
     interface IntrinsicElements {
+      "ts-bundle": TSBundle
       "ts-source-file": TSSourceFile
 
       // declaration
@@ -171,6 +174,8 @@ declare global {
 
 export function generateAST(element: TSElements): ts.Node {
   switch (element.type) {
+    case "ts-bundle":
+      return generateBundle(element)
     case "ts-function":
       return generateFunction(element)
     case "ts-import":

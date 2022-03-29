@@ -4,6 +4,7 @@ import ts from "typescript"
 export interface TSCallExpression {
   name: string
   args?: string[]
+  children?: undefined
 }
 
 export type TSCallExpressionElement = React.ReactElement<

@@ -6,6 +6,7 @@ export interface TSBinaryExpression {
   left: TSExpressionElement
   op: "==" | "===" | "<=" | ">=" | "!=" | "!=="
   right: TSExpressionElement
+  children?: undefined
 }
 
 export type TSBinaryExpressionElement = React.ReactElement<

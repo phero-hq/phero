@@ -3,6 +3,7 @@ import ts from "typescript"
 
 export interface TSStringLiteral {
   value: string
+  children?: undefined
 }
 
 export type TSStringLiteralElement = React.ReactElement<

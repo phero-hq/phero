@@ -18,6 +18,7 @@ export interface TSLiteralType {
     | TSNumberLiteralElement
     | TSFalseElement
     | TSTrueElement
+  children?: undefined
 }
 
 export type TSLiteralTypeElement = React.ReactElement<

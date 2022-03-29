@@ -1,7 +1,9 @@
 import React from "react"
 import ts from "typescript"
 
-export interface TSTrue {}
+export interface TSTrue {
+  children?: undefined
+}
 
 export type TSTrueElement = React.ReactElement<TSTrue, "ts-true">
 
