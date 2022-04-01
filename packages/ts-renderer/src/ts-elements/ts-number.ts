@@ -6,6 +6,6 @@ export interface TSNumber {
 
 export type TSNumberElement = React.ReactElement<TSNumber, "ts-number">
 
-export function generateNumber() {
+export function generateNumber(): ts.KeywordTypeNode<ts.SyntaxKind.NumberKeyword> {
   return ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword)
 }

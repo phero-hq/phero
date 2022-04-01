@@ -6,6 +6,6 @@ export interface TSBoolean {
 
 export type TSBooleanElement = React.ReactElement<TSBoolean, "ts-boolean">
 
-export function generateBoolean() {
+export function generateBoolean(): ts.KeywordTypeNode<ts.SyntaxKind.BooleanKeyword> {
   return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword)
 }

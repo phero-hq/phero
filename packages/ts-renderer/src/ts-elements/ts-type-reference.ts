@@ -13,7 +13,9 @@ export type TSTypeReferenceElement = React.ReactElement<
   "ts-type-reference"
 >
 
-export function generateTypeReference(element: TSTypeReferenceElement) {
+export function generateTypeReference(
+  element: TSTypeReferenceElement,
+): ts.TypeReferenceNode {
   return ts.factory.createTypeReferenceNode(
     ts.factory.createIdentifier(element.props.name),
     element.props.args && element.props.args.map(generateTypeNode),

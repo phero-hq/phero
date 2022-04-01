@@ -1,6 +1,11 @@
 import ReactReconciler from "react-reconciler"
 import ts from "typescript"
-import { generateAST, TSElements } from "./ts-elements"
+import {
+  generateAST,
+  TSElements,
+  TSElementTypeToSyntaxKind,
+  TSSyntaxKindToTSNodeMapping,
+} from "./ts-elements"
 import { TSBundleElement } from "./ts-elements/ts-bundle"
 
 type Type = TSElements["type"]
@@ -48,6 +53,34 @@ class TSElementInstance<TSElement extends TSElements> implements Instance {
 
   removeChild(child: Instance | TextInstance): void {
     this.children.splice(this.children.indexOf(child), 1)
+  }
+}
+
+class RootInstance<TSElement extends TSElements> implements Instance {
+  readonly type = "ts-root"
+  readonly props: {} = {}
+  children: TSElementInstance<TSElement>[] = []
+  rootElement?: TSElementInstance<TSElement>
+
+  appendChild(child: TSElementInstance<TSElement>): void {
+    if (this.rootElement) {
+      throw new Error("RootElement already set")
+    }
+
+    this.rootElement = child
+    this.children.push(child)
+  }
+
+  commitUpdate(newProps: {}): void {
+    console.log("COMMIT UPDATE HOOK ", newProps)
+    // this.props = {
+    //   ...this.props,
+    //   ...newProps,
+    // }
+  }
+
+  removeChild(child: Instance | TextInstance): void {
+    // this.children.splice(this.children.indexOf(child), 1)
   }
 }
 
@@ -262,31 +295,37 @@ const TSRenderer = ReactReconciler<
   supportsHydration: false,
 })
 
-export function renderAST(element: TSElements): ts.Node {
-  const rootElement = new TSElementInstance<TSBundleElement>("ts-bundle", {
-    children: [],
-  })
+export function renderAST<
+  TSElement extends TSElements,
+  TSNode = TSSyntaxKindToTSNodeMapping[TSElementTypeToSyntaxKind[TSElement["type"]]],
+>(element: TSElement): TSNode {
+  const rootElement = new RootInstance<TSElement>()
 
   const root = TSRenderer.createContainer(rootElement, 0, false, null)
   TSRenderer.updateContainer(element, root, null, () => {
     // noop
   })
 
+  if (!rootElement.rootElement) {
+    throw new Error("Render gone wrong")
+  }
   // TSRenderer.injectIntoDevTools({
   //   bundleType: 0, // prod
   //   rendererPackageName: "ts-renderer",
   //   version: "0.0.1",
   // })
 
-  return generateAST(toJSON(rootElement))
+  return generateAST(toElementTree(rootElement.rootElement))
 }
 
-function toJSON<T extends TSElements>(inst: TSElementInstance<T>): any {
+function toElementTree<TSElement extends TSElements>(
+  inst: TSElementInstance<TSElement>,
+): TSElement {
   const { children, ...props } = inst.props
   let renderedChildren = undefined
   if (inst.children && inst.children.length) {
     for (let i = 0; i < inst.children.length; i++) {
-      const renderedChild = toJSON(inst.children[i])
+      const renderedChild = toElementTree(inst.children[i])
       if (renderedChild !== undefined) {
         if (renderedChildren === undefined) {
           renderedChildren = [renderedChild]
@@ -296,10 +335,9 @@ function toJSON<T extends TSElements>(inst: TSElementInstance<T>): any {
       }
     }
   }
-  const json = {
+
+  return {
     type: inst.type,
     props: { ...props, children: renderedChildren },
-  }
-
-  return json
+  } as TSElement
 }

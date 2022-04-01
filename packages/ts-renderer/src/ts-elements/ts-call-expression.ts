@@ -1,9 +1,10 @@
 import React from "react"
 import ts from "typescript"
+import { generateExpression, TSExpressionElement } from "./ts-expression"
 
 export interface TSCallExpression {
   name: string
-  args?: string[]
+  args?: (string | TSExpressionElement)[]
   children?: undefined
 }
 
@@ -18,6 +19,10 @@ export function generateCallExpression(
   return ts.factory.createCallExpression(
     ts.factory.createIdentifier(element.props.name),
     undefined,
-    element.props.args?.map(ts.factory.createIdentifier),
+    element.props.args?.map((arg) =>
+      typeof arg === "string"
+        ? ts.factory.createIdentifier(arg)
+        : generateExpression(arg),
+    ),
   )
 }

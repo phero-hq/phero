@@ -8,6 +8,7 @@ import {
   TSLiteralType,
   TSLiteralTypeElement,
 } from "./ts-literal-type"
+import { generateNode, TSNodeElement } from "./ts-node"
 import { generateNumber, TSNumber, TSNumberElement } from "./ts-number"
 import {
   generateNumberLiteral,
@@ -66,6 +67,7 @@ export type TSTypeElement =
   | TSNumberLiteralElement
   | TSStringLiteralElement
   | TSTypeLiteralElement
+  | TSNodeElement
 
 export function generateTypeNode(element: TSTypeElement): ts.TypeNode {
   switch (element.type) {
@@ -93,6 +95,8 @@ export function generateTypeNode(element: TSTypeElement): ts.TypeNode {
       return ts.factory.createLiteralTypeNode(generateStringLiteral(element))
     case "ts-type-literal":
       return generateTypeLiteral(element)
+    case "ts-node":
+      return generateNode(element, ts.isTypeNode)
     default:
       throw new UnsupportedElementSupportedError(element)
   }

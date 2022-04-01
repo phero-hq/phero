@@ -13,13 +13,13 @@ export type TSTryElement = React.ReactElement<TSTry, "ts-try">
 
 export interface TSCatch {
   errorName: string
-  children: TSBlockElement
+  children?: TSBlockElement
 }
 
 export type TSCatchElement = React.ReactElement<TSCatch, "ts-catch">
 
 export interface TSFinally {
-  children: TSBlockElement
+  children?: TSBlockElement
 }
 
 export type TSFinallyElement = React.ReactElement<TSFinally, "ts-finally">
@@ -35,8 +35,10 @@ export function generateTry(element: TSTryElement): ts.TryStatement {
         undefined,
         undefined,
       ),
-      generateBlock(_catch.props.children),
+      _catch.props.children
+        ? generateBlock(_catch.props.children)
+        : ts.factory.createBlock([]),
     ),
-    _finally && generateBlock(_finally.props.children),
+    _finally?.props.children && generateBlock(_finally.props.children),
   )
 }

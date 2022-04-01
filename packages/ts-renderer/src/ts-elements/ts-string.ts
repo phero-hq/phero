@@ -6,6 +6,6 @@ export interface TSString {
 
 export type TSStringElement = React.ReactElement<TSString, "ts-string">
 
-export function generateString() {
+export function generateString(): ts.KeywordTypeNode<ts.SyntaxKind.StringKeyword> {
   return ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword)
 }

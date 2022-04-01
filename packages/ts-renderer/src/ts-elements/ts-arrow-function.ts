@@ -1,6 +1,7 @@
 import React from "react"
 import ts from "typescript"
 import { generateBlock, TSBlockElement } from "./ts-block"
+import { generateNode, TSNode, TSNodeElement } from "./ts-node"
 import { generateParameter, TSParameterElement } from "./ts-parameter"
 import { generateTypeNode, TSTypeElement } from "./ts-type"
 import { generateModifiers } from "./utils"
@@ -12,8 +13,7 @@ export interface TSArrowFunction {
   name?: string
   params: TSParameterElement[]
   returnType: TSTypeElement
-  // body: TSExpression | TSStatement
-  body: TSBlockElement
+  body: TSBlockElement | TSNodeElement
   children?: undefined
 }
 
@@ -34,6 +34,8 @@ export function generateArrowFunction(
     element.props.params.map(generateParameter),
     generateTypeNode(element.props.returnType),
     ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-    generateBlock(element.props.body),
+    element.props.body.type === "ts-node"
+      ? generateNode(element.props.body, ts.isBlock)
+      : generateBlock(element.props.body),
   )
 }

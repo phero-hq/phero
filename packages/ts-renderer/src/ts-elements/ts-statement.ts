@@ -39,6 +39,8 @@ export function generateStatement(element: TSStatementElement): ts.Statement {
       return generateInterface(element)
     case "ts-function":
       return generateFunction(element)
+    case "ts-function":
+      return generateFunction(element)
     default:
       throw new UnsupportedElementSupportedError(element)
   }

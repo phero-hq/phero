@@ -1,5 +1,4 @@
-import { TSAnyElement } from "./ts-elements/ts-any"
-import { TSTypeElement } from "./ts-elements/ts-type"
+import { renderAST } from "./renderer"
 
 const RootRender = () => (
   <ts-source-file>
@@ -158,4 +157,15 @@ function ParseResult({ name, isExport }: { name: string; isExport?: boolean }) {
       }
     />
   )
+}
+
+console.log(
+  "XXX",
+  renderAST(
+    <ts-function name="aad" params={[<Aad />]} returnType={<ts-string />} />,
+  ),
+)
+
+function Aad() {
+  return <ts-parameter name="kees" type={<ts-any />} />
 }

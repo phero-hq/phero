@@ -14,7 +14,7 @@ export interface TSInterface {
   export?: boolean
   name: string
   typeParameters: TSTypeParameterElement[]
-  children: TSPropertySignatureElement | TSPropertySignatureElement[]
+  children?: TSPropertySignatureElement | TSPropertySignatureElement[]
 }
 
 export type TSInterfaceElement = React.ReactElement<TSInterface, "ts-interface">
