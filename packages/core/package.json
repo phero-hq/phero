@@ -12,9 +12,7 @@
     "prepublish": "npm run clean && npm run build"
   },
   "dependencies": {
-    "react": "^18.0.0",
-    "typescript": "^4.4.4",
-    "@samen/ts-renderer": "^0.8.0-alpha.6"
+    "typescript": "^4.4.4"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
