@@ -97,7 +97,9 @@ export default function generateModelParser(
           ],
         ),
         generateParserBody(
-          rootParserModel.rootTypeParser.typeName,
+          ts.factory.createTypeReferenceNode(
+            rootParserModel.rootTypeParser.typeName,
+          ),
           parserStatement,
         ),
       ),
@@ -106,7 +108,7 @@ export default function generateModelParser(
 }
 
 export function generateParserBody(
-  returnTypeString: string,
+  returnType: ts.TypeNode,
   parserStatement: ts.Statement,
 ): ts.Block {
   return ts.factory.createBlock(
@@ -185,7 +187,7 @@ export function generateParserBody(
               ts.factory.createIdentifier("result"),
               ts.factory.createAsExpression(
                 ts.factory.createIdentifier("result"),
-                ts.factory.createTypeReferenceNode(returnTypeString, undefined),
+                returnType,
               ),
             ),
           ],

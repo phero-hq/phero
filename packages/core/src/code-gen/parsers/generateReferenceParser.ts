@@ -135,6 +135,9 @@ export function generateInlineTypeParameterParser(
       ],
     ),
     ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-    generateParserBody(returnTypeString, parser),
+    generateParserBody(
+      ts.factory.createTypeReferenceNode(returnTypeString),
+      parser,
+    ),
   )
 }

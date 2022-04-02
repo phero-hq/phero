@@ -1,5 +1,4 @@
 import ts from "typescript"
-import { renderAST } from "@samen/ts-renderer"
 import { ParsedSamenApp } from ".."
 import { getReturnType } from "../extractFunctionFromServiceProperty"
 import { ParsedSamenFunctionDefinition } from "../parseSamenApp"
@@ -10,6 +9,8 @@ import generateModelParser, {
 } from "./parsers/generateParser"
 import generateParserFromModel from "./parsers/generateParserFromModel"
 import generateParserModel from "./parsers/generateParserModel"
+
+import * as tsx from "../tsx"
 
 const factory = ts.factory
 
@@ -103,187 +104,154 @@ function generateRPCExecutor(
   funcDef: ParsedSamenFunctionDefinition,
   typeChecker: ts.TypeChecker,
 ): ts.FunctionDeclaration {
-  return renderAST(
-    <ts-function
-      name={`rpc_executor_${serviceName}__${funcDef.name}`}
-      params={[<ts-parameter name="input" type={<ts-any />} />]}
-      returnType={
-        <ts-type-reference
-          name="Promise"
-          args={[<ts-type-reference name="RPCResult" args={[<ts-any />]} />]}
-        />
-      }
-    >
-      <ts-const name="v2" init={<ts-true />} />
-      <ts-const
-        name="inputParser"
-        init={
-          <InlineParser
-            returnTypeString="any"
-            parser={generateParserFromModel(
-              generateParserModel(typeChecker, funcDef.actualFunction, "data"),
-            )}
-          />
-        }
-      />
-      <ts-const
-        name="inputParseResult"
-        init={<ts-call-expression name="inputParser" args={["input"]} />}
-      />
-      <ts-const
-        name="outputParser"
-        init={
-          <InlineParser
-            returnTypeString="any"
-            parser={generateParserFromModel(
-              generateParserModel(
-                typeChecker,
-                getReturnType(funcDef.actualFunction),
-                "data",
-              ),
-            )}
-          />
-        }
-      />
-      <EarlyReturnParseResultNotOkay parseResult="inputParseResult" />
-      <CallRPCFunction serviceName={serviceName} funcDef={funcDef} />
-    </ts-function>,
-  )
+  return tsx.function({
+    name: `rpc_executor_${serviceName}__${funcDef.name}`,
+    params: [tsx.param({ name: "input", type: tsx.type.any })],
+    returnType: tsx.type.reference({
+      name: "Promise",
+      args: [tsx.type.reference({ name: "RPCResult", args: [tsx.type.any] })],
+    }),
+    body: [
+      tsx.const({ name: "v3", init: tsx.literal.true }),
+
+      tsx.const({
+        name: "inputParser",
+        init: generateInlineParser({
+          returnType: tsx.type.any,
+          parser: generateParserFromModel(
+            generateParserModel(typeChecker, funcDef.actualFunction, "data"),
+          ),
+        }),
+      }),
+
+      tsx.const({
+        name: "inputParseResult",
+        init: tsx.expression.call("inputParser", { args: ["input"] }),
+      }),
+
+      tsx.const({
+        name: "outputParser",
+        init: generateInlineParser({
+          returnType: tsx.type.any,
+          parser: generateParserFromModel(
+            generateParserModel(
+              typeChecker,
+              getReturnType(funcDef.actualFunction),
+              "data",
+            ),
+          ),
+        }),
+      }),
+
+      generateIfParseResultNotOkayEarlyReturn({
+        parseResult: "inputParseResult",
+      }),
+
+      generateRPCFunctionCall({ serviceName, funcDef }),
+    ],
+  })
 }
 
-function InlineParser({
-  returnTypeString,
+function generateInlineParser({
+  returnType,
   parser,
 }: {
-  returnTypeString: string
+  returnType: ts.TypeNode
   parser: ts.Statement
-}) {
-  return (
-    <ts-arrow-function
-      params={[<ts-parameter name="data" type={<ts-any />} />]}
-      returnType={
-        <ts-type-reference
-          name="ParseResult"
-          args={[<ts-type-reference name={returnTypeString} />]}
-        />
-      }
-      body={<ts-node node={generateParserBody(returnTypeString, parser)} />}
-    />
-  )
+}): ts.ArrowFunction {
+  return tsx.arrowFunction({
+    params: [tsx.param({ name: "data", type: tsx.type.any })],
+    returnType: tsx.type.reference({
+      name: "ParseResult",
+      args: [returnType],
+    }),
+    body: generateParserBody(returnType, parser),
+  })
 }
 
-function CallRPCFunction({
+function generateRPCFunctionCall({
   serviceName,
   funcDef,
 }: {
   serviceName: string
   funcDef: ParsedSamenFunctionDefinition
 }) {
-  return (
-    <ts-try>
-      <ts-block>
-        <ts-const
-          name="output"
-          init={
-            <ts-await>
-              <ts-call-expression
-                name={`${serviceName}.${funcDef.name}.func`}
-                args={funcDef.parameters.map((param) => (
-                  <ts-property-access-expression
-                    chain={`inputParseResult.result.${getParameterName(
-                      param.name,
-                    )}`}
-                  />
-                ))}
-              />
-            </ts-await>
-          }
-        />
-        <ts-const
-          name="outputParseResult"
-          init={<ts-call-expression name="outputParser" args={["output"]} />}
-        />
-        <EarlyReturnParseResultNotOkay parseResult="outputParseResult" />
+  return tsx.statement.try({
+    block: [
+      tsx.const({
+        name: "output",
+        init: tsx.expression.await(
+          tsx.expression.call(`${serviceName}.${funcDef.name}.func`, {
+            args: funcDef.parameters.map((param) =>
+              tsx.expression.propertyAccess(
+                "inputParseResult",
+                "result",
+                getParameterName(param.name),
+              ),
+            ),
+          }),
+        ),
+      }),
 
-        <ReturnOkay />
-      </ts-block>
-      <ts-catch errorName="error">
-        <ts-return
-          expression={
-            <ts-object-literal>
-              <ts-property-assignment
-                name="status"
-                init={<ts-number-literal value={500} />}
-              />
-              <ts-shorthand-property-assignment name="error" />
-            </ts-object-literal>
-          }
-        />
-      </ts-catch>
-    </ts-try>
-  )
+      generateIfParseResultNotOkayEarlyReturn({
+        parseResult: "outputParseResult",
+      }),
+
+      generateReturnOkay(),
+
+      tsx.const({
+        name: "outputParseResult",
+        init: tsx.expression.call("outputParser", { args: ["output"] }),
+      }),
+    ],
+    catch: {
+      error: "error",
+      block: [
+        tsx.statement.return(
+          tsx.literal.object(
+            tsx.property.assignment("status", tsx.literal.number(500)),
+            tsx.property.shorthandAssignment("error"),
+          ),
+        ),
+      ],
+    },
+  })
 }
 
-function EarlyReturnParseResultNotOkay({
+function generateIfParseResultNotOkayEarlyReturn({
   parseResult,
 }: {
   parseResult: "inputParseResult" | "outputParseResult"
 }) {
-  return (
-    <ts-if
-      expression={
-        <ts-binary-expression
-          left={<ts-property-access-expression chain={`${parseResult}.ok`} />}
-          op="==="
-          right={<ts-false />}
-        />
-      }
-      then={
-        <ts-block>
-          <ts-return
-            expression={
-              <ts-object-literal>
-                <ts-property-assignment
-                  name="status"
-                  init={<ts-number-literal value={400} />}
-                />
-                <ts-property-assignment
-                  name="errors"
-                  init={
-                    <ts-property-access-expression
-                      chain={`${parseResult}.errors`}
-                    />
-                  }
-                />
-              </ts-object-literal>
-            }
-          />
-        </ts-block>
-      }
-    />
-  )
+  return tsx.statement.if({
+    expression: tsx.expression.binary(
+      tsx.expression.propertyAccess(parseResult, "ok"),
+      "===",
+      tsx.literal.false,
+    ),
+    then: tsx.statement.block(
+      tsx.statement.return(
+        tsx.literal.object(
+          tsx.property.assignment("status", tsx.literal.number(400)),
+          tsx.property.assignment(
+            "errors",
+            tsx.expression.propertyAccess(parseResult, "errors"),
+          ),
+        ),
+      ),
+    ),
+  })
 }
 
-function ReturnOkay() {
-  return (
-    <ts-return
-      expression={
-        <ts-object-literal>
-          <ts-property-assignment
-            name="status"
-            init={<ts-number-literal value={200} />}
-          />
-          <ts-property-assignment
-            name="result"
-            init={
-              <ts-property-access-expression
-                chain={`outputParserResult.result`}
-              />
-            }
-          />
-        </ts-object-literal>
-      }
-    />
+function generateReturnOkay() {
+  return tsx.statement.return(
+    tsx.literal.object(
+      tsx.property.assignment("status", tsx.literal.number(200)),
+      tsx.property.assignment(
+        "result",
+        tsx.expression.propertyAccess("outputParserResult", "result"),
+      ),
+    ),
   )
 }
 
