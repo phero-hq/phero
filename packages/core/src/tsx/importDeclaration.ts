@@ -1,4 +1,3 @@
-import React from "react"
 import ts from "typescript"
 
 interface ImportProps {
