@@ -24,11 +24,11 @@ export class Expression {
   }
 
   public static call(
-    name: string,
+    name: string | ts.Expression,
     opts?: { args?: (string | ts.Expression)[] },
   ): ts.CallExpression {
     return ts.factory.createCallExpression(
-      ts.factory.createIdentifier(name),
+      typeof name == "string" ? ts.factory.createIdentifier(name) : name,
       undefined,
       opts?.args?.map((arg) =>
         typeof arg === "string" ? ts.factory.createIdentifier(arg) : arg,

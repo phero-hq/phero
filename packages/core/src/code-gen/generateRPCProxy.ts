@@ -105,6 +105,8 @@ function generateRPCExecutor(
   typeChecker: ts.TypeChecker,
 ): ts.FunctionDeclaration {
   return tsx.function({
+    export: true,
+    async: true,
     name: `rpc_executor_${serviceName}__${funcDef.name}`,
     params: [tsx.param({ name: "input", type: tsx.type.any })],
     returnType: tsx.type.reference({
@@ -181,16 +183,29 @@ function generateRPCFunctionCall({
       tsx.const({
         name: "output",
         init: tsx.expression.await(
-          tsx.expression.call(`${serviceName}.${funcDef.name}.func`, {
-            args: funcDef.parameters.map((param) =>
-              tsx.expression.propertyAccess(
-                "inputParseResult",
-                "result",
-                getParameterName(param.name),
-              ),
+          tsx.expression.call(
+            tsx.expression.propertyAccess(
+              serviceName,
+              "functions",
+              funcDef.name,
+              "func",
             ),
-          }),
+            {
+              args: funcDef.parameters.map((param) =>
+                tsx.expression.propertyAccess(
+                  "inputParseResult",
+                  "result",
+                  getParameterName(param.name),
+                ),
+              ),
+            },
+          ),
         ),
+      }),
+
+      tsx.const({
+        name: "outputParseResult",
+        init: tsx.expression.call("outputParser", { args: ["output"] }),
       }),
 
       generateIfParseResultNotOkayEarlyReturn({
@@ -198,11 +213,6 @@ function generateRPCFunctionCall({
       }),
 
       generateReturnOkay(),
-
-      tsx.const({
-        name: "outputParseResult",
-        init: tsx.expression.call("outputParser", { args: ["output"] }),
-      }),
     ],
     catch: {
       error: "error",
@@ -249,7 +259,7 @@ function generateReturnOkay() {
       tsx.property.assignment("status", tsx.literal.number(200)),
       tsx.property.assignment(
         "result",
-        tsx.expression.propertyAccess("outputParserResult", "result"),
+        tsx.expression.propertyAccess("outputParseResult", "result"),
       ),
     ),
   )
