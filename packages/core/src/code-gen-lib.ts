@@ -74,7 +74,7 @@ function generateFunctionParameters(
         undefined,
         "ctx",
         undefined,
-        generateTypeNode(func.context, refMaker),
+        generateTypeNode(func.context.type, refMaker),
         undefined,
       ),
     )

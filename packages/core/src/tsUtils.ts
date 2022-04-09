@@ -292,3 +292,11 @@ export function getNameAsString(
 
   throw new Error("Name not supported")
 }
+
+export function getTypeName(typeNode: ts.TypeNode): string | undefined {
+  if (ts.isTypeReferenceNode(typeNode)) {
+    return ts.isIdentifier(typeNode.typeName)
+      ? typeNode.typeName.text
+      : typeNode.typeName.right.text
+  }
+}

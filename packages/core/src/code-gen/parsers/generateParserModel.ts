@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { printCode } from "../../tsTestUtils"
-import { isExternalType } from "../../tsUtils"
+import { getTypeName, isExternalType } from "../../tsUtils"
 
 export enum ParserModelType {
   Root = "root",
@@ -239,15 +239,23 @@ export default function generateParserModel(
       parser: {
         type: ParserModelType.Object,
         members: rootNode.parameters.map((param) => {
-          if (!param.type) {
+          const paramType =
+            //  if it's of type SamenContext, we actually want the type arg
+            param.type &&
+            ts.isTypeReferenceNode(param.type) &&
+            getTypeName(param.type) === "SamenContext"
+              ? param.type.typeArguments?.[0]
+              : param.type
+
+          if (!paramType) {
             throw new Error("Function parameter has no returnType")
           }
-          // console.log("is 162?", param.type.kind)
+          // console.log("is 162?", paramType.kind)
           return {
             type: ParserModelType.Member,
             name: getMemberName(param.name),
             optional: !!param.questionToken,
-            parser: generate(param.type, 0),
+            parser: generate(paramType, 0),
           }
         }),
       },

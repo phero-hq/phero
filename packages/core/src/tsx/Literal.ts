@@ -30,12 +30,20 @@ export class Literal {
   }
 
   public static object(
-    ...props: (ts.PropertyAssignment | ts.ShorthandPropertyAssignment)[]
+    ...props: (
+      | ts.PropertyAssignment
+      | ts.ShorthandPropertyAssignment
+      | ts.SpreadAssignment
+    )[]
   ): ts.ObjectLiteralExpression {
     return ts.factory.createObjectLiteralExpression(props)
   }
 
-  public static type(members: ts.PropertySignature[]): ts.TypeLiteralNode {
+  public static array(...elements: ts.Expression[]): ts.ArrayLiteralExpression {
+    return ts.factory.createArrayLiteralExpression(elements)
+  }
+
+  public static type(...members: ts.PropertySignature[]): ts.TypeLiteralNode {
     return ts.factory.createTypeLiteralNode(members)
   }
 }

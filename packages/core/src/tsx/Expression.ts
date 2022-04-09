@@ -10,7 +10,7 @@ export class Expression {
   public static binary = binaryExpression
 
   public static propertyAccess(
-    obj: string,
+    obj: string | ts.Expression,
     prop: string,
     ...deepProps: string[]
   ): ts.PropertyAccessExpression {
@@ -19,17 +19,31 @@ export class Expression {
     }
     return deepProps.reduce(
       create,
-      create(ts.factory.createIdentifier(obj), prop),
+      create(
+        typeof obj == "string" ? ts.factory.createIdentifier(obj) : obj,
+        prop,
+      ),
+    )
+  }
+
+  public static elementAccess(
+    arr: string | ts.Expression,
+    index: string | number | ts.Expression,
+  ): ts.ElementAccessExpression {
+    return ts.factory.createElementAccessChain(
+      typeof arr == "string" ? ts.factory.createIdentifier(arr) : arr,
+      undefined,
+      typeof index == "string" ? ts.factory.createIdentifier(index) : index,
     )
   }
 
   public static call(
     name: string | ts.Expression,
-    opts?: { args?: (string | ts.Expression)[] },
+    opts?: { args?: (string | ts.Expression)[]; typeArgs?: ts.TypeNode[] },
   ): ts.CallExpression {
     return ts.factory.createCallExpression(
       typeof name == "string" ? ts.factory.createIdentifier(name) : name,
-      undefined,
+      opts?.typeArgs,
       opts?.args?.map((arg) =>
         typeof arg === "string" ? ts.factory.createIdentifier(arg) : arg,
       ),
@@ -40,5 +54,9 @@ export class Expression {
 
   public static literalType(literal: ts.LiteralExpression): ts.LiteralTypeNode {
     return ts.factory.createLiteralTypeNode(literal)
+  }
+
+  public static identifier(text: string): ts.Identifier {
+    return ts.factory.createIdentifier(text)
   }
 }

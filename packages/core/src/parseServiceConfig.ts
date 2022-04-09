@@ -100,12 +100,9 @@ export function parseConfigNumberPropValue(
 export function mergeFunctionConfigs(
   serviceConfig: ParsedSamenServiceConfig,
   functionConfig: ParsedSamenFunctionConfig,
-): ParsedSamenServiceConfig {
+): ParsedSamenFunctionConfig {
   return {
     memory: functionConfig.memory ?? serviceConfig.memory,
     timeout: functionConfig.timeout ?? serviceConfig.timeout,
-    minInstance: serviceConfig.minInstance,
-    maxInstance: serviceConfig.maxInstance,
-    middleware: serviceConfig.middleware,
   }
 }

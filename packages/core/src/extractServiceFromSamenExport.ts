@@ -42,6 +42,7 @@ export default function extractServiceFromSamenExport(
         ...func,
         config: mergeFunctionConfigs(parsedServiceConfig, func.config),
       },
+      parsedServiceConfig,
       typeChecker,
     ),
   )
@@ -54,6 +55,7 @@ export default function extractServiceFromSamenExport(
     name: serviceName,
     funcs: functionDefinitions,
     models: extractModels(functionDefinitions, typeChecker), // TODO
+    config: parsedServiceConfig,
   }
 }
 

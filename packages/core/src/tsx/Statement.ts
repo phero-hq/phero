@@ -1,6 +1,7 @@
 import ts from "typescript"
 import { block } from "./block"
 import { constDeclaration } from "./const"
+import { simpleForOver } from "./for"
 
 export class Statement {
   public static if(props: {
@@ -53,4 +54,10 @@ export class Statement {
   public static return(expression?: ts.Expression): ts.ReturnStatement {
     return ts.factory.createReturnStatement(expression)
   }
+
+  public static expression(expression: ts.Expression): ts.ExpressionStatement {
+    return ts.factory.createExpressionStatement(expression)
+  }
+
+  public static simpleForOver = simpleForOver
 }

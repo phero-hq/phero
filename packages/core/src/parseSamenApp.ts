@@ -12,6 +12,7 @@ export interface ParsedSamenServiceDefinition {
   name: string
   models: Model[]
   funcs: ParsedSamenFunctionDefinition[]
+  config: ParsedSamenServiceConfig
 }
 
 export type Model =
@@ -26,8 +27,11 @@ export interface ParsedSamenFunctionDefinition {
   actualFunction: ts.FunctionLikeDeclarationBase
   parameters: ts.ParameterDeclaration[]
   returnType: ts.TypeNode
-  config: ParsedSamenServiceConfig
-  context?: ts.TypeNode
+  config: ParsedSamenFunctionConfig
+  context?: {
+    name: string
+    type: ts.TypeNode
+  }
 }
 
 export interface ParsedSamenServiceConfig {
@@ -45,8 +49,8 @@ export interface ParsedSamenFunctionConfig {
 }
 
 export interface ParsedMiddlewareConfig {
-  nextType: ts.TypeNode | undefined
-  ctxType: ts.TypeNode | undefined
+  nextType: ts.TypeNode
+  contextType: ts.TypeNode
   middleware: ts.FunctionLikeDeclarationBase
 }
 

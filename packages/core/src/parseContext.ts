@@ -4,11 +4,15 @@ import generateParserModel, {
   ParserModelType,
 } from "./code-gen/parsers/generateParserModel"
 import { ParseError } from "./errors"
-import { ParsedSamenFunctionDefinition } from "./parseSamenApp"
+import {
+  ParsedSamenFunctionDefinition,
+  ParsedSamenServiceConfig,
+} from "./parseSamenApp"
 import { getNameAsString } from "./tsUtils"
 
 export function parseContext(
   func: ParsedSamenFunctionDefinition,
+  serviceConfig: ParsedSamenServiceConfig,
   typeChecker: ts.TypeChecker,
 ): ParsedSamenFunctionDefinition {
   const ctxIndex = func.parameters.findIndex(
@@ -54,8 +58,8 @@ export function parseContext(
 
   const ctxIO = getContextIO(
     [
-      ...(func.config.middleware ?? []),
-      { ctxType: funcCtx, nextType: undefined },
+      ...(serviceConfig.middleware ?? []),
+      { contextType: funcCtx, nextType: undefined },
     ],
     typeChecker,
   )
@@ -67,7 +71,10 @@ export function parseContext(
   return {
     ...func,
     parameters: func.parameters.slice(0, ctxIndex),
-    context: genCtx,
+    context: {
+      type: genCtx,
+      name: getNameAsString(ctxParam.name),
+    },
   }
 }
 
@@ -79,7 +86,7 @@ type ContextIO = {
 
 type MiddlewareContext = {
   nextType: ts.TypeNode | undefined
-  ctxType: ts.TypeNode | undefined
+  contextType: ts.TypeNode | undefined
 }
 
 function getContextIO(
@@ -89,7 +96,7 @@ function getContextIO(
   return middleware.reduce(
     (
       { inputContext, inputContextProps, accumulatedContext },
-      { ctxType, nextType },
+      { contextType: ctxType, nextType },
     ) => {
       if (ctxType) {
         const ctxParserModel = getRootObjectParserModel(ctxType, typeChecker)

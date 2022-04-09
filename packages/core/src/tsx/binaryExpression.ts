@@ -1,6 +1,16 @@
 import ts from "typescript"
 
-type BinaryOperator = "==" | "===" | "<=" | ">=" | "!=" | "!=="
+type BinaryOperator =
+  | "=="
+  | "==="
+  | "<="
+  | ">="
+  | "!="
+  | "!=="
+  | "+"
+  | "-"
+  | "*"
+  | "/"
 
 export function binaryExpression(
   left: ts.Expression,
@@ -26,5 +36,13 @@ function generateOperator(
       return ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsToken)
     case "!==":
       return ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsEqualsToken)
+    case "+":
+      return ts.factory.createToken(ts.SyntaxKind.PlusToken)
+    case "-":
+      return ts.factory.createToken(ts.SyntaxKind.MinusToken)
+    case "*":
+      return ts.factory.createToken(ts.SyntaxKind.AsteriskToken)
+    case "/":
+      return ts.factory.createToken(ts.SyntaxKind.SlashToken)
   }
 }

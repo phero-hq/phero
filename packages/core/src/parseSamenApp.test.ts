@@ -357,14 +357,14 @@ describe("parseSamenApp", () => {
         parsedApp.services[0].funcs[1].actualFunction,
         "editArticle",
       )
-      expect(parsedApp.services[0].funcs[0].config.middleware).toHaveLength(1)
+      expect(parsedApp.services[0].config.middleware).toHaveLength(1)
       expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[0].config.middleware?.[0].middleware,
+        parsedApp.services[0].config.middleware?.[0].middleware,
         "requireCMSUser",
       )
-      expect(parsedApp.services[0].funcs[1].config.middleware).toHaveLength(1)
+      expect(parsedApp.services[0].config.middleware).toHaveLength(1)
       expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[1].config.middleware?.[0].middleware,
+        parsedApp.services[0].config.middleware?.[0].middleware,
         "requireCMSUser",
       )
     })
@@ -435,9 +435,9 @@ describe("parseSamenApp", () => {
         parsedApp.services[1].funcs[0].actualFunction,
         "editArticle",
       )
-      expect(parsedApp.services[1].funcs[0].config.middleware).toHaveLength(1)
+      expect(parsedApp.services[1].config.middleware).toHaveLength(1)
       expectFunctionDeclrWithName(
-        parsedApp.services[1].funcs[0].config.middleware?.[0].middleware,
+        parsedApp.services[1].config.middleware?.[0].middleware,
         "requireCMSUser",
       )
     })

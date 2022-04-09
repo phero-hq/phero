@@ -28,4 +28,12 @@ export class Property {
   ): ts.ShorthandPropertyAssignment {
     return ts.factory.createShorthandPropertyAssignment(name)
   }
+
+  public static spreadAssignment(
+    name: string | ts.Expression,
+  ): ts.SpreadAssignment {
+    return ts.factory.createSpreadAssignment(
+      typeof name == "string" ? ts.factory.createIdentifier(name) : name,
+    )
+  }
 }

@@ -5,7 +5,7 @@ interface ArrowFunctionProps {
   export?: boolean
   async?: boolean
   params: ts.ParameterDeclaration[]
-  returnType: ts.TypeNode
+  returnType?: ts.TypeNode
   body: ts.Block | ts.Statement[]
 }
 
