@@ -57,7 +57,9 @@ export function parseAppDeclarationFileContent(dts: string): {
 function parseAppDeclarationSourceFile(
   sourceFile: ts.SourceFile,
 ): ParsedAppDeclaration {
-  const modules: ParsedModule[] = sourceFile.statements.map(parseModule)
+  const modules: ParsedModule[] = sourceFile.statements
+    .filter(isUserModule)
+    .map(parseModule)
 
   const domainModule: ParsedModule | undefined = modules.find(
     (m) => m.name === "domain",
@@ -167,4 +169,12 @@ function parseModule(statement: ts.Statement): ParsedModule {
     }
   }
   throw new ParseError("Unexpected statement", statement)
+}
+
+function isUserModule(statement: ts.Statement): boolean {
+  return (
+    !ts.isModuleDeclaration(statement) ||
+    // skip the samen namespace
+    statement.name.text != "samen"
+  )
 }

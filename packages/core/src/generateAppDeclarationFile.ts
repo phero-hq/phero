@@ -7,6 +7,7 @@ import {
 } from "./code-gen-lib"
 import { ParsedSamenApp } from "./parseSamenApp"
 import { VirtualCompilerHost } from "./VirtualCompilerHost"
+import * as tsx from "./tsx"
 
 export default function generateAppDeclarationFile(
   app: ParsedSamenApp,
@@ -42,6 +43,22 @@ export default function generateAppDeclarationFile(
     )
   }
 
+  const isUsingSamenContext = app.services.some((s) =>
+    s.funcs.some((f) => !!f.context),
+  )
+  if (isUsingSamenContext) {
+    namespaceDeclrs.push(
+      generateNamespace(ts.factory.createIdentifier("samen"), [
+        tsx.typeAlias({
+          export: true,
+          name: "SamenContext",
+          typeParameters: [tsx.typeParam({ name: "T" })],
+          type: tsx.type.reference({ name: "T" }),
+        }),
+      ]),
+    )
+  }
+
   for (const service of app.services) {
     namespaceDeclrs.push(
       // export namespace cmsService {
@@ -66,17 +83,8 @@ export default function generateAppDeclarationFile(
   // console.log("---123----")
   // console.log(generateTS(namespaceDeclrs))
   // console.log("---123----")
-  const isUsingSamenContext = app.services.some((s) =>
-    s.funcs.some((f) => !!f.context),
-  )
-  vHost.addFile(
-    "api.ts",
-    generateTS(
-      isUsingSamenContext
-        ? [samenContextImport, ...namespaceDeclrs]
-        : namespaceDeclrs,
-    ),
-  )
+
+  vHost.addFile("api.ts", generateTS(namespaceDeclrs))
 
   const program = vHost.createProgram("api.ts")
   program.emit()
@@ -96,25 +104,6 @@ export default function generateAppDeclarationFile(
 
   return declrFile
 }
-
-const samenContextImport = ts.factory.createImportDeclaration(
-  undefined,
-  undefined,
-  ts.factory.createImportClause(
-    false,
-    undefined,
-    ts.factory.createNamedImports([
-      ts.factory.createImportSpecifier(
-        false,
-        undefined,
-        ts.factory.createIdentifier("SamenContext"),
-      ),
-    ]),
-  ),
-  // TODO, where should this type come from?
-  ts.factory.createStringLiteral("@samen/server"),
-  undefined,
-)
 
 function generateTS(nodes: ts.Node[]): string {
   const printer = ts.createPrinter({

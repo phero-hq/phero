@@ -50,7 +50,11 @@ function generateFunctionParameters(
   func: ParsedSamenFunctionDefinition,
   refMaker: ReferenceMaker,
 ): ts.ParameterDeclaration[] {
-  const params = func.parameters.map((param) => {
+  const parameters = func.context
+    ? func.parameters.slice(0, func.parameters.length - 1)
+    : func.parameters
+
+  const result = parameters.map((param) => {
     if (!param.type) {
       throw new ParseError(`Parameter should have a type`, param)
     }
@@ -67,12 +71,12 @@ function generateFunctionParameters(
   })
 
   if (func.context) {
-    params.push(
+    result.push(
       ts.factory.createParameterDeclaration(
         undefined,
         undefined,
         undefined,
-        "ctx",
+        func.context.name,
         undefined,
         generateTypeNode(func.context.type, refMaker),
         undefined,
@@ -80,7 +84,7 @@ function generateFunctionParameters(
     )
   }
 
-  return params
+  return result
 }
 
 export function generateClientFunction(
@@ -410,7 +414,7 @@ export class ReferenceMaker {
 
   toEntityNames(name: ts.EntityName, type: ts.Type): ts.EntityName[] {
     if (name.getText() === "SamenContext") {
-      return [ts.factory.createIdentifier("SamenContext")]
+      return [ts.factory.createIdentifier("samen.SamenContext")]
     }
 
     const isSharedType = this.sharedTypes.some(

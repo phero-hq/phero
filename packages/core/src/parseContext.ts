@@ -70,7 +70,6 @@ export function parseContext(
 
   return {
     ...func,
-    parameters: func.parameters.slice(0, ctxIndex),
     context: {
       type: genCtx,
       name: getNameAsString(ctxParam.name),

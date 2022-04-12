@@ -528,15 +528,15 @@ function generateRPCFunctionCall({
                     getParameterName(param.name),
                   ),
                 ),
-                ...(funcDef.context
-                  ? [
-                      tsx.expression.propertyAccess(
-                        "inputParseResult",
-                        "result",
-                        funcDef.context.name,
-                      ),
-                    ]
-                  : []),
+                // ...(funcDef.context
+                //   ? [
+                //       tsx.expression.propertyAccess(
+                //         "inputParseResult",
+                //         "result",
+                //         funcDef.context.name,
+                //       ),
+                //     ]
+                //   : []),
               ],
             },
           ),
