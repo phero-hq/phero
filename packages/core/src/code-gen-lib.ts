@@ -3,6 +3,7 @@ import { ParseError } from "./errors"
 import { getReturnType } from "./extractFunctionFromServiceProperty"
 import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
 import { getNameAsString, isExternalType } from "./tsUtils"
+import * as tsx from "./tsx"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
 const asyncModifier = ts.factory.createModifier(ts.SyntaxKind.AsyncKeyword)
@@ -89,35 +90,56 @@ function generateFunctionParameters(
 
 export function generateClientFunction(
   serviceName: string,
+  contextType: ts.TypeNode | undefined,
   func: ts.FunctionLikeDeclarationBase,
   refMaker: ReferenceMaker,
 ): ts.PropertyAssignment {
+  let parameters = func.parameters.map((p) =>
+    ts.factory.createParameterDeclaration(
+      undefined,
+      p.modifiers,
+      p.dotDotDotToken,
+      p.name,
+      p.questionToken,
+      p.type && generateTypeNode(p.type, refMaker),
+      undefined, // initializer is prohibited, only on classes
+    ),
+  )
+  let context: { name: string; type: ts.TypeNode } | undefined
+
+  if (contextType) {
+    const lastParam = func.parameters[func.parameters.length - 1]
+    if (
+      lastParam &&
+      lastParam.type &&
+      ts.isTypeReferenceNode(lastParam.type) &&
+      getNameAsString(lastParam.type.typeName) === "SamenContext"
+    ) {
+      // skip last parameter if we have a context param
+      parameters = parameters.slice(0, func.parameters.length - 1)
+      context = {
+        name: getNameAsString(lastParam.name),
+        type: contextType,
+      }
+    }
+  }
+
   return ts.factory.createPropertyAssignment(
     func.name!,
     ts.factory.createArrowFunction(
       [ts.factory.createModifier(ts.SyntaxKind.AsyncKeyword)],
       undefined,
-      func.parameters.map((p) =>
-        ts.factory.createParameterDeclaration(
-          undefined,
-          p.modifiers,
-          p.dotDotDotToken,
-          p.name,
-          p.questionToken,
-          p.type && generateTypeNode(p.type, refMaker),
-          undefined, // initializer is prohibited, only on classes
-        ),
-      ),
+      parameters,
       func.type && generateTypeNode(func.type, refMaker),
       undefined,
-      // ts.factory.createBlock([], false),
-      generateClientFunctionBlock(serviceName, func, refMaker),
+      generateClientFunctionBlock(serviceName, context, func, refMaker),
     ),
   )
 }
 
 function generateClientFunctionBlock(
   serviceName: string,
+  context: { name: string; type: ts.TypeNode } | undefined,
   func: ts.FunctionLikeDeclarationBase,
   refMaker: ReferenceMaker,
 ): ts.Block {
@@ -125,35 +147,52 @@ function generateClientFunctionBlock(
   const returnType = getReturnType(func)
   const isVoid = returnType.kind === ts.SyntaxKind.VoidKeyword
 
-  return ts.factory.createBlock([
-    ts.factory.createReturnStatement(
-      ts.factory.createCallExpression(
-        ts.factory.createPropertyAccessExpression(
+  return tsx.block(
+    tsx.statement.return(
+      tsx.expression.call(
+        tsx.expression.propertyAccess(
           ts.factory.createThis(),
-          isVoid
-            ? ts.factory.createIdentifier("requestVoid")
-            : ts.factory.createIdentifier("request"),
+          isVoid ? "requestVoid" : "request",
         ),
-        isVoid ? undefined : [generateTypeNode(returnType, refMaker)], //typeArgs,
-        [
-          ts.factory.createStringLiteral(serviceName),
-          ts.factory.createStringLiteral(func.name!.getText()),
-          ts.factory.createObjectLiteralExpression(
-            func.parameters.map((p) => {
-              if (ts.isIdentifier(p.name)) {
-                return ts.factory.createShorthandPropertyAssignment(
-                  ts.factory.createIdentifier(p.name.getText()),
-                )
-              }
-              // TODO https://trello.com/c/UJHzzAHz/25-support-object-array-binding-patterns-in-parameter-names
-              throw new Error("No support for prop binding names yet")
-            }),
-            true,
-          ),
-        ], // argumentArray
+        {
+          typeArgs: isVoid
+            ? undefined
+            : [generateTypeNode(returnType, refMaker)],
+
+          args: [
+            tsx.literal.string(serviceName),
+            tsx.literal.string(func.name!.getText()),
+            tsx.literal.object(
+              ...func.parameters.map((p, i) => {
+                if (!ts.isIdentifier(p.name)) {
+                  // TODO https://trello.com/c/UJHzzAHz/25-support-object-array-binding-patterns-in-parameter-names
+                  throw new Error("No support for prop binding names yet")
+                }
+
+                if (context && func.parameters.length - 1 === i) {
+                  return tsx.property.assignment(
+                    context.name,
+                    tsx.expression.await(
+                      tsx.expression.call(
+                        tsx.expression.propertyAccess(
+                          ts.factory.createThis(),
+                          "opts",
+                          "context",
+                          serviceName,
+                        ),
+                      ),
+                    ),
+                  )
+                }
+
+                return tsx.property.shorthandAssignment(p.name.getText())
+              }),
+            ),
+          ],
+        },
       ),
     ),
-  ])
+  )
 }
 
 export function generateModel(model: Model, refMaker: ReferenceMaker): Model {

@@ -13,3 +13,4 @@ export { default as generateAppDeclarationFile } from "./generateAppDeclarationF
 export { default as generateRPCProxy } from "./code-gen/generateRPCProxy"
 export { default as parseSamenApp, ParsedSamenApp } from "./parseSamenApp"
 export * from "./errors"
+export * as tsx from "./tsx"

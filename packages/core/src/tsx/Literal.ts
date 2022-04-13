@@ -46,4 +46,16 @@ export class Literal {
   public static type(...members: ts.PropertySignature[]): ts.TypeLiteralNode {
     return ts.factory.createTypeLiteralNode(members)
   }
+
+  public static function(props: {
+    params: ts.ParameterDeclaration[]
+    type: ts.TypeNode
+    typeParams?: ts.TypeParameterDeclaration[]
+  }): ts.FunctionTypeNode {
+    return ts.factory.createFunctionTypeNode(
+      props.typeParams,
+      props.params,
+      props.type,
+    )
+  }
 }

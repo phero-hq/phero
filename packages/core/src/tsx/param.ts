@@ -1,6 +1,9 @@
 import ts from "typescript"
+import { generateModifiers } from "./lib"
 
 interface ParamDeclarationProps {
+  private?: boolean
+  readonly?: boolean
   name: string
   questionToken?: boolean
   type: ts.TypeNode
@@ -10,7 +13,10 @@ interface ParamDeclarationProps {
 export function param(props: ParamDeclarationProps): ts.ParameterDeclaration {
   return ts.factory.createParameterDeclaration(
     undefined,
-    undefined,
+    generateModifiers([
+      props.private && ts.SyntaxKind.PrivateKeyword,
+      props.readonly && ts.SyntaxKind.ReadonlyKeyword,
+    ]),
     undefined,
     props.name,
     props.questionToken

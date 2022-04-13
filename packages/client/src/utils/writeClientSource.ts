@@ -2,7 +2,7 @@ import { promises as fs } from "fs"
 import path from "path"
 import ts from "typescript"
 
-import { ClientSource } from "./getClientSource"
+import { ClientSource } from "../ClientSource"
 
 const printer = ts.createPrinter({
   newLine: ts.NewLineKind.LineFeed,

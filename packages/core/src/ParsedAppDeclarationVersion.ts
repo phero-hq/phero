@@ -8,6 +8,7 @@ export interface ParsedAppDeclarationVersion {
     name: string
     models: Model[]
     functions: ts.FunctionLikeDeclarationBase[]
+    context: ts.TypeNode | undefined
   }>
 }
 
@@ -21,6 +22,7 @@ export function getDeclarationForVersion(
       name: service.name,
       models: service.versions[version].models,
       functions: service.versions[version].functions,
+      context: service.versions[version].context,
     })),
   }
 }

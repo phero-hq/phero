@@ -1,6 +1,7 @@
 import ts from "typescript"
 import { ParseError } from "./errors"
 import { Model } from "./parseSamenApp"
+import { getNameAsString } from "./tsUtils"
 import { VirtualCompilerHost } from "./VirtualCompilerHost"
 
 export interface ParsedAppDeclaration {
@@ -20,10 +21,13 @@ export interface ParsedServiceDeclaration {
 }
 
 export interface ParsedServiceDeclarationVersions {
-  [version: string]: {
-    models: Model[]
-    functions: ts.FunctionDeclaration[]
-  }
+  [version: string]: ParsedServiceDeclarationVersion
+}
+
+export interface ParsedServiceDeclarationVersion {
+  models: Model[]
+  functions: ts.FunctionDeclaration[]
+  context: ts.TypeNode | undefined
 }
 
 export function parseAppDeclarationFileContent(dts: string): {
@@ -89,11 +93,10 @@ function parseDomainDeclarations({
       ...result,
       [versionModule.name]: {
         models: versionModule.statements.map((st) => {
-          const model = parseModel(st)
-          if (!model) {
+          if (!isModel(st)) {
             throw new ParseError("Unexpected statement", st)
           }
-          return model
+          return st
         }),
       },
     }),
@@ -111,22 +114,8 @@ function parseServiceDeclaration({
     versions: versionModules.reduce(
       (result, versionModule) => ({
         ...result,
-        [versionModule.name]: versionModule.statements.reduce(
-          ({ models, functions }, st) => {
-            const model = parseModel(st)
-            if (model) {
-              return { models: [...models, model], functions }
-            }
-            const func = parseFunction(st)
-            if (func) {
-              return { models, functions: [...functions, func] }
-            }
-            throw new ParseError("Neither model nor function", st)
-          },
-          {
-            models: [] as Model[],
-            functions: [] as ts.FunctionDeclaration[],
-          },
+        [versionModule.name]: parseServiceDeclarationVersion(
+          versionModule.statements,
         ),
       }),
       {} as ParsedServiceDeclaration["versions"],
@@ -134,22 +123,53 @@ function parseServiceDeclaration({
   }
 }
 
-function parseModel(statement: ts.Statement): Model | undefined {
+function parseServiceDeclarationVersion(
+  statements: ts.Statement[],
+): ParsedServiceDeclarationVersion {
+  return statements.reduce(
+    ({ models, functions, context }, st) => {
+      if (isModel(st)) {
+        return { models: [...models, st], functions, context }
+      }
+      if (ts.isFunctionDeclaration(st)) {
+        return {
+          models,
+          functions: [...functions, st],
+          context: context ?? parseContextType(st),
+        }
+      }
+      throw new ParseError("Neither model nor function", st)
+    },
+    {
+      models: [],
+      functions: [],
+      context: undefined,
+    } as ParsedServiceDeclarationVersion,
+  )
+}
+
+function parseContextType(
+  func: ts.FunctionDeclaration,
+): ts.TypeNode | undefined {
+  const lastParam = func.parameters[func.parameters.length - 1]
   if (
+    lastParam &&
+    lastParam.type &&
+    ts.isTypeReferenceNode(lastParam.type) &&
+    getNameAsString(lastParam.type.typeName) === "SamenContext"
+  ) {
+    return lastParam.type.typeArguments?.[0]
+  }
+
+  return undefined
+}
+
+function isModel(statement: ts.Statement): statement is Model {
+  return (
     ts.isInterfaceDeclaration(statement) ||
     ts.isTypeAliasDeclaration(statement) ||
     ts.isEnumDeclaration(statement)
-  ) {
-    return statement
-  }
-}
-
-function parseFunction(
-  statement: ts.Statement,
-): ts.FunctionDeclaration | undefined {
-  if (ts.isFunctionDeclaration(statement)) {
-    return statement
-  }
+  )
 }
 
 interface ParsedModule {

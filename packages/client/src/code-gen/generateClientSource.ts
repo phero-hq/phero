@@ -5,14 +5,11 @@ import {
   generateNamespace,
   ReferenceMaker,
   ParsedAppDeclarationVersion,
+  tsx,
 } from "@samen/core"
+import { ClientSource } from "../ClientSource"
 
-export interface ClientSource {
-  domainSource: ts.SourceFile
-  samenClientSource: ts.SourceFile
-}
-
-export default function getClientSource(
+export default function generateClientSource(
   appDeclarationVersion: ParsedAppDeclarationVersion,
   typeChecker: ts.TypeChecker,
 ): ClientSource {
@@ -93,6 +90,8 @@ export default function getClientSource(
     ],
   )
 
+  const optsParam = generateOptsParam(appDeclarationVersion)
+
   const classDeclr: ts.ClassDeclaration = ts.factory.createClassDeclaration(
     undefined,
     [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
@@ -120,8 +119,9 @@ export default function getClientSource(
             "url",
             undefined,
             undefined,
-            ts.factory.createStringLiteral("http://localhost:4040"),
+            ts.factory.createStringLiteral("http://localhost:3030"),
           ),
+          ...(optsParam ? [optsParam] : []),
         ],
         ts.factory.createBlock([
           ts.factory.createExpressionStatement(
@@ -137,7 +137,7 @@ export default function getClientSource(
         ]),
       ),
       ...services.map((service) => {
-        const { name, functions } = service
+        const { name, functions, context } = service
 
         const serviceRefMaker = new ReferenceMaker(
           domainModels,
@@ -154,7 +154,7 @@ export default function getClientSource(
           undefined,
           ts.factory.createObjectLiteralExpression(
             functions.map((func) =>
-              generateClientFunction(name, func, serviceRefMaker),
+              generateClientFunction(name, context, func, serviceRefMaker),
             ),
             true,
           ),
@@ -176,4 +176,56 @@ export default function getClientSource(
     samenClientSource,
     domainSource,
   }
+}
+
+function generateOptsParam(
+  appDeclarationVersion: ParsedAppDeclarationVersion,
+): ts.ParameterDeclaration | undefined {
+  const optsProps = [generateContextParam(appDeclarationVersion)].filter(
+    (prop): prop is ts.PropertySignature => !!prop,
+  )
+
+  if (optsProps.length === 0) {
+    return undefined
+  }
+
+  return tsx.param({
+    private: true,
+    readonly: true,
+    name: "opts",
+    type: tsx.literal.type(...optsProps),
+  })
+}
+
+function generateContextParam(
+  appDeclarationVersion: ParsedAppDeclarationVersion,
+): ts.PropertySignature | undefined {
+  const serviceContextTypes = appDeclarationVersion.services
+    .filter((service) => !!service.context)
+    .map((service) => ({
+      serviceName: service.name,
+      contextType: service.context,
+    })) as { serviceName: string; contextType: ts.TypeNode }[]
+
+  if (!serviceContextTypes.length) {
+    return undefined
+  }
+
+  return tsx.property.signature(
+    "context",
+    tsx.literal.type(
+      ...serviceContextTypes.map(({ serviceName, contextType }) =>
+        tsx.property.signature(
+          serviceName,
+          tsx.literal.function({
+            params: [],
+            type: tsx.type.union(
+              contextType,
+              tsx.type.reference({ name: "Promise", args: [contextType] }),
+            ),
+          }),
+        ),
+      ),
+    ),
+  )
 }

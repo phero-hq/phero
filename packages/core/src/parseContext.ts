@@ -1,5 +1,6 @@
 import ts from "typescript"
 import generateParserModel, {
+  MemberParserModel,
   ObjectParserModel,
   ParserModelType,
 } from "./code-gen/parsers/generateParserModel"
@@ -56,13 +57,43 @@ export function parseContext(
 
   const funcCtx = ctxParamType.typeArguments[0]
 
-  const ctxIO = getContextIO(
-    [
-      ...(serviceConfig.middleware ?? []),
-      { contextType: funcCtx, nextType: undefined },
-    ],
-    typeChecker,
-  )
+  const ctxIO = getContextIO(serviceConfig.middleware ?? [], typeChecker)
+
+  const funcCtxParserModel = getRootObjectParserModel(funcCtx, typeChecker)
+  const funcCtxProps = getPropertySignatures(funcCtx)
+
+  for (const funcCtxMemberParser of funcCtxParserModel.members) {
+    if (funcCtxMemberParser.type != ParserModelType.Member) {
+      throw new ParseError(`Context type can't have index members`, funcCtx)
+    }
+
+    const prop = funcCtxProps.find(
+      (p) => getNameAsString(p.name) === funcCtxMemberParser.name,
+    )
+    if (!prop) {
+      throw new ParseError(
+        `Can't find property with name ${funcCtxMemberParser.name}`,
+        funcCtx,
+      )
+    }
+
+    const accumulatedContextMember = ctxIO.accumulatedContext.members.find(
+      (m): m is MemberParserModel =>
+        m.type === ParserModelType.Member &&
+        m.name === funcCtxMemberParser.name,
+    )
+
+    if (!accumulatedContextMember) {
+      throw new ParseError(`Property should be provided by middleware`, prop)
+    }
+
+    if (!isSameMember(funcCtxMemberParser, accumulatedContextMember)) {
+      throw new ParseError(
+        `Context member ${funcCtxMemberParser.name} would change type of already existing context member`,
+        prop,
+      )
+    }
+  }
 
   const genCtx = ts.factory.createTypeReferenceNode(ctxParamType.typeName, [
     ts.factory.createTypeLiteralNode(ctxIO.inputContextProps),
@@ -108,9 +139,6 @@ function getContextIO(
                 accMem.name === ctxMem.name,
             )
 
-            // TODO check for ctx with same name but different parser
-            // then trhow error like "you already have context with same name but different parser"
-
             if (accMemIndex === -1) {
               // NOTE we need the context from the client
               inputContext.members.push(ctxMem)
@@ -120,7 +148,7 @@ function getContextIO(
 
               if (!ctxProp) {
                 throw new ParseError(
-                  `Can't find prope with name ${ctxMem.name}`,
+                  `Can't find property with name ${ctxMem.name}`,
                   ctxType,
                 )
               }
@@ -128,6 +156,21 @@ function getContextIO(
               inputContextProps.push(ctxProp)
               // we also accumlate it for use in other middleware or rpc
               accumulatedContext.members.push(ctxMem)
+            } else {
+              // lets check whether the user doesn't change already defined types of context
+              const accMem = accumulatedContext.members[accMemIndex]
+              if (accMem.type !== ParserModelType.Member) {
+                throw new ParseError(
+                  `Context type can't have index members`,
+                  ctxType,
+                )
+              }
+              if (!isSameMember(ctxMem, accMem)) {
+                throw new ParseError(
+                  `Context member ${ctxMem.name} would change type of already existing context member`,
+                  ctxType,
+                )
+              }
             }
           }
         }
@@ -218,4 +261,11 @@ function getPropertySignatures(typeNode: ts.TypeNode): ts.PropertySignature[] {
   }
 
   return []
+}
+
+function isSameMember(
+  left: MemberParserModel,
+  right: MemberParserModel,
+): boolean {
+  return JSON.stringify(left) === JSON.stringify(right)
 }

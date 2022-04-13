@@ -7,7 +7,8 @@ import { promises as fs } from "fs"
 import http from "http"
 import https from "https"
 import path from "path"
-import getClientSource from "./getClientSource"
+
+import generateClientSource from "../code-gen/generateClientSource"
 import writeClientSource from "./writeClientSource"
 
 export default async function buildClient(
@@ -16,7 +17,7 @@ export default async function buildClient(
   const manifest = await getManifestSource(server)
   const declaration = parseAppDeclarationFileContent(manifest)
   const declarationVersion = getDeclarationForVersion(declaration.result)
-  const clientSource = getClientSource(
+  const clientSource = generateClientSource(
     declarationVersion,
     declaration.typeChecker,
   )
