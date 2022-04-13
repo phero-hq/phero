@@ -19,7 +19,7 @@ export function generateMiddlewareParsers(
           generateInlineParser({
             returnType: tsx.type.any,
             parser: generateParserFromModel(
-              generateParserModel(typeChecker, middleware.nextType, "data"),
+              generateParserModel(typeChecker, middleware.paramsType, "data"),
             ),
           }),
 
@@ -27,6 +27,13 @@ export function generateMiddlewareParsers(
             returnType: tsx.type.any,
             parser: generateParserFromModel(
               generateParserModel(typeChecker, middleware.contextType, "data"),
+            ),
+          }),
+
+          generateInlineParser({
+            returnType: tsx.type.any,
+            parser: generateParserFromModel(
+              generateParserModel(typeChecker, middleware.nextType, "data"),
             ),
           }),
         ),

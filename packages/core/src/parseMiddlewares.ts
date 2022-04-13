@@ -33,96 +33,90 @@ export default function parseFunctionConfigMiddlewares(
     if (symbol?.valueDeclaration) {
       if (ts.isFunctionDeclaration(symbol.valueDeclaration)) {
         const middleware = symbol.valueDeclaration
-        functionDeclrs.push({
-          nextType: parseNextType(middleware),
-          contextType: parseCtxType(middleware),
-          middleware,
-        })
+        functionDeclrs.push(parseMiddlewareConfig(middleware))
       } else if (
         ts.isVariableDeclaration(symbol.valueDeclaration) &&
         symbol.valueDeclaration.initializer &&
         ts.isArrowFunction(symbol.valueDeclaration.initializer)
       ) {
         const middleware = symbol.valueDeclaration.initializer
-        functionDeclrs.push({
-          nextType: parseNextType(middleware),
-          contextType: parseCtxType(middleware),
-          middleware,
-        })
+        functionDeclrs.push(parseMiddlewareConfig(middleware))
       }
     }
   }
   return functionDeclrs
 }
 
-function parseNextType(
+function parseMiddlewareConfig(
   middleware: ts.FunctionLikeDeclarationBase,
-): ts.TypeNode {
-  const firstParam = middleware.parameters[0]
-
-  if (!firstParam) {
+): ParsedMiddlewareConfig {
+  if (middleware.parameters.length != 3) {
     throw new ParseError(
-      `Middleware should have two parameters "(next: NextFunction<T>, ctx: SamenContext<C>)"`,
+      `Middleware should have three parameters "(params: SamenParams<P>, ctx: SamenContext<C>, next: NextFunction<T>)"`,
       middleware,
     )
   }
 
-  const firstParamType = firstParam.type
+  const [paramsParam, contextParam, nextParam] = middleware.parameters
 
-  if (
-    !firstParamType ||
-    !ts.isTypeReferenceNode(firstParamType) ||
-    getTypeName(firstParamType) !== "NextFunction"
-  ) {
-    throw new ParseError(
-      `Middleware next parameter has no type defined, should be defined like "next: NextFunction<T>"`,
-      middleware,
-    )
+  return {
+    paramsType: parseParamsType(paramsParam),
+    contextType: parseContextType(contextParam),
+    nextType: parseNextType(nextParam),
+    middleware,
   }
-
-  const typeNode = firstParamType.typeArguments?.[0]
-
-  if (!typeNode) {
-    throw new ParseError(
-      `Middleware next parameter was not defined, should be defined like "next: NextFunction<T>"`,
-      middleware,
-    )
-  }
-
-  return typeNode
 }
 
-function parseCtxType(middleware: ts.FunctionLikeDeclarationBase): ts.TypeNode {
-  const secondParam = middleware.parameters[1]
-
-  if (!secondParam) {
-    throw new ParseError(
-      `Middleware should have two parameters "(next: NextFunction<T>, ctx: SamenContext<C>)"`,
-      middleware,
-    )
-  }
-
-  const secondParamType = secondParam.type
+function parseParamsType(paramsParam: ts.ParameterDeclaration): ts.TypeNode {
+  const paramsType = paramsParam.type
 
   if (
-    !secondParamType ||
-    !ts.isTypeReferenceNode(secondParamType) ||
-    getTypeName(secondParamType) !== "SamenContext"
+    !paramsType ||
+    !ts.isTypeReferenceNode(paramsType) ||
+    getTypeName(paramsType) !== "SamenParams" ||
+    !paramsType.typeArguments?.[0]
   ) {
     throw new ParseError(
-      `Middleware ctx parameter has no type defined, should be defined like "ctx: SamenContext<T>"`,
-      middleware,
+      `Middleware params parameter has no or incorrect type, should be defined like "params: SamenParams<T>"`,
+      paramsParam,
     )
   }
 
-  const typeNode = secondParamType.typeArguments?.[0]
+  return paramsType.typeArguments?.[0]
+}
 
-  if (!typeNode) {
+function parseNextType(nextParam: ts.ParameterDeclaration): ts.TypeNode {
+  const nextType = nextParam.type
+
+  if (
+    !nextType ||
+    !ts.isTypeReferenceNode(nextType) ||
+    getTypeName(nextType) !== "NextFunction" ||
+    !nextType.typeArguments?.[0]
+  ) {
     throw new ParseError(
-      `Middleware ctx parameter has no type defined, should be defined like "ctx: SamenContext<T>"`,
-      middleware,
+      `Middleware next parameter has no or incorrect type, should be defined like "next: NextFunction<T>"`,
+      nextParam,
     )
   }
 
-  return typeNode
+  return nextType.typeArguments?.[0]
+}
+
+function parseContextType(contextParam: ts.ParameterDeclaration): ts.TypeNode {
+  const contextType = contextParam.type
+
+  if (
+    !contextType ||
+    !ts.isTypeReferenceNode(contextType) ||
+    getTypeName(contextType) !== "SamenContext" ||
+    !contextType.typeArguments?.[0]
+  ) {
+    throw new ParseError(
+      `Middleware ctx parameter has no or incorrect type, should be defined like "ctx: SamenContext<T>"`,
+      contextParam,
+    )
+  }
+
+  return contextType.typeArguments?.[0]
 }

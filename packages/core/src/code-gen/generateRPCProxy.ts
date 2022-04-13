@@ -239,7 +239,7 @@ function generateRPCExecutor(
                   ),
                 }),
                 tsx.const({
-                  name: "parseMiddlewareNextOut",
+                  name: "parseMiddlewareParams",
                   init: tsx.expression.elementAccess(
                     tsx.expression.elementAccess(
                       `service_middlewares_${service.name}`,
@@ -256,6 +256,16 @@ function generateRPCExecutor(
                       "i",
                     ),
                     1,
+                  ),
+                }),
+                tsx.const({
+                  name: "parseMiddlewareNextOut",
+                  init: tsx.expression.elementAccess(
+                    tsx.expression.elementAccess(
+                      `service_middlewares_${service.name}`,
+                      "i",
+                    ),
+                    2,
                   ),
                 }),
                 tsx.const({
@@ -306,6 +316,30 @@ function generateRPCExecutor(
                   ),
                 }),
 
+                // const parsedParams = parseMiddlewareParams(i, ctx)
+                tsx.const({
+                  name: "parsedParamsParseResult",
+                  init: tsx.expression.call("parseMiddlewareParams", {
+                    args: ["input"],
+                  }),
+                }),
+
+                generateIfParseResultNotOkayEarlyReturn({
+                  parseResult: "parsedParamsParseResult",
+                }),
+
+                tsx.verbatim(
+                  `console.log("parsedParamsParseResult", JSON.stringify(parsedParamsParseResult))`,
+                ),
+
+                tsx.const({
+                  name: "parsedParams",
+                  init: tsx.expression.propertyAccess(
+                    "parsedParamsParseResult",
+                    "result",
+                  ),
+                }),
+
                 tsx.verbatim(`console.log("parsedContext", parsedContext);`),
 
                 tsx.statement.expression(
@@ -313,6 +347,8 @@ function generateRPCExecutor(
                     tsx.expression.propertyAccess(
                       tsx.expression.call("middleware", {
                         args: [
+                          "parsedParams",
+                          "parsedContext",
                           tsx.arrowFunction({
                             async: true,
                             params: [
@@ -399,7 +435,6 @@ function generateRPCExecutor(
                               ),
                             ],
                           }),
-                          "parsedContext",
                         ],
                       }),
                       "then",
@@ -608,6 +643,9 @@ function generateIfParseResultNotOkayEarlyReturn({
       tsx.literal.false,
     ),
     then: tsx.statement.block(
+      tsx.verbatim(
+        `console.log("${parseResult}", JSON.stringify(${parseResult}))`,
+      ),
       tsx.statement.return(
         tsx.literal.object(
           tsx.property.assignment("status", tsx.literal.number(400)),

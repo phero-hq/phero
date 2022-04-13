@@ -1,13 +1,16 @@
 type Ctx = { x: string }
+type Prms = { p: string }
 
-type Middleware<TIn, TOut> = (
-  next: (p: TOut) => Promise<void>,
-  context: TIn,
+type Middleware<P, C, N> = (
+  params: P,
+  context: C,
+  next: (p: N) => Promise<void>,
 ) => Promise<void>
 
 async function middleware0(
-  next: (ctx: Ctx) => Promise<void>,
+  params: Prms,
   context: Ctx,
+  next: (ctx: Ctx) => Promise<void>,
 ): Promise<void> {
   console.log("Middleware", "start", 0, context.x)
   await sleep(5)
@@ -17,8 +20,9 @@ async function middleware0(
 }
 
 async function middleware1(
-  next: (ctx: Ctx) => Promise<void>,
+  params: Prms,
   context: Ctx,
+  next: (ctx: Ctx) => Promise<void>,
 ): Promise<void> {
   console.log("Middleware", "start", 1, context.x)
   await sleep(2)
@@ -28,8 +32,9 @@ async function middleware1(
 }
 
 async function middleware2(
-  next: (ctx: Ctx) => Promise<void>,
+  params: Prms,
   context: Ctx,
+  next: (ctx: Ctx) => Promise<void>,
 ): Promise<void> {
   console.log("Middleware", "start", 2, context.x)
   await sleep(1)
@@ -47,7 +52,7 @@ type Resolvers = {
   exec: Defer<void>
 }
 async function runWithMiddlewares<T>(
-  middlewares: Middleware<Ctx, Ctx>[],
+  middlewares: Middleware<Prms, Ctx, Ctx>[],
   context: any,
   func: (ctx: Ctx) => Promise<T>,
 ): Promise<T> {
@@ -73,7 +78,7 @@ async function runWithMiddlewares<T>(
     const ctx = await resolvers[currResolverIndex].inputContext.promise
     const parsedContext = parseMiddlewareContext(i, ctx)
 
-    middleware(async (nextOutput: Ctx) => {
+    middleware({ p: "" }, parsedContext, async (nextOutput: Ctx) => {
       const parsedOut = parseMiddlewareNextOut(i, nextOutput)
 
       resolvers[nextResolverIndex].inputContext.resolve({
@@ -83,7 +88,7 @@ async function runWithMiddlewares<T>(
       })
 
       await resolvers[nextResolverIndex].exec.promise
-    }, parsedContext).then(() => {
+    }).then(() => {
       resolvers[currResolverIndex].exec.resolve()
     })
   }
@@ -111,7 +116,7 @@ function parseMiddlewareNextOut(i: number, x: any): Ctx {
 }
 
 ;(async function () {
-  const middlewares: Middleware<Ctx, Ctx>[] = [
+  const middlewares: Middleware<Prms, Ctx, Ctx>[] = [
     middleware0,
     middleware1,
     middleware2,

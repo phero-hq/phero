@@ -49,6 +49,7 @@ export interface ParsedSamenFunctionConfig {
 }
 
 export interface ParsedMiddlewareConfig {
+  paramsType: ts.TypeNode
   nextType: ts.TypeNode
   contextType: ts.TypeNode
   middleware: ts.FunctionLikeDeclarationBase
