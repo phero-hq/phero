@@ -82,7 +82,7 @@ export function spawnServerWatch(
       hasBeenConnected = true
     } else if (hasBeenConnected) {
       // the process that we started ourselves is gone, something is seriously gone bad
-      throw new Error(`server child process is disconnected (${status})`)
+      throw new Error(`Server child process is disconnected (${status})`)
     } else {
       // we should be safe to ignore this
     }
@@ -99,21 +99,22 @@ export function spawnServerWatch(
     ["serve", "--quiet", "--port", `${port}`],
     { cwd },
   )
-    .on("close", (code) => {
-      console.log(`child process at ${cwd} closed with code: ${code}`)
-    })
-    .on("exit", (code) => {
-      console.log(`child process at ${cwd} exited with code: ${code}`)
-    })
-    .on("disconnect", () => {
-      console.log(`child process at ${cwd} disconnected`)
-    })
-    .on("message", (message) => {
-      console.log(`child process at ${cwd} messaged:`, message)
-    })
-    .on("error", (error) => {
-      console.error(`child process at ${cwd} errored with:`, error)
-    })
+  // This doesn't seem to do anything, and we probably won't need it (events come in through the listener)
+  // .on("close", (code) => {
+  //   console.log(`child process at ${cwd} closed with code: ${code}`)
+  // })
+  // .on("exit", (code) => {
+  //   console.log(`child process at ${cwd} exited with code: ${code}`)
+  // })
+  // .on("disconnect", () => {
+  //   console.log(`child process at ${cwd} disconnected`)
+  // })
+  // .on("message", (message) => {
+  //   console.log(`child process at ${cwd} messaged:`, message)
+  // })
+  // .on("error", (error) => {
+  //   console.error(`child process at ${cwd} errored with:`, error)
+  // })
 
   return () => {
     removeEventListener()

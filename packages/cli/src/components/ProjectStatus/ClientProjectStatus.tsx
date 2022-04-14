@@ -26,6 +26,10 @@ export default function ClientProjectStatus({
     }
 
     switch (event.type) {
+      case "LISTENER_CONNECTED":
+        addEvent(["default", "Listening for events..."])
+        break
+
       case "WATCH_INIT":
         addEvent(["default", "Initializing client watch server..."])
         break

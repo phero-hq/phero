@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react"
 import { CommandProvider, useCommand } from "../context/CommandContext"
 import { ScreenSizeProvider, useScreenSize } from "../context/ScreenSizeContext"
 import getProjects, { Project } from "../utils/getProjects"
+import ErrorMessage from "./ErrorMessage"
 
 import ClientProjectStatus from "./ProjectStatus/ClientProjectStatus"
 import ServerProjectStatus from "./ProjectStatus/ServerProjectStatus"
@@ -13,7 +14,7 @@ import ServerProjectStatus from "./ProjectStatus/ServerProjectStatus"
 export default class App extends React.Component<SamenCommand> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     if (this.props.debug) {
-      console.error(error)
+      console.error("Error:", error)
       console.error(errorInfo)
     } else {
       console.error("Something went wrong, try again.")
@@ -34,19 +35,32 @@ export default class App extends React.Component<SamenCommand> {
 
 function AppContent() {
   const [isLoading, setLoading] = useState(true)
+  const [error, setError] = useState<unknown>()
   const [projects, setProjects] = useState<Project[]>([])
   const { orientation, columns, rows } = useScreenSize()
   const command = useCommand()
 
   const updateProjects = useCallback(async () => {
-    setProjects(await getProjects())
+    try {
+      setProjects(await getProjects())
+    } catch (error) {
+      console.log("error!!!", error)
+      setError(error)
+    }
   }, [])
 
   useEffect(() => {
     const interval = setInterval(updateProjects, 10000)
-    updateProjects().then(() => setLoading(false))
+    updateProjects().then(() => {
+      console.log("not loading anymore")
+      setLoading(false)
+    })
     return () => clearInterval(interval)
   }, [])
+
+  if (error) {
+    return <ErrorMessage error={error} />
+  }
 
   if (isLoading) {
     return <Text>Initializing...</Text>

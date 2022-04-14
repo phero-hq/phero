@@ -88,18 +88,17 @@ export default class WatchProgram {
     }
   }
 
-  private reportWatchStatusChanged(diagnostic: ts.Diagnostic) {
-    // console.info(ts.formatDiagnostic(diagnostic, formatHost))
-
-    if (
-      diagnostic.category !== ts.DiagnosticCategory.Message ||
-      // see https://github.com/microsoft/TypeScript/issues/24625#issuecomment-394447728
-      ![6193, 6194].includes(diagnostic.code)
-    ) {
-      return
+  private reportWatchStatusChanged(
+    diagnostic: ts.Diagnostic,
+    newLine: string,
+    options: ts.CompilerOptions,
+    errorCount?: number,
+  ) {
+    if (errorCount === 0) {
+      this.provideSamenFileToClient()
+    } else {
+      // already handled by this.reportDiagnostic()
     }
-
-    this.provideSamenFileToClient()
   }
 
   private async provideSamenFileToClient() {
