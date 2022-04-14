@@ -2,6 +2,7 @@ import ts from "typescript"
 import { ParseError } from "./errors"
 import { ParsedMiddlewareConfig } from "./parseSamenApp"
 import { getFirstChildOfKind, getTypeName, resolveSymbol } from "./tsUtils"
+import * as tsx from "./tsx"
 
 export default function parseFunctionConfigMiddlewares(
   configObject: ts.ObjectLiteralExpression,
@@ -85,14 +86,15 @@ function parseParamsType(paramsParam: ts.ParameterDeclaration): ts.TypeNode {
   return paramsType.typeArguments?.[0]
 }
 
-function parseNextType(nextParam: ts.ParameterDeclaration): ts.TypeNode {
+function parseNextType(
+  nextParam: ts.ParameterDeclaration,
+): ts.TypeNode | undefined {
   const nextType = nextParam.type
 
   if (
     !nextType ||
     !ts.isTypeReferenceNode(nextType) ||
-    getTypeName(nextType) !== "NextFunction" ||
-    !nextType.typeArguments?.[0]
+    getTypeName(nextType) !== "NextFunction"
   ) {
     throw new ParseError(
       `Middleware next parameter has no or incorrect type, should be defined like "next: NextFunction<T>"`,

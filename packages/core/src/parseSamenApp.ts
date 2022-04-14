@@ -50,7 +50,7 @@ export interface ParsedSamenFunctionConfig {
 
 export interface ParsedMiddlewareConfig {
   paramsType: ts.TypeNode
-  nextType: ts.TypeNode
+  nextType: ts.TypeNode | undefined
   contextType: ts.TypeNode
   middleware: ts.FunctionLikeDeclarationBase
 }

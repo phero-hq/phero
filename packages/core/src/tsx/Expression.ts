@@ -59,4 +59,18 @@ export class Expression {
   public static identifier(text: string): ts.Identifier {
     return ts.factory.createIdentifier(text)
   }
+
+  public static ternary(
+    condition: ts.Expression,
+    whenTrue: ts.Expression,
+    whenFalse: ts.Expression,
+  ): ts.ConditionalExpression {
+    return ts.factory.createConditionalExpression(
+      condition,
+      ts.factory.createToken(ts.SyntaxKind.QuestionToken),
+      whenTrue,
+      ts.factory.createToken(ts.SyntaxKind.ColonToken),
+      whenFalse,
+    )
+  }
 }

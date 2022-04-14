@@ -30,12 +30,14 @@ export function generateMiddlewareParsers(
             ),
           }),
 
-          generateInlineParser({
-            returnType: tsx.type.any,
-            parser: generateParserFromModel(
-              generateParserModel(typeChecker, middleware.nextType, "data"),
-            ),
-          }),
+          middleware.nextType
+            ? generateInlineParser({
+                returnType: tsx.type.any,
+                parser: generateParserFromModel(
+                  generateParserModel(typeChecker, middleware.nextType, "data"),
+                ),
+              })
+            : tsx.literal.null,
         ),
       ),
     ),

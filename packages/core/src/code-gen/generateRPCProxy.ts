@@ -365,9 +365,28 @@ function generateRPCExecutor(
                               // const parsedOut = parseMiddlewareNextOut(i, nextOutput)
                               tsx.const({
                                 name: "parsedOutParseResult",
-                                init: tsx.expression.call(
-                                  "parseMiddlewareNextOut",
-                                  { args: ["nextOutput"] },
+                                init: tsx.expression.ternary(
+                                  tsx.expression.binary(
+                                    tsx.expression.identifier(
+                                      "parseMiddlewareNextOut",
+                                    ),
+                                    "!=",
+                                    tsx.literal.null,
+                                  ),
+                                  tsx.expression.call(
+                                    "parseMiddlewareNextOut",
+                                    { args: ["nextOutput"] },
+                                  ),
+                                  tsx.literal.object(
+                                    tsx.property.assignment(
+                                      "ok",
+                                      tsx.literal.true,
+                                    ),
+                                    tsx.property.assignment(
+                                      "result",
+                                      tsx.literal.object(),
+                                    ),
+                                  ),
                                 ),
                               }),
 
@@ -578,7 +597,7 @@ function generateRPCFunctionCall({
         ),
       }),
 
-      ...(service.config.middleware
+      ...(service.config.middleware && funcDef.context
         ? [
             // resolvers[3].exec.resolve()
             tsx.statement.expression(
