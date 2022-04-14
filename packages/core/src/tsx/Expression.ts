@@ -1,6 +1,8 @@
 import ts from "typescript"
 import { binaryExpression } from "./binaryExpression"
 import { arrowFunction } from "./arrowFunction"
+import { prefixUnaryExpression } from "./prefixUnaryExpression"
+import { postfixUnaryExpression } from "./postfixUnaryExpression"
 
 export class Expression {
   public static await(expression: ts.Expression): ts.AwaitExpression {
@@ -8,6 +10,12 @@ export class Expression {
   }
 
   public static binary = binaryExpression
+  public static prefixUnary = prefixUnaryExpression
+  public static postfixUnary = postfixUnaryExpression
+
+  public static negate(expression: ts.Expression): ts.PrefixUnaryExpression {
+    return Expression.prefixUnary("!", expression)
+  }
 
   public static propertyAccess(
     obj: string | ts.Expression,
@@ -72,5 +80,15 @@ export class Expression {
       ts.factory.createToken(ts.SyntaxKind.ColonToken),
       whenFalse,
     )
+  }
+
+  public static typeof(expression: ts.Expression): ts.TypeOfExpression {
+    return ts.factory.createTypeOfExpression(expression)
+  }
+
+  public static parenthesis(
+    expression: ts.Expression,
+  ): ts.ParenthesizedExpression {
+    return ts.factory.createParenthesizedExpression(expression)
   }
 }

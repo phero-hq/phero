@@ -8,6 +8,7 @@ import { ParserModelType, ReferenceParserModel } from "./generateParserModel"
 import { generateParserBody } from "./generateParser"
 import generateParserFromModel from "./generateParserFromModel"
 import { capitalize } from "../../utils"
+import * as tsx from "../../tsx"
 
 export default function generateReferenceParser(
   pointer: Pointer<ReferenceParserModel>,
@@ -17,10 +18,15 @@ export default function generateReferenceParser(
     hasNoTypeArgs
       ? generateReferenceValidator(pointer)
       : generateReferenceValidatorWithTypeArguments(pointer),
-    // TODO populate the errors with the actual errors
-    generatePushErrorExpressionStatement(
-      pointer.errorPath,
-      `not a ${pointer.model.typeName}`,
+    tsx.block(
+      tsx.verbatim(
+        `console.log("not X", data, JSON.stringify(data), XXParser.parse(data))`,
+      ),
+      // TODO populate the errors with the actual errors
+      generatePushErrorExpressionStatement(
+        pointer.errorPath,
+        `not a ${pointer.model.typeName}`,
+      ),
     ),
     assignDataToResult(pointer.resultVarExpr, pointer.dataVarExpr),
   )
