@@ -293,6 +293,13 @@ export function getNameAsString(
   throw new Error("Name not supported")
 }
 
+export function getFullTypeName(typeName: ts.EntityName): string {
+  if (ts.isIdentifier(typeName)) {
+    return typeName.text
+  }
+  return `${getFullTypeName(typeName.left)}.${typeName.right.text}`
+}
+
 export function getTypeName(typeNode: ts.TypeNode): string | undefined {
   if (ts.isTypeReferenceNode(typeNode)) {
     return ts.isIdentifier(typeNode.typeName)

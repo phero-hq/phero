@@ -164,11 +164,11 @@ function parseContextType(
   return undefined
 }
 
-function isModel(statement: ts.Statement): statement is Model {
+export function isModel(node: ts.Node): node is Model {
   return (
-    ts.isInterfaceDeclaration(statement) ||
-    ts.isTypeAliasDeclaration(statement) ||
-    ts.isEnumDeclaration(statement)
+    ts.isInterfaceDeclaration(node) ||
+    ts.isTypeAliasDeclaration(node) ||
+    ts.isEnumDeclaration(node)
   )
 }
 

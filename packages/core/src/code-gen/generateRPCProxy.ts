@@ -50,7 +50,7 @@ export default function generateRPCProxy(
   tsNodes.push(...types)
 
   tsNodes.push(
-    ts.createUnparsedSourceFile(`
+    tsx.verbatim(`
     type Defer<T = void> = {
       resolve: (result: T) => void
       reject: (err: Error) => void
@@ -328,10 +328,6 @@ function generateRPCExecutor(
                   parseResult: "parsedParamsParseResult",
                 }),
 
-                tsx.verbatim(
-                  `console.log("parsedParamsParseResult", JSON.stringify(parsedParamsParseResult))`,
-                ),
-
                 tsx.const({
                   name: "parsedParams",
                   init: tsx.expression.propertyAccess(
@@ -339,8 +335,6 @@ function generateRPCExecutor(
                     "result",
                   ),
                 }),
-
-                tsx.verbatim(`console.log("parsedContext", parsedContext);`),
 
                 tsx.statement.expression(
                   tsx.expression.call(
@@ -358,10 +352,6 @@ function generateRPCExecutor(
                               }),
                             ],
                             body: [
-                              tsx.verbatim(
-                                `console.log("nextOutput", nextOutput);`,
-                              ),
-
                               // const parsedOut = parseMiddlewareNextOut(i, nextOutput)
                               tsx.const({
                                 name: "parsedOutParseResult",
@@ -390,10 +380,6 @@ function generateRPCExecutor(
                                 ),
                               }),
 
-                              tsx.verbatim(
-                                `console.log("parsedOutParseResult", parsedOutParseResult);`,
-                              ),
-
                               generateIfParseResultNotOkayEarlyReturn({
                                 parseResult: "parsedOutParseResult",
                               }),
@@ -405,10 +391,6 @@ function generateRPCExecutor(
                                   "result",
                                 ),
                               }),
-
-                              tsx.verbatim(
-                                `console.log("parsedOut", parsedOut);`,
-                              ),
 
                               // resolvers[nextResolverIndex].inputContext.resolve(
                               //   {
@@ -529,8 +511,6 @@ function generateRPCExecutor(
       generateIfParseResultNotOkayEarlyReturn({
         parseResult: "inputParseResult",
       }),
-
-      tsx.verbatim(`console.log("inputParseResult", inputParseResult)`),
 
       generateRPCFunctionCall({ service, funcDef }),
     ],
@@ -662,9 +642,6 @@ function generateIfParseResultNotOkayEarlyReturn({
       tsx.literal.false,
     ),
     then: tsx.statement.block(
-      tsx.verbatim(
-        `console.log("${parseResult}", JSON.stringify(${parseResult}))`,
-      ),
       tsx.statement.return(
         tsx.literal.object(
           tsx.property.assignment("status", tsx.literal.number(400)),
@@ -701,110 +678,47 @@ function getParameterName(name: ts.BindingName): string {
 }
 
 const types = [
-  factory.createTypeAliasDeclaration(
-    undefined,
-    undefined,
-    factory.createIdentifier("ParseResult"),
-    [
-      factory.createTypeParameterDeclaration(
-        factory.createIdentifier("T"),
-        undefined,
-        undefined,
+  tsx.typeAlias({
+    name: "ParseResult",
+    typeParameters: [tsx.typeParam({ name: "T" })],
+    type: tsx.type.union(
+      tsx.type.reference({
+        name: "ParseResultSuccess",
+        args: [tsx.type.reference({ name: "T" })],
+      }),
+      tsx.type.reference({ name: "ParseResultFailure" }),
+    ),
+  }),
+
+  tsx.interface({
+    name: "ParseResultSuccess",
+    typeParameters: [tsx.typeParam({ name: "T" })],
+    members: [
+      tsx.property.signature("ok", tsx.type.literalType(tsx.literal.true)),
+
+      tsx.property.signature("result", tsx.type.reference({ name: "T" })),
+    ],
+  }),
+
+  tsx.interface({
+    name: "ParseResultFailure",
+    members: [
+      tsx.property.signature("ok", tsx.type.literalType(tsx.literal.false)),
+
+      tsx.property.signature(
+        "errors",
+        tsx.type.array(tsx.type.reference({ name: "ValidationError" })),
       ),
     ],
-    factory.createUnionTypeNode([
-      factory.createTypeReferenceNode(
-        factory.createIdentifier("ParseResultSuccess"),
-        [
-          factory.createTypeReferenceNode(
-            factory.createIdentifier("T"),
-            undefined,
-          ),
-        ],
-      ),
-      factory.createTypeReferenceNode(
-        factory.createIdentifier("ParseResultFailure"),
-        undefined,
-      ),
-    ]),
-  ),
-  factory.createInterfaceDeclaration(
-    undefined,
-    undefined,
-    factory.createIdentifier("ParseResultSuccess"),
-    [
-      factory.createTypeParameterDeclaration(
-        factory.createIdentifier("T"),
-        undefined,
-        undefined,
-      ),
+  }),
+  tsx.interface({
+    name: "ValidationError",
+    members: [
+      tsx.property.signature("path", tsx.type.string),
+      tsx.property.signature("message", tsx.type.string),
     ],
-    undefined,
-    [
-      factory.createPropertySignature(
-        undefined,
-        factory.createIdentifier("ok"),
-        undefined,
-        factory.createLiteralTypeNode(factory.createTrue()),
-      ),
-      factory.createPropertySignature(
-        undefined,
-        factory.createIdentifier("result"),
-        undefined,
-        factory.createTypeReferenceNode(
-          factory.createIdentifier("T"),
-          undefined,
-        ),
-      ),
-    ],
-  ),
-  factory.createInterfaceDeclaration(
-    undefined,
-    undefined,
-    factory.createIdentifier("ParseResultFailure"),
-    undefined,
-    undefined,
-    [
-      factory.createPropertySignature(
-        undefined,
-        factory.createIdentifier("ok"),
-        undefined,
-        factory.createLiteralTypeNode(factory.createFalse()),
-      ),
-      factory.createPropertySignature(
-        undefined,
-        factory.createIdentifier("errors"),
-        undefined,
-        factory.createArrayTypeNode(
-          factory.createTypeReferenceNode(
-            factory.createIdentifier("ValidationError"),
-            undefined,
-          ),
-        ),
-      ),
-    ],
-  ),
-  factory.createInterfaceDeclaration(
-    undefined,
-    undefined,
-    factory.createIdentifier("ValidationError"),
-    undefined,
-    undefined,
-    [
-      factory.createPropertySignature(
-        undefined,
-        factory.createIdentifier("path"),
-        undefined,
-        factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
-      ),
-      factory.createPropertySignature(
-        undefined,
-        factory.createIdentifier("message"),
-        undefined,
-        factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
-      ),
-    ],
-  ),
+  }),
+
   factory.createTypeAliasDeclaration(
     undefined,
     undefined,

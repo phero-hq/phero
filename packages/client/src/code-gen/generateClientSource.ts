@@ -6,6 +6,8 @@ import {
   ReferenceMaker,
   ParsedAppDeclarationVersion,
   tsx,
+  generateModelParser,
+  generateNonModelParser,
 } from "@samen/core"
 import { ClientSource } from "../ClientSource"
 
@@ -23,62 +25,31 @@ export default function generateClientSource(
     undefined,
   )
 
-  const domainSource = ts.factory.createSourceFile(
-    [
-      ...domainModels.map((model) => generateModel(model, domainRefMaker)),
-      ...services.map((service) =>
-        generateNamespace(
-          ts.factory.createIdentifier(service.name),
-          service.models.map((model) => generateModel(model, domainRefMaker)),
+  const domainSource = tsx.sourceFile(
+    ...domainModels.map((model) => generateModel(model, domainRefMaker)),
+    ...domainModels.map((model) => generateModelParser(model, typeChecker)),
+    ...services.map((service) =>
+      generateNamespace(ts.factory.createIdentifier(service.name), [
+        ...service.models.map((model) => generateModel(model, domainRefMaker)),
+        ...service.models.map((model) =>
+          generateModelParser(model, typeChecker),
         ),
-      ),
-    ],
-    ts.factory.createToken(ts.SyntaxKind.EndOfFileToken),
-    ts.NodeFlags.None,
+      ]),
+    ),
   )
 
-  const importDomain = ts.factory.createImportDeclaration(
-    undefined,
-    undefined,
-    ts.factory.createImportClause(
-      false,
-      undefined,
-      ts.factory.createNamedImports([
-        ...domainModels.map((model) =>
-          ts.factory.createImportSpecifier(false, undefined, model.name),
-        ),
-        ...services.map((service) =>
-          ts.factory.createImportSpecifier(
-            false,
-            undefined,
-            ts.factory.createIdentifier(service.name),
-          ),
-        ),
-      ]),
-    ),
-    ts.factory.createStringLiteral("./domain"),
-  )
-  const importBaseSamenClient = ts.factory.createImportDeclaration(
-    undefined,
-    undefined,
-    ts.factory.createImportClause(
-      false,
-      undefined,
-      ts.factory.createNamedImports([
-        ts.factory.createImportSpecifier(
-          false,
-          undefined,
-          ts.factory.createIdentifier("BaseSamenClient"),
-        ),
-        ts.factory.createImportSpecifier(
-          false,
-          undefined,
-          ts.factory.createIdentifier("Fetch"),
-        ),
-      ]),
-    ),
-    ts.factory.createStringLiteral("./BaseSamenClient"),
-  )
+  const importDomain = tsx.importDeclaration({
+    names: [
+      ...domainModels.map((model) => model.name.text),
+      ...services.map((service) => service.name),
+    ],
+    module: "./domain",
+  })
+
+  const importBaseSamenClient = tsx.importDeclaration({
+    names: ["BaseSamenClient", "Fetch"],
+    module: "./BaseSamenClient",
+  })
 
   const hertitageClause: ts.HeritageClause = ts.factory.createHeritageClause(
     ts.SyntaxKind.ExtendsKeyword,
@@ -154,7 +125,13 @@ export default function generateClientSource(
           undefined,
           ts.factory.createObjectLiteralExpression(
             functions.map((func) =>
-              generateClientFunction(name, context, func, serviceRefMaker),
+              generateClientFunction(
+                name,
+                context,
+                func,
+                serviceRefMaker,
+                typeChecker,
+              ),
             ),
             true,
           ),
@@ -163,10 +140,23 @@ export default function generateClientSource(
     ],
   )
 
-  const samenClientSource = ts.factory.createSourceFile(
-    [importDomain, importBaseSamenClient, classDeclr],
-    ts.factory.createToken(ts.SyntaxKind.EndOfFileToken),
-    ts.NodeFlags.None,
+  const parserDeclrs: ts.FunctionDeclaration[] = generateParsersForReturnTypes(
+    appDeclarationVersion,
+    typeChecker,
+  )
+
+  const importParserTypes = tsx.importDeclaration({
+    isTypeOnly: true,
+    names: ["ParseResult", "ValidationError"],
+    module: "./ParseResult",
+  })
+
+  const samenClientSource = tsx.sourceFile(
+    importDomain,
+    importBaseSamenClient,
+    importParserTypes,
+    ...parserDeclrs,
+    classDeclr,
   )
 
   const t2 = Date.now()
@@ -228,4 +218,34 @@ function generateContextParam(
       ),
     ),
   )
+}
+
+function generateParsersForReturnTypes(
+  appDeclarationVersion: ParsedAppDeclarationVersion,
+  typeChecker: ts.TypeChecker,
+): ts.FunctionDeclaration[] {
+  const result: ts.FunctionDeclaration[] = []
+
+  for (const service of appDeclarationVersion.services) {
+    for (const func of service.functions) {
+      const returnType: ts.TypeNode | undefined =
+        func.type && ts.isTypeReferenceNode(func.type)
+          ? func.type.typeArguments?.[0]
+          : undefined
+
+      if (!returnType || ts.isTypeReferenceNode(returnType)) {
+        continue
+      }
+
+      result.push(
+        generateNonModelParser(
+          returnType,
+          returnType,
+          typeChecker,
+          `${func.name?.getText()}ResultParser`,
+        ),
+      )
+    }
+  }
+  return result
 }

@@ -19,9 +19,6 @@ export default function generateReferenceParser(
       ? generateReferenceValidator(pointer)
       : generateReferenceValidatorWithTypeArguments(pointer),
     tsx.block(
-      tsx.verbatim(
-        `console.log("not X", data, JSON.stringify(data), XXParser.parse(data))`,
-      ),
       // TODO populate the errors with the actual errors
       generatePushErrorExpressionStatement(
         pointer.errorPath,

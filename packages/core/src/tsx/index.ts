@@ -9,6 +9,7 @@ export { param } from "./param"
 export { block } from "./block"
 export { namespace } from "./namespace"
 export { verbatim } from "./verbatim"
+export { importDeclaration } from "./importDeclaration"
 
 export { Type as type } from "./Type"
 export { Literal as literal } from "./Literal"

@@ -1,3 +1,5 @@
+import { ParseResult, ValidationError } from "./ParseResult"
+
 export interface SamenRequest {
   method: "GET" | "POST"
   headers: {
@@ -21,6 +23,11 @@ export class HttpError extends Error {
     super()
   }
 }
+export class ParseError extends Error {
+  constructor(public readonly errors: ValidationError[]) {
+    super()
+  }
+}
 
 export class BaseSamenClient {
   // TODO: Strip out trailing slash from url:
@@ -30,6 +37,7 @@ export class BaseSamenClient {
     serviceName: string,
     functionName: string,
     body: object,
+    resultParser: (data: any) => ParseResult<T>,
   ): Promise<T> {
     let result
 
@@ -51,7 +59,13 @@ export class BaseSamenClient {
     }
 
     const data = await result.json()
-    return data as T
+    const parseResult = resultParser(data)
+
+    if (parseResult.ok == false) {
+      throw new ParseError(parseResult.errors)
+    }
+
+    return parseResult.result
   }
 
   protected async requestVoid(

@@ -10,24 +10,21 @@ import * as tsx from "../../tsx"
 export default function generateDateParser(
   pointer: Pointer<DateParserModel>,
 ): ts.Statement {
-  return tsx.block(
-    tsx.verbatim(`console.log("data", data);`),
-    tsx.statement.if({
-      expression: generateDateValidator(pointer),
-      then: generatePushErrorExpressionStatement(
-        pointer.errorPath,
-        `is not a Date`,
+  return tsx.statement.if({
+    expression: generateDateValidator(pointer),
+    then: generatePushErrorExpressionStatement(
+      pointer.errorPath,
+      `is not a Date`,
+    ),
+    else: assignDataToResult(
+      pointer.resultVarExpr,
+      ts.factory.createNewExpression(
+        ts.factory.createIdentifier("Date"),
+        undefined,
+        [pointer.dataVarExpr],
       ),
-      else: assignDataToResult(
-        pointer.resultVarExpr,
-        ts.factory.createNewExpression(
-          ts.factory.createIdentifier("Date"),
-          undefined,
-          [pointer.dataVarExpr],
-        ),
-      ),
-    }),
-  )
+    ),
+  })
 }
 
 function generateDateValidator(

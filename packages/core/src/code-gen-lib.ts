@@ -2,7 +2,7 @@ import ts from "typescript"
 import { ParseError } from "./errors"
 import { getReturnType } from "./extractFunctionFromServiceProperty"
 import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
-import { getNameAsString, isExternalType } from "./tsUtils"
+import { getNameAsString, getFullTypeName, isExternalType } from "./tsUtils"
 import * as tsx from "./tsx"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
@@ -93,6 +93,7 @@ export function generateClientFunction(
   contextType: ts.TypeNode | undefined,
   func: ts.FunctionLikeDeclarationBase,
   refMaker: ReferenceMaker,
+  typeChecker: ts.TypeChecker,
 ): ts.PropertyAssignment {
   let parameters = func.parameters.map((p) =>
     ts.factory.createParameterDeclaration(
@@ -132,7 +133,13 @@ export function generateClientFunction(
       parameters,
       func.type && generateTypeNode(func.type, refMaker),
       undefined,
-      generateClientFunctionBlock(serviceName, context, func, refMaker),
+      generateClientFunctionBlock(
+        serviceName,
+        context,
+        func,
+        refMaker,
+        typeChecker,
+      ),
     ),
   )
 }
@@ -142,6 +149,7 @@ function generateClientFunctionBlock(
   context: { name: string; type: ts.TypeNode } | undefined,
   func: ts.FunctionLikeDeclarationBase,
   refMaker: ReferenceMaker,
+  typeChecker: ts.TypeChecker,
 ): ts.Block {
   // TODO should not use getReturnType or refactor
   const returnType = getReturnType(func)
@@ -187,6 +195,12 @@ function generateClientFunctionBlock(
 
                 return tsx.property.shorthandAssignment(p.name.getText())
               }),
+            ),
+            tsx.expression.identifier(
+              typeNodeToParserRef(
+                generateTypeNode(returnType, refMaker),
+                getNameAsString(func.name!),
+              ),
             ),
           ],
         },
@@ -312,6 +326,21 @@ function generateTypeElement(
     "Only Property signature is allowed " + typeElement.kind,
     typeElement,
   )
+}
+
+function typeNodeToParserRef(
+  typeNode: ts.TypeNode,
+  functionName: string,
+): string {
+  if (ts.isTypeReferenceNode(typeNode)) {
+    if (typeNode.typeArguments) {
+      //TODO
+      // return `${getFullTypeName(typeNode.typeName)}Parser.parse`
+    }
+    return `${getFullTypeName(typeNode.typeName)}Parser.parse`
+  }
+
+  return `${functionName}ResultParser`
 }
 
 function generateTypeNode(

@@ -60,10 +60,6 @@ export class Expression {
 
   public static arrowFunction = arrowFunction
 
-  public static literalType(literal: ts.LiteralExpression): ts.LiteralTypeNode {
-    return ts.factory.createLiteralTypeNode(literal)
-  }
-
   public static identifier(text: string): ts.Identifier {
     return ts.factory.createIdentifier(text)
   }
