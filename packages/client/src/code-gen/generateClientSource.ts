@@ -25,7 +25,14 @@ export default function generateClientSource(
     undefined,
   )
 
+  const importParserTypes = tsx.importDeclaration({
+    isTypeOnly: true,
+    names: ["ParseResult", "ValidationError"],
+    module: "./ParseResult",
+  })
+
   const domainSource = tsx.sourceFile(
+    importParserTypes,
     ...domainModels.map((model) => generateModel(model, domainRefMaker)),
     ...domainModels.map((model) => generateModelParser(model, typeChecker)),
     ...services.map((service) =>
@@ -144,12 +151,6 @@ export default function generateClientSource(
     appDeclarationVersion,
     typeChecker,
   )
-
-  const importParserTypes = tsx.importDeclaration({
-    isTypeOnly: true,
-    names: ["ParseResult", "ValidationError"],
-    module: "./ParseResult",
-  })
 
   const samenClientSource = tsx.sourceFile(
     importDomain,

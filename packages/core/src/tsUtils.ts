@@ -293,11 +293,40 @@ export function getNameAsString(
   throw new Error("Name not supported")
 }
 
-export function getFullTypeName(typeName: ts.EntityName): string {
-  if (ts.isIdentifier(typeName)) {
-    return typeName.text
+export function getFullyQualifiedName(
+  typeNode: ts.TypeReferenceNode,
+  typeChecker: ts.TypeChecker,
+): {
+  base: string
+  typeArgs?: string
+  full: string
+} {
+  const type = typeChecker.getTypeFromTypeNode(typeNode)
+  const base = typeChecker
+    .getFullyQualifiedName(type.aliasSymbol ?? type.symbol)
+    .replace(/^"[^"]+"\./, "") // remove file name
+    .replace(/\.v_\d+_\d+_\d+/, "") // remove version
+
+  const fullyQualifiedTypeArgs = typeNode.typeArguments?.map((typeArg) =>
+    ts.isTypeReferenceNode(typeArg)
+      ? getFullyQualifiedName(typeArg, typeChecker).full
+      : typeChecker.typeToString(
+          typeChecker.getTypeFromTypeNode(typeArg),
+          typeArg,
+        ),
+  )
+
+  const typeArgs = fullyQualifiedTypeArgs
+    ? `<${fullyQualifiedTypeArgs.join(", ")}>`
+    : undefined
+
+  console.log(getNameAsString(typeNode.typeName), "->", base)
+
+  return {
+    base,
+    typeArgs,
+    full: `${base}${typeArgs ?? ""}`,
   }
-  return `${getFullTypeName(typeName.left)}.${typeName.right.text}`
 }
 
 export function getTypeName(typeNode: ts.TypeNode): string | undefined {
