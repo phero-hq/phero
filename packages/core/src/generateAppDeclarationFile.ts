@@ -80,18 +80,10 @@ export default function generateAppDeclarationFile(
     emitDeclarationOnly: true,
   })
 
-  // console.log("---123----")
-  // console.log(generateTS(namespaceDeclrs))
-  // console.log("---123----")
-
   vHost.addFile("api.ts", generateTS(namespaceDeclrs))
 
   const program = vHost.createProgram("api.ts")
   program.emit()
-
-  // console.log("ssss", program.getSemanticDiagnostics().length)
-  // console.log("ssss", program.getSemanticDiagnostics()[0].messageText)
-  // console.log("ssss", program.getSemanticDiagnostics()[1].messageText)
 
   const t2 = Date.now()
   // console.log("generateAppDeclarationFile in", t2 - t1)

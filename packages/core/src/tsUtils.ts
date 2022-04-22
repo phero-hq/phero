@@ -320,8 +320,6 @@ export function getFullyQualifiedName(
     ? `<${fullyQualifiedTypeArgs.join(", ")}>`
     : undefined
 
-  console.log(getNameAsString(typeNode.typeName), "->", base)
-
   return {
     base,
     typeArgs,

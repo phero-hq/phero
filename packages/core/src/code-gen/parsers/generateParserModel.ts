@@ -265,7 +265,7 @@ export default function generateParserModel(
           if (!paramType) {
             throw new Error("Function parameter has no returnType")
           }
-          // console.log("is 162?", paramType.kind)
+
           return {
             type: ParserModelType.Member,
             name: getMemberName(param.name),
