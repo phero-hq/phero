@@ -11,6 +11,9 @@ type BinaryOperator =
   | "-"
   | "*"
   | "/"
+  | "||"
+  | "&&"
+  | "??"
 
 export function binaryExpression(
   left: ts.Expression,
@@ -44,5 +47,11 @@ function generateOperator(
       return ts.factory.createToken(ts.SyntaxKind.AsteriskToken)
     case "/":
       return ts.factory.createToken(ts.SyntaxKind.SlashToken)
+    case "||":
+      return ts.factory.createToken(ts.SyntaxKind.BarBarToken)
+    case "&&":
+      return ts.factory.createToken(ts.SyntaxKind.AmpersandAmpersandToken)
+    case "??":
+      return ts.factory.createToken(ts.SyntaxKind.QuestionQuestionToken)
   }
 }

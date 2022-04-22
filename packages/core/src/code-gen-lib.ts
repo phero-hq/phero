@@ -1,8 +1,15 @@
 import ts from "typescript"
+import { generateInlineParser } from "./code-gen/generateRPCProxy"
+import generateParserFromModel from "./code-gen/parsers/generateParserFromModel"
+import generateParserModel from "./code-gen/parsers/generateParserModel"
 import { ParseError } from "./errors"
 import { getReturnType } from "./extractFunctionFromServiceProperty"
 import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
-import { getNameAsString, isExternalType } from "./tsUtils"
+import {
+  getNameAsString,
+  isExternalType,
+  getFullyQualifiedName,
+} from "./tsUtils"
 import * as tsx from "./tsx"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
@@ -93,6 +100,7 @@ export function generateClientFunction(
   contextType: ts.TypeNode | undefined,
   func: ts.FunctionLikeDeclarationBase,
   refMaker: ReferenceMaker,
+  typeChecker: ts.TypeChecker,
 ): ts.PropertyAssignment {
   let parameters = func.parameters.map((p) =>
     ts.factory.createParameterDeclaration(
@@ -132,7 +140,13 @@ export function generateClientFunction(
       parameters,
       func.type && generateTypeNode(func.type, refMaker),
       undefined,
-      generateClientFunctionBlock(serviceName, context, func, refMaker),
+      generateClientFunctionBlock(
+        serviceName,
+        context,
+        func,
+        refMaker,
+        typeChecker,
+      ),
     ),
   )
 }
@@ -142,11 +156,13 @@ function generateClientFunctionBlock(
   context: { name: string; type: ts.TypeNode } | undefined,
   func: ts.FunctionLikeDeclarationBase,
   refMaker: ReferenceMaker,
+  typeChecker: ts.TypeChecker,
 ): ts.Block {
   // TODO should not use getReturnType or refactor
   const returnType = getReturnType(func)
   const isVoid = returnType.kind === ts.SyntaxKind.VoidKeyword
 
+  const returnTypeNode = generateTypeNode(returnType, refMaker)
   return tsx.block(
     tsx.statement.return(
       tsx.expression.call(
@@ -155,9 +171,7 @@ function generateClientFunctionBlock(
           isVoid ? "requestVoid" : "request",
         ),
         {
-          typeArgs: isVoid
-            ? undefined
-            : [generateTypeNode(returnType, refMaker)],
+          typeArgs: isVoid ? undefined : [returnTypeNode],
 
           args: [
             tsx.literal.string(serviceName),
@@ -188,6 +202,11 @@ function generateClientFunctionBlock(
                 return tsx.property.shorthandAssignment(p.name.getText())
               }),
             ),
+            ts.isTypeReferenceNode(returnType)
+              ? makeReferenceToParserFunction(returnType, typeChecker)
+              : tsx.expression.identifier(
+                  `${getNameAsString(func.name!)}ResultParser`,
+                ),
           ],
         },
       ),
@@ -312,6 +331,25 @@ function generateTypeElement(
     "Only Property signature is allowed " + typeElement.kind,
     typeElement,
   )
+}
+
+function makeReferenceToParserFunction(
+  typeNode: ts.TypeNode,
+  typeChecker: ts.TypeChecker,
+): ts.Expression {
+  if (ts.isTypeReferenceNode(typeNode) && !typeNode.typeArguments) {
+    return tsx.expression.propertyAccess(
+      `${getFullyQualifiedName(typeNode, typeChecker).base}Parser`,
+      "parse",
+    )
+  }
+
+  return generateInlineParser({
+    returnType: tsx.type.any,
+    parser: generateParserFromModel(
+      generateParserModel(typeChecker, typeNode, "data"),
+    ),
+  })
 }
 
 function generateTypeNode(

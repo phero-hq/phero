@@ -7,104 +7,95 @@ import {
 import { ParserModelType, ReferenceParserModel } from "./generateParserModel"
 import { generateParserBody } from "./generateParser"
 import generateParserFromModel from "./generateParserFromModel"
-import { capitalize } from "../../utils"
+import * as tsx from "../../tsx"
 
 export default function generateReferenceParser(
   pointer: Pointer<ReferenceParserModel>,
 ): ts.Statement {
-  const hasNoTypeArgs = pointer.model.typeArguments.length === 0
-  return ts.factory.createIfStatement(
-    hasNoTypeArgs
-      ? generateReferenceValidator(pointer)
-      : generateReferenceValidatorWithTypeArguments(pointer),
-    // TODO populate the errors with the actual errors
-    generatePushErrorExpressionStatement(
-      pointer.errorPath,
-      `not a ${pointer.model.typeName}`,
-    ),
-    assignDataToResult(pointer.resultVarExpr, pointer.dataVarExpr),
+  const parseResultName = `parseResult`
+  return tsx.block(
+    tsx.const({
+      name: parseResultName,
+      init: generateParserCall(pointer),
+    }),
+    tsx.statement.if({
+      expression: tsx.expression.negate(
+        tsx.expression.propertyAccess(parseResultName, "ok"),
+      ),
+      // TODO populate the errors with the actual errors
+      then: generatePushErrorExpressionStatement(
+        pointer.errorPath,
+        `not a ${pointer.model.typeName}`,
+      ),
+      else: assignDataToResult(
+        pointer.resultVarExpr,
+        tsx.expression.propertyAccess(parseResultName, "result"),
+      ),
+    }),
   )
 }
 
-function generateReferenceValidator(
+function generateParserCall(
   pointer: Pointer<ReferenceParserModel>,
-): ts.Expression {
-  return ts.factory.createPrefixUnaryExpression(
-    ts.SyntaxKind.ExclamationToken,
-    ts.factory.createPropertyAccessExpression(
-      ts.factory.createCallExpression(
-        ts.factory.createPropertyAccessExpression(
-          ts.factory.createIdentifier(
-            capitalize(`${pointer.model.baseTypeName}Parser`),
-          ),
-          ts.factory.createIdentifier("parse"),
-        ),
-        undefined,
-        [pointer.dataVarExpr],
+): ts.CallExpression {
+  if (pointer.model.typeArguments.length === 0) {
+    return tsx.expression.call(
+      tsx.expression.propertyAccess(
+        `${pointer.model.fullyQualifiedName.base}Parser`,
+        "parse",
       ),
-      ts.factory.createIdentifier("ok"),
-    ),
-  )
-}
-
-function generateReferenceValidatorWithTypeArguments(
-  pointer: Pointer<ReferenceParserModel>,
-): ts.Expression {
-  return ts.factory.createPrefixUnaryExpression(
-    ts.SyntaxKind.ExclamationToken,
-    ts.factory.createPropertyAccessExpression(
-      ts.factory.createCallExpression(
-        ts.factory.createPropertyAccessExpression(
-          ts.factory.createIdentifier(
-            capitalize(`${pointer.model.baseTypeName}Parser`),
-          ),
-          ts.factory.createIdentifier("parse"),
+      { args: [pointer.dataVarExpr] },
+    )
+  } else {
+    return ts.factory.createCallExpression(
+      ts.factory.createPropertyAccessExpression(
+        ts.factory.createIdentifier(
+          `${pointer.model.fullyQualifiedName.base}Parser`,
         ),
-        pointer.model.typeArguments.map((typeArg) =>
-          ts.factory.createTypeReferenceNode(
-            ts.factory.createIdentifier(typeArg.typeName),
-            undefined,
-          ),
-        ),
-        [
-          pointer.dataVarExpr,
-          ...(pointer.model.typeArguments?.map((param) =>
-            param.parser.type === ParserModelType.TypeParameter
-              ? param.parser.defaultParser
-                ? ts.factory.createBinaryExpression(
-                    ts.factory.createIdentifier(`t${param.parser.position}`),
-                    ts.factory.createToken(ts.SyntaxKind.QuestionQuestionToken),
-                    generateInlineTypeParameterParser(
-                      param.typeName,
-                      generateParserFromModel(
-                        param.parser.defaultParser.parser,
-                        [
-                          {
-                            type: ParserModelType.Root,
-                            name: "data",
-                            parser: param.parser.defaultParser.parser,
-                          },
-                        ],
-                      ),
-                    ),
-                  )
-                : ts.factory.createIdentifier(`t${param.parser.position}`)
-              : generateInlineTypeParameterParser(
-                  param.typeName,
-                  generateParserFromModel(param.parser, [
-                    {
-                      type: ParserModelType.Root,
-                      name: "data",
-                      parser: pointer.model,
-                    },
-                  ]),
-                ),
-          ) ?? []),
-        ],
+        ts.factory.createIdentifier("parse"),
       ),
-      ts.factory.createIdentifier("ok"),
-    ),
-  )
+      pointer.model.typeArguments.map((typeArg) =>
+        ts.factory.createTypeReferenceNode(
+          ts.factory.createIdentifier(
+            typeArg.fullyQualifiedName?.full ?? typeArg.typeName,
+          ),
+          undefined,
+        ),
+      ),
+      [
+        pointer.dataVarExpr,
+        ...(pointer.model.typeArguments?.map((param) =>
+          param.parser.type === ParserModelType.TypeParameter
+            ? param.parser.defaultParser
+              ? ts.factory.createBinaryExpression(
+                  ts.factory.createIdentifier(`t${param.parser.position}`),
+                  ts.factory.createToken(ts.SyntaxKind.QuestionQuestionToken),
+                  generateInlineTypeParameterParser(
+                    param.fullyQualifiedName?.full ?? param.typeName,
+                    generateParserFromModel(param.parser.defaultParser.parser, [
+                      {
+                        type: ParserModelType.Root,
+                        name: "data",
+                        parser: param.parser.defaultParser.parser,
+                      },
+                    ]),
+                  ),
+                )
+              : ts.factory.createIdentifier(`t${param.parser.position}`)
+            : generateInlineTypeParameterParser(
+                param.fullyQualifiedName?.full ?? param.typeName,
+                generateParserFromModel(param.parser, [
+                  {
+                    type: ParserModelType.Root,
+                    name: "data",
+                    parser: pointer.model,
+                  },
+                ]),
+              ),
+        ) ?? []),
+      ],
+    )
+  }
 }
 
 export function generateInlineTypeParameterParser(

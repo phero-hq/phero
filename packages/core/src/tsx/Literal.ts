@@ -58,4 +58,8 @@ export class Literal {
       props.type,
     )
   }
+
+  public static regularExpression(text: string): ts.RegularExpressionLiteral {
+    return ts.factory.createRegularExpressionLiteral(text)
+  }
 }

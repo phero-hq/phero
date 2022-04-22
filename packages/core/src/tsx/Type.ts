@@ -26,5 +26,14 @@ export class Type {
   public static intersection(...types: ts.TypeNode[]): ts.IntersectionTypeNode {
     return ts.factory.createIntersectionTypeNode(types)
   }
+  public static literalType(
+    literal:
+      | ts.LiteralExpression
+      | ts.NullLiteral
+      | ts.BooleanLiteral
+      | ts.PrefixUnaryExpression,
+  ): ts.LiteralTypeNode {
+    return ts.factory.createLiteralTypeNode(literal)
+  }
   public static reference = typeReference
 }
