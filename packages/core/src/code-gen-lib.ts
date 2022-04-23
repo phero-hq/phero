@@ -42,15 +42,7 @@ export function generateFunction(
     ts.factory.createTypeReferenceNode("Promise", [
       generateTypeNode(func.returnType, refMaker),
     ]),
-    ts.factory.createBlock([
-      ts.factory.createThrowStatement(
-        ts.factory.createNewExpression(
-          ts.factory.createIdentifier("Error"),
-          undefined,
-          [ts.factory.createStringLiteral("no impl", false)],
-        ),
-      ),
-    ]),
+    undefined,
   )
 }
 
