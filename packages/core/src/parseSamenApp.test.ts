@@ -302,7 +302,11 @@ describe("parseSamenApp", () => {
     test("should parse middleware config", () => {
       const parsedApp = parseProgram(
         createTestProgram(`
-        interface NextFunction {}
+        interface NextFunction {}type NextFunction<T = void> = T extends void
+          ? () => Promise<void>
+          : (ctx: T) => Promise<void>
+        type SamenContext<T = {}> = T
+        type SamenParams<T = {}> = Partial<T>
 
         async function getArticle(): Promise<string> {
           return "ok"
@@ -312,7 +316,7 @@ describe("parseSamenApp", () => {
           return "ok"
         }
         
-        async function requireCMSUser(next: NextFunction): Promise<string> {
+        async function requireCMSUser(params: SamenParams, ctx: SamenContext, next: NextFunction): Promise<string> {
           return "ok"
         }
         
@@ -372,7 +376,11 @@ describe("parseSamenApp", () => {
     test("should parse multiple services", () => {
       const parsedApp = parseProgram(
         createTestProgram(`
-        interface NextFunction {}
+        interface NextFunction {}type NextFunction<T = void> = T extends void
+          ? () => Promise<void>
+          : (ctx: T) => Promise<void>
+        type SamenContext<T = {}> = T
+        type SamenParams<T = {}> = Partial<T>
 
         async function getArticle(): Promise<string> {
           return "ok"
@@ -382,7 +390,7 @@ describe("parseSamenApp", () => {
           return "ok"
         }
         
-        async function requireCMSUser(next: NextFunction): Promise<string> {
+        async function requireCMSUser(params: SamenParams, ctx: SamenContext, next: NextFunction): Promise<string> {
           return "ok"
         }
         

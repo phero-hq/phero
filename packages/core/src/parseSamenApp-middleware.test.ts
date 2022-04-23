@@ -45,15 +45,19 @@ describe("parseSamenApp middleware", () => {
   test("should parse middleware", () => {
     const parsedApp = parseProgram(
       createTestProgram(`
-        type NextFunction<T = void> = {}
-        type SamenContext<T> = {}
+        type NextFunction<T = void> = T extends void
+          ? () => Promise<void>
+          : (ctx: T) => Promise<void>
+
+        type SamenContext<T = {}> = T
+        type SamenParams<T = {}> = Partial<T>
 
         async function getArticle(aap: string, ctx: SamenContext<{ x: number }>): Promise<string> {
           return "ok"
         }
 
-        async function myMiddleware(next: NextFunction<{ x: number }) {
-
+        async function myMiddleware(params: SamenParams, context: SamenContext, next: NextFunction<{ x: number }) {
+          await next({ x: 123 })
         }
 
         export const articleService = createService({

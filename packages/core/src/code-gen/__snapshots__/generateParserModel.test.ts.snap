@@ -1768,9 +1768,15 @@ Object {
         "optional": false,
         "parser": Object {
           "baseTypeName": "Test",
+          "fullyQualifiedName": Object {
+            "base": "Test",
+            "full": "Test<number>",
+            "typeArgs": "<number>",
+          },
           "type": "reference",
           "typeArguments": Array [
             Object {
+              "fullyQualifiedName": undefined,
               "parser": Object {
                 "type": "number",
               },
@@ -2154,6 +2160,11 @@ Object {
               "optional": false,
               "parser": Object {
                 "baseTypeName": "Test",
+                "fullyQualifiedName": Object {
+                  "base": "Test",
+                  "full": "Test",
+                  "typeArgs": undefined,
+                },
                 "type": "reference",
                 "typeArguments": Array [],
                 "typeName": "Test",
@@ -2187,6 +2198,11 @@ Object {
         "optional": false,
         "parser": Object {
           "baseTypeName": "Test",
+          "fullyQualifiedName": Object {
+            "base": "Test",
+            "full": "Test",
+            "typeArgs": undefined,
+          },
           "type": "reference",
           "typeArguments": Array [],
           "typeName": "Test",

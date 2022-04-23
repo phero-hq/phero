@@ -20,8 +20,11 @@ describe("generateAppDeclarationFile", () => {
   test("should parse middleware", () => {
     const parsedApp = generate(
       createTestProgram(`
-        type NextFunction<T = void> = (ctx: T) => Promise<void>
-        type SamenContext<T> = {}
+        type NextFunction<T = void> = T extends void
+          ? () => Promise<void>
+          : (ctx: T) => Promise<void>
+        type SamenContext<T = {}> = T
+        type SamenParams<T = {}> = Partial<T>
 
         async function getArticle(aap: string, ctx: SamenContext<{ user: User }>): Promise<string> {
           return "ok"
@@ -29,12 +32,12 @@ describe("generateAppDeclarationFile", () => {
 
         interface User { uid: string }
 
-        async function requireUID(next: NextFunction<{ uid: string, x: string }>, ctx: SamenContext<{ uid: string }>) {
+        async function requireUID(params: SamenParams, ctx: SamenContext<{ uid: string }>, next: NextFunction<{ uid: string, x: string }>) {
           // valideer id token
           await next({ uid, x })
         }
         
-        async function requireCmsUser(next: NextFunction<{ user: User }>, ctx: SamenContext<{ uid: string, x: string }>) {
+        async function requireCmsUser(params: SamenParams, ctx: SamenContext<{ uid: string, x: string }>, next: NextFunction<{ user: User }>) {
           // zet om naar user, of het cms user is
           await next({ user: { uid } })
         }
