@@ -2,7 +2,7 @@ import { promises as fs } from "fs"
 import path from "path"
 import ts from "typescript"
 
-import { ClientSource } from "./getClientSource"
+import { ClientSource } from "../ClientSource"
 
 const printer = ts.createPrinter({
   newLine: ts.NewLineKind.LineFeed,
@@ -24,8 +24,13 @@ export default async function writeClientSource(
   )
 
   await fs.copyFile(
-    path.join(__dirname, "../../src/BaseSamenClient.ts"),
+    path.join(__dirname, "../../src/templates/BaseSamenClient.ts"),
     path.join(outputPath, "BaseSamenClient.ts"),
+  )
+
+  await fs.copyFile(
+    path.join(__dirname, "../../src/templates/ParseResult.ts"),
+    path.join(outputPath, "ParseResult.ts"),
   )
 
   await fs.writeFile(

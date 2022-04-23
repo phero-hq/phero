@@ -1,4 +1,5 @@
 import ts from "typescript"
+import { printCode } from "./tsTestUtils"
 
 export interface KindToNodeMappings {
   [kind: number]: ts.Node
@@ -264,4 +265,72 @@ export function isExternalTypeNode(typeNode: ts.TypeNode): boolean {
 
 export function isExternalSourceFile(sourceFile: ts.SourceFile): boolean {
   return sourceFile.fileName.includes("node_modules/typescript/lib/lib.")
+}
+
+export function getNameAsString(
+  name: ts.PropertyName | ts.EntityName | ts.BindingName,
+): string {
+  if (!name) {
+    throw new Error("No name")
+  }
+
+  if (ts.isIdentifier(name)) {
+    return name.text
+  } else if (ts.isStringLiteral(name)) {
+    return name.text
+  } else if (ts.isNumericLiteral(name)) {
+    return name.text
+  } else if (ts.isQualifiedName(name)) {
+    return name.right.text
+  } else if (ts.isComputedPropertyName(name)) {
+    throw new Error(`No support for computed names ${printCode(name)}`)
+  } else if (ts.isPrivateIdentifier(name)) {
+    throw new Error(`No support for private names ${printCode(name)}`)
+  } else if (ts.isBindingName(name)) {
+    throw new Error(`No support for binding names ${printCode(name)}`)
+  }
+
+  throw new Error("Name not supported")
+}
+
+export function getFullyQualifiedName(
+  typeNode: ts.TypeReferenceNode,
+  typeChecker: ts.TypeChecker,
+): {
+  base: string
+  typeArgs?: string
+  full: string
+} {
+  const type = typeChecker.getTypeFromTypeNode(typeNode)
+  const base = typeChecker
+    .getFullyQualifiedName(type.aliasSymbol ?? type.symbol)
+    .replace(/^"[^"]+"\./, "") // remove file name
+    .replace(/\.v_\d+_\d+_\d+/, "") // remove version
+
+  const fullyQualifiedTypeArgs = typeNode.typeArguments?.map((typeArg) =>
+    ts.isTypeReferenceNode(typeArg)
+      ? getFullyQualifiedName(typeArg, typeChecker).full
+      : typeChecker.typeToString(
+          typeChecker.getTypeFromTypeNode(typeArg),
+          typeArg,
+        ),
+  )
+
+  const typeArgs = fullyQualifiedTypeArgs
+    ? `<${fullyQualifiedTypeArgs.join(", ")}>`
+    : undefined
+
+  return {
+    base,
+    typeArgs,
+    full: `${base}${typeArgs ?? ""}`,
+  }
+}
+
+export function getTypeName(typeNode: ts.TypeNode): string | undefined {
+  if (ts.isTypeReferenceNode(typeNode)) {
+    return ts.isIdentifier(typeNode.typeName)
+      ? typeNode.typeName.text
+      : typeNode.typeName.right.text
+  }
 }

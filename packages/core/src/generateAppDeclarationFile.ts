@@ -7,6 +7,7 @@ import {
 } from "./code-gen-lib"
 import { ParsedSamenApp } from "./parseSamenApp"
 import { VirtualCompilerHost } from "./VirtualCompilerHost"
+import * as tsx from "./tsx"
 
 export default function generateAppDeclarationFile(
   app: ParsedSamenApp,
@@ -42,6 +43,20 @@ export default function generateAppDeclarationFile(
     )
   }
 
+  const isUsingSamenContext = app.services.some((s) => !!s.config.contextType)
+  if (isUsingSamenContext) {
+    namespaceDeclrs.push(
+      generateNamespace(ts.factory.createIdentifier("samen"), [
+        tsx.typeAlias({
+          export: true,
+          name: "SamenContext",
+          typeParameters: [tsx.typeParam({ name: "T" })],
+          type: tsx.type.reference({ name: "T" }),
+        }),
+      ]),
+    )
+  }
+
   for (const service of app.services) {
     namespaceDeclrs.push(
       // export namespace cmsService {
@@ -63,17 +78,10 @@ export default function generateAppDeclarationFile(
     emitDeclarationOnly: true,
   })
 
-  // console.log("---123----")
-  // console.log(generateTS(namespaceDeclrs))
-  // console.log("---123----")
   vHost.addFile("api.ts", generateTS(namespaceDeclrs))
 
   const program = vHost.createProgram("api.ts")
   program.emit()
-
-  // console.log("ssss", program.getSemanticDiagnostics().length)
-  // console.log("ssss", program.getSemanticDiagnostics()[0].messageText)
-  // console.log("ssss", program.getSemanticDiagnostics()[1].messageText)
 
   const t2 = Date.now()
   // console.log("generateAppDeclarationFile in", t2 - t1)

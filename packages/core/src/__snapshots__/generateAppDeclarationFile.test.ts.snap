@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateAppDeclarationFile should parse middleware 1`] = `
+"export declare namespace samen {
+    type SamenContext<T> = T;
+}
+export declare namespace articleService {
+    namespace v_1_0_0 {
+        interface User {
+            uid: string;
+        }
+        function getArticle(aap: string, ctx: samen.SamenContext<{
+            uid: string;
+        }>): Promise<string>;
+    }
+}
+"
+`;

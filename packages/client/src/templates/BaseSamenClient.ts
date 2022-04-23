@@ -1,3 +1,5 @@
+import { ParseResult, ValidationError } from "./ParseResult"
+
 export interface SamenRequest {
   method: "GET" | "POST"
   headers: {
@@ -15,56 +17,38 @@ export type Fetch = (
   json(): Promise<unknown>
 }>
 
-export type RequestInterceptor = (
-  request: SamenRequest,
-) => SamenRequest | Promise<SamenRequest>
-
 export class NetworkError extends Error {}
 export class HttpError extends Error {
   constructor(public readonly httpStatus: number) {
     super()
   }
 }
+export class ParseError extends Error {
+  constructor(public readonly errors: ValidationError[]) {
+    super()
+  }
+}
 
 export class BaseSamenClient {
-  private interceptors: RequestInterceptor[] = []
-
   // TODO: Strip out trailing slash from url:
   constructor(private readonly _fetch: Fetch, private readonly url: string) {}
-
-  public addRequestInterceptor(interceptor: RequestInterceptor): this {
-    this.interceptors.push(interceptor)
-    return this
-  }
-
-  private async runRequestInterceptors(
-    request: SamenRequest,
-  ): Promise<SamenRequest> {
-    let _result = request
-    for (const interceptor of this.interceptors) {
-      _result = await interceptor(_result)
-    }
-    return _result
-  }
 
   protected async request<T>(
     serviceName: string,
     functionName: string,
     body: object,
+    resultParser: (data: any) => ParseResult<T>,
   ): Promise<T> {
     let result
 
     try {
-      result = await this._fetch(
-        `${this.url}/${serviceName}/${functionName}`,
-        await this.runRequestInterceptors({
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(body),
-        }),
-      )
+      result = await this._fetch(`${this.url}/${serviceName}/${functionName}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
     } catch (err) {
       console.error(err)
       throw new NetworkError()
@@ -75,7 +59,13 @@ export class BaseSamenClient {
     }
 
     const data = await result.json()
-    return data as T
+    const parseResult = resultParser(data)
+
+    if (parseResult.ok == false) {
+      throw new ParseError(parseResult.errors)
+    }
+
+    return parseResult.result
   }
 
   protected async requestVoid(
@@ -86,16 +76,13 @@ export class BaseSamenClient {
     let result
 
     try {
-      result = await this._fetch(
-        `${this.url}/${serviceName}/${functionName}`,
-        await this.runRequestInterceptors({
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(body),
-        }),
-      )
+      result = await this._fetch(`${this.url}/${serviceName}/${functionName}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
     } catch (err) {
       console.error(err)
       throw new NetworkError()

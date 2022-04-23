@@ -1,6 +1,4 @@
 import ts from "typescript"
-import path from "path"
-import { promises as fs } from "fs"
 
 export interface TSFiles {
   [fileName: string]: string
@@ -31,14 +29,6 @@ export class VirtualCompilerHost {
     const host = ts.createCompilerHost(this.compilerOpts)
 
     host.writeFile = async (fileName: string, contents: string) => {
-      // if (opts?.outDir && fileName.startsWith(opts.outDir)) {
-      //   await fs.mkdir(path.dirname(fileName), { recursive: true })
-      //   await fs.writeFile(fileName, contents, { encoding: "utf-8" })
-      //   console.log(fileName)
-      // } else {
-      //   throw new Error("HUHH" + fileName)
-      // }
-      // console.log("fileName", fileName)
       this.files[fileName] = contents
     }
 
@@ -56,15 +46,6 @@ export class VirtualCompilerHost {
           resolvedFileName: fileName,
           isExternalLibraryImport: false,
         }
-
-        // const res = ress(moduleName, containingFile)
-        // console.log(
-        //   "m",
-        //   moduleName,
-        //   res?.isExternalLibraryImport,
-        //   res?.resolvedFileName,
-        // )
-        // return res
       })
     }
 
@@ -78,7 +59,6 @@ export class VirtualCompilerHost {
     }
 
     host.fileExists = (fileName: string) => {
-      // console.log("fileName", fileName)
       return !!this.files[fileName]
     }
 

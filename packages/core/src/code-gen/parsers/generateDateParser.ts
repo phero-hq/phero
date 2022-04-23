@@ -5,14 +5,18 @@ import {
   generatePushErrorExpressionStatement,
 } from "./generateParserLib"
 import { DateParserModel } from "./generateParserModel"
+import * as tsx from "../../tsx"
 
 export default function generateDateParser(
   pointer: Pointer<DateParserModel>,
 ): ts.Statement {
-  return ts.factory.createIfStatement(
-    generateDateValidator(pointer),
-    generatePushErrorExpressionStatement(pointer.errorPath, `is not a Date`),
-    assignDataToResult(
+  return tsx.statement.if({
+    expression: generateDateValidator(pointer),
+    then: generatePushErrorExpressionStatement(
+      pointer.errorPath,
+      `is not a Date`,
+    ),
+    else: assignDataToResult(
       pointer.resultVarExpr,
       ts.factory.createNewExpression(
         ts.factory.createIdentifier("Date"),
@@ -20,32 +24,48 @@ export default function generateDateParser(
         [pointer.dataVarExpr],
       ),
     ),
-  )
+  })
 }
 
 function generateDateValidator(
   pointer: Pointer<DateParserModel>,
 ): ts.Expression {
-  return ts.factory.createBinaryExpression(
-    ts.factory.createBinaryExpression(
-      ts.factory.createTypeOfExpression(pointer.dataVarExpr),
-      ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsEqualsToken),
-      ts.factory.createStringLiteral("string"),
-    ),
-    ts.factory.createToken(ts.SyntaxKind.BarBarToken),
-    ts.factory.createPrefixUnaryExpression(
-      ts.SyntaxKind.ExclamationToken,
-      ts.factory.createCallExpression(
-        ts.factory.createPropertyAccessExpression(
+  return tsx.expression.binary(
+    tsx.expression.prefixUnary(
+      "!",
+      tsx.expression.parenthesis(
+        ts.factory.createBinaryExpression(
           pointer.dataVarExpr,
-          ts.factory.createIdentifier("match"),
+          ts.factory.createToken(ts.SyntaxKind.InstanceOfKeyword),
+          tsx.expression.identifier("Date"),
         ),
-        undefined,
-        [
-          ts.factory.createRegularExpressionLiteral(
-            "/^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/",
-          ),
-        ],
+      ),
+    ),
+    "&&",
+    generateDateStringValidator(pointer),
+  )
+}
+
+function generateDateStringValidator(
+  pointer: Pointer<DateParserModel>,
+): ts.Expression {
+  return tsx.expression.binary(
+    tsx.expression.binary(
+      tsx.expression.typeof(pointer.dataVarExpr),
+      "!==",
+      tsx.literal.string("string"),
+    ),
+    "||",
+    tsx.expression.negate(
+      tsx.expression.call(
+        tsx.expression.propertyAccess(pointer.dataVarExpr, "match"),
+        {
+          args: [
+            tsx.literal.regularExpression(
+              `/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/`,
+            ),
+          ],
+        },
       ),
     ),
   )

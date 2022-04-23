@@ -1,17 +1,16 @@
 import ts from "typescript"
-import { getReturnType } from "../../extractFunctionFromServiceProperty"
-import { printCode } from "../../tsTestUtils"
+import { isModel } from "../../parseAppDeclaration"
+import { Model } from "../../parseSamenApp"
+import * as tsx from "../../tsx"
 import { capitalize } from "../../utils"
 import generateParserFromModel from "./../parsers/generateParserFromModel"
-import generateParserModel, {
-  ParserModelType,
-} from "./../parsers/generateParserModel"
+import generateParserModel from "./../parsers/generateParserModel"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
 const staticModifier = ts.factory.createModifier(ts.SyntaxKind.StaticKeyword)
 
 export default function generateModelParser(
-  model: ts.Node,
+  model: Model,
   typeChecker: ts.TypeChecker,
 ): ts.ClassDeclaration {
   const rootParserModel = generateParserModel(typeChecker, model, "data")
@@ -100,7 +99,9 @@ export default function generateModelParser(
           ],
         ),
         generateParserBody(
-          rootParserModel.rootTypeParser.typeName,
+          ts.factory.createTypeReferenceNode(
+            rootParserModel.rootTypeParser.typeName,
+          ),
           parserStatement,
         ),
       ),
@@ -109,7 +110,7 @@ export default function generateModelParser(
 }
 
 export function generateParserBody(
-  returnTypeString: string,
+  returnType: ts.TypeNode,
   parserStatement: ts.Statement,
 ): ts.Block {
   return ts.factory.createBlock(
@@ -188,7 +189,7 @@ export function generateParserBody(
               ts.factory.createIdentifier("result"),
               ts.factory.createAsExpression(
                 ts.factory.createIdentifier("result"),
-                ts.factory.createTypeReferenceNode(returnTypeString, undefined),
+                returnType,
               ),
             ),
           ],
@@ -214,82 +215,26 @@ export function getFunctionName(name?: ts.PropertyName): string {
   throw new Error(`Function has unsupported name`)
 }
 
-export function generateRPCParser(
-  func: ts.FunctionLikeDeclarationBase,
+export function generateNonModelParser(
+  type: ts.TypeNode,
+  model: ts.Node,
   typeChecker: ts.TypeChecker,
-): ts.ClassDeclaration {
-  if (!func.type) {
-    throw new Error("Function should have return type")
+  parserName: string,
+): ts.FunctionDeclaration {
+  if (isModel(model)) {
+    throw new Error("Should not be model")
   }
 
-  const intputParserModel = generateParserModel(typeChecker, func, "data")
+  const rootParserModel = generateParserModel(typeChecker, model, "data")
+  const parserStatement: ts.Statement = generateParserFromModel(rootParserModel)
 
-  const outputParserModel = generateParserModel(
-    typeChecker,
-    getReturnType(func),
-    "data",
-  )
-
-  const inputParserStatement: ts.Statement = generateParserFromModel(
-    generateParserModel(typeChecker, func, "data"),
-  )
-  const outputParserStatement: ts.Statement =
-    generateParserFromModel(outputParserModel)
-
-  // console.log("input")
-  // console.log(printCode(inputParserStatement))
-  // console.log("output")
-  // console.log(printCode(outputParserStatement))
-
-  const parserName = capitalize(`${getFunctionName(func.name)}Parser`)
-
-  return ts.factory.createClassDeclaration(
-    undefined,
-    undefined,
-    parserName,
-    undefined,
-    undefined,
-    [],
-  )
-  // return ts.factory.createClassDeclaration(
-  //   undefined,
-  //   [exportModifier],
-  //   parserName,
-  //   undefined,
-  //   undefined,
-  //   [
-  //     ts.factory.createMethodDeclaration(
-  //       undefined,
-  //       [staticModifier],
-  //       undefined,
-  //       "parse",
-  //       undefined,
-  //       undefined,
-  //       [
-  //         ts.factory.createParameterDeclaration(
-  //           undefined,
-  //           undefined,
-  //           undefined,
-  //           "data",
-  //           undefined,
-  //           ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword),
-  //           undefined,
-  //         ),
-  //       ],
-  //       ts.factory.createTypeReferenceNode(
-  //         ts.factory.createIdentifier("ParseResult"),
-  //         [
-  //           ts.factory.createTypeReferenceNode(
-  //             rootParserModel.rootTypeParser.typeName,
-  //             undefined,
-  //           ),
-  //         ],
-  //       ),
-  //       generateParserBody(
-  //         rootParserModel.rootTypeParser.typeName,
-  //         parserStatement,
-  //       ),
-  //     ),
-  //   ],
-  // )
+  return tsx.function({
+    name: parserName,
+    params: [tsx.param({ name: "data", type: tsx.type.any })],
+    returnType: tsx.type.reference({
+      name: "ParseResult",
+      args: [type],
+    }),
+    body: generateParserBody(type, parserStatement),
+  })
 }

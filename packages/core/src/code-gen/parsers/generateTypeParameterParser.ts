@@ -10,48 +10,53 @@ import {
 } from "./generateParserModel"
 import { generateInlineTypeParameterParser } from "./generateReferenceParser"
 import Pointer from "./Pointer"
+import * as tsx from "../../tsx"
 
 export default function generateTypeParameterParser(
   pointer: Pointer<TypeParameterParserModel>,
 ): ts.Statement {
-  return ts.factory.createIfStatement(
-    ts.factory.createPrefixUnaryExpression(
-      ts.SyntaxKind.ExclamationToken,
-      ts.factory.createPropertyAccessExpression(
-        ts.factory.createCallExpression(
-          pointer.model.defaultParser
-            ? ts.factory.createParenthesizedExpression(
-                ts.factory.createBinaryExpression(
-                  ts.factory.createIdentifier(`t${pointer.model.position}`),
-                  ts.factory.createToken(ts.SyntaxKind.QuestionQuestionToken),
-                  generateInlineTypeParameterParser(
-                    pointer.model.defaultParser.typeName,
-                    generateParserFromModel(
-                      pointer.model.defaultParser.parser,
-                      [
-                        {
-                          type: ParserModelType.Root,
-                          name: "data",
-                          parser: pointer.model.defaultParser.parser,
-                        },
-                      ],
-                    ),
-                  ),
-                ),
-              )
-            : ts.factory.createIdentifier(`t${pointer.model.position}`),
-          undefined,
-          [pointer.dataVarExpr],
-        ),
+  const tParamName = `t${pointer.model.position}`
+  const tResultName = `${tParamName}_result`
 
-        ts.factory.createIdentifier("ok"),
+  return tsx.block(
+    tsx.const({
+      name: tResultName,
+      init: tsx.expression.call(
+        pointer.model.defaultParser
+          ? tsx.expression.parenthesis(
+              tsx.expression.binary(
+                ts.factory.createIdentifier(tParamName),
+                "??",
+                generateInlineTypeParameterParser(
+                  pointer.model.defaultParser.typeName,
+                  generateParserFromModel(pointer.model.defaultParser.parser, [
+                    {
+                      type: ParserModelType.Root,
+                      name: "data",
+                      parser: pointer.model.defaultParser.parser,
+                    },
+                  ]),
+                ),
+              ),
+            )
+          : tsx.expression.identifier(tParamName),
+        { args: [pointer.dataVarExpr] },
       ),
-    ),
-    // TODO populate the errors with the actual errors
-    generatePushErrorExpressionStatement(
-      pointer.errorPath,
-      `not a ${pointer.model.typeName}`,
-    ),
-    assignDataToResult(pointer.resultVarExpr, pointer.dataVarExpr),
+    }),
+
+    tsx.statement.if({
+      expression: tsx.expression.negate(
+        tsx.expression.propertyAccess(tResultName, "ok"),
+      ),
+      // TODO populate the errors with the actual errors
+      then: generatePushErrorExpressionStatement(
+        pointer.errorPath,
+        `not a ${pointer.model.typeName}`,
+      ),
+      else: assignDataToResult(
+        pointer.resultVarExpr,
+        tsx.expression.propertyAccess(tResultName, "result"),
+      ),
+    }),
   )
 }

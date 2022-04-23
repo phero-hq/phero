@@ -1,6 +1,11 @@
 import ts from "typescript"
 import { printCode } from "../../tsTestUtils"
-import { isExternalType } from "../../tsUtils"
+import {
+  getFullyQualifiedName,
+  getNameAsString,
+  getTypeName,
+  isExternalType,
+} from "../../tsUtils"
 
 export enum ParserModelType {
   Root = "root",
@@ -137,9 +142,19 @@ export type EnumParserModel = {
 export type ReferenceParserModel = {
   type: ParserModelType.Reference
   typeName: string
+  fullyQualifiedName: {
+    base: string
+    typeArgs?: string
+    full: string
+  }
   baseTypeName: string
   typeArguments: {
     typeName: string
+    fullyQualifiedName?: {
+      base: string
+      typeArgs?: string
+      full: string
+    }
     parser: ParserModel
   }[]
 }
@@ -239,15 +254,23 @@ export default function generateParserModel(
       parser: {
         type: ParserModelType.Object,
         members: rootNode.parameters.map((param) => {
-          if (!param.type) {
+          const paramType =
+            //  if it's of type SamenContext, we actually want the type arg
+            param.type &&
+            ts.isTypeReferenceNode(param.type) &&
+            getTypeName(param.type) === "SamenContext"
+              ? param.type.typeArguments?.[0]
+              : param.type
+
+          if (!paramType) {
             throw new Error("Function parameter has no returnType")
           }
-          // console.log("is 162?", param.type.kind)
+
           return {
             type: ParserModelType.Member,
             name: getMemberName(param.name),
             optional: !!param.questionToken,
-            parser: generate(param.type, 0),
+            parser: generate(paramType, 0),
           }
         }),
       },
@@ -468,11 +491,15 @@ export default function generateParserModel(
           type: ParserModelType.Reference,
           baseTypeName: getMemberName(node.typeName),
           typeName: typeChecker.typeToString(type, node, undefined),
+          fullyQualifiedName: getFullyQualifiedName(node, typeChecker),
           typeArguments:
             node.typeArguments?.map((typeArg) => ({
               typeName: typeChecker.typeToString(
                 typeChecker.getTypeFromTypeNode(typeArg),
               ),
+              fullyQualifiedName: ts.isTypeReferenceNode(typeArg)
+                ? getFullyQualifiedName(typeArg, typeChecker)
+                : undefined,
               parser: generate(typeArg, depth),
             })) ?? [],
         }
@@ -572,16 +599,19 @@ export default function generateParserModel(
         }, [] as MemberParserModel[]),
       }
     }
-
     return {
       type: ParserModelType.Reference,
       baseTypeName: getMemberName(node.typeName),
       typeName: typeChecker.typeToString(type, node, undefined),
+      fullyQualifiedName: getFullyQualifiedName(node, typeChecker),
       typeArguments:
         node.typeArguments?.map((typeArg) => ({
           typeName: typeChecker.typeToString(
             typeChecker.getTypeFromTypeNode(typeArg),
           ),
+          fullyQualifiedName: ts.isTypeReferenceNode(typeArg)
+            ? getFullyQualifiedName(typeArg, typeChecker)
+            : undefined,
           parser: generate(typeArg, depth),
         })) ?? [],
     }
@@ -643,39 +673,4 @@ export default function generateParserModel(
       }),
     }
   }
-
-  // function reduceAad(
-  //   members: MemberParserModel[],
-  //   member: ts.TypeElement,
-  //   // arrayDepth: number,
-  // ): MemberParserModel[] {
-  //   if (
-  //     ts.isIndexSignatureDeclaration(member) &&
-  //     member.parameters.length === 1 &&
-  //     member.parameters[0].type
-  //   ) {
-  //     return [
-  //       ...members,
-  //       {
-  //         type: ParserModelType.IndexMember,
-  //         depth: arrayDepth++,
-  //         keyParser: generate(member.parameters[0].type, arrayDepth),
-  //         optional: !!member.questionToken,
-  //         parser: generate(member.type, arrayDepth),
-  //       },
-  //     ]
-  //   } else if (member.name) {
-  //     return [
-  //       ...members,
-  //       {
-  //         type: ParserModelType.Member,
-  //         name: getMemberName(member),
-  //         optional: !!member.questionToken,
-  //         parser: generate(member, arrayDepth),
-  //       },
-  //     ]
-  //   } else {
-  //     return members
-  //   }
-  // }
 }

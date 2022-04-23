@@ -12,6 +12,7 @@ export interface ParsedSamenServiceDefinition {
   name: string
   models: Model[]
   funcs: ParsedSamenFunctionDefinition[]
+  config: ParsedSamenServiceConfig
 }
 
 export type Model =
@@ -27,15 +28,32 @@ export interface ParsedSamenFunctionDefinition {
   parameters: ts.ParameterDeclaration[]
   returnType: ts.TypeNode
   config: ParsedSamenFunctionConfig
+  serviceContext?: {
+    type: ts.TypeNode
+    paramName?: string
+  }
 }
 
-export interface ParsedSamenFunctionConfig {
+export interface ParsedSamenServiceConfig {
   memory?: number
   timeout?: number
 
   minInstance?: number
   maxInstance?: number
-  middleware?: ts.FunctionLikeDeclarationBase[]
+  middleware?: ParsedMiddlewareConfig[]
+  contextType?: ts.TypeNode
+}
+
+export interface ParsedSamenFunctionConfig {
+  memory?: number
+  timeout?: number
+}
+
+export interface ParsedMiddlewareConfig {
+  paramsType: ts.TypeNode
+  nextType: ts.TypeNode | undefined
+  contextType: ts.TypeNode
+  middleware: ts.FunctionLikeDeclarationBase
 }
 
 export enum SamenLibFunctions {
