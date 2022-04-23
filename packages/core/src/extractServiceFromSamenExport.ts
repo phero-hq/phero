@@ -31,30 +31,23 @@ export default function extractServiceFromSamenExport(
 
   // parsing arguments of createService
   const [functionDefs, serviceConfig] = createServiceCallExpr.arguments
-  const parsedServiceConfig = parseServiceConfig(serviceConfig, typeChecker)
-
-  const functionDefinitions = parseFunctionDefinitions(
-    functionDefs,
+  const [parsedServiceConfig, functionDefinitions] = parseContext(
+    parseServiceConfig(serviceConfig, typeChecker),
+    parseFunctionDefinitions(functionDefs, typeChecker),
     typeChecker,
-  )?.map((func) =>
-    parseContext(
-      {
-        ...func,
-        config: mergeFunctionConfigs(parsedServiceConfig, func.config),
-      },
-      parsedServiceConfig,
-      typeChecker,
-    ),
   )
 
-  if (!functionDefinitions || functionDefinitions.length === 0) {
+  if (functionDefinitions.length === 0) {
     throw new ParseError("Can't find function definitions", functionDefs)
   }
 
   return {
     name: serviceName,
-    funcs: functionDefinitions,
-    models: extractModels(functionDefinitions, typeChecker), // TODO
+    funcs: functionDefinitions.map((func) => ({
+      ...func,
+      config: mergeFunctionConfigs(parsedServiceConfig, func.config),
+    })),
+    models: extractModels(functionDefinitions, typeChecker),
     config: parsedServiceConfig,
   }
 }
@@ -62,9 +55,9 @@ export default function extractServiceFromSamenExport(
 function parseFunctionDefinitions(
   node: ts.Node | undefined,
   typeChecker: ts.TypeChecker,
-): ParsedSamenFunctionDefinition[] | undefined {
+): ParsedSamenFunctionDefinition[] {
   if (!node) {
-    return
+    return []
   }
 
   if (ts.isObjectLiteralExpression(node)) {
@@ -108,12 +101,12 @@ function parseFunctionDefinitions(
             result.push(func)
           }
         } else {
-          return undefined
+          return []
         }
       }
     }
     return result
   }
 
-  return undefined
+  return []
 }

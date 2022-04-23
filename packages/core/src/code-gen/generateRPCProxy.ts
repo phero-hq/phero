@@ -164,7 +164,7 @@ function generateRPCExecutor(
         }),
       }),
 
-      ...(service.config.middleware && funcDef.context
+      ...(service.config.middleware
         ? [
             tsx.const({ name: "v4", init: tsx.literal.true }),
 
@@ -193,7 +193,7 @@ function generateRPCExecutor(
                   tsx.property.assignment(
                     "inputContext",
                     tsx.expression.call("defer", {
-                      typeArgs: [funcDef.context.type],
+                      typeArgs: [service.config.contextType ?? tsx.type.void],
                     }),
                   ),
                   tsx.property.assignment("exec", tsx.expression.call("defer")),
@@ -212,7 +212,7 @@ function generateRPCExecutor(
                   args: [
                     tsx.expression.propertyAccess(
                       "input",
-                      funcDef.context.name,
+                      funcDef.serviceContext?.paramName ?? "context",
                     ),
                   ],
                 },
@@ -484,11 +484,15 @@ function generateRPCExecutor(
             tsx.const({
               name: "inputWithContext",
               init: tsx.literal.object(
-                tsx.property.spreadAssignment("input"),
-                tsx.property.assignment(
-                  funcDef.context.name,
-                  tsx.expression.identifier("middlewareOutput"),
-                ),
+                ...(!!funcDef.serviceContext?.paramName
+                  ? [
+                      tsx.property.spreadAssignment("input"),
+                      tsx.property.assignment(
+                        funcDef.serviceContext.paramName,
+                        tsx.expression.identifier("middlewareOutput"),
+                      ),
+                    ]
+                  : [tsx.property.spreadAssignment("input")]),
               ),
             }),
 
@@ -577,7 +581,7 @@ function generateRPCFunctionCall({
         ),
       }),
 
-      ...(service.config.middleware && funcDef.context
+      ...(service.config.middleware?.length
         ? [
             // resolvers[3].exec.resolve()
             tsx.statement.expression(

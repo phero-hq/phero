@@ -4,7 +4,11 @@ import generateParserFromModel from "./code-gen/parsers/generateParserFromModel"
 import generateParserModel from "./code-gen/parsers/generateParserModel"
 import { ParseError } from "./errors"
 import { getReturnType } from "./extractFunctionFromServiceProperty"
-import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
+import {
+  Model,
+  ParsedSamenFunctionDefinition,
+  ParsedSamenServiceConfig,
+} from "./parseSamenApp"
 import {
   getNameAsString,
   isExternalType,
@@ -50,9 +54,10 @@ function generateFunctionParameters(
   func: ParsedSamenFunctionDefinition,
   refMaker: ReferenceMaker,
 ): ts.ParameterDeclaration[] {
-  const parameters = func.context
-    ? func.parameters.slice(0, func.parameters.length - 1)
-    : func.parameters
+  const parameters =
+    func.serviceContext && func.serviceContext.paramName
+      ? func.parameters.slice(0, func.parameters.length - 1)
+      : func.parameters
 
   const result = parameters.map((param) => {
     if (!param.type) {
@@ -70,15 +75,15 @@ function generateFunctionParameters(
     )
   })
 
-  if (func.context) {
+  if (func.serviceContext) {
     result.push(
       ts.factory.createParameterDeclaration(
         undefined,
         undefined,
         undefined,
-        func.context.name,
+        func.serviceContext.paramName ?? "context",
         undefined,
-        generateTypeNode(func.context.type, refMaker),
+        generateTypeNode(func.serviceContext.type, refMaker),
         undefined,
       ),
     )
@@ -109,12 +114,7 @@ export function generateClientFunction(
 
   if (contextType) {
     const lastParam = func.parameters[func.parameters.length - 1]
-    if (
-      lastParam &&
-      lastParam.type &&
-      ts.isTypeReferenceNode(lastParam.type) &&
-      getNameAsString(lastParam.type.typeName) === "SamenContext"
-    ) {
+    if (isLastParamSamenContext(func)) {
       // skip last parameter if we have a context param
       parameters = parameters.slice(0, func.parameters.length - 1)
       context = {
@@ -140,6 +140,19 @@ export function generateClientFunction(
         typeChecker,
       ),
     ),
+  )
+}
+
+function isLastParamSamenContext(
+  func: ts.FunctionLikeDeclarationBase,
+): boolean {
+  const lastParam = func.parameters[func.parameters.length - 1]
+
+  return (
+    !!lastParam &&
+    !!lastParam.type &&
+    ts.isTypeReferenceNode(lastParam.type) &&
+    getNameAsString(lastParam.type.typeName) === "SamenContext"
   )
 }
 

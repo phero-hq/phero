@@ -43,9 +43,7 @@ export default function generateAppDeclarationFile(
     )
   }
 
-  const isUsingSamenContext = app.services.some((s) =>
-    s.funcs.some((f) => !!f.context),
-  )
+  const isUsingSamenContext = app.services.some((s) => !!s.config.contextType)
   if (isUsingSamenContext) {
     namespaceDeclrs.push(
       generateNamespace(ts.factory.createIdentifier("samen"), [

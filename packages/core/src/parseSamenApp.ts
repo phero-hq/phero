@@ -28,9 +28,9 @@ export interface ParsedSamenFunctionDefinition {
   parameters: ts.ParameterDeclaration[]
   returnType: ts.TypeNode
   config: ParsedSamenFunctionConfig
-  context?: {
-    name: string
+  serviceContext?: {
     type: ts.TypeNode
+    paramName?: string
   }
 }
 
@@ -41,6 +41,7 @@ export interface ParsedSamenServiceConfig {
   minInstance?: number
   maxInstance?: number
   middleware?: ParsedMiddlewareConfig[]
+  contextType?: ts.TypeNode
 }
 
 export interface ParsedSamenFunctionConfig {

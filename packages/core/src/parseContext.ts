@@ -12,8 +12,37 @@ import {
 import { getNameAsString } from "./tsUtils"
 
 export function parseContext(
-  func: ParsedSamenFunctionDefinition,
   serviceConfig: ParsedSamenServiceConfig,
+  funcDefinitions: ParsedSamenFunctionDefinition[],
+  typeChecker: ts.TypeChecker,
+): [ParsedSamenServiceConfig, ParsedSamenFunctionDefinition[]] {
+  if (!serviceConfig.middleware || serviceConfig.middleware.length == 0) {
+    return [serviceConfig, funcDefinitions]
+  }
+
+  const ctxIO = getContextIO(serviceConfig.middleware, typeChecker)
+
+  // HACK get the second param from the middleware func, this is always the contextParam
+  const samenContextType: ts.TypeReferenceNode = serviceConfig.middleware[0]
+    .middleware.parameters[1].type as ts.TypeReferenceNode
+
+  const contextType = ts.factory.createTypeReferenceNode(
+    samenContextType.typeName,
+    [ts.factory.createTypeLiteralNode(ctxIO.inputContextProps)],
+  )
+
+  return [
+    { ...serviceConfig, contextType },
+    funcDefinitions.map((func) =>
+      addFunctionContext(ctxIO, contextType, func, typeChecker),
+    ),
+  ]
+}
+
+function addFunctionContext(
+  ctxIO: ContextIO,
+  contextType: ts.TypeReferenceNode,
+  func: ParsedSamenFunctionDefinition,
   typeChecker: ts.TypeChecker,
 ): ParsedSamenFunctionDefinition {
   const ctxIndex = func.parameters.findIndex(
@@ -24,7 +53,12 @@ export function parseContext(
   )
 
   if (ctxIndex === -1) {
-    return func
+    return {
+      ...func,
+      serviceContext: {
+        type: contextType,
+      },
+    }
   }
 
   const ctxParam = func.parameters[ctxIndex]
@@ -56,8 +90,6 @@ export function parseContext(
   }
 
   const funcCtx = ctxParamType.typeArguments[0]
-
-  const ctxIO = getContextIO(serviceConfig.middleware ?? [], typeChecker)
 
   const funcCtxParserModel = getRootObjectParserModel(funcCtx, typeChecker)
   const funcCtxProps = getPropertySignatures(funcCtx)
@@ -95,15 +127,11 @@ export function parseContext(
     }
   }
 
-  const genCtx = ts.factory.createTypeReferenceNode(ctxParamType.typeName, [
-    ts.factory.createTypeLiteralNode(ctxIO.inputContextProps),
-  ])
-
   return {
     ...func,
-    context: {
-      type: genCtx,
-      name: getNameAsString(ctxParam.name),
+    serviceContext: {
+      paramName: getNameAsString(ctxParam.name),
+      type: contextType,
     },
   }
 }

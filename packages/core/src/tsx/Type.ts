@@ -17,6 +17,9 @@ export class Type {
   public static get undefined(): ts.TypeNode {
     return ts.factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword)
   }
+  public static get void(): ts.TypeNode {
+    return ts.factory.createKeywordTypeNode(ts.SyntaxKind.VoidKeyword)
+  }
   public static array(elementType: ts.TypeNode): ts.ArrayTypeNode {
     return ts.factory.createArrayTypeNode(elementType)
   }

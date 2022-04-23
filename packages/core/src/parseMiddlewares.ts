@@ -74,8 +74,7 @@ function parseParamsType(paramsParam: ts.ParameterDeclaration): ts.TypeNode {
   if (
     !paramsType ||
     !ts.isTypeReferenceNode(paramsType) ||
-    getTypeName(paramsType) !== "SamenParams" ||
-    !paramsType.typeArguments?.[0]
+    getTypeName(paramsType) !== "SamenParams"
   ) {
     throw new ParseError(
       `Middleware params parameter has no or incorrect type, should be defined like "params: SamenParams<T>"`,
@@ -83,7 +82,24 @@ function parseParamsType(paramsParam: ts.ParameterDeclaration): ts.TypeNode {
     )
   }
 
-  return paramsType.typeArguments?.[0]
+  return paramsType.typeArguments?.[0] ?? tsx.literal.type()
+}
+
+function parseContextType(contextParam: ts.ParameterDeclaration): ts.TypeNode {
+  const contextType = contextParam.type
+
+  if (
+    !contextType ||
+    !ts.isTypeReferenceNode(contextType) ||
+    getTypeName(contextType) !== "SamenContext"
+  ) {
+    throw new ParseError(
+      `Middleware ctx parameter has no or incorrect type, should be defined like "ctx: SamenContext<T>"`,
+      contextParam,
+    )
+  }
+
+  return contextType.typeArguments?.[0] ?? tsx.literal.type()
 }
 
 function parseNextType(
@@ -103,22 +119,4 @@ function parseNextType(
   }
 
   return nextType.typeArguments?.[0]
-}
-
-function parseContextType(contextParam: ts.ParameterDeclaration): ts.TypeNode {
-  const contextType = contextParam.type
-
-  if (
-    !contextType ||
-    !ts.isTypeReferenceNode(contextType) ||
-    getTypeName(contextType) !== "SamenContext" ||
-    !contextType.typeArguments?.[0]
-  ) {
-    throw new ParseError(
-      `Middleware ctx parameter has no or incorrect type, should be defined like "ctx: SamenContext<T>"`,
-      contextParam,
-    )
-  }
-
-  return contextType.typeArguments?.[0]
 }
