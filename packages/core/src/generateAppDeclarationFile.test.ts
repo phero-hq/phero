@@ -17,9 +17,10 @@ function generate(prog: ts.Program): string {
 }
 
 describe("generateAppDeclarationFile", () => {
-  test("should parse middleware", () => {
-    const parsedApp = generate(
-      createTestProgram(`
+  describe("middleware", () => {
+    test("should parse middleware", () => {
+      const parsedApp = generate(
+        createTestProgram(`
         type NextFunction<T = void> = T extends void
           ? () => Promise<void>
           : (ctx: T) => Promise<void>
@@ -48,10 +49,136 @@ describe("generateAppDeclarationFile", () => {
           middleware: [requireUID, requireCmsUser],
         })
       `),
-    )
+      )
 
-    // EXPECT function getArticle(aap: string): Promise<string>;
-    // because x:number is provided implicitly by middleware
-    expect(parsedApp).toMatchSnapshot()
+      // EXPECT function getArticle(aap: string): Promise<string>;
+      // because x:number is provided implicitly by middleware
+      expect(parsedApp).toMatchSnapshot()
+    })
+  })
+  describe.only("errors", () => {
+    test("should generate service error", () => {
+      const parsedApp = generate(
+        createTestProgram(`
+          class ArticleError extends Error {
+          }
+
+          async function getArticle(): Promise<string> {
+            throw new ArticleError()
+          }
+
+          export const articleService = createService({
+            getArticle: createFunction(getArticle),
+          })
+        `),
+      )
+
+      expect(parsedApp).toMatchSnapshot()
+    })
+
+    test("should generate multi-service multi-error", () => {
+      const parsedApp = generate(
+        createTestProgram(`
+          class HamburgerError extends Error {
+          }
+
+          async function getHamburger(): Promise<string> {
+            throw new HamburgerError()
+          }
+          
+
+          export const hamburgerService = createService({
+            getHamburger: createFunction(getHamburger),
+          })
+          
+          class ArticleError extends Error {
+          }
+
+          async function getArticle(): Promise<string> {
+            throw new ArticleError()
+          }
+
+          export const articleService = createService({
+            getArticle: createFunction(getArticle),
+          })
+        `),
+      )
+
+      expect(parsedApp).toMatchSnapshot()
+    })
+
+    test("should generate common errors in domain", () => {
+      const parsedApp = generate(
+        createTestProgram(`
+          class CommonError extends Error {
+          }
+
+          class HamburgerError extends Error {
+          }
+
+          async function getHamburger(): Promise<string> {
+            throw new HamburgerError()
+          }
+
+          async function setHamburger(): Promise<string> {
+            throw new CommonError()
+          }
+          
+          export const hamburgerService = createService({
+            getHamburger: createFunction(getHamburger),
+            setHamburger: createFunction(setHamburger),
+          })
+          
+          class ArticleError extends Error {
+          }
+
+          async function getArticle(): Promise<string> {
+            throw new ArticleError()
+          }
+
+          async function setArticle(): Promise<string> {
+            throw new CommonError()
+          }
+
+          export const articleService = createService({
+            getArticle: createFunction(getArticle),
+            setArticle: createFunction(setArticle),
+          })
+        `),
+      )
+
+      expect(parsedApp).toMatchSnapshot()
+    })
+
+    test("should generate properties on generated error classes", () => {
+      const parsedApp = generate(
+        createTestProgram(`
+          class GenericError extends Error {
+            constructor(test: number) {
+              super(\`Test \${test}\`)
+            }
+          }
+
+          class ArticleError extends GenericError {
+            public myPublicProp: number
+            
+            constructor(public myProp: number, myParam: string) {
+              super(myProp + 1)
+              this.myPublicProp = myProp + 2
+            }
+          }
+
+          async function getArticle(): Promise<string> {
+            throw new ArticleError(123)
+          }
+
+          export const articleService = createService({
+            getArticle: createFunction(getArticle),
+          })
+        `),
+      )
+
+      expect(parsedApp).toMatchSnapshot()
+    })
   })
 })

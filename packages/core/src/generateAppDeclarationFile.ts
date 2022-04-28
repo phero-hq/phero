@@ -1,5 +1,6 @@
 import ts from "typescript"
 import {
+  generateErrorClass,
   generateFunction,
   generateModel,
   generateNamespace,
@@ -27,18 +28,21 @@ export default function generateAppDeclarationFile(
 
   const namespaceDeclrs: ts.ModuleDeclaration[] = []
 
-  if (app.models.length) {
+  if (app.models.length || app.errors.length) {
     namespaceDeclrs.push(
       // export namespace domain {
       generateNamespace(domainIdentifier, [
         // export namespace v_1_0_0 {
-        generateNamespace(
-          versionIdentifier,
-          app.models.map((m) =>
+        generateNamespace(versionIdentifier, [
+          ...app.models.map((m) =>
             // export interface MyModel {
             generateModel(m, refMaker),
           ),
-        ),
+          ...app.errors.map((e) =>
+            // export class Error {
+            generateErrorClass(e, refMaker),
+          ),
+        ]),
       ]),
     )
   }
@@ -66,6 +70,10 @@ export default function generateAppDeclarationFile(
           ...service.models.map((m) =>
             // export interface MyModel {
             generateModel(m, refMaker),
+          ),
+          ...service.errors.map((e) =>
+            // export class Error {
+            generateErrorClass(e, refMaker),
           ),
           // export function myFunction(): Promise<void> {
           ...service.funcs.map((func) => generateFunction(func, refMaker)),
