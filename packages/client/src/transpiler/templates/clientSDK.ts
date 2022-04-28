@@ -125,8 +125,9 @@ const authHeaderFunctions = () => `
 
 const requestFunctions = () => `
   private async request<T>(name: string, body: object): Promise<T> {
+    let result;
     try {
-      const result = await _fetch(this.url + name, {
+      result = await _fetch(this.url + name, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -134,20 +135,20 @@ const requestFunctions = () => `
         },
         body: JSON.stringify(body),
       })
-      if (!result.ok) {
-        throw new Error(\`Call failed with status \${result.status}\`)
-      }
-      const data = await result.json()
-      return data as T
     } catch (err) {
-      console.error(err)
       throw new Error("Network error")
     }
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`)
+    }
+    const data = await result.json()
+    return data as T
   }
 
   private async requestVoid(name: string, body: object): Promise<void> {
+    let result;
     try {
-      const result = await _fetch(this.url + name, {
+      result = await _fetch(this.url + name, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -155,12 +156,11 @@ const requestFunctions = () => `
         },
         body: JSON.stringify(body),
       })
-      if (!result.ok) {
-        throw new Error(\`Call failed with status \${result.status}\`)
-      }
     } catch (err) {
-      console.error(err)
       throw new Error("Network error")
+    }
+    if (!result.ok) {
+      throw new Error(\`Call failed with status \${result.status}\`)
     }
   }
 `
