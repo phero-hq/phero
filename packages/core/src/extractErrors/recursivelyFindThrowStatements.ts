@@ -4,10 +4,10 @@ import findFunctionDeclaration from "./findFunctionDeclaration"
 import findFunctionStatements from "./findFunctionStatements"
 
 export default function recursivelyFindThrowStatements(
-  func: ts.FunctionLikeDeclarationBase,
+  functions: ts.FunctionLikeDeclarationBase | ts.FunctionLikeDeclarationBase[],
   typeChecker: ts.TypeChecker,
 ): ts.ThrowStatement[] {
-  return loop([func], [], [])
+  return loop(Array.isArray(functions) ? functions : [functions], [], [])
 
   function loop(
     todos: ts.FunctionLikeDeclarationBase[],

@@ -1,5 +1,6 @@
 import ts from "typescript"
 import { ParseError } from "./errors"
+import { ParsedError } from "./extractErrors/parseThrowStatement"
 import extractServiceFromSamenExport from "./extractServiceFromSamenExport"
 import { hasModifier } from "./tsUtils"
 
@@ -13,6 +14,7 @@ export interface ParsedSamenServiceDefinition {
   models: Model[]
   funcs: ParsedSamenFunctionDefinition[]
   config: ParsedSamenServiceConfig
+  errors: ParsedError[]
 }
 
 export type Model =
