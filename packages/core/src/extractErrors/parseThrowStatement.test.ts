@@ -19,7 +19,14 @@ describe("parseThrowStatement", () => {
         parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
       ).toMatchObject({
         name: "SomethingError",
-        properties: ["message"],
+        properties: expect.arrayContaining([
+          expect.objectContaining({
+            name: "message",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.StringKeyword,
+            }),
+          }),
+        ]),
       })
     })
     test("parent is error descendant", () => {
@@ -39,7 +46,14 @@ describe("parseThrowStatement", () => {
         parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
       ).toMatchObject({
         name: "SomethingError",
-        properties: ["message"],
+        properties: expect.arrayContaining([
+          expect.objectContaining({
+            name: "message",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.StringKeyword,
+            }),
+          }),
+        ]),
       })
     })
     test("grandparent is error descendant", () => {
@@ -61,7 +75,14 @@ describe("parseThrowStatement", () => {
         parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
       ).toMatchObject({
         name: "SomethingError",
-        properties: ["message"],
+        properties: expect.arrayContaining([
+          expect.objectContaining({
+            name: "message",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.StringKeyword,
+            }),
+          }),
+        ]),
       })
     })
     test("grandparent is no error descendant", () => {
@@ -105,7 +126,7 @@ describe("parseThrowStatement", () => {
       } = compileStatements(`
         class SomethingError extends Error {
           public aap = 1
-          kaas = 2
+          kaas = true
           private noot = 3
         }
 
@@ -116,7 +137,26 @@ describe("parseThrowStatement", () => {
         parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
       ).toMatchObject({
         name: "SomethingError",
-        properties: ["message", "aap", "kaas"],
+        properties: expect.arrayContaining([
+          expect.objectContaining({
+            name: "message",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.StringKeyword,
+            }),
+          }),
+          expect.objectContaining({
+            name: "aap",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.NumberKeyword,
+            }),
+          }),
+          expect.objectContaining({
+            name: "kaas",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.BooleanKeyword,
+            }),
+          }),
+        ]),
       })
     })
 
@@ -126,7 +166,7 @@ describe("parseThrowStatement", () => {
         typeChecker,
       } = compileStatements(`
         class SomethingError extends Error {
-          constructor(aap, public noot, private mies, public kaas) {
+          constructor(aap: string, public noot: boolean, private mies: number, public kaas: string) {
             super("message")
           }
         }
@@ -138,7 +178,26 @@ describe("parseThrowStatement", () => {
         parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
       ).toMatchObject({
         name: "SomethingError",
-        properties: ["message", "noot", "kaas"],
+        properties: expect.arrayContaining([
+          expect.objectContaining({
+            name: "message",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.StringKeyword,
+            }),
+          }),
+          expect.objectContaining({
+            name: "noot",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.BooleanKeyword,
+            }),
+          }),
+          expect.objectContaining({
+            name: "kaas",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.StringKeyword,
+            }),
+          }),
+        ]),
       })
     })
 
@@ -166,7 +225,32 @@ describe("parseThrowStatement", () => {
         parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
       ).toMatchObject({
         name: "SomethingError",
-        properties: expect.arrayContaining(["message", "one", "three", "four"]),
+        properties: expect.arrayContaining([
+          expect.objectContaining({
+            name: "message",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.StringKeyword,
+            }),
+          }),
+          expect.objectContaining({
+            name: "one",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.NumberKeyword,
+            }),
+          }),
+          expect.objectContaining({
+            name: "three",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.NumberKeyword,
+            }),
+          }),
+          expect.objectContaining({
+            name: "four",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.NumberKeyword,
+            }),
+          }),
+        ]),
       })
     })
 
@@ -193,7 +277,26 @@ describe("parseThrowStatement", () => {
         parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
       ).toMatchObject({
         name: "SomethingError",
-        properties: expect.arrayContaining(["message", "aap", "noot"]),
+        properties: expect.arrayContaining([
+          expect.objectContaining({
+            name: "message",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.StringKeyword,
+            }),
+          }),
+          expect.objectContaining({
+            name: "aap",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.StringKeyword,
+            }),
+          }),
+          expect.objectContaining({
+            name: "noot",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.StringKeyword,
+            }),
+          }),
+        ]),
       })
     })
     test("always has at least message prop", () => {
@@ -213,7 +316,59 @@ describe("parseThrowStatement", () => {
         parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
       ).toMatchObject({
         name: "SomethingError",
-        properties: expect.arrayContaining(["message"]),
+        properties: expect.arrayContaining([
+          expect.objectContaining({
+            name: "message",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.StringKeyword,
+            }),
+          }),
+        ]),
+      })
+    })
+    test("correct type for complex properties", () => {
+      const {
+        statements: [, , throwStatement],
+        typeChecker,
+      } = compileStatements(`
+        class ParentError extends Error {
+          public test: {
+            kaas: boolean
+          }
+        }
+        class SomethingError extends ParentError {
+        }
+
+        throw new SomethingError()
+      `)
+
+      expect(
+        parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
+      ).toMatchObject({
+        name: "SomethingError",
+        properties: expect.arrayContaining([
+          expect.objectContaining({
+            name: "message",
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.StringKeyword,
+            }),
+          }),
+          expect.objectContaining({
+            name: "test",
+            // test
+            type: expect.objectContaining({
+              kind: ts.SyntaxKind.TypeLiteral,
+              members: expect.arrayContaining([
+                // kaas
+                expect.objectContaining({
+                  type: expect.objectContaining({
+                    kind: ts.SyntaxKind.BooleanKeyword,
+                  }),
+                }),
+              ]),
+            }),
+          }),
+        ]),
       })
     })
   })

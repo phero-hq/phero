@@ -1,12 +1,17 @@
 import ts from "typescript"
-import { ParseError } from "../errors"
+import * as tsx from "../tsx"
 import { getNameAsString } from "../tsUtils"
 
 export interface ParsedError {
   name: string
   sourceFile: string
-  properties: string[]
+  properties: ErrorProperty[]
   ref: ts.ClassDeclaration
+}
+
+export interface ErrorProperty {
+  name: string
+  type: ts.TypeNode
 }
 
 export default function parseThrowStatement(
@@ -35,9 +40,11 @@ export default function parseThrowStatement(
     return undefined
   }
 
-  const properties = [
-    "message",
-    ...[classDeclaration, ...superClasses].flatMap(findPublicProperties),
+  const properties: ErrorProperty[] = [
+    { name: "message", type: tsx.type.string },
+    ...[classDeclaration, ...superClasses].flatMap((classDeclaration) =>
+      findPublicProperties(classDeclaration, typeChecker),
+    ),
   ]
 
   return {
@@ -94,12 +101,15 @@ function getClassDeclaration(
   return classDeclaration
 }
 
-function findPublicProperties(classDeclaration: ts.ClassDeclaration): string[] {
+function findPublicProperties(
+  classDeclaration: ts.ClassDeclaration,
+  typeChecker: ts.TypeChecker,
+): ErrorProperty[] {
   const isPublicMember = (member: ts.Node): boolean =>
     member.modifiers?.some((m) => m.kind == ts.SyntaxKind.PublicKeyword) ??
     false
 
-  const result = []
+  const result: ErrorProperty[] = []
 
   for (const member of classDeclaration.members) {
     if (
@@ -107,7 +117,18 @@ function findPublicProperties(classDeclaration: ts.ClassDeclaration): string[] {
         ts.isGetAccessorDeclaration(member)) &&
       (member.modifiers == undefined || isPublicMember(member))
     ) {
-      result.push(getNameAsString(member.name))
+      const typeNode = typeChecker.typeToTypeNode(
+        typeChecker.getTypeAtLocation(member),
+        member,
+        undefined,
+      )
+
+      if (typeNode) {
+        result.push({
+          name: getNameAsString(member.name),
+          type: typeNode,
+        })
+      }
     }
 
     if (ts.isConstructorDeclaration(member)) {
@@ -117,7 +138,17 @@ function findPublicProperties(classDeclaration: ts.ClassDeclaration): string[] {
           !ts.isObjectBindingPattern(param.name) &&
           !ts.isArrayBindingPattern(param.name)
         ) {
-          result.push(param.name.text)
+          const typeNode = typeChecker.typeToTypeNode(
+            typeChecker.getTypeAtLocation(param),
+            param,
+            undefined,
+          )
+          if (typeNode) {
+            result.push({
+              name: param.name.text,
+              type: typeNode,
+            })
+          }
         }
       }
     }
