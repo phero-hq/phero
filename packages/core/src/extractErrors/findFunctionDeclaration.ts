@@ -25,6 +25,12 @@ export default function findFunctionDeclaration(
     return [declaration]
   }
 
+  // Not sure about this one...
+  // occurs with `console.log`
+  if (ts.isMethodSignature(declaration)) {
+    return []
+  }
+
   if (ts.isClassDeclaration(declaration)) {
     return findConstructorAndSuperConstructors(declaration)
   }

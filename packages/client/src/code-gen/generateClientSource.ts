@@ -17,7 +17,7 @@ export default function generateClientSource(
 ): ClientSource {
   const t1 = Date.now()
 
-  const { domainModels, services } = appDeclarationVersion
+  const { domainModels, errors: domainErrors, services } = appDeclarationVersion
   const domainRefMaker = new ReferenceMaker(
     domainModels,
     typeChecker,
@@ -35,12 +35,14 @@ export default function generateClientSource(
     importParserTypes,
     ...domainModels.map((model) => generateModel(model, domainRefMaker)),
     ...domainModels.map((model) => generateModelParser(model, typeChecker)),
+    ...domainErrors.map(generateError),
     ...services.map((service) =>
       generateNamespace(ts.factory.createIdentifier(service.name), [
         ...service.models.map((model) => generateModel(model, domainRefMaker)),
         ...service.models.map((model) =>
           generateModelParser(model, typeChecker),
         ),
+        ...service.errors.map(generateError),
       ]),
     ),
   )
@@ -249,4 +251,24 @@ function generateParsersForReturnTypes(
     }
   }
   return result
+}
+
+function generateError(errorClass: ts.ClassDeclaration): ts.ClassDeclaration {
+  return tsx.classDeclaration({
+    name: errorClass.name!,
+    export: true,
+    constructor: tsx.constructor({
+      params: errorClass.members
+        .find(ts.isConstructorDeclaration)!
+        .parameters.map((param) =>
+          tsx.param({
+            public: true,
+            readonly: true,
+            name: param.name.getText(),
+            type: param.type!,
+          }),
+        ),
+      block: tsx.block(),
+    }),
+  })
 }

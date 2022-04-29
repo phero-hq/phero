@@ -12,6 +12,7 @@ export interface ParsedAppDeclaration {
 export interface ParsedDomainDeclaration {
   [version: string]: {
     models: Model[]
+    errors: ts.ClassDeclaration[]
   }
 }
 
@@ -26,6 +27,7 @@ export interface ParsedServiceDeclarationVersions {
 
 export interface ParsedServiceDeclarationVersion {
   models: Model[]
+  errors: ts.ClassDeclaration[]
   functions: ts.FunctionDeclaration[]
   context: ts.TypeNode | undefined
 }
@@ -127,15 +129,24 @@ function parseServiceDeclarationVersion(
   statements: ts.Statement[],
 ): ParsedServiceDeclarationVersion {
   return statements.reduce(
-    ({ models, functions, context }, st) => {
+    ({ models, functions, context, errors }, st) => {
       if (isModel(st)) {
-        return { models: [...models, st], functions, context }
+        return { models: [...models, st], functions, context, errors }
       }
       if (ts.isFunctionDeclaration(st)) {
         return {
           models,
           functions: [...functions, st],
           context: context ?? parseContextType(st),
+          errors,
+        }
+      }
+      if (ts.isClassDeclaration(st)) {
+        return {
+          models,
+          functions,
+          context,
+          errors: [...errors, st],
         }
       }
       throw new ParseError("Neither model nor function", st)
@@ -144,6 +155,7 @@ function parseServiceDeclarationVersion(
       models: [],
       functions: [],
       context: undefined,
+      errors: [],
     } as ParsedServiceDeclarationVersion,
   )
 }
