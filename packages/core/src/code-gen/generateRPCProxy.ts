@@ -16,6 +16,7 @@ import generateParserModel from "./parsers/generateParserModel"
 
 import * as tsx from "../tsx"
 import { generateMiddlewareParsers } from "../generatedMiddlewareRunner"
+import { ParsedError } from "../extractErrors/parseThrowStatement"
 
 const factory = ts.factory
 
@@ -75,6 +76,9 @@ export default function generateRPCProxy(
   }
 
   for (const service of app.services) {
+    for (const err of service.errors) {
+      tsNodes.push(err.ref)
+    }
     for (const serviceModel of service.models) {
       tsNodes.push(
         serviceModel,
@@ -84,7 +88,9 @@ export default function generateRPCProxy(
     }
 
     for (const serviceFunction of service.funcs) {
-      tsNodes.push(generateRPCExecutor(service, serviceFunction, typeChecker))
+      tsNodes.push(
+        generateRPCExecutor(service, serviceFunction, app.errors, typeChecker),
+      )
     }
   }
 
@@ -128,6 +134,7 @@ export default function generateRPCProxy(
 function generateRPCExecutor(
   service: ParsedSamenServiceDefinition,
   funcDef: ParsedSamenFunctionDefinition,
+  domainErrors: ParsedError[],
   typeChecker: ts.TypeChecker,
 ): ts.FunctionDeclaration {
   return tsx.function({
@@ -516,7 +523,7 @@ function generateRPCExecutor(
         parseResult: "inputParseResult",
       }),
 
-      generateRPCFunctionCall({ service, funcDef }),
+      generateRPCFunctionCall({ service, funcDef, domainErrors }),
     ],
   })
 }
@@ -541,9 +548,11 @@ export function generateInlineParser({
 function generateRPCFunctionCall({
   service,
   funcDef,
+  domainErrors,
 }: {
   service: ParsedSamenServiceDefinition
   funcDef: ParsedSamenFunctionDefinition
+  domainErrors: ParsedError[]
 }) {
   return tsx.statement.try({
     block: [
@@ -623,15 +632,95 @@ function generateRPCFunctionCall({
     catch: {
       error: "error",
       block: [
-        tsx.statement.return(
-          tsx.literal.object(
-            tsx.property.assignment("status", tsx.literal.number(500)),
-            tsx.property.shorthandAssignment("error"),
-          ),
-        ),
+        tsx.verbatim(`console.log("errorname", error.constructor.name)`),
+        tsx.verbatim(`console.log("iserror", error instanceof Error)`),
+        generateErrorParsingFunction(domainErrors, service.errors),
       ],
     },
   })
+}
+
+function generateErrorParsingFunction(
+  domainErrors: ParsedError[],
+  serviceErrors: ParsedError[],
+): ts.IfStatement {
+  function wrapErrorWithStatusObject(
+    errorObj: ts.ObjectLiteralExpression,
+  ): ts.ObjectLiteralExpression {
+    return tsx.literal.object(
+      tsx.property.assignment("status", tsx.literal.number(500)),
+      tsx.property.assignment("error", errorObj),
+    )
+  }
+
+  const fallbackSt = tsx.statement.if({
+    expression: tsx.expression.propertyAccess(
+      tsx.expression.identifier("error?"),
+      "message",
+    ),
+    then: tsx.statement.return(
+      wrapErrorWithStatusObject(
+        tsx.literal.object(
+          tsx.property.assignment(
+            "message",
+            tsx.expression.propertyAccess("error", "message"),
+          ),
+        ),
+      ),
+    ),
+    else: tsx.statement.return(
+      wrapErrorWithStatusObject(
+        tsx.literal.object(
+          tsx.property.assignment(
+            "message",
+            tsx.literal.string("Internal Server Error"),
+          ),
+        ),
+      ),
+    ),
+  })
+
+  // const errors: Array<{ typeRef: ts.Identifier; error: ParsedError }> = [
+  //   ...domainErrors.map((error) => ({
+  //     typeRef: tsx.expression.identifier(`domain.${error.name}`),
+  //     error,
+  //   })),
+  //   ...serviceErrors.map((error) => ({
+  //     typeRef: tsx.expression.identifier(error.name),
+  //     error,
+  //   })),
+  // ]
+
+  return [...domainErrors, ...serviceErrors].reduceRight((elseSt, error) => {
+    return tsx.statement.if({
+      expression: tsx.expression.binary(
+        tsx.expression.binary(
+          tsx.expression.identifier("error"),
+          "instanceof",
+          tsx.expression.identifier("Error"),
+        ),
+        "&&",
+        tsx.expression.binary(
+          tsx.expression.propertyAccess("error", "constructor", "name"),
+          "==",
+          tsx.literal.string(error.name),
+        ),
+      ),
+      then: tsx.statement.return(
+        wrapErrorWithStatusObject(
+          tsx.literal.object(
+            ...error.properties.map((prop) =>
+              tsx.property.assignment(
+                prop.name,
+                tsx.expression.propertyAccess("error", prop.name),
+              ),
+            ),
+          ),
+        ),
+      ),
+      else: elseSt,
+    })
+  }, fallbackSt)
 }
 
 function generateIfParseResultNotOkayEarlyReturn({
