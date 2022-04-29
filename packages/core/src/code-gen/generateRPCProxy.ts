@@ -661,9 +661,15 @@ function generateErrorParsingFunction(
     then: tsx.statement.return(
       wrapErrorWithStatusObject(
         tsx.literal.object(
+          tsx.property.assignment("name", tsx.literal.string("Error")),
           tsx.property.assignment(
-            "message",
-            tsx.expression.propertyAccess("error", "message"),
+            "props",
+            tsx.literal.object(
+              tsx.property.assignment(
+                "message",
+                tsx.expression.propertyAccess("error", "message"),
+              ),
+            ),
           ),
         ),
       ),
@@ -671,9 +677,15 @@ function generateErrorParsingFunction(
     else: tsx.statement.return(
       wrapErrorWithStatusObject(
         tsx.literal.object(
+          tsx.property.assignment("name", tsx.literal.string("Error")),
           tsx.property.assignment(
-            "message",
-            tsx.literal.string("Internal Server Error"),
+            "props",
+            tsx.literal.object(
+              tsx.property.assignment(
+                "message",
+                tsx.literal.string("Internal Server Error"),
+              ),
+            ),
           ),
         ),
       ),
@@ -709,10 +721,17 @@ function generateErrorParsingFunction(
       then: tsx.statement.return(
         wrapErrorWithStatusObject(
           tsx.literal.object(
-            ...error.properties.map((prop) =>
-              tsx.property.assignment(
-                prop.name,
-                tsx.expression.propertyAccess("error", prop.name),
+            tsx.property.assignment("name", tsx.literal.string(error.name)),
+            tsx.property.assignment(
+              "props",
+
+              tsx.literal.object(
+                ...error.properties.map((prop) =>
+                  tsx.property.assignment(
+                    prop.name,
+                    tsx.expression.propertyAccess("error", prop.name),
+                  ),
+                ),
               ),
             ),
           ),
