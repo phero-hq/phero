@@ -59,5 +59,9 @@ export class Statement {
     return ts.factory.createExpressionStatement(expression)
   }
 
+  public static throw(expression: ts.Expression): ts.ThrowStatement {
+    return ts.factory.createThrowStatement(expression)
+  }
+
   public static simpleForOver = simpleForOver
 }

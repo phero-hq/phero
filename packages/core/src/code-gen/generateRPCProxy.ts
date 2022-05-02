@@ -76,9 +76,6 @@ export default function generateRPCProxy(
   }
 
   for (const service of app.services) {
-    for (const err of service.errors) {
-      tsNodes.push(err.ref)
-    }
     for (const serviceModel of service.models) {
       tsNodes.push(
         serviceModel,
@@ -634,13 +631,18 @@ function generateRPCFunctionCall({
       block: [
         tsx.verbatim(`console.log("errorname", error.constructor.name)`),
         tsx.verbatim(`console.log("iserror", error instanceof Error)`),
-        generateErrorParsingFunction(domainErrors, service.errors),
+        generateErrorParsingFunction(
+          service.name,
+          domainErrors,
+          service.errors,
+        ),
       ],
     },
   })
 }
 
 function generateErrorParsingFunction(
+  serviceName: string,
   domainErrors: ParsedError[],
   serviceErrors: ParsedError[],
 ): ts.IfStatement {
@@ -692,18 +694,18 @@ function generateErrorParsingFunction(
     ),
   })
 
-  // const errors: Array<{ typeRef: ts.Identifier; error: ParsedError }> = [
-  //   ...domainErrors.map((error) => ({
-  //     typeRef: tsx.expression.identifier(`domain.${error.name}`),
-  //     error,
-  //   })),
-  //   ...serviceErrors.map((error) => ({
-  //     typeRef: tsx.expression.identifier(error.name),
-  //     error,
-  //   })),
-  // ]
+  const errors: Array<{ clientName: ts.StringLiteral; error: ParsedError }> = [
+    ...domainErrors.map((error) => ({
+      clientName: tsx.literal.string(error.name),
+      error,
+    })),
+    ...serviceErrors.map((error) => ({
+      clientName: tsx.literal.string(`${serviceName}.${error.name}`),
+      error,
+    })),
+  ]
 
-  return [...domainErrors, ...serviceErrors].reduceRight((elseSt, error) => {
+  return errors.reduceRight((elseSt, { clientName, error }) => {
     return tsx.statement.if({
       expression: tsx.expression.binary(
         tsx.expression.binary(
@@ -721,7 +723,7 @@ function generateErrorParsingFunction(
       then: tsx.statement.return(
         wrapErrorWithStatusObject(
           tsx.literal.object(
-            tsx.property.assignment("name", tsx.literal.string(error.name)),
+            tsx.property.assignment("name", clientName),
             tsx.property.assignment(
               "props",
 

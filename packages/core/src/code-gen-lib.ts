@@ -208,6 +208,7 @@ function generateClientFunctionBlock(
                 return tsx.property.shorthandAssignment(p.name.getText())
               }),
             ),
+            `error_parser_${serviceName}`,
             ts.isTypeReferenceNode(returnType)
               ? makeReferenceToParserFunction(returnType, typeChecker)
               : tsx.expression.identifier(

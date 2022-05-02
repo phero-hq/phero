@@ -20,6 +20,9 @@ export class Type {
   public static get void(): ts.TypeNode {
     return ts.factory.createKeywordTypeNode(ts.SyntaxKind.VoidKeyword)
   }
+  public static get never(): ts.TypeNode {
+    return ts.factory.createKeywordTypeNode(ts.SyntaxKind.NeverKeyword)
+  }
   public static array(elementType: ts.TypeNode): ts.ArrayTypeNode {
     return ts.factory.createArrayTypeNode(elementType)
   }
