@@ -42,7 +42,7 @@ export type ServerDevEvent =
   // Running the RPC's
   | { type: "RPC_START"; url?: string }
   | { type: "RPC_SUCCESS"; url?: string; status: number }
-  | { type: "RPC_FAILED"; url?: string; status: number }
+  | { type: "RPC_FAILED"; url?: string; status: number; message: string }
 
 export type ClientDevEvent =
   | DevEventEmitterConnectionEvent

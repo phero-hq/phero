@@ -173,6 +173,7 @@ export default class DevServer {
                 type: "RPC_FAILED",
                 url: req.url,
                 status: res.statusCode,
+                message: JSON.stringify(rpcResult.errors),
               })
             } else if (rpcResult.status === 500) {
               console.error(rpcResult.error)
@@ -180,6 +181,7 @@ export default class DevServer {
                 type: "RPC_FAILED",
                 url: req.url,
                 status: res.statusCode,
+                message: rpcResult.error,
               })
             } else {
               throw new Error("Unsupported http status")
@@ -193,6 +195,7 @@ export default class DevServer {
               type: "RPC_FAILED",
               url: req.url,
               status: 500,
+              message: JSON.stringify({ error: e.message }),
             })
           } finally {
             res.end()
@@ -205,6 +208,12 @@ export default class DevServer {
     res.statusCode = 404
     res.write(`{ "error": "RPC not found" }`)
     res.end()
+    this.eventEmitter.emit({
+      type: "RPC_FAILED",
+      url: req.url,
+      status: 404,
+      message: "RPC not found",
+    })
   }
 
   private generateRoutes(app: ParsedSamenApp): RPCRoutes {
