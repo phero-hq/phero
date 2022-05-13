@@ -89,14 +89,16 @@ export class Expression {
   }
 
   public static new(
-    expression: ts.Expression,
+    expression: string | ts.Expression,
     props: {
       typeArgs?: ts.TypeNode[]
       args?: ts.Expression[]
     },
   ): ts.NewExpression {
     return ts.factory.createNewExpression(
-      expression,
+      typeof expression === "string"
+        ? ts.factory.createIdentifier(expression)
+        : expression,
       props.typeArgs,
       props.args,
     )

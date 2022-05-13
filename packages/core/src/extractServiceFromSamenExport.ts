@@ -50,7 +50,10 @@ export default function extractServiceFromSamenExport(
     })),
     models: extractModels(functionDefinitions, typeChecker),
     errors: extractErrors(
-      functionDefinitions.map((f) => f.actualFunction),
+      [
+        ...functionDefinitions.map((f) => f.actualFunction),
+        ...(parsedServiceConfig.middleware?.map((m) => m.middleware) ?? []),
+      ],
       typeChecker,
     ),
     config: parsedServiceConfig,

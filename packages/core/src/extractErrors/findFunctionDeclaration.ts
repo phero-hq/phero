@@ -43,6 +43,10 @@ export default function findFunctionDeclaration(
     return [declaration.initializer]
   }
 
+  if (ts.isParameter(declaration)) {
+    return []
+  }
+
   throw new ParseError(
     `Unsupported call expression ${declaration.kind.toString()}`,
     declaration,

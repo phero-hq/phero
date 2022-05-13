@@ -68,6 +68,8 @@ async function runWithMiddlewares<T>(
     actualFunctionResolver,
   ]
 
+  const middlewarePromises: Promise<void>[] = []
+
   resolvers[0].inputContext.resolve(context)
 
   for (let i = 0; i < middlewares.length; i++) {
@@ -78,19 +80,25 @@ async function runWithMiddlewares<T>(
     const ctx = await resolvers[currResolverIndex].inputContext.promise
     const parsedContext = parseMiddlewareContext(i, ctx)
 
-    middleware({ p: "" }, parsedContext, async (nextOutput: Ctx) => {
-      const parsedOut = parseMiddlewareNextOut(i, nextOutput)
+    const middlewarePromise = middleware(
+      { p: "" },
+      parsedContext,
+      async (nextOutput: Ctx) => {
+        const parsedOut = parseMiddlewareNextOut(i, nextOutput)
 
-      resolvers[nextResolverIndex].inputContext.resolve({
-        // this way we don't lose any accumulated context
-        ...ctx,
-        ...parsedOut,
-      })
+        resolvers[nextResolverIndex].inputContext.resolve({
+          // this way we don't lose any accumulated context
+          ...ctx,
+          ...parsedOut,
+        })
 
-      await resolvers[nextResolverIndex].exec.promise
-    }).then(() => {
+        await resolvers[nextResolverIndex].exec.promise
+      },
+    ).then(() => {
       resolvers[currResolverIndex].exec.resolve()
     })
+
+    middlewarePromises.push(middlewarePromise)
   }
 
   const middlewareOutput: Ctx = await actualFunctionResolver.inputContext
@@ -100,6 +108,8 @@ async function runWithMiddlewares<T>(
 
   const result = await func(middlewareOutput)
   actualFunctionResolver.exec.resolve()
+  await resolvers[2].exec.promise
+  await resolvers[1].exec.promise
   await resolvers[0].exec.promise
 
   return result
