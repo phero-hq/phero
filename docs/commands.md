@@ -1,50 +1,73 @@
-# CLI commands
+# Commands
 
-In order to build, run and deploy samen servers and clients, the package is also a CLI. The following commands can be run:
+You control `samen` by a couple of commands. In most cases, you'd use `npx samen` which passes the command down to either `samen-server` or `samen-client`, while giving it a nice UI in your CLI. You'd almost never use `samen-server`/`samen-client` directly, but it will help to know the workings in order to use them.
 
-## install
+## `samen-server`
 
-`$ npx samen install`
+### `samen-server init` (not implemented yet)
 
-This command will add samen as a dev dep to your package and install it automatically. Besides one script will be added to your package json:
+This does a couple of things, to make your server-project ready to go:
 
-`"samen": "samen"`
+- Installs the `@samen/server` package, including the `./node_modules/.bin/samen-server` executable.
+- Creates an example of a samen-file at `src/samen.ts`
 
-Which makes sure the user can then run `npm run samen command`.
-It will also create an empty `samen.ts` file in users project and create all necessary config files (if any).
+### `samen-server build`
 
-## build
+Takes a samen-file, parses it and generates a manifest and the RPC's for it. Assumes the a samen-file at `src/samen.ts`.
 
-The build command will first compile the TypeScript project. If it's compiling it will look up the `samen.ts` file and generate a file called `samen-manifest.yaml`. This file describes all API endpoints including the parameters but also the return values. It's like a blueprint, or "contract" of the API.
+### `samen-server serve [options]`
 
-## serve
+Watches changes in the samen-file and runs `build` when it changes. Also connects to client-watch processes and last but not leasts: serves incoming requests from clients and runs the generated RPC's for that.
 
-Serve will internally first call the `build` command. Eventually the serve command will read the generated `samen-manifest.yaml` and will generate all necessary code to run a server based on the described contract.
+#### Options
 
-## serve watch
+```
+-p, --port    3030     Specify a custom port for the server to be running on
+```
 
-The serve watch command is like the scribed serve command except that it wil generate and pick up changes to the codebase and manifest instantly.
+## `samen-client`
 
-## deploy
+### `samen-client init` (not implemented yet)
 
-The deploy command will first build all code into separate JavaScript bundles. Next it will deploy the code to the configured deployment target(s).
-The deploy command has no knowledge about versions or backwards compatiblity.
+This does a couple of things, to make your client-project ready to go:
 
-## publish (Payed feature)
+- Installs the `@samen/client` package, including the `./node_modules/.bin/samen-client` executable.
+- Creates an example of a client at `src/samen.ts`.
 
-The publish command is a payed feature. When the user is not logged in it will ask the user to log in.
+### `samen-client build [server-location] [options]`
 
-The publish command will upload the manifest to the samen.cloud business, and make it a version. A version desribes the contracts of a specific moment in time. With making it possilbe to have differente versions of a manifest, one can also deploy versions of the API concurrently next to each other.
+Takes a manifest and generates a client with it. You can get a manifest from a samen-server, which can be located by a couple of ways:
 
-When an backwards incompatible change was made to the API since the last version, the user will get a few choices:
+- By the location of a server: `samen-client ../api`
+- By the URL of a server: `samen-client build http://localhost:3030`.
+- By leaving out the location of the server, assuming a server is running at `http://localhost:3030`.
 
-1. implement generated mappers (from the new version to the old, and vice versa).
-2. be aware of an incompatbible change, revert/fixthe code
+> Make sure you're not targeting the manifest-file itself, but the server instead. This way the location of the manifest-file could be modified by the server, without affecting configuration in the client.
 
-## build client
+#### Options
 
-Builds a client based on the manifest of the project. This manifest can be stored on:
+```
+-p, --port    4040    Specify a custom port for the client-watch-server to be running on. When you've got multiple clients watching a server, give each client its own port.
+```
 
-- the file system (file://)
-- some file storage service (AWS S3 or Google Cloud Object Storage) (s3/some path/dsm/v5.0.31)
-- the samen server (http://samen.cloud/dsm/v5.0.31)
+### `samen-client watch [server-location] [options]`
+
+Connects to a dev-server and runs `build` as soon as the manifest changes.
+
+## `npx samen`
+
+The primary way to run `samen`. It will inspect the current directory and do the most appropriate thing possible:
+
+- When in a server-directory it will run `samen-server serve`.
+- When in a client-directory it will run `samen-client watch`.
+- When in a directory with multiple samen-projects, it will run either `samen-serve serve` or `samen-client watch` for each project.
+- When there's samen-project found in the current directory, or in one of the direct child directories in it, it will prompt to initiate one for you (not implemented yet).
+
+When you're in need of any custom options, you cannot use this shortcut. Use one of the commands following commands instead:
+
+- `npx samen server init`
+- `npx samen server build`
+- `npx samen server serve [options]`
+- `npx samen client init`
+- `npx samen client build [server-location] [options]`
+- `npx samen client watch [server-location] [options]`

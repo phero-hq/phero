@@ -79,8 +79,8 @@ function AppContent() {
           {projects.map((project) => (
             <Box
               key={project.path}
-              flexGrow={1}
-              flexBasis="100%"
+              flexGrow={project.type === "server" ? 1 : undefined}
+              flexBasis={project.type === "server" ? "100%" : undefined}
               paddingY={1}
               paddingX={2}
               borderStyle="round"

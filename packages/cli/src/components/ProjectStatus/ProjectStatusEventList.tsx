@@ -1,7 +1,7 @@
 import { Box, Text } from "ink"
 import { useScreenSize } from "../../context/ScreenSizeContext"
 
-export type StyledEvent = ["default" | "error" | "dimmed", string]
+export type StyledEvent = ["default" | "error" | "dimmed" | "busy", string]
 
 interface Props {
   events: StyledEvent[]

@@ -12,7 +12,7 @@ export function spawnClientWatch(
   onEvent: (event: ClientDevEvent) => void,
   debug: boolean,
 ) {
-  const port = 4040
+  const port = 3030
   const cwd = path.resolve(projectPath)
   let hasBeenConnected = false
 
