@@ -3,17 +3,17 @@ import {
   ClientDevEventEmitter,
   DevEventListenerConnectionStatus,
   ServerDevEvent,
-  WatchServerCommand,
+  ClientCommandWatch,
 } from "@samen/dev"
 import http from "http"
 import buildClient from "./utils/buildClient"
 
 export default class ClientWatchServer {
   private readonly server: http.Server
-  private readonly command: WatchServerCommand
+  private readonly command: ClientCommandWatch
   private readonly eventEmitter: ClientDevEventEmitter
 
-  constructor(command: WatchServerCommand) {
+  constructor(command: ClientCommandWatch) {
     this.command = command
     this.eventEmitter = new ClientDevEventEmitter()
 

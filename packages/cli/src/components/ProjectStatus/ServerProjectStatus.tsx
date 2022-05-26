@@ -1,18 +1,18 @@
-import { ServerDevEvent } from "@samen/dev"
+import { ServerCommandServe, ServerDevEvent } from "@samen/dev"
 import { Box, Text } from "ink"
 import Spinner from "ink-spinner"
 import { useCallback, useEffect, useState } from "react"
-import { useCommand } from "../../context/CommandContext"
 import { ServerProject } from "../../utils/getProjects"
 import { spawnServerWatch } from "../../utils/processes"
 import ProjectStatusEventList, { StyledEvent } from "./ProjectStatusEventList"
 
 export default function ServerProjectStatus({
   project,
+  command,
 }: {
   project: ServerProject
+  command: ServerCommandServe
 }) {
-  const command = useCommand()
   const [status, setStatus] = useState<string>("Initializing...")
   const [isBuilding, setBuilding] = useState(true)
   const [error, setError] = useState<string>()
@@ -23,7 +23,7 @@ export default function ServerProjectStatus({
   }, [])
 
   const onEvent = useCallback((event: ServerDevEvent) => {
-    if (command.debug) {
+    if (command.verbose) {
       console.log("server", event)
     }
 
@@ -110,14 +110,14 @@ export default function ServerProjectStatus({
         break
 
       default:
-        if (command.debug) {
+        if (command.verbose) {
           console.log("unhandled server event: ", event)
         }
     }
   }, [])
 
   useEffect(() => {
-    const kill = spawnServerWatch(project.path, onEvent, command.debug)
+    const kill = spawnServerWatch(project.path, onEvent, command.verbose)
     return () => kill()
   }, [])
 

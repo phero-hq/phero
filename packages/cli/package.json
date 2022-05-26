@@ -10,7 +10,8 @@
     "test": "jest src",
     "prepublish": "npm run clean && npm run build",
     "start": "node ./dist/index.js",
-    "prestart": "npm run build"
+    "prestart": "npm run build",
+    "postbuild": "cp package.json ./dist/package.json"
   },
   "dependencies": {
     "@samen/dev": "^0.8.0-alpha.6",

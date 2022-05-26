@@ -1,8 +1,8 @@
 import arg from "arg"
 
-const DEFAULT_SERVER_PORT = 3030
-const DEFAULT_SERVER_URL = `http://localhost:${DEFAULT_SERVER_PORT}`
-const DEFAULT_CLIENT_PORT = 4040
+export const DEFAULT_SERVER_PORT = 3030
+export const DEFAULT_SERVER_URL = `http://localhost:${DEFAULT_SERVER_PORT}`
+export const DEFAULT_CLIENT_PORT = 4040
 
 // Common
 
@@ -38,7 +38,9 @@ interface ClientServerLocationPath {
   path: string
 }
 
-type ClientServerLocation = ClientServerLocationUrl | ClientServerLocationPath
+export type ClientServerLocation =
+  | ClientServerLocationUrl
+  | ClientServerLocationPath
 
 export interface ClientCommandWatch {
   name: "watch"
@@ -60,24 +62,24 @@ export type ClientCommand =
 
 // Samen
 
-interface SamenCommandServer {
+export interface SamenCommandServer {
   name: "server"
   verbose: boolean
   command: ServerCommand
 }
 
-interface SamenCommandClient {
+export interface SamenCommandClient {
   name: "client"
   verbose: boolean
   command: ClientCommand
 }
 
-interface SamenCommandDevEnv {
+export interface SamenCommandDevEnv {
   name: "dev-env"
   verbose: boolean
 }
 
-type SamenCommand =
+export type SamenCommand =
   | CommonCommand
   | SamenCommandServer
   | SamenCommandClient
@@ -97,7 +99,7 @@ export function parseServerCommand(argv: string[]): ServerCommand {
     { argv },
   )
 
-  const name = args["_"][1]
+  const name = args["_"][0]
   const verbose = !!args["--verbose"]
 
   if (args["--help"]) {
@@ -135,9 +137,9 @@ export function parseClientCommand(argv: string[]): ClientCommand {
     { argv },
   )
 
-  const name = args["_"][1]
+  const name = args["_"][0]
+  const location = args["_"][1] // TODO: Is there a better way?
   const verbose = !!args["--verbose"]
-  const location = args["_"][2] // TODO: Is there a better way?
 
   if (args["--help"]) {
     return { name: "help", command: name }
@@ -185,7 +187,7 @@ export function parseSamenCommand(argv: string[]): SamenCommand {
     { argv, permissive: true },
   )
 
-  const name = args["_"][1]
+  const name = args["_"][0]
   const verbose = !!args["--verbose"]
 
   if (args["--help"]) {

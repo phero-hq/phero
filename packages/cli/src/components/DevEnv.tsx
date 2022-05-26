@@ -1,19 +1,22 @@
-import { SamenCommand } from "@samen/dev"
+import {
+  DEFAULT_CLIENT_PORT,
+  DEFAULT_SERVER_PORT,
+  DEFAULT_SERVER_URL,
+  SamenCommandDevEnv,
+} from "@samen/dev"
 import { Box, Text } from "ink"
-import React, { ErrorInfo } from "react"
-import { useCallback, useEffect, useState } from "react"
-
-import { CommandProvider, useCommand } from "../context/CommandContext"
+import React, { ErrorInfo, useCallback, useEffect, useState } from "react"
 import { ScreenSizeProvider, useScreenSize } from "../context/ScreenSizeContext"
 import getProjects, { Project } from "../utils/getProjects"
 import ErrorMessage from "./ErrorMessage"
-
 import ClientProjectStatus from "./ProjectStatus/ClientProjectStatus"
 import ServerProjectStatus from "./ProjectStatus/ServerProjectStatus"
 
-export default class App extends React.Component<SamenCommand> {
+export default class DevEnv extends React.Component<{
+  command: SamenCommandDevEnv
+}> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    if (this.props.debug) {
+    if (this.props.command.verbose) {
       console.error("Error:", error)
       console.error(errorInfo)
     } else {
@@ -24,21 +27,18 @@ export default class App extends React.Component<SamenCommand> {
 
   render() {
     return (
-      <CommandProvider value={this.props}>
-        <ScreenSizeProvider>
-          <AppContent />
-        </ScreenSizeProvider>
-      </CommandProvider>
+      <ScreenSizeProvider>
+        <DevEnvContent command={this.props.command} />
+      </ScreenSizeProvider>
     )
   }
 }
 
-function AppContent() {
+function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
   const [isLoading, setLoading] = useState(true)
   const [error, setError] = useState<unknown>()
   const [projects, setProjects] = useState<Project[]>([])
   const { orientation, columns, rows } = useScreenSize()
-  const command = useCommand()
 
   const updateProjects = useCallback(async () => {
     try {
@@ -59,7 +59,7 @@ function AppContent() {
   }, [])
 
   if (error) {
-    return <ErrorMessage error={error} />
+    return <ErrorMessage error={error} verbose={command.verbose} />
   }
 
   if (isLoading) {
@@ -73,10 +73,10 @@ function AppContent() {
       ) : (
         <Box
           width={columns}
-          height={command.debug ? undefined : rows}
+          height={command.verbose ? undefined : rows}
           flexDirection={orientation === "portrait" ? "column" : "row"}
         >
-          {projects.map((project) => (
+          {projects.map((project, index) => (
             <Box
               key={project.path}
               flexGrow={project.type === "server" ? 1 : undefined}
@@ -87,10 +87,25 @@ function AppContent() {
               borderColor="blue"
             >
               {project.type === "client" && (
-                <ClientProjectStatus project={project} />
+                <ClientProjectStatus
+                  project={project}
+                  command={{
+                    name: "watch",
+                    port: DEFAULT_CLIENT_PORT + index,
+                    server: { url: DEFAULT_SERVER_URL },
+                    verbose: command.verbose,
+                  }}
+                />
               )}
               {project.type === "server" && (
-                <ServerProjectStatus project={project} />
+                <ServerProjectStatus
+                  project={project}
+                  command={{
+                    name: "serve",
+                    port: DEFAULT_SERVER_PORT,
+                    verbose: command.verbose,
+                  }}
+                />
               )}
             </Box>
           ))}

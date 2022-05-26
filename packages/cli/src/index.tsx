@@ -1,19 +1,22 @@
 #!/usr/bin/env node
 
 import { parseSamenCommand } from "@samen/dev"
-import { render } from "ink"
-import React from "react"
-import App from "./components/App"
+import devEnv from "./commands/dev-env"
+import help from "./commands/help"
+import version from "./commands/version"
 
 const command = parseSamenCommand(process.argv.slice(2))
 
-process.on("unhandledRejection", (error) => {
-  if (command.debug) {
-    console.error(error)
-  } else {
-    console.error("Something went wrong, try again.")
-  }
-  process.exit(1)
-})
+switch (command.name) {
+  case "version":
+    version()
+    break
 
-render(React.createElement(App, command))
+  case "help":
+    help()
+    break
+
+  case "dev-env":
+    devEnv(command)
+    break
+}

@@ -6,7 +6,7 @@ import {
 
 describe("parseServerCommand", () => {
   function run(cmd: string) {
-    return parseServerCommand(cmd.split(" "))
+    return parseServerCommand(cmd.split(" ").splice(1))
   }
 
   function err(cmd: string) {
@@ -86,7 +86,7 @@ describe("parseServerCommand", () => {
 
 describe("parseClientCommand", () => {
   function run(cmd: string) {
-    return parseClientCommand(cmd.split(" "))
+    return parseClientCommand(cmd.split(" ").splice(1))
   }
 
   function err(cmd: string) {
@@ -186,7 +186,7 @@ describe("parseClientCommand", () => {
 
 describe("parseSamenCommand", () => {
   function run(cmd: string) {
-    return parseSamenCommand(cmd.split(" "))
+    return parseSamenCommand(cmd.split(" ").splice(1))
   }
 
   function err(cmd: string) {

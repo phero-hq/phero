@@ -1,22 +1,22 @@
-import { ClientDevEvent } from "@samen/dev"
+import { ClientCommandWatch, ClientDevEvent } from "@samen/dev"
 import { Box, Text } from "ink"
 import Spinner from "ink-spinner"
 import { useCallback, useEffect, useState } from "react"
-import { useCommand } from "../../context/CommandContext"
 import { ClientProject } from "../../utils/getProjects"
 import { spawnClientWatch } from "../../utils/processes"
 import { StyledEvent } from "./ProjectStatusEventList"
 
 export default function ClientProjectStatus({
   project,
+  command,
 }: {
   project: ClientProject
+  command: ClientCommandWatch
 }) {
-  const command = useCommand()
   const [event, setEvent] = useState<StyledEvent>(["busy", "Initializing..."])
 
   const onEvent = useCallback((event: ClientDevEvent) => {
-    if (command.debug) {
+    if (command.verbose) {
       console.log("client", event)
     }
 
@@ -58,14 +58,14 @@ export default function ClientProjectStatus({
         break
 
       default:
-        if (command.debug) {
+        if (command.verbose) {
           console.log("unhandled client event: ", event)
         }
     }
   }, [])
 
   useEffect(() => {
-    const kill = spawnClientWatch(project.path, onEvent, command.debug)
+    const kill = spawnClientWatch(project.path, onEvent, command.verbose)
     return () => kill()
   }, [])
 

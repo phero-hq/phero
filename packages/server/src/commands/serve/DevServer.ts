@@ -1,4 +1,4 @@
-import { ServerDevEventEmitter, ServeServerCommand } from "@samen/dev"
+import { ServerDevEventEmitter, ServerCommandServe } from "@samen/dev"
 import {
   generateAppDeclarationFile,
   generateRPCProxy,
@@ -29,7 +29,7 @@ interface RPCRoutes {
 export default class DevServer {
   private readonly server: http.Server
   private readonly program: WatchProgram
-  private readonly command: ServeServerCommand
+  private readonly command: ServerCommandServe
   private readonly projectPath: string
   private readonly eventEmitter: ServerDevEventEmitter
 
@@ -37,7 +37,7 @@ export default class DevServer {
   private currentClientCodeHash = ""
   private clients: http.ServerResponse[] = []
 
-  constructor(command: ServeServerCommand, projectPath: string) {
+  constructor(command: ServerCommandServe, projectPath: string) {
     this.command = command
     this.projectPath = projectPath
     this.eventEmitter = new ServerDevEventEmitter()
