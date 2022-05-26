@@ -1,133 +1,223 @@
+import arg from "arg"
+
 const DEFAULT_SERVER_PORT = 3030
 const DEFAULT_SERVER_URL = `http://localhost:${DEFAULT_SERVER_PORT}`
 const DEFAULT_CLIENT_PORT = 4040
 
+// Common
+
+export type CommonCommand =
+  | { name: "help"; command?: string }
+  | { name: "version" }
+
 // Server
 
-export interface ServeServerCommand {
+export interface ServerCommandServe {
   name: "serve"
+  verbose: boolean
   port: number
-  quiet: boolean // `npx samen` has its own eventlistener, no need to output anything
 }
 
-export interface BuildServerCommand {
+export interface ServerCommandBuild {
   name: "build"
+  verbose: boolean
 }
 
-export type ServerCommand = ServeServerCommand | BuildServerCommand
-
-// Assumes that the process and file path are already stripped out (https://nodejs.org/en/knowledge/command-line/how-to-parse-command-line-arguments/)
-// > serve
-// > serve --p 3031
-// > serve --port 3031
-// > build
-export function parseServerCommand(args: string[]): ServerCommand {
-  const name = args[0]
-
-  switch (name) {
-    case "serve":
-      return {
-        name,
-        port: getPort(args) ?? DEFAULT_SERVER_PORT,
-        quiet: getQuiet(args),
-      }
-
-    case "build":
-      return { name }
-
-    default:
-      throw new Error(`Unknown server command: ${name}`)
-  }
-}
+export type ServerCommand =
+  | CommonCommand
+  | ServerCommandServe
+  | ServerCommandBuild
 
 // Client
 
-export interface WatchServerCommand {
+interface ClientServerLocationUrl {
+  url: string
+}
+
+interface ClientServerLocationPath {
+  path: string
+}
+
+type ClientServerLocation = ClientServerLocationUrl | ClientServerLocationPath
+
+export interface ClientCommandWatch {
   name: "watch"
+  verbose: boolean
   port: number
-  server: { url: string } // TODO: Strip trailing slash
-  quiet: boolean // `npx samen` has its own eventlistener, no need to output anything
+  server: ClientServerLocationUrl
 }
 
-export interface BuildClientCommand {
+export interface ClientCommandBuild {
   name: "build"
-  server:
-    | { url: string } // TODO: Strip trailing slash
-    | { path: string }
+  verbose: boolean
+  server: ClientServerLocation
 }
 
-export type ClientCommand = WatchServerCommand | BuildClientCommand
-
-// Assumes that the process and file path are already stripped out (https://nodejs.org/en/knowledge/command-line/how-to-parse-command-line-arguments/)
-// > watch
-// > watch --p 4041
-// > watch --port 4041
-// > watch http://localhost:3031
-// > watch http://localhost:3031 --port 4041
-// > build
-// > build ../server
-// > build http://localhost:4321
-export function parseClientCommand(args: string[]): ClientCommand {
-  const name = args[0]
-  const port = getPort(args) ?? DEFAULT_CLIENT_PORT
-
-  switch (name) {
-    case "watch": {
-      const location = !args[1]?.startsWith("-") && args[1]
-      if (!location) {
-        return {
-          name,
-          port,
-          server: { url: DEFAULT_SERVER_URL },
-          quiet: getQuiet(args),
-        }
-      } else if (location.startsWith("http")) {
-        return {
-          name,
-          port,
-          server: { url: location },
-          quiet: getQuiet(args),
-        }
-      } else {
-        throw new Error("Watching based on file path is not supported ")
-      }
-    }
-
-    case "build": {
-      const location = !args[1]?.startsWith("-") && args[1]
-      if (!location) {
-        return { name, server: { url: DEFAULT_SERVER_URL } }
-      } else if (location.startsWith("http")) {
-        return { name, server: { url: location } }
-      } else {
-        return { name, server: { path: location } }
-      }
-    }
-
-    default:
-      throw new Error(`Unknown client command: ${name}`)
-  }
-}
+export type ClientCommand =
+  | CommonCommand
+  | ClientCommandWatch
+  | ClientCommandBuild
 
 // Samen
 
-export interface SamenCommand {
-  debug: boolean
+interface SamenCommandServer {
+  name: "server"
+  verbose: boolean
+  command: ServerCommand
 }
 
-export function parseSamenCommand(args: string[]): SamenCommand {
-  return {
-    debug: args.includes("--debug"),
+interface SamenCommandClient {
+  name: "client"
+  verbose: boolean
+  command: ClientCommand
+}
+
+interface SamenCommandDevEnv {
+  name: "dev-env"
+  verbose: boolean
+}
+
+type SamenCommand =
+  | CommonCommand
+  | SamenCommandServer
+  | SamenCommandClient
+  | SamenCommandDevEnv
+
+export function parseServerCommand(argv: string[]): ServerCommand {
+  const args = arg(
+    {
+      "--version": Boolean,
+      "--help": Boolean,
+      "--verbose": Boolean,
+      "--port": Number,
+      "-v": "--version",
+      "-h": "--help",
+      "-p": "--port",
+    },
+    { argv },
+  )
+
+  const name = args["_"][1]
+  const verbose = !!args["--verbose"]
+
+  if (args["--help"]) {
+    return { name: "help", command: name }
+  }
+
+  if (args["--version"]) {
+    return { name: "version" }
+  }
+
+  switch (name) {
+    case "serve":
+      const port = args["--port"] ?? DEFAULT_SERVER_PORT
+      return { name, verbose, port }
+
+    case "build":
+      return { name, verbose }
+
+    default:
+      throw new Error(`unknown server command: ${name}`)
   }
 }
 
-// Helpers
+export function parseClientCommand(argv: string[]): ClientCommand {
+  const args = arg(
+    {
+      "--version": Boolean,
+      "--help": Boolean,
+      "--verbose": Boolean,
+      "--port": Number,
+      "-v": "--version",
+      "-h": "--help",
+      "-p": "--port",
+    },
+    { argv },
+  )
 
-function getPort(args: string[]): number | undefined {
-  const portIndex = args.findIndex((a) => ["-p", "--port"].includes(a))
-  return portIndex > -1 ? parseInt(args[portIndex + 1]) : undefined
+  const name = args["_"][1]
+  const verbose = !!args["--verbose"]
+  const location = args["_"][2] // TODO: Is there a better way?
+
+  if (args["--help"]) {
+    return { name: "help", command: name }
+  }
+
+  if (args["--version"]) {
+    return { name: "version" }
+  }
+
+  switch (name) {
+    case "watch":
+      const port = args["--port"] ?? DEFAULT_CLIENT_PORT
+
+      if (!location) {
+        return { name, verbose, port, server: { url: DEFAULT_SERVER_URL } }
+      } else if (location.startsWith("http")) {
+        return { name, verbose, port, server: { url: location } }
+      } else {
+        throw new Error("Watching based on file path is not supported ")
+      }
+
+    case "build":
+      if (!location) {
+        return { name, verbose, server: { url: DEFAULT_SERVER_URL } }
+      } else if (location.startsWith("http")) {
+        return { name, verbose, server: { url: location } }
+      } else {
+        return { name, verbose, server: { path: location } }
+      }
+
+    default:
+      throw new Error(`unknown client command: ${name}`)
+  }
 }
 
-function getQuiet(args: string[]): boolean {
-  return args.some((a) => a === "--quiet")
+export function parseSamenCommand(argv: string[]): SamenCommand {
+  const args = arg(
+    {
+      "--version": Boolean,
+      "--help": Boolean,
+      "--verbose": Boolean,
+      "-v": "--version",
+      "-h": "--help",
+    },
+    { argv, permissive: true },
+  )
+
+  const name = args["_"][1]
+  const verbose = !!args["--verbose"]
+
+  if (args["--help"]) {
+    return { name: "help", command: name }
+  }
+
+  if (args["--version"]) {
+    return { name: "version" }
+  }
+
+  switch (name) {
+    case undefined:
+      return {
+        name: "dev-env",
+        verbose,
+      }
+
+    case "client":
+      return {
+        name: "client",
+        verbose,
+        command: parseClientCommand(argv.slice(1)),
+      }
+
+    case "server":
+      return {
+        name: "server",
+        verbose,
+        command: parseServerCommand(argv.slice(1)),
+      }
+
+    default:
+      throw new Error(`unknown samen command: ${name}`)
+  }
 }
