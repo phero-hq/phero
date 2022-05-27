@@ -3,6 +3,7 @@ import { generateModifiers } from "./lib"
 
 interface ParamDeclarationProps {
   private?: boolean
+  public?: boolean
   readonly?: boolean
   name: string
   questionToken?: boolean
@@ -15,6 +16,7 @@ export function param(props: ParamDeclarationProps): ts.ParameterDeclaration {
     undefined,
     generateModifiers([
       props.private && ts.SyntaxKind.PrivateKeyword,
+      props.public && ts.SyntaxKind.PublicKeyword,
       props.readonly && ts.SyntaxKind.ReadonlyKeyword,
     ]),
     undefined,

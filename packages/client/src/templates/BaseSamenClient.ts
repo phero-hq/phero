@@ -18,11 +18,7 @@ export type Fetch = (
 }>
 
 export class NetworkError extends Error {}
-export class HttpError extends Error {
-  constructor(public readonly httpStatus: number) {
-    super()
-  }
-}
+
 export class ParseError extends Error {
   constructor(public readonly errors: ValidationError[]) {
     super()
@@ -37,6 +33,7 @@ export class BaseSamenClient {
     serviceName: string,
     functionName: string,
     body: object,
+    errorParser: <TError extends Error>(error: any) => TError,
     resultParser: (data: any) => ParseResult<T>,
   ): Promise<T> {
     let result
@@ -50,15 +47,15 @@ export class BaseSamenClient {
         body: JSON.stringify(body),
       })
     } catch (err) {
-      console.error(err)
       throw new NetworkError()
     }
 
+    const data = await result.json()
+
     if (!result.ok) {
-      throw new HttpError(result.status)
+      throw errorParser(data)
     }
 
-    const data = await result.json()
     const parseResult = resultParser(data)
 
     if (parseResult.ok == false) {
@@ -72,6 +69,7 @@ export class BaseSamenClient {
     serviceName: string,
     functionName: string,
     body: object,
+    errorParser: <TError extends Error>(error: any) => TError,
   ): Promise<void> {
     let result
 
@@ -84,12 +82,12 @@ export class BaseSamenClient {
         body: JSON.stringify(body),
       })
     } catch (err) {
-      console.error(err)
       throw new NetworkError()
     }
 
     if (!result.ok) {
-      throw new HttpError(result.status)
+      const data = await result.json()
+      throw errorParser(data)
     }
   }
 }

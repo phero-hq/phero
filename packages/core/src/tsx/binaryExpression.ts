@@ -14,6 +14,7 @@ type BinaryOperator =
   | "||"
   | "&&"
   | "??"
+  | "instanceof"
 
 export function binaryExpression(
   left: ts.Expression,
@@ -53,5 +54,7 @@ function generateOperator(
       return ts.factory.createToken(ts.SyntaxKind.AmpersandAmpersandToken)
     case "??":
       return ts.factory.createToken(ts.SyntaxKind.QuestionQuestionToken)
+    case "instanceof":
+      return ts.factory.createToken(ts.SyntaxKind.InstanceOfKeyword)
   }
 }

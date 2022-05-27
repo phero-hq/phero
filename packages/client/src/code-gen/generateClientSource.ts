@@ -18,6 +18,7 @@ export default function generateClientSource(
   const t1 = Date.now()
 
   const { domainModels, services } = appDeclarationVersion
+  const parsedDomainErrors = appDeclarationVersion.errors.map(parseError)
   const domainRefMaker = new ReferenceMaker(
     domainModels,
     typeChecker,
@@ -35,12 +36,14 @@ export default function generateClientSource(
     importParserTypes,
     ...domainModels.map((model) => generateModel(model, domainRefMaker)),
     ...domainModels.map((model) => generateModelParser(model, typeChecker)),
+    ...parsedDomainErrors.map(generateError),
     ...services.map((service) =>
       generateNamespace(ts.factory.createIdentifier(service.name), [
         ...service.models.map((model) => generateModel(model, domainRefMaker)),
         ...service.models.map((model) =>
           generateModelParser(model, typeChecker),
         ),
+        ...service.errors.map(parseError).map(generateError),
       ]),
     ),
   )
@@ -48,6 +51,7 @@ export default function generateClientSource(
   const importDomain = tsx.importDeclaration({
     names: [
       ...domainModels.map((model) => model.name.text),
+      ...parsedDomainErrors.map((err) => err.name),
       ...services.map((service) => service.name),
     ],
     module: "./domain",
@@ -157,6 +161,14 @@ export default function generateClientSource(
     importBaseSamenClient,
     importParserTypes,
     ...parserDeclrs,
+    ...services.map((service) =>
+      generateErrorParser(service.name, [
+        ...parsedDomainErrors,
+        ...service.errors
+          .map(parseError)
+          .map((e) => ({ ...e, name: `${service.name}.${e.name}` })),
+      ]),
+    ),
     classDeclr,
   )
 
@@ -249,4 +261,95 @@ function generateParsersForReturnTypes(
     }
   }
   return result
+}
+
+function generateError(parsedError: ParsedError): ts.ClassDeclaration {
+  return tsx.classDeclaration({
+    name: parsedError.name,
+    export: true,
+    constructor: tsx.constructor({
+      params: parsedError.props.map((prop) =>
+        tsx.param({
+          public: true,
+          readonly: true,
+          name: prop.name,
+          type: prop.type,
+        }),
+      ),
+      block: tsx.block(),
+    }),
+  })
+}
+
+// function generate
+interface ParsedError {
+  name: string
+  props: Array<{
+    name: string
+    type: ts.TypeNode
+  }>
+}
+
+function parseError(errorClass: ts.ClassDeclaration): ParsedError {
+  return {
+    name: errorClass.name!.text,
+    props: errorClass.members
+      .find(ts.isConstructorDeclaration)!
+      .parameters.map((param) => ({
+        name: param.name.getText(),
+        type: param.type!,
+      })),
+  }
+}
+
+function generateErrorParser(
+  serviceName: string,
+  parsedErrors: ParsedError[],
+): ts.FunctionDeclaration {
+  const fallbackSt = tsx.statement.if({
+    expression: tsx.expression.binary(
+      tsx.expression.propertyAccess("error", "name"),
+      "===",
+      tsx.literal.string("Error"),
+    ),
+    then: returnError("Error", [
+      tsx.expression.propertyAccess("error", "props", "message"),
+    ]),
+    else: returnError("Error", [tsx.literal.string("Unknown Error")]),
+  })
+
+  return tsx.function({
+    name: `error_parser_${serviceName}`,
+    params: [tsx.param({ name: "error", type: tsx.type.any })],
+    returnType: tsx.type.union(
+      tsx.type.reference({ name: "Error" }),
+      ...parsedErrors.map((e) => tsx.type.reference({ name: e.name })),
+    ),
+    body: tsx.block(
+      parsedErrors.reduceRight(
+        (elseSt, parsedError) =>
+          tsx.statement.if({
+            expression: tsx.expression.binary(
+              tsx.expression.propertyAccess("error", "name"),
+              "===",
+              tsx.literal.string(parsedError.name),
+            ),
+            then: returnError(
+              parsedError.name,
+              parsedError.props.map((prop) =>
+                tsx.expression.propertyAccess("error", "props", prop.name),
+              ),
+            ),
+            else: elseSt,
+          }),
+        fallbackSt,
+      ),
+    ),
+  })
+}
+
+function returnError(name: string, args: ts.Expression[]): ts.ReturnStatement {
+  return tsx.statement.return(
+    tsx.expression.new(tsx.expression.identifier(name), { args }),
+  )
 }

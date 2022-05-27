@@ -1,17 +1,73 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`generateAppDeclarationFile should parse middleware 1`] = `
-"export declare namespace samen {
-    type SamenContext<T> = T;
+exports[`generateAppDeclarationFile errors should generate common errors in domain 1`] = `
+"export declare namespace domain {
+    namespace v_1_0_0 {
+        class CommonError {
+            constructor(message: string);
+        }
+    }
+}
+export declare namespace hamburgerService {
+    namespace v_1_0_0 {
+        class HamburgerError {
+            constructor(message: string);
+        }
+        function getHamburger(): Promise<string>;
+        function setHamburger(): Promise<string>;
+    }
 }
 export declare namespace articleService {
     namespace v_1_0_0 {
-        interface User {
-            uid: string;
+        class ArticleError {
+            constructor(message: string);
         }
-        function getArticle(aap: string, ctx: samen.SamenContext<{
-            uid: string;
-        }>): Promise<string>;
+        function getArticle(): Promise<string>;
+        function setArticle(): Promise<string>;
+    }
+}
+"
+`;
+
+exports[`generateAppDeclarationFile errors should generate multi-service multi-error 1`] = `
+"export declare namespace hamburgerService {
+    namespace v_1_0_0 {
+        class HamburgerError {
+            constructor(message: string);
+        }
+        function getHamburger(): Promise<string>;
+    }
+}
+export declare namespace articleService {
+    namespace v_1_0_0 {
+        class ArticleError {
+            constructor(message: string);
+        }
+        function getArticle(): Promise<string>;
+    }
+}
+"
+`;
+
+exports[`generateAppDeclarationFile errors should generate properties on generated error classes 1`] = `
+"export declare namespace articleService {
+    namespace v_1_0_0 {
+        class ArticleError {
+            constructor(message: string, myPublicProp: number, myProp: number);
+        }
+        function getArticle(): Promise<string>;
+    }
+}
+"
+`;
+
+exports[`generateAppDeclarationFile errors should generate service error 1`] = `
+"export declare namespace articleService {
+    namespace v_1_0_0 {
+        class ArticleError {
+            constructor(message: string);
+        }
+        function getArticle(): Promise<string>;
     }
 }
 "

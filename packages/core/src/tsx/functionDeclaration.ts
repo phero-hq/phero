@@ -16,8 +16,8 @@ export function functionDeclaration(
   return ts.factory.createFunctionDeclaration(
     undefined,
     generateModifiers([
-      props.async && ts.SyntaxKind.AsyncKeyword,
       props.export && ts.SyntaxKind.ExportKeyword,
+      props.async && ts.SyntaxKind.AsyncKeyword,
     ]),
     undefined,
     props.name,

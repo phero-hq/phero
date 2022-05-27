@@ -87,4 +87,20 @@ export class Expression {
   ): ts.ParenthesizedExpression {
     return ts.factory.createParenthesizedExpression(expression)
   }
+
+  public static new(
+    expression: string | ts.Expression,
+    props: {
+      typeArgs?: ts.TypeNode[]
+      args?: ts.Expression[]
+    },
+  ): ts.NewExpression {
+    return ts.factory.createNewExpression(
+      typeof expression === "string"
+        ? ts.factory.createIdentifier(expression)
+        : expression,
+      props.typeArgs,
+      props.args,
+    )
+  }
 }

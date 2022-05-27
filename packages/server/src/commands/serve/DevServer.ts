@@ -176,6 +176,7 @@ export default class DevServer {
                 message: JSON.stringify(rpcResult.errors),
               })
             } else if (rpcResult.status === 500) {
+              res.write(JSON.stringify(rpcResult.error))
               console.error(rpcResult.error)
               this.eventEmitter.emit({
                 type: "RPC_FAILED",

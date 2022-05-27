@@ -10,6 +10,8 @@ export { block } from "./block"
 export { namespace } from "./namespace"
 export { verbatim } from "./verbatim"
 export { importDeclaration } from "./importDeclaration"
+export { classDeclaration } from "./classDeclaration"
+export { constructor } from "./constructor"
 
 export { Type as type } from "./Type"
 export { Literal as literal } from "./Literal"

@@ -3,6 +3,7 @@ import { generateInlineParser } from "./code-gen/generateRPCProxy"
 import generateParserFromModel from "./code-gen/parsers/generateParserFromModel"
 import generateParserModel from "./code-gen/parsers/generateParserModel"
 import { ParseError } from "./errors"
+import { ParsedError } from "./extractErrors/parseThrowStatement"
 import { getReturnType } from "./extractFunctionFromServiceProperty"
 import {
   Model,
@@ -207,6 +208,7 @@ function generateClientFunctionBlock(
                 return tsx.property.shorthandAssignment(p.name.getText())
               }),
             ),
+            `error_parser_${serviceName}`,
             ts.isTypeReferenceNode(returnType)
               ? makeReferenceToParserFunction(returnType, typeChecker)
               : tsx.expression.identifier(
@@ -281,6 +283,26 @@ export function generateModel(model: Model, refMaker: ReferenceMaker): Model {
   }
 
   return model
+}
+
+export function generateErrorClass(
+  error: ParsedError,
+  refMaker: ReferenceMaker,
+): ts.ClassDeclaration {
+  return tsx.classDeclaration({
+    name: error.name,
+    export: true,
+    constructor: tsx.constructor({
+      params: error.properties.map((prop) =>
+        tsx.param({
+          public: true,
+          readonly: true,
+          name: prop.name,
+          type: generateTypeNode(prop.type, refMaker),
+        }),
+      ),
+    }),
+  })
 }
 
 function generatePropertyName(propName: ts.PropertyName): ts.PropertyName {

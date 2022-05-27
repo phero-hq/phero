@@ -1,16 +1,19 @@
 import ts from "typescript"
 import { ParseError } from "./errors"
+import { ParsedError } from "./extractErrors/parseThrowStatement"
 import extractServiceFromSamenExport from "./extractServiceFromSamenExport"
 import { hasModifier } from "./tsUtils"
 
 export interface ParsedSamenApp {
   models: Model[]
+  errors: ParsedError[]
   services: ParsedSamenServiceDefinition[]
 }
 
 export interface ParsedSamenServiceDefinition {
   name: string
   models: Model[]
+  errors: ParsedError[]
   funcs: ParsedSamenFunctionDefinition[]
   config: ParsedSamenServiceConfig
 }
@@ -99,28 +102,48 @@ export default function parseSamenApp(
     }
   }
 
-  const seen: Model[] = []
-  const shared: Model[] = []
+  const seenModels: Model[] = []
+  const sharedModels: Model[] = []
 
   for (const model of services.flatMap((s) => s.models)) {
-    if (shared.includes(model)) {
+    if (sharedModels.includes(model)) {
       continue
-    } else if (seen.includes(model)) {
-      if (!shared.includes(model)) {
-        shared.push(model)
+    } else if (seenModels.includes(model)) {
+      if (!sharedModels.includes(model)) {
+        sharedModels.push(model)
       }
     } else {
-      seen.push(model)
+      seenModels.push(model)
     }
   }
+
+  const seenErrors: ts.ClassDeclaration[] = []
+  const sharedErrors: ParsedError[] = []
+
+  for (const error of services.flatMap((s) => s.errors)) {
+    const sharedErrorClasses = sharedErrors.map((e) => e.ref)
+    if (sharedErrorClasses.includes(error.ref)) {
+      continue
+    } else if (seenErrors.includes(error.ref)) {
+      if (!sharedErrorClasses.includes(error.ref)) {
+        sharedErrors.push(error)
+      }
+    } else {
+      seenErrors.push(error.ref)
+    }
+  }
+
+  const sharedErrorClasses = sharedErrors.map((e) => e.ref)
 
   const t2 = Date.now()
   // console.log("parseSamenApp in", t2 - t1)
   return {
-    models: shared,
+    models: sharedModels,
+    errors: sharedErrors,
     services: services.map((service) => ({
       ...service,
-      models: service.models.filter((m) => !shared.includes(m)),
+      models: service.models.filter((m) => !sharedModels.includes(m)),
+      errors: service.errors.filter((e) => !sharedErrorClasses.includes(e.ref)),
     })),
   }
 }

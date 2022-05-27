@@ -93,6 +93,22 @@ export function compileStatements(code: string): {
   }
 }
 
+export function compileProgram(input: TSFiles): {
+  statements: ts.Statement[]
+  typeChecker: ts.TypeChecker
+} {
+  const prog = createTestProgram(input)
+  const statements = prog.getSourceFile("samen.ts")?.statements
+  if (!statements || statements.length < 1) {
+    throw new Error("Should provide at least 1 statement")
+  }
+
+  return {
+    typeChecker: prog.getTypeChecker(),
+    statements: statements.map((s) => s),
+  }
+}
+
 const printer = ts.createPrinter({
   newLine: ts.NewLineKind.LineFeed,
   noEmitHelpers: true,

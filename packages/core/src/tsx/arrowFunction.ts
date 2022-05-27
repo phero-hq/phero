@@ -12,8 +12,8 @@ interface ArrowFunctionProps {
 export function arrowFunction(props: ArrowFunctionProps): ts.ArrowFunction {
   return ts.factory.createArrowFunction(
     generateModifiers([
-      props.async && ts.SyntaxKind.AsyncKeyword,
       props.export && ts.SyntaxKind.ExportKeyword,
+      props.async && ts.SyntaxKind.AsyncKeyword,
     ]),
     undefined,
     props.params,

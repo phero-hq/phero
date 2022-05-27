@@ -27,5 +27,5 @@ export interface RPCBadRequestResult {
 
 export interface RPCInternalServerErrorResult {
   status: 500
-  error: Error
+  error: Record<string, any>
 }

@@ -1019,4 +1019,173 @@ describe("parseSamenApp", () => {
       )
     })
   })
+
+  describe("parse errors", () => {
+    test("should parse errors within one function", () => {
+      const parsedApp = parseProgram(
+        createTestProgram({
+          other: `
+            export class ArticleError extends Error {
+            }
+
+            export function editArticle(): Promise<string> {
+              throw new ArticleError()
+            }
+          `,
+          samen: `
+          import {editArticle} from './other'
+
+          export const articleService = createService({
+            editArticle: createFunction(editArticle),
+          })
+        `,
+        }),
+      )
+
+      expect(parsedApp).toMatchObject({
+        services: [
+          expect.objectContaining({
+            name: "articleService",
+            errors: [
+              expect.objectContaining({
+                name: "ArticleError",
+              }),
+            ],
+          }),
+        ],
+      })
+    })
+    test("should parse errors within multiple functions", () => {
+      const parsedApp = parseProgram(
+        createTestProgram({
+          other: `
+            class ArticleError extends Error {
+            }
+
+            export function getArticle(): Promise<string> {
+              throw new ArticleError()
+            }
+
+            export function editArticle(): Promise<string> {
+              throw new ArticleError()
+            }
+          `,
+          samen: `
+          import {getArticle, editArticle} from './other'
+
+          export const articleService = createService({
+            getArticle: createFunction(getArticle),
+            editArticle: createFunction(editArticle),
+          })
+        `,
+        }),
+      )
+
+      expect(parsedApp).toMatchObject({
+        services: [
+          expect.objectContaining({
+            name: "articleService",
+            errors: [
+              expect.objectContaining({
+                name: "ArticleError",
+              }),
+            ],
+          }),
+        ],
+      })
+    })
+    test("should parse errors within multiple files with the same name", () => {
+      const parsedApp = parseProgram(
+        createTestProgram({
+          otherOne: `
+            class ArticleError extends Error {
+            }
+
+            export function getArticle(): Promise<string> {
+              throw new ArticleError()
+            }
+          `,
+          otherTwo: `
+            class ArticleError extends Error {
+            }
+
+            export function editArticle(): Promise<string> {
+              throw new ArticleError()
+            }
+          `,
+          samen: `
+          import {getArticle} from './otherOne'
+          import {editArticle} from './otherTwo'
+
+          export const articleService = createService({
+            getArticle: createFunction(getArticle),
+            editArticle: createFunction(editArticle),
+          })
+        `,
+        }),
+      )
+
+      expect(parsedApp).toMatchObject({
+        services: [
+          expect.objectContaining({
+            name: "articleService",
+            errors: [
+              expect.objectContaining({
+                name: "ArticleError",
+                sourceFile: "otherOne.ts",
+              }),
+              expect.objectContaining({
+                name: "ArticleError",
+                sourceFile: "otherTwo.ts",
+              }),
+            ],
+          }),
+        ],
+      })
+    })
+    test("should recognize re-export of same error class", () => {
+      const parsedApp = parseProgram(
+        createTestProgram({
+          otherOne: `
+            export class ArticleError extends Error {
+            }
+
+            export function getArticle(): Promise<string> {
+              throw new ArticleError()
+            }
+          `,
+          otherTwo: `
+            import {ArticleError} from './otherOne'
+
+            export function editArticle(): Promise<string> {
+              throw new ArticleError()
+            }
+          `,
+          samen: `
+          import {getArticle} from './otherOne'
+          import {editArticle} from './otherTwo'
+
+          export const articleService = createService({
+            getArticle: createFunction(getArticle),
+            editArticle: createFunction(editArticle),
+          })
+        `,
+        }),
+      )
+
+      expect(parsedApp).toMatchObject({
+        services: [
+          expect.objectContaining({
+            name: "articleService",
+            errors: [
+              expect.objectContaining({
+                name: "ArticleError",
+                sourceFile: "otherOne.ts",
+              }),
+            ],
+          }),
+        ],
+      })
+    })
+  })
 })
