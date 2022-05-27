@@ -1,4 +1,6 @@
+import { samenHelp } from "@samen/dev"
+
 export default function help() {
-  console.error("not implemented yet")
-  process.exit(1)
+  console.log(samenHelp)
+  process.exit(0)
 }

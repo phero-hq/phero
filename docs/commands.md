@@ -11,7 +11,7 @@ The primary way to run Samen. It will inspect the current directory and do the m
 - When in a directory with multiple samen-projects, it will run the appropriate one of the above for each project.
 - When there's no samen-project found in the current directory, or in one of the direct child directories in it, it will prompt to initiate one for you (not implemented yet).
 
-When you're in need of any custom options, you cannot use this shortcut. Use one of the commands following commands instead.
+When you're in need of any custom options, you cannot use this shortcut. Use one of the following commands instead.
 
 ### `npx samen server init` (not implemented yet)
 

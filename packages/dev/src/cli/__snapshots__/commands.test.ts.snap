@@ -162,37 +162,26 @@ Object {
 
 exports[`parseSamenCommand client cmd:   'samen client watch --port 1234' 1`] = `
 Object {
-  "command": Object {
-    "name": "watch",
-    "port": 1234,
-    "server": Object {
-      "url": "http://localhost:3030",
-    },
-    "verbose": false,
-  },
+  "argv": Array [
+    "watch",
+    "--port",
+    "1234",
+  ],
   "name": "client",
-  "verbose": false,
 }
 `;
 
 exports[`parseSamenCommand client cmd:   'samen client watch' 1`] = `
 Object {
-  "command": Object {
-    "name": "watch",
-    "port": 4040,
-    "server": Object {
-      "url": "http://localhost:3030",
-    },
-    "verbose": false,
-  },
+  "argv": Array [
+    "watch",
+  ],
   "name": "client",
-  "verbose": false,
 }
 `;
 
 exports[`parseSamenCommand common cmd:   'samen --help' 1`] = `
 Object {
-  "command": undefined,
   "name": "help",
 }
 `;
@@ -205,7 +194,6 @@ Object {
 
 exports[`parseSamenCommand common cmd:   'samen -h' 1`] = `
 Object {
-  "command": undefined,
   "name": "help",
 }
 `;
@@ -225,25 +213,21 @@ Object {
 
 exports[`parseSamenCommand server cmd:   'samen server serve --port 1234' 1`] = `
 Object {
-  "command": Object {
-    "name": "serve",
-    "port": 1234,
-    "verbose": false,
-  },
+  "argv": Array [
+    "serve",
+    "--port",
+    "1234",
+  ],
   "name": "server",
-  "verbose": false,
 }
 `;
 
 exports[`parseSamenCommand server cmd:   'samen server serve' 1`] = `
 Object {
-  "command": Object {
-    "name": "serve",
-    "port": 3030,
-    "verbose": false,
-  },
+  "argv": Array [
+    "serve",
+  ],
   "name": "server",
-  "verbose": false,
 }
 `;
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { parseServerCommand } from "@samen/dev"
+import { parseServerCommand, ServerCommandName } from "@samen/dev"
 import build from "./commands/build"
 import help from "./commands/help"
 import serve from "./commands/serve"
@@ -9,20 +9,20 @@ import version from "./commands/version"
 const command = parseServerCommand(process.argv.slice(2))
 
 switch (command.name) {
-  case "version":
+  case ServerCommandName.Version:
     version()
     break
 
-  case "help":
-    help()
+  case ServerCommandName.Help:
+    help(command)
     break
 
-  case "serve": {
+  case ServerCommandName.Serve: {
     serve(command)
     break
   }
 
-  case "build": {
+  case ServerCommandName.Build: {
     build()
     break
   }

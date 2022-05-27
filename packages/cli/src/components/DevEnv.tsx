@@ -1,8 +1,10 @@
 import {
+  ClientCommandName,
   DEFAULT_CLIENT_PORT,
   DEFAULT_SERVER_PORT,
   DEFAULT_SERVER_URL,
   SamenCommandDevEnv,
+  ServerCommandName,
 } from "@samen/dev"
 import { Box, Text } from "ink"
 import React, { ErrorInfo, useCallback, useEffect, useState } from "react"
@@ -90,7 +92,7 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
                 <ClientProjectStatus
                   project={project}
                   command={{
-                    name: "watch",
+                    name: ClientCommandName.Watch,
                     port: DEFAULT_CLIENT_PORT + index,
                     server: { url: DEFAULT_SERVER_URL },
                     verbose: command.verbose,
@@ -101,7 +103,7 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
                 <ServerProjectStatus
                   project={project}
                   command={{
-                    name: "serve",
+                    name: ServerCommandName.Serve,
                     port: DEFAULT_SERVER_PORT,
                     verbose: command.verbose,
                   }}

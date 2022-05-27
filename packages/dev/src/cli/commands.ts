@@ -4,31 +4,58 @@ export const DEFAULT_SERVER_PORT = 3030
 export const DEFAULT_SERVER_URL = `http://localhost:${DEFAULT_SERVER_PORT}`
 export const DEFAULT_CLIENT_PORT = 4040
 
-// Common
-
-export type CommonCommand =
-  | { name: "help"; command?: string }
-  | { name: "version" }
-
 // Server
 
+export enum ServerCommandName {
+  Version = "version",
+  Help = "help",
+  Serve = "serve",
+  Build = "build",
+}
+
+export interface ServerCommandVersion {
+  name: ServerCommandName.Version
+}
+
+export interface ServerCommandHelp {
+  name: ServerCommandName.Help
+  command?: ServerCommandName
+}
+
 export interface ServerCommandServe {
-  name: "serve"
+  name: ServerCommandName.Serve
   verbose: boolean
   port: number
 }
 
 export interface ServerCommandBuild {
-  name: "build"
+  name: ServerCommandName.Build
   verbose: boolean
 }
 
 export type ServerCommand =
-  | CommonCommand
+  | ServerCommandVersion
+  | ServerCommandHelp
   | ServerCommandServe
   | ServerCommandBuild
 
 // Client
+
+export enum ClientCommandName {
+  Version = "version",
+  Help = "help",
+  Watch = "watch",
+  Build = "build",
+}
+
+export interface ClientCommandVersion {
+  name: ClientCommandName.Version
+}
+
+export interface ClientCommandHelp {
+  name: ClientCommandName.Help
+  command?: ClientCommandName
+}
 
 interface ClientServerLocationUrl {
   url: string
@@ -43,44 +70,60 @@ export type ClientServerLocation =
   | ClientServerLocationPath
 
 export interface ClientCommandWatch {
-  name: "watch"
+  name: ClientCommandName.Watch
   verbose: boolean
   port: number
   server: ClientServerLocationUrl
 }
 
 export interface ClientCommandBuild {
-  name: "build"
+  name: ClientCommandName.Build
   verbose: boolean
   server: ClientServerLocation
 }
 
 export type ClientCommand =
-  | CommonCommand
+  | ClientCommandVersion
+  | ClientCommandHelp
   | ClientCommandWatch
   | ClientCommandBuild
 
 // Samen
 
+export enum SamenCommandName {
+  Version = "version",
+  Help = "help",
+  Server = "server",
+  Client = "client",
+  DevEnv = "dev-env",
+}
+
+export interface SamenCommandVersion {
+  name: SamenCommandName.Version
+}
+
+export interface SamenCommandHelp {
+  name: SamenCommandName.Help
+}
+
 export interface SamenCommandServer {
-  name: "server"
-  verbose: boolean
-  command: ServerCommand
+  name: SamenCommandName.Server
+  argv: string[]
 }
 
 export interface SamenCommandClient {
-  name: "client"
-  verbose: boolean
-  command: ClientCommand
+  name: SamenCommandName.Client
+  argv: string[]
 }
 
 export interface SamenCommandDevEnv {
-  name: "dev-env"
+  name: SamenCommandName.DevEnv
   verbose: boolean
 }
 
 export type SamenCommand =
-  | CommonCommand
+  | SamenCommandVersion
+  | SamenCommandHelp
   | SamenCommandServer
   | SamenCommandClient
   | SamenCommandDevEnv
@@ -99,23 +142,23 @@ export function parseServerCommand(argv: string[]): ServerCommand {
     { argv },
   )
 
-  const name = args["_"][0]
+  const name = args["_"][0] as ServerCommandName
   const verbose = !!args["--verbose"]
 
   if (args["--help"]) {
-    return { name: "help", command: name }
+    return { name: ServerCommandName.Help, command: name }
   }
 
   if (args["--version"]) {
-    return { name: "version" }
+    return { name: ServerCommandName.Version }
   }
 
   switch (name) {
-    case "serve":
+    case ServerCommandName.Serve:
       const port = args["--port"] ?? DEFAULT_SERVER_PORT
       return { name, verbose, port }
 
-    case "build":
+    case ServerCommandName.Build:
       return { name, verbose }
 
     default:
@@ -137,20 +180,20 @@ export function parseClientCommand(argv: string[]): ClientCommand {
     { argv },
   )
 
-  const name = args["_"][0]
+  const name = args["_"][0] as ClientCommandName
   const location = args["_"][1] // TODO: Is there a better way?
   const verbose = !!args["--verbose"]
 
   if (args["--help"]) {
-    return { name: "help", command: name }
+    return { name: ClientCommandName.Help, command: name }
   }
 
   if (args["--version"]) {
-    return { name: "version" }
+    return { name: ClientCommandName.Version }
   }
 
   switch (name) {
-    case "watch":
+    case ClientCommandName.Watch:
       const port = args["--port"] ?? DEFAULT_CLIENT_PORT
 
       if (!location) {
@@ -161,7 +204,7 @@ export function parseClientCommand(argv: string[]): ClientCommand {
         throw new Error("Watching based on file path is not supported ")
       }
 
-    case "build":
+    case ClientCommandName.Build:
       if (!location) {
         return { name, verbose, server: { url: DEFAULT_SERVER_URL } }
       } else if (location.startsWith("http")) {
@@ -187,39 +230,27 @@ export function parseSamenCommand(argv: string[]): SamenCommand {
     { argv, permissive: true },
   )
 
-  const name = args["_"][0]
+  const name = args["_"][0] as SamenCommandName
   const verbose = !!args["--verbose"]
 
+  if (name === SamenCommandName.Client || name === SamenCommandName.Server) {
+    return { name, argv: argv.slice(1) }
+  }
+
   if (args["--help"]) {
-    return { name: "help", command: name }
+    return { name: SamenCommandName.Help }
   }
 
   if (args["--version"]) {
-    return { name: "version" }
+    return { name: SamenCommandName.Version }
   }
 
-  switch (name) {
-    case undefined:
-      return {
-        name: "dev-env",
-        verbose,
-      }
-
-    case "client":
-      return {
-        name: "client",
-        verbose,
-        command: parseClientCommand(argv.slice(1)),
-      }
-
-    case "server":
-      return {
-        name: "server",
-        verbose,
-        command: parseServerCommand(argv.slice(1)),
-      }
-
-    default:
-      throw new Error(`unknown samen command: ${name}`)
+  if (name === undefined) {
+    return {
+      name: SamenCommandName.DevEnv,
+      verbose,
+    }
+  } else {
+    throw new Error(`unknown samen command: ${name}`)
   }
 }
