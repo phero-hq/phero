@@ -12,7 +12,8 @@
     "clean": "rm -rf dist && rm -rf generated",
     "build": "tsc",
     "test": "jest src",
-    "prepublish": "npm run clean && npm run build"
+    "prepublish": "npm run clean && npm run build",
+    "postbuild": "cp package.json ./dist/package.json"
   },
   "dependencies": {
     "@samen/core": "^0.8.0-alpha.6",

@@ -1,18 +1,17 @@
-import { BuildClientCommand, ClientCommand } from "@samen/dev"
 import {
   getDeclarationForVersion,
   parseAppDeclarationFileContent,
 } from "@samen/core"
+import { ClientCommandBuild, ClientServerLocation } from "@samen/dev"
 import { promises as fs } from "fs"
 import http from "http"
 import https from "https"
 import path from "path"
-
 import generateClientSource from "../code-gen/generateClientSource"
 import writeClientSource from "./writeClientSource"
 
 export default async function buildClient(
-  server: ClientCommand["server"],
+  server: ClientServerLocation,
 ): Promise<void> {
   const manifest = await getManifestSource(server)
   const declaration = parseAppDeclarationFileContent(manifest)
@@ -28,7 +27,7 @@ export default async function buildClient(
 }
 
 async function getManifestSource(
-  server: BuildClientCommand["server"],
+  server: ClientCommandBuild["server"],
 ): Promise<string> {
   if ("path" in server) {
     return getManifestFromPath(server.path)

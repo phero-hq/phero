@@ -12,7 +12,7 @@ export function spawnClientWatch(
   onEvent: (event: ClientDevEvent) => void,
   debug: boolean,
 ) {
-  const port = 4040
+  const port = 3030
   const cwd = path.resolve(projectPath)
   let hasBeenConnected = false
 
@@ -39,7 +39,7 @@ export function spawnClientWatch(
 
   const proc = spawn(
     "./node_modules/.bin/samen-client",
-    ["watch", "--quiet", "--port", `${port}`],
+    ["watch", "--port", `${port}`],
     { cwd },
   )
     .on("close", (code) => {
@@ -96,7 +96,7 @@ export function spawnServerWatch(
 
   const proc = spawn(
     "./node_modules/.bin/samen-server",
-    ["serve", "--quiet", "--port", `${port}`],
+    ["serve", "--port", `${port}`],
     { cwd },
   )
   // This doesn't seem to do anything, and we probably won't need it (events come in through the listener)

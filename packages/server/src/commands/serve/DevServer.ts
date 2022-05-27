@@ -1,4 +1,4 @@
-import { ServerDevEventEmitter, ServeServerCommand } from "@samen/dev"
+import { ServerDevEventEmitter, ServerCommandServe } from "@samen/dev"
 import {
   generateAppDeclarationFile,
   generateRPCProxy,
@@ -29,7 +29,7 @@ interface RPCRoutes {
 export default class DevServer {
   private readonly server: http.Server
   private readonly program: WatchProgram
-  private readonly command: ServeServerCommand
+  private readonly command: ServerCommandServe
   private readonly projectPath: string
   private readonly eventEmitter: ServerDevEventEmitter
 
@@ -37,7 +37,7 @@ export default class DevServer {
   private currentClientCodeHash = ""
   private clients: http.ServerResponse[] = []
 
-  constructor(command: ServeServerCommand, projectPath: string) {
+  constructor(command: ServerCommandServe, projectPath: string) {
     this.command = command
     this.projectPath = projectPath
     this.eventEmitter = new ServerDevEventEmitter()
@@ -173,6 +173,7 @@ export default class DevServer {
                 type: "RPC_FAILED",
                 url: req.url,
                 status: res.statusCode,
+                message: JSON.stringify(rpcResult.errors),
               })
             } else if (rpcResult.status === 500) {
               res.write(JSON.stringify(rpcResult.error))
@@ -181,6 +182,7 @@ export default class DevServer {
                 type: "RPC_FAILED",
                 url: req.url,
                 status: res.statusCode,
+                message: rpcResult.error,
               })
             } else {
               throw new Error("Unsupported http status")
@@ -194,6 +196,7 @@ export default class DevServer {
               type: "RPC_FAILED",
               url: req.url,
               status: 500,
+              message: JSON.stringify({ error: e.message }),
             })
           } finally {
             res.end()
@@ -206,6 +209,12 @@ export default class DevServer {
     res.statusCode = 404
     res.write(`{ "error": "RPC not found" }`)
     res.end()
+    this.eventEmitter.emit({
+      type: "RPC_FAILED",
+      url: req.url,
+      status: 404,
+      message: "RPC not found",
+    })
   }
 
   private generateRoutes(app: ParsedSamenApp): RPCRoutes {

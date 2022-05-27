@@ -1,50 +1,141 @@
-# CLI commands
+# Commands
 
-In order to build, run and deploy samen servers and clients, the package is also a CLI. The following commands can be run:
+In most cases, you will control Samen by running `npx samen`, or some variant of it. If you need to digg down to the details (or you're just curious), take a look at the [internal commands](#Internal-commands) for more information.
 
-## install
+## `npx samen`
 
-`$ npx samen install`
+The primary way to run Samen. It will inspect the current directory and do the most appropriate thing possible:
 
-This command will add samen as a dev dep to your package and install it automatically. Besides one script will be added to your package json:
+- When in a directory where `@samen/server` is installed, it will run the equivalent of `npx samen server serve`.
+- When in a directory where `@samen/client` is installed, it will run the equivalent of `npx samen client watch`.
+- When in a directory with multiple samen-projects, it will run the appropriate one of the above for each project.
+- When there's no samen-project found in the current directory, or in one of the direct child directories in it, it will prompt to initiate one for you (not implemented yet).
 
-`"samen": "samen"`
+When you're in need of any custom options, you cannot use this shortcut. Use one of the following commands instead.
 
-Which makes sure the user can then run `npm run samen command`.
-It will also create an empty `samen.ts` file in users project and create all necessary config files (if any).
+### `npx samen server init` (not implemented yet)
 
-## build
+This does a couple of things, to make your server-project ready to go:
 
-The build command will first compile the TypeScript project. If it's compiling it will look up the `samen.ts` file and generate a file called `samen-manifest.yaml`. This file describes all API endpoints including the parameters but also the return values. It's like a blueprint, or "contract" of the API.
+- Installs the `@samen/server` package.
+- Creates an example of a samen-file at `src/samen.ts`.
 
-## serve
+### `npx samen server build`
 
-Serve will internally first call the `build` command. Eventually the serve command will read the generated `samen-manifest.yaml` and will generate all necessary code to run a server based on the described contract.
+Takes a samen-file, parses it and generates a manifest and the RPC's for it. Assumes a samen-file at `src/samen.ts`.
 
-## serve watch
+### `npx samen server serve [options]`
 
-The serve watch command is like the scribed serve command except that it wil generate and pick up changes to the codebase and manifest instantly.
+Watches changes in the samen-file and runs `build` when it does. Also connects to client-watch processes and serves RPC's.
 
-## deploy
+#### Options
 
-The deploy command will first build all code into separate JavaScript bundles. Next it will deploy the code to the configured deployment target(s).
-The deploy command has no knowledge about versions or backwards compatiblity.
+- `-p, --port`: Specify a custom port for the server to be running on. Defaults to `3030`.
 
-## publish (Payed feature)
+### `npx samen client init` (not implemented yet)
 
-The publish command is a payed feature. When the user is not logged in it will ask the user to log in.
+This does a couple of things, to add Samen to your client-project:
 
-The publish command will upload the manifest to the samen.cloud business, and make it a version. A version desribes the contracts of a specific moment in time. With making it possilbe to have differente versions of a manifest, one can also deploy versions of the API concurrently next to each other.
+- Installs the `@samen/client` package.
+- Creates an example of a client at `src/samen.ts`.
 
-When an backwards incompatible change was made to the API since the last version, the user will get a few choices:
+### `npx samen client build [server-location] [options]`
 
-1. implement generated mappers (from the new version to the old, and vice versa).
-2. be aware of an incompatbible change, revert/fixthe code
+Takes the manifest from a server and generates a client for it. The server can be located by a couple of ways:
 
-## build client
+- By the file location of the server: `npx samen client build ../api`
+- By the URL of the server: `npx samen client build http://localhost:8000`.
+- By leaving out the location of the server, assuming a server is running at `http://localhost:3030`.
 
-Builds a client based on the manifest of the project. This manifest can be stored on:
+> Make sure you're not targeting the manifest-file itself, but the server instead. This way the location of the manifest-file could be modified by the server, without affecting configuration in the client.
 
-- the file system (file://)
-- some file storage service (AWS S3 or Google Cloud Object Storage) (s3/some path/dsm/v5.0.31)
-- the samen server (http://samen.cloud/dsm/v5.0.31)
+### `npx samen client watch [server-location] [options]`
+
+Connects to a dev-server and runs `build` as soon as the manifest changes. The location of the server works similar to `npx samen client build`, with the exception that pointing to a server by file location is not supported. In other words, you can watch a server in these ways:
+
+- By the URL of the server: `npx samen client watch http://localhost:8000`.
+- By leaving out the location of the server, assuming a server is running at `http://localhost:3030`.
+
+#### Options
+
+- `-p, --port`: Specify a custom port for the client-watch-server to be running on. When you've got multiple clients watching a server at the same time, give each client its own port. Defaults to `4040`.
+
+## Internal commands
+
+`npx samen` is a UI layer that redirects the commands to the `samen-server` or `samen-client` executables, provided by the `@samen/server` and `@samen/client` packages. It shouldn't be required to know this, but you can use these executables by their own as well:
+
+### `samen-server`
+
+```
+samen-server --version
+
+  Version of @samen/server
+
+samen-server --help
+
+  Displays this message
+
+samen-server init
+
+  Installs the `@samen/server` package in the current directory and creates an example of a samen-file at `src/samen.ts`.
+
+samen-server build
+
+  Takes a samen-file, parses it and generates a manifest and the RPC's for it. Assumes a samen-file at `src/samen.ts`.
+
+samen-server serve [options]
+
+  Watches changes in the samen-file and runs `build` when it does. Also emits events for client-watch-processes and serves RPC's.
+
+  OPTIONS
+
+    -p, --port    3030     Specify a custom port for the server to be running on.
+
+    --quiet       false    Don't emit any output, used by `npx samen` which listens to the emitted events instead.
+
+    --debug       false    Output more information to debug a problem
+```
+
+### `samen-client`
+
+```
+samen-client --version
+
+  Version of @samen/client
+
+samen-client --help
+
+  Displays this message
+
+samen-client init
+
+  Installs the `@samen/client` package in the current directory and creates an example of a client at `src/samen.ts`.
+
+samen-client build [server-location] [options]
+
+  Takes the manifest from a server and generates a client for it. The server can be located by:
+
+    - File location     samen-client build ../api
+    - URL               samen-client build http://localhost:8000
+
+  The default location of a server is http://localhost:3030.
+
+samen-client watch [server-location] [options]
+
+  Connects to a dev-server and runs `build` as soon as the manifest changes. The server can be located by:
+
+    - URL               samen-client build http://localhost:8000
+
+  The default location of a server is http://localhost:3030.
+
+  OPTIONS
+
+    -p, --port    4040     Specify a custom port for the client-watch-server to be running on.
+                           When you've got multiple clients watching a server at the same time,
+                           give each client its own port.
+
+    --quiet       false    Don't emit any output, used by `npx samen` which listens to the emitted
+                           events instead.
+
+    --debug       false    Output more information to debug a problem
+```

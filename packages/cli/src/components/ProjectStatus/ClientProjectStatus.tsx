@@ -1,83 +1,102 @@
-import { ClientDevEvent } from "@samen/dev"
+import { ClientCommandWatch, ClientDevEvent } from "@samen/dev"
 import { Box, Text } from "ink"
+import Spinner from "ink-spinner"
 import { useCallback, useEffect, useState } from "react"
-import { useCommand } from "../../context/CommandContext"
 import { ClientProject } from "../../utils/getProjects"
 import { spawnClientWatch } from "../../utils/processes"
-import ProjectStatusEventList, { StyledEvent } from "./ProjectStatusEventList"
+import { StyledEvent } from "./ProjectStatusEventList"
 
 export default function ClientProjectStatus({
   project,
+  command,
 }: {
   project: ClientProject
+  command: ClientCommandWatch
 }) {
-  const [events, setEvents] = useState<StyledEvent[]>([
-    ["default", "Initializing..."],
-  ])
-  const command = useCommand()
-
-  const addEvent = useCallback((addedEvent: StyledEvent) => {
-    setEvents((oldEvents) => [...oldEvents, addedEvent])
-  }, [])
+  const [event, setEvent] = useState<StyledEvent>(["busy", "Initializing..."])
 
   const onEvent = useCallback((event: ClientDevEvent) => {
-    if (command.debug) {
+    if (command.verbose) {
       console.log("client", event)
     }
 
     switch (event.type) {
       case "LISTENER_CONNECTED":
-        addEvent(["default", "Listening for events..."])
+        setEvent(["default", "Waiting for changes"])
         break
 
       case "WATCH_INIT":
-        addEvent(["default", "Initializing client watch server..."])
+        setEvent(["default", "Initializing client watch server..."])
         break
 
       case "WATCH_READY":
-        // addEvent(["default", "Client watch server ready."])
+        setEvent(["default", "Waiting for changes"])
         break
 
       case "SERVER_CONNECTED":
-        // addEvent(["default", "Connected to server, watching for changes..."])
+        setEvent(["default", "Waiting for changes"])
         break
 
       case "SERVER_DISCONNECTED":
-        addEvent(["error", "Disconnected from server!"])
+        setEvent(["error", "Disconnected from server. Is it still running?"])
         break
 
       case "SERVER_NOT_FOUND":
-        addEvent(["error", "Could not find server!"])
+        setEvent(["error", "Could not find any samen server to connect too."])
         break
 
       case "BUILD_START":
-        addEvent(["default", "Building client..."])
+        setEvent(["busy", "Building client..."])
         break
 
       case "BUILD_SUCCESS":
-        addEvent(["default", "Client is ready."])
+        setEvent(["default", "Waiting for changes"])
         break
 
       case "BUILD_FAILED":
-        addEvent(["error", "Build failed!"])
+        setEvent(["error", `Could not build client: ${event.error}`])
         break
 
       default:
-        if (command.debug) {
+        if (command.verbose) {
           console.log("unhandled client event: ", event)
         }
     }
   }, [])
 
   useEffect(() => {
-    const kill = spawnClientWatch(project.path, onEvent, command.debug)
+    const kill = spawnClientWatch(project.path, onEvent, command.verbose)
     return () => kill()
   }, [])
 
   return (
-    <Box flexDirection="column" flexGrow={1}>
+    <Box flexDirection="column" flexGrow={0} flexShrink={0}>
       <Text>samen-client @ {project.path}</Text>
-      <ProjectStatusEventList events={events} />
+
+      <Box marginTop={1} marginBottom={1}>
+        {event[0] === "busy" && (
+          <Text>
+            <Text color="yellow">
+              <Spinner type="triangle" />
+            </Text>
+            {` ${event[1]}`}
+          </Text>
+        )}
+
+        {event[0] === "default" && (
+          <Text>
+            <Text color="green">✓</Text>
+            {` ${event[1]}`}
+          </Text>
+        )}
+
+        {event[0] === "error" && (
+          <Text>
+            <Text color="red">✖</Text>
+            {` ${event[1]}`}
+          </Text>
+        )}
+      </Box>
     </Box>
   )
 }

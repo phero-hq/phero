@@ -1,0 +1,340 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parseClientCommand build cmd:   'samen-client build --help' 1`] = `
+Object {
+  "command": "build",
+  "name": "help",
+}
+`;
+
+exports[`parseClientCommand build cmd:   'samen-client build --verbose' 1`] = `
+Object {
+  "name": "build",
+  "server": Object {
+    "url": "http://localhost:3030",
+  },
+  "verbose": true,
+}
+`;
+
+exports[`parseClientCommand build cmd:   'samen-client build -h' 1`] = `
+Object {
+  "command": "build",
+  "name": "help",
+}
+`;
+
+exports[`parseClientCommand build cmd:   'samen-client build http://localhost:1234 --verbose' 1`] = `
+Object {
+  "name": "build",
+  "server": Object {
+    "url": "http://localhost:1234",
+  },
+  "verbose": true,
+}
+`;
+
+exports[`parseClientCommand build cmd:   'samen-client build http://localhost:1234' 1`] = `
+Object {
+  "name": "build",
+  "server": Object {
+    "url": "http://localhost:1234",
+  },
+  "verbose": false,
+}
+`;
+
+exports[`parseClientCommand build cmd:   'samen-client build' 1`] = `
+Object {
+  "name": "build",
+  "server": Object {
+    "url": "http://localhost:3030",
+  },
+  "verbose": false,
+}
+`;
+
+exports[`parseClientCommand common cmd:   'samen-client --help' 1`] = `
+Object {
+  "command": undefined,
+  "name": "help",
+}
+`;
+
+exports[`parseClientCommand common cmd:   'samen-client --version' 1`] = `
+Object {
+  "name": "version",
+}
+`;
+
+exports[`parseClientCommand common cmd:   'samen-client -h' 1`] = `
+Object {
+  "command": undefined,
+  "name": "help",
+}
+`;
+
+exports[`parseClientCommand common cmd:   'samen-client -v' 1`] = `
+Object {
+  "name": "version",
+}
+`;
+
+exports[`parseClientCommand watch cmd:   'samen-client watch --help' 1`] = `
+Object {
+  "command": "watch",
+  "name": "help",
+}
+`;
+
+exports[`parseClientCommand watch cmd:   'samen-client watch --port 1234' 1`] = `
+Object {
+  "name": "watch",
+  "port": 1234,
+  "server": Object {
+    "url": "http://localhost:3030",
+  },
+  "verbose": false,
+}
+`;
+
+exports[`parseClientCommand watch cmd:   'samen-client watch --verbose' 1`] = `
+Object {
+  "name": "watch",
+  "port": 4040,
+  "server": Object {
+    "url": "http://localhost:3030",
+  },
+  "verbose": true,
+}
+`;
+
+exports[`parseClientCommand watch cmd:   'samen-client watch -h' 1`] = `
+Object {
+  "command": "watch",
+  "name": "help",
+}
+`;
+
+exports[`parseClientCommand watch cmd:   'samen-client watch -p 1234' 1`] = `
+Object {
+  "name": "watch",
+  "port": 1234,
+  "server": Object {
+    "url": "http://localhost:3030",
+  },
+  "verbose": false,
+}
+`;
+
+exports[`parseClientCommand watch cmd:   'samen-client watch http://localhost:1234 --verbose --port 4321' 1`] = `
+Object {
+  "name": "watch",
+  "port": 4321,
+  "server": Object {
+    "url": "http://localhost:1234",
+  },
+  "verbose": true,
+}
+`;
+
+exports[`parseClientCommand watch cmd:   'samen-client watch http://localhost:1234' 1`] = `
+Object {
+  "name": "watch",
+  "port": 4040,
+  "server": Object {
+    "url": "http://localhost:1234",
+  },
+  "verbose": false,
+}
+`;
+
+exports[`parseClientCommand watch cmd:   'samen-client watch' 1`] = `
+Object {
+  "name": "watch",
+  "port": 4040,
+  "server": Object {
+    "url": "http://localhost:3030",
+  },
+  "verbose": false,
+}
+`;
+
+exports[`parseSamenCommand client cmd:   'samen client watch --port 1234' 1`] = `
+Object {
+  "argv": Array [
+    "watch",
+    "--port",
+    "1234",
+  ],
+  "name": "client",
+}
+`;
+
+exports[`parseSamenCommand client cmd:   'samen client watch' 1`] = `
+Object {
+  "argv": Array [
+    "watch",
+  ],
+  "name": "client",
+}
+`;
+
+exports[`parseSamenCommand common cmd:   'samen --help' 1`] = `
+Object {
+  "name": "help",
+}
+`;
+
+exports[`parseSamenCommand common cmd:   'samen --version' 1`] = `
+Object {
+  "name": "version",
+}
+`;
+
+exports[`parseSamenCommand common cmd:   'samen -h' 1`] = `
+Object {
+  "name": "help",
+}
+`;
+
+exports[`parseSamenCommand common cmd:   'samen -v' 1`] = `
+Object {
+  "name": "version",
+}
+`;
+
+exports[`parseSamenCommand dev-env cmd:   'samen' 1`] = `
+Object {
+  "name": "dev-env",
+  "verbose": false,
+}
+`;
+
+exports[`parseSamenCommand server cmd:   'samen server serve --port 1234' 1`] = `
+Object {
+  "argv": Array [
+    "serve",
+    "--port",
+    "1234",
+  ],
+  "name": "server",
+}
+`;
+
+exports[`parseSamenCommand server cmd:   'samen server serve' 1`] = `
+Object {
+  "argv": Array [
+    "serve",
+  ],
+  "name": "server",
+}
+`;
+
+exports[`parseServerCommand build cmd:   'samen-server build --help' 1`] = `
+Object {
+  "command": "build",
+  "name": "help",
+}
+`;
+
+exports[`parseServerCommand build cmd:   'samen-server build --verbose' 1`] = `
+Object {
+  "name": "build",
+  "verbose": true,
+}
+`;
+
+exports[`parseServerCommand build cmd:   'samen-server build -h' 1`] = `
+Object {
+  "command": "build",
+  "name": "help",
+}
+`;
+
+exports[`parseServerCommand build cmd:   'samen-server build' 1`] = `
+Object {
+  "name": "build",
+  "verbose": false,
+}
+`;
+
+exports[`parseServerCommand common cmd:   'samen-server --help' 1`] = `
+Object {
+  "command": undefined,
+  "name": "help",
+}
+`;
+
+exports[`parseServerCommand common cmd:   'samen-server --version' 1`] = `
+Object {
+  "name": "version",
+}
+`;
+
+exports[`parseServerCommand common cmd:   'samen-server -h' 1`] = `
+Object {
+  "command": undefined,
+  "name": "help",
+}
+`;
+
+exports[`parseServerCommand common cmd:   'samen-server -v' 1`] = `
+Object {
+  "name": "version",
+}
+`;
+
+exports[`parseServerCommand serve cmd:   'samen-server serve --help' 1`] = `
+Object {
+  "command": "serve",
+  "name": "help",
+}
+`;
+
+exports[`parseServerCommand serve cmd:   'samen-server serve --port 1234' 1`] = `
+Object {
+  "name": "serve",
+  "port": 1234,
+  "verbose": false,
+}
+`;
+
+exports[`parseServerCommand serve cmd:   'samen-server serve --verbose' 1`] = `
+Object {
+  "name": "serve",
+  "port": 3030,
+  "verbose": true,
+}
+`;
+
+exports[`parseServerCommand serve cmd:   'samen-server serve -h' 1`] = `
+Object {
+  "command": "serve",
+  "name": "help",
+}
+`;
+
+exports[`parseServerCommand serve cmd:   'samen-server serve -p 1234 --verbose' 1`] = `
+Object {
+  "name": "serve",
+  "port": 1234,
+  "verbose": true,
+}
+`;
+
+exports[`parseServerCommand serve cmd:   'samen-server serve -p 1234' 1`] = `
+Object {
+  "name": "serve",
+  "port": 1234,
+  "verbose": false,
+}
+`;
+
+exports[`parseServerCommand serve cmd:   'samen-server serve' 1`] = `
+Object {
+  "name": "serve",
+  "port": 3030,
+  "verbose": false,
+}
+`;

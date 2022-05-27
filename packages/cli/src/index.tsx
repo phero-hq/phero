@@ -1,19 +1,31 @@
 #!/usr/bin/env node
 
-import { parseSamenCommand } from "@samen/dev"
-import { render } from "ink"
-import React from "react"
-import App from "./components/App"
+import { parseSamenCommand, SamenCommandName } from "@samen/dev"
+import devEnv from "./commands/dev-env"
+import help from "./commands/help"
+import redirect from "./commands/redirect"
+import version from "./commands/version"
 
 const command = parseSamenCommand(process.argv.slice(2))
 
-process.on("unhandledRejection", (error) => {
-  if (command.debug) {
-    console.error(error)
-  } else {
-    console.error("Something went wrong, try again.")
-  }
-  process.exit(1)
-})
+switch (command.name) {
+  case SamenCommandName.Version:
+    version()
+    break
 
-render(React.createElement(App, command))
+  case SamenCommandName.Help:
+    help()
+    break
+
+  case SamenCommandName.DevEnv:
+    devEnv(command)
+    break
+
+  case SamenCommandName.Client:
+    redirect("./node_modules/.bin/samen-client", command.argv)
+    break
+
+  case SamenCommandName.Server:
+    redirect("./node_modules/.bin/samen-server", command.argv)
+    break
+}

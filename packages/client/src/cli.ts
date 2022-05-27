@@ -1,36 +1,29 @@
 #!/usr/bin/env node
 
-import { addDevEventListener, parseClientCommand } from "@samen/dev"
-import ClientWatchServer from "./ClientWatchServer"
-import buildClient from "./utils/buildClient"
+import { ClientCommandName, parseClientCommand } from "@samen/dev"
+import build from "./commands/build"
+import help from "./commands/help"
+import version from "./commands/version"
+import watch from "./commands/watch"
 
 const command = parseClientCommand(process.argv.slice(2))
 
 switch (command.name) {
-  case "watch": {
-    if (!command.quiet) {
-      addDevEventListener(
-        `http://localhost:${command.port}`,
-        console.log,
-        console.log,
-      )
-    }
-    const watchServer = new ClientWatchServer(command)
+  case ClientCommandName.Version:
+    version()
+    break
+
+  case ClientCommandName.Help:
+    help(command)
+    break
+
+  case ClientCommandName.Watch: {
+    watch(command)
     break
   }
 
-  case "build": {
-    if ("path" in command.server) {
-      console.log(`Building client from server at: ${command.server.path}`)
-    } else if ("url" in command.server) {
-      console.log(`Building client from server at: ${command.server.url}`)
-    } else {
-      throw new Error("unexpected server config")
-    }
-
-    buildClient(command.server)
-      .then(() => console.log("Client is ready"))
-      .catch(console.error)
+  case ClientCommandName.Build: {
+    build(command)
     break
   }
 }
