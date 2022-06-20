@@ -117,7 +117,7 @@ export default function ServerProjectStatus({
   }, [])
 
   useEffect(() => {
-    const kill = spawnServerWatch(project.path, onEvent, command.verbose)
+    const kill = spawnServerWatch(project.path, onEvent, command)
     return () => kill()
   }, [])
 

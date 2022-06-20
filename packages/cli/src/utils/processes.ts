@@ -5,6 +5,8 @@ import {
   DevEventListenerConnectionStatus,
   ServerDevEvent,
   DEFAULT_SERVER_PORT,
+  ClientCommandWatch,
+  ServerCommandServe,
 } from "@samen/dev"
 import { spawn } from "child_process"
 import path from "path"
@@ -17,26 +19,25 @@ function fatalError(message: string) {
 export function spawnClientWatch(
   projectPath: string,
   onEvent: (event: ClientDevEvent) => void,
-  debug: boolean,
+  command: ClientCommandWatch,
 ) {
-  const port = DEFAULT_CLIENT_PORT // TODO: auto increment
   const cwd = path.resolve(projectPath)
 
   function onChangeConnectionStatus(status: DevEventListenerConnectionStatus) {
-    if (debug) {
+    if (command.verbose) {
       console.log({ status })
     }
   }
 
   const removeEventListener = addDevEventListener(
-    `http://localhost:${port}`,
+    `http://localhost:${command.port}`,
     onEvent,
     onChangeConnectionStatus,
   )
 
   const proc = spawn(
     "./node_modules/.bin/samen-client",
-    ["watch", "--port", `${port}`],
+    ["watch", "--port", `${command.port}`],
     { cwd },
   )
     .on("close", (code) => {
@@ -61,26 +62,25 @@ export function spawnClientWatch(
 export function spawnServerWatch(
   projectPath: string,
   onEvent: (event: ServerDevEvent) => void,
-  debug: boolean,
+  command: ServerCommandServe,
 ) {
-  const port = DEFAULT_SERVER_PORT
   const cwd = path.resolve(projectPath)
 
   function onChangeConnectionStatus(status: DevEventListenerConnectionStatus) {
-    if (debug) {
+    if (command.verbose) {
       console.log({ status })
     }
   }
 
   const removeEventListener = addDevEventListener(
-    `http://localhost:${port}`,
+    `http://localhost:${command.port}`,
     onEvent,
     onChangeConnectionStatus,
   )
 
   const proc = spawn(
     "./node_modules/.bin/samen-server",
-    ["serve", "--port", `${port}`],
+    ["serve", "--port", `${command.port}`],
     { cwd },
   )
     .on("close", (code) => {

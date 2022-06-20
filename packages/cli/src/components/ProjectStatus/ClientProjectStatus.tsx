@@ -65,7 +65,7 @@ export default function ClientProjectStatus({
   }, [])
 
   useEffect(() => {
-    const kill = spawnClientWatch(project.path, onEvent, command.verbose)
+    const kill = spawnClientWatch(project.path, onEvent, command)
     return () => kill()
   }, [])
 
