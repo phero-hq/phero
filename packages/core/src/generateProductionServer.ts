@@ -55,7 +55,7 @@ export default function generateProductionServer(
   )
 
   tsNodes.push(generateRequestListener(app))
-  tsNodes.push(generatCreateAndStartServer(), generateHelperFucntions())
+  tsNodes.push(generateCreateAndStartServer(), generateHelperFucntions())
 
   const printer = ts.createPrinter({
     newLine: ts.NewLineKind.LineFeed,
@@ -103,7 +103,7 @@ function generateIdentifierForRPCFunction(
   return factory.createIdentifier(`rpc_executor_${serviceName}__${funcName}`)
 }
 
-function generatCreateAndStartServer(): ts.Node {
+function generateCreateAndStartServer(): ts.Node {
   return tsx.verbatim(`
       const PORT = process.env.PORT ?? 2222
 
