@@ -5,11 +5,7 @@ import generateParserModel from "./code-gen/parsers/generateParserModel"
 import { ParseError } from "./errors"
 import { ParsedError } from "./extractErrors/parseThrowStatement"
 import { getReturnType } from "./extractFunctionFromServiceProperty"
-import {
-  Model,
-  ParsedSamenFunctionDefinition,
-  ParsedSamenServiceConfig,
-} from "./parseSamenApp"
+import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
 import {
   getNameAsString,
   isExternalType,
