@@ -84,9 +84,8 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
               flexGrow={project.type === "server" ? 1 : undefined}
               flexBasis={project.type === "server" ? "100%" : undefined}
               paddingY={1}
-              paddingX={2}
-              borderStyle="round"
-              borderColor="blue"
+              paddingLeft={1}
+              paddingRight={4}
             >
               {project.type === "client" && (
                 <ClientProjectStatus
