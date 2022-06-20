@@ -126,6 +126,8 @@ export default class DevServer {
     res.setHeader("Access-Control-Allow-Methods", "POST")
     res.setHeader("Access-Control-Allow-Headers", "content-type, authorization")
 
+    const startTime = Date.now()
+
     if (req.method === "OPTIONS") {
       res.statusCode = 200
       res.end()
@@ -166,6 +168,7 @@ export default class DevServer {
                 type: "RPC_SUCCESS",
                 url: req.url,
                 status: res.statusCode,
+                ms: Date.now() - startTime,
               })
             } else if (rpcResult.status === 400) {
               res.write(JSON.stringify(rpcResult.errors, null, 4))
@@ -174,6 +177,7 @@ export default class DevServer {
                 url: req.url,
                 status: res.statusCode,
                 message: JSON.stringify(rpcResult.errors),
+                ms: Date.now() - startTime,
               })
             } else if (rpcResult.status === 500) {
               res.write(JSON.stringify(rpcResult.error))
@@ -183,6 +187,7 @@ export default class DevServer {
                 url: req.url,
                 status: res.statusCode,
                 message: rpcResult.error,
+                ms: Date.now() - startTime,
               })
             } else {
               throw new Error("Unsupported http status")
@@ -197,6 +202,7 @@ export default class DevServer {
               url: req.url,
               status: 500,
               message: JSON.stringify({ error: e.message }),
+              ms: Date.now() - startTime,
             })
           } finally {
             res.end()
@@ -214,6 +220,7 @@ export default class DevServer {
       url: req.url,
       status: 404,
       message: "RPC not found",
+      ms: Date.now() - startTime,
     })
   }
 

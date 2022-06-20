@@ -47,6 +47,7 @@ export class BaseSamenClient {
         body: JSON.stringify(body),
       })
     } catch (err) {
+      console.error(err)
       throw new NetworkError()
     }
 
@@ -82,6 +83,7 @@ export class BaseSamenClient {
         body: JSON.stringify(body),
       })
     } catch (err) {
+      console.error(err)
       throw new NetworkError()
     }
 

@@ -92,20 +92,17 @@ export default function ServerProjectStatus({
         break
 
       case "RPC_START":
-        addEvent(["default", `Handling call to RPC: ${event.url}...`])
+        addEvent(["default", `${event.url}...`])
         break
 
       case "RPC_SUCCESS":
-        addEvent([
-          "default",
-          `Handled call to RPC: {lastEvent.url}: {lastEvent.status}`,
-        ])
+        addEvent(["default", `${event.url} (${event.ms}ms)`])
         break
 
       case "RPC_FAILED":
         addEvent([
           "error",
-          `Failed to handle call to RPC:\n  ${event.url}\n  ${event.status}: ${event.message}`,
+          `${event.url} (${event.ms}ms)\n  ${event.status}: ${event.message}`,
         ])
         break
 

@@ -32,7 +32,9 @@ export default async function getProjects(): Promise<Project[]> {
     }
   }
 
-  return projects.filter((p): p is Project => !!p)
+  return projects
+    .filter((p): p is Project => !!p)
+    .sort((a, b) => (a.type === "client" ? -1 : 1))
 }
 
 async function getProject(filePath: string): Promise<Project | undefined> {
