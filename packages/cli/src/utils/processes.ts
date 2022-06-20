@@ -1,33 +1,30 @@
 import {
+  DEFAULT_CLIENT_PORT,
   addDevEventListener,
   ClientDevEvent,
   DevEventListenerConnectionStatus,
   ServerDevEvent,
+  DEFAULT_SERVER_PORT,
 } from "@samen/dev"
 import { spawn } from "child_process"
 import path from "path"
+
+function fatalError(message: string) {
+  console.error(message)
+  process.exit(1)
+}
 
 export function spawnClientWatch(
   projectPath: string,
   onEvent: (event: ClientDevEvent) => void,
   debug: boolean,
 ) {
-  const port = 3030
+  const port = DEFAULT_CLIENT_PORT // TODO: auto increment
   const cwd = path.resolve(projectPath)
-  let hasBeenConnected = false
 
   function onChangeConnectionStatus(status: DevEventListenerConnectionStatus) {
     if (debug) {
       console.log({ status })
-    }
-
-    if (status === "CONNECTED") {
-      hasBeenConnected = true
-    } else if (hasBeenConnected) {
-      // the process that we started ourselves is gone, something is seriously gone bad
-      throw new Error(`client child process is disconnected (${status})`)
-    } else {
-      // we should be safe to ignore this
     }
   }
 
@@ -43,19 +40,16 @@ export function spawnClientWatch(
     { cwd },
   )
     .on("close", (code) => {
-      console.log(`child process at ${cwd} closed with code: ${code}`)
+      fatalError(`child process at ${cwd} closed with code: ${code}`)
     })
     .on("exit", (code) => {
-      console.log(`child process at ${cwd} exited with code: ${code}`)
+      fatalError(`child process at ${cwd} exited with code: ${code}`)
     })
     .on("disconnect", () => {
-      console.log(`child process at ${cwd} disconnected`)
-    })
-    .on("message", (message) => {
-      console.log(`child process at ${cwd} messaged:`, message)
+      fatalError(`child process at ${cwd} disconnected`)
     })
     .on("error", (error) => {
-      console.error(`child process at ${cwd} errored with:`, error)
+      fatalError(`child process at ${cwd} errored with: ${error.message}`)
     })
 
   return () => {
@@ -69,22 +63,12 @@ export function spawnServerWatch(
   onEvent: (event: ServerDevEvent) => void,
   debug: boolean,
 ) {
-  const port = 3030
+  const port = DEFAULT_SERVER_PORT
   const cwd = path.resolve(projectPath)
-  let hasBeenConnected = false
 
   function onChangeConnectionStatus(status: DevEventListenerConnectionStatus) {
     if (debug) {
       console.log({ status })
-    }
-
-    if (status === "CONNECTED") {
-      hasBeenConnected = true
-    } else if (hasBeenConnected) {
-      // the process that we started ourselves is gone, something is seriously gone bad
-      throw new Error(`Server child process is disconnected (${status})`)
-    } else {
-      // we should be safe to ignore this
     }
   }
 
@@ -99,22 +83,18 @@ export function spawnServerWatch(
     ["serve", "--port", `${port}`],
     { cwd },
   )
-  // This doesn't seem to do anything, and we probably won't need it (events come in through the listener)
-  // .on("close", (code) => {
-  //   console.log(`child process at ${cwd} closed with code: ${code}`)
-  // })
-  // .on("exit", (code) => {
-  //   console.log(`child process at ${cwd} exited with code: ${code}`)
-  // })
-  // .on("disconnect", () => {
-  //   console.log(`child process at ${cwd} disconnected`)
-  // })
-  // .on("message", (message) => {
-  //   console.log(`child process at ${cwd} messaged:`, message)
-  // })
-  // .on("error", (error) => {
-  //   console.error(`child process at ${cwd} errored with:`, error)
-  // })
+    .on("close", (code) => {
+      fatalError(`child process at ${cwd} closed with code: ${code}`)
+    })
+    .on("exit", (code) => {
+      fatalError(`child process at ${cwd} exited with code: ${code}`)
+    })
+    .on("disconnect", () => {
+      fatalError(`child process at ${cwd} disconnected`)
+    })
+    .on("error", (error) => {
+      fatalError(`child process at ${cwd} errored with: ${error.message}`)
+    })
 
   return () => {
     removeEventListener()

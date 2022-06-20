@@ -128,7 +128,7 @@ export default function generateRPCProxy(
 
   prog.emit()
 
-  console.log(vHost.getFile("samen-execution.ts"))
+  // console.log(vHost.getFile("samen-execution.ts"))
 
   const js = vHost.getFile("samen-execution.js")
 

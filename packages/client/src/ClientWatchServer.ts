@@ -39,8 +39,8 @@ export default class ClientWatchServer {
   ) {
     switch (status) {
       case "CONNECTED":
-        await this.buildClient()
         this.eventEmitter.emit({ type: "SERVER_CONNECTED" })
+        await this.buildClient()
         break
 
       case "DISCONNECTED":
@@ -61,7 +61,7 @@ export default class ClientWatchServer {
     } catch (error) {
       this.eventEmitter.emit({
         type: "BUILD_FAILED",
-        error: JSON.stringify(error),
+        error: error instanceof Error ? error.message : "unknown",
       })
     }
   }

@@ -64,6 +64,8 @@ export type ClientDevEvent =
 // Event emitters
 
 class DevEventEmitter<T extends ServerDevEvent | ClientDevEvent> {
+  private lastEvent?: DevEventEmitterConnectionEvent | T
+
   public listeners: http.ServerResponse[] = []
 
   public shouldRegisterListener(req: http.IncomingMessage): boolean {
@@ -87,9 +89,15 @@ class DevEventEmitter<T extends ServerDevEvent | ClientDevEvent> {
     res.write("id: " + id + "\n")
     res.write("retry: 2000\n")
     res.write("data: " + JSON.stringify(connectedEvent) + "\n\n")
+
+    this.emit(connectedEvent)
+    if (this.lastEvent) {
+      this.emit(this.lastEvent)
+    }
   }
 
   public emit(event: DevEventEmitterConnectionEvent | T) {
+    this.lastEvent = event
     this.listeners.forEach((connection) => {
       const id = new Date().toISOString()
       connection.write("id: " + id + "\n")
@@ -103,6 +111,7 @@ export class ServerDevEventEmitter extends DevEventEmitter<ServerDevEvent> {}
 export class ClientDevEventEmitter extends DevEventEmitter<ClientDevEvent> {}
 
 // Event listener
+// NOTE: The same event could be emitted multiple times
 
 export function addDevEventListener<T extends ServerDevEvent | ClientDevEvent>(
   url: string,
