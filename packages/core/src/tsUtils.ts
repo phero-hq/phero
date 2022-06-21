@@ -252,7 +252,7 @@ export function isExternalDeclaration(declr: ts.Declaration): boolean {
 }
 
 export function isExternalSymbol(symbol: ts.Symbol): boolean {
-  return !!symbol.getDeclarations()?.some(isExternalDeclaration)
+  return !!symbol?.getDeclarations()?.some(isExternalDeclaration)
 }
 
 export function isExternalType(type: ts.Type): boolean {
@@ -264,7 +264,7 @@ export function isExternalTypeNode(typeNode: ts.TypeNode): boolean {
 }
 
 export function isExternalSourceFile(sourceFile: ts.SourceFile): boolean {
-  return sourceFile.fileName.includes("node_modules/typescript/lib/lib.")
+  return sourceFile.fileName.includes("node_modules")
 }
 
 export function getNameAsString(
