@@ -23,7 +23,7 @@ export default async function buildClient(
 
   await writeClientSource(
     path.join("node_modules", "@samen", "client", "generated"),
-    path.join("node_modules", ".samen"),
+    path.join(".samen"),
     clientSource,
   )
 }
