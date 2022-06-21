@@ -16,8 +16,15 @@ export default async function writeClientSource(
   outputPathClient: string,
   client: ClientSource,
 ): Promise<void> {
-  await fs.mkdir(outputPathClient, { recursive: true })
-  await fs.mkdir(outputPathBase, { recursive: true })
+  const pathClientExists = await exists(outputPathClient)
+  if (!pathClientExists) {
+    await fs.mkdir(outputPathClient, { recursive: true })
+  }
+
+  const pathBaseExists = await exists(outputPathBase)
+  if (!pathBaseExists) {
+    await fs.mkdir(outputPathBase, { recursive: true })
+  }
 
   await fs.writeFile(
     path.join(outputPathClient, "domain.ts"),
@@ -31,21 +38,33 @@ export default async function writeClientSource(
     { encoding: "utf-8" },
   )
 
-  await fs.writeFile(
-    path.join(outputPathClient, "index.ts"),
-    printSourceFile(client.samenIndexSource),
-    { encoding: "utf-8" },
-  )
+  const indexPath = path.join(outputPathClient, "index.ts")
+  const indexPathExists = await exists(indexPath)
+  if (!indexPathExists) {
+    await fs.writeFile(
+      path.join(outputPathClient, "index.ts"),
+      printSourceFile(client.samenIndexSource),
+      { encoding: "utf-8" },
+    )
+  }
 
-  await fs.copyFile(
-    path.join(__dirname, "../../src/templates/BaseSamenClient.ts"),
-    path.join(outputPathClient, "BaseSamenClient.ts"),
-  )
+  const baseSamenClientPath = path.join(outputPathClient, "BaseSamenClient.ts")
+  const baseSamenClientPathExists = await exists(baseSamenClientPath)
+  if (!baseSamenClientPathExists) {
+    await fs.copyFile(
+      path.join(__dirname, "../../src/templates/BaseSamenClient.ts"),
+      baseSamenClientPath,
+    )
+  }
 
-  await fs.copyFile(
-    path.join(__dirname, "../../src/templates/ParseResult.ts"),
-    path.join(outputPathClient, "ParseResult.ts"),
-  )
+  const baseParseResultPath = path.join(outputPathClient, "ParseResult.ts")
+  const baseParseResultPathExists = exists(baseParseResultPath)
+  if (!baseParseResultPathExists) {
+    await fs.copyFile(
+      path.join(__dirname, "../../src/templates/ParseResult.ts"),
+      path.join(outputPathClient, "ParseResult.ts"),
+    )
+  }
 
   const clientProgram = ts.createProgram(
     [
@@ -66,24 +85,36 @@ export default async function writeClientSource(
     throw new Error("compilation failed")
   }
 
-  // write index file that exports SamenClient and domains
-  await fs.writeFile(
-    path.join(outputPathBase, `index.ts`),
-    printSourceFile(client.programIndexSource),
-    { encoding: "utf-8" },
-  )
+  const baseIndexPath = path.join(outputPathBase, `index.ts`)
+  const baseIndexPathExists = await exists(baseIndexPath)
+  if (!baseIndexPathExists) {
+    await fs.writeFile(
+      path.join(outputPathBase, `index.ts`),
+      printSourceFile(client.programIndexSource),
+      { encoding: "utf-8" },
+    )
 
-  const program = ts.createProgram([path.join(outputPathBase, "index.ts")], {
-    declaration: true,
-  })
+    const program = ts.createProgram([path.join(outputPathBase, "index.ts")], {
+      declaration: true,
+    })
 
-  const emitResult = program.emit()
+    const emitResult = program.emit()
 
-  if (emitResult.emitSkipped) {
-    throw new Error("compilation failed")
+    if (emitResult.emitSkipped) {
+      throw new Error("compilation failed")
+    }
   }
 }
 
 export function printSourceFile(source: ts.SourceFile): string {
   return printer.printFile(source)
+}
+
+async function exists(pathString: string) {
+  try {
+    await fs.access(pathString)
+    return true
+  } catch {
+    return false
+  }
 }
