@@ -432,6 +432,10 @@ export default function generateParserModel(
       }
     }
 
+    if (ts.isEnumDeclaration(node)) {
+      return getEnumParser(node)
+    }
+
     if (ts.isTypeReferenceNode(node)) {
       const type = typeChecker.getTypeAtLocation(node)
       const declr = type.symbol?.valueDeclaration

@@ -712,6 +712,24 @@ describe("generateParserModel", () => {
       const parserModel = generateParserModel(typeChecker, model, "data")
       expect(parserModel).toMatchSnapshot()
     })
+
+    test("enum root model", () => {
+      const {
+        statements: [enumModel],
+        typeChecker,
+      } = compileStatements(
+        `
+      export enum MyEnum {
+        Aaa = "Aaa",
+        Bbb = "Bbb",
+        Ccc = "Ccc",
+      }
+      `,
+      )
+
+      const parserModel = generateParserModel(typeChecker, enumModel, "data")
+      expect(parserModel).toMatchSnapshot()
+    })
   })
   describe("for generics", () => {
     test("type with generic parameter", () => {
@@ -839,7 +857,7 @@ describe("generateParserModel", () => {
         type Noot = Partial<Record<X, number>>;
         enum X {
           A,
-          B, 
+          B,
           C,
         }
       `,
@@ -857,7 +875,7 @@ describe("generateParserModel", () => {
         type Noot = Partial<Record<X, string>>;
         enum X {
           A = "a",
-          B = "b", 
+          B = "b",
           C = "c",
         }
       `,
@@ -919,11 +937,11 @@ describe("generateParserModel", () => {
       } = compileStatements(
         `
         type UnlockedAccount = CreateMutable<LockedAccount>;
-        
+
         type CreateMutable<Type> = {
           readonly [Property in keyof Type]: Type[Property];
         };
-        
+
         type LockedAccount = {
           readonly id: string;
           readonly name: string;
@@ -950,7 +968,7 @@ describe("generateParserModel", () => {
         darkMode: () => void;
         newUserProfile: () => void;
       };
- 
+
       type OptionsFlags<Type> = {
         [Property in keyof Type]: boolean;
       };
@@ -977,7 +995,7 @@ describe("generateParserModel", () => {
 
           interface MyOtherModel {
             kaas: number
-            koos: string  
+            koos: string
           }
         `,
       )

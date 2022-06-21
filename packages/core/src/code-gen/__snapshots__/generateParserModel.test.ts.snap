@@ -1573,6 +1573,35 @@ Object {
 }
 `;
 
+exports[`generateParserModel for enums enum root model 1`] = `
+Object {
+  "name": "data",
+  "parser": Object {
+    "members": Array [
+      Object {
+        "literal": "Aaa",
+        "type": "string-literal",
+      },
+      Object {
+        "literal": "Bbb",
+        "type": "string-literal",
+      },
+      Object {
+        "literal": "Ccc",
+        "type": "string-literal",
+      },
+    ],
+    "type": "enum",
+  },
+  "rootTypeParser": Object {
+    "baseTypeName": "MyEnum",
+    "typeName": "MyEnum",
+    "typeParameters": Array [],
+  },
+  "type": "root",
+}
+`;
+
 exports[`generateParserModel for enums enum with auto number enum members 1`] = `
 Object {
   "name": "data",
