@@ -2,7 +2,6 @@ import ts from "typescript"
 import { printCode } from "../../tsTestUtils"
 import {
   getFullyQualifiedName,
-  getNameAsString,
   getTypeName,
   isExternalType,
 } from "../../tsUtils"
@@ -17,6 +16,7 @@ export enum ParserModelType {
   BooleanLiteral = "boolean-literal",
   Null = "null",
   Undefined = "undefined",
+  Void = "void",
   Object = "object",
   Member = "member",
   IndexMember = "indexMember",
@@ -43,6 +43,7 @@ export type ParserModel =
   | BooleanLiteralParserModel
   | NullParserModel
   | UndefinedParserModel
+  | VoidParserModel
   | ObjectParserModel
   | MemberParserModel
   | IndexMemberParserModel
@@ -91,6 +92,7 @@ export type BooleanLiteralParserModel = {
 }
 export type NullParserModel = { type: ParserModelType.Null }
 export type UndefinedParserModel = { type: ParserModelType.Undefined }
+export type VoidParserModel = { type: ParserModelType.Void }
 export type ObjectParserModel = {
   type: ParserModelType.Object
   members: (MemberParserModel | IndexMemberParserModel)[]
@@ -299,6 +301,14 @@ export default function generateParserModel(
 
     if (ts.isTypeNode(node)) {
       switch (node.kind) {
+        case ts.SyntaxKind.VoidKeyword:
+          return {
+            type: ParserModelType.Void,
+          }
+        case ts.SyntaxKind.UndefinedKeyword:
+          return {
+            type: ParserModelType.Undefined,
+          }
         case ts.SyntaxKind.StringKeyword:
           return {
             type: ParserModelType.String,

@@ -20,6 +20,7 @@ import generateTupleParser from "./generateTupleParser"
 import generateTypeParameterParser from "./generateTypeParameterParser"
 import generateUndefinedParser from "./generateUndefinedParser"
 import generateUnionParser from "./generateUnionParser"
+import generateVoidParser from "./generateVoidParser"
 import Pointer from "./Pointer"
 
 export default function generateParserFromModel(
@@ -51,6 +52,8 @@ export default function generateParserFromModel(
       return generateNullParser(new Pointer(model, ancestors))
     case ParserModelType.Undefined:
       return generateUndefinedParser(new Pointer(model, ancestors))
+    case ParserModelType.Void:
+      return generateVoidParser(new Pointer(model, ancestors))
     case ParserModelType.Array:
       return generateArrayParser(new Pointer(model, ancestors))
     case ParserModelType.Tuple:
