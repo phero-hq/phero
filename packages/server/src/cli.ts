@@ -23,7 +23,7 @@ switch (command.name) {
   }
 
   case ServerCommandName.Build: {
-    build()
+    build(command)
     break
   }
 }

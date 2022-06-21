@@ -2,6 +2,7 @@ import ts from "typescript"
 import { block } from "./block"
 import { constDeclaration } from "./const"
 import { simpleForOver } from "./for"
+import { switchStatement } from "./switch"
 
 export class Statement {
   public static if(props: {
@@ -64,4 +65,10 @@ export class Statement {
   }
 
   public static simpleForOver = simpleForOver
+
+  public static switch = switchStatement
+
+  public static get break(): ts.BreakStatement {
+    return ts.factory.createBreakStatement()
+  }
 }
