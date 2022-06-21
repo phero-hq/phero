@@ -1,5 +1,6 @@
 import ts from "typescript"
 import { ParseError } from "../errors"
+import { isExternalDeclaration } from "../tsUtils"
 
 export default function findFunctionDeclaration(
   callExpression: ts.CallExpression | ts.NewExpression,
@@ -44,6 +45,25 @@ export default function findFunctionDeclaration(
   }
 
   if (ts.isParameter(declaration)) {
+    return []
+  }
+
+  if (
+    ts.isNewExpression(callExpression) &&
+    ts.isIdentifier(callExpression.expression) &&
+    callExpression.expression.text === "Promise" &&
+    callExpression.arguments?.length === 1 &&
+    (ts.isArrowFunction(callExpression.arguments[0]) ||
+      ts.isFunctionDeclaration(callExpression.arguments[0]))
+  ) {
+    const promiseExecutor = callExpression.arguments[0]
+    // TODO: we detected `new Promise((resolve, reject) => ...)`
+    // we should also catch calls on the "reject" function in order
+    // to find all errors
+    return [promiseExecutor]
+  }
+
+  if (isExternalDeclaration(declaration)) {
     return []
   }
 

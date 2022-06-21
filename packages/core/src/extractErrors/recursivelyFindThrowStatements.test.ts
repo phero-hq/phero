@@ -1542,4 +1542,57 @@ describe("recursivelyFindThrowStatements", () => {
       ).toHaveLength(1)
     })
   })
+
+  describe("Promise", () => {
+    test("new Promise", () => {
+      const {
+        statements: [funcOne],
+        typeChecker,
+      } = compileStatements(
+        `
+          async function funcOne(a: string): boolean {
+            const x = await Promise.all([funcTwo()])
+            return x[0];
+          }
+          async function funcTwo(): Promise<boolean> {
+            return new Promise((resolve, reject) => {
+              throw new Error('error')
+            })
+          }
+        `,
+      )
+
+      expect(
+        recursivelyFindThrowStatements(
+          funcOne as ts.FunctionDeclaration,
+          typeChecker,
+        ),
+      ).toHaveLength(1)
+    })
+    test.skip("new Promise with reject", () => {
+      const {
+        statements: [funcOne],
+        typeChecker,
+      } = compileStatements(
+        `
+          async function funcOne(a: string): boolean {
+            const x = await Promise.all([funcTwo()])
+            return x[0];
+          }
+          async function funcTwo(): Promise<boolean> {
+            return new Promise((resolve, reject) => {
+              reject(new Error('error'))
+            })
+          }
+        `,
+      )
+
+      expect(
+        recursivelyFindThrowStatements(
+          funcOne as ts.FunctionDeclaration,
+          typeChecker,
+        ),
+      ).toHaveLength(1)
+    })
+  })
 })
