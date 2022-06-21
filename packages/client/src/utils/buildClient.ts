@@ -20,8 +20,10 @@ export default async function buildClient(
     declarationVersion,
     declaration.typeChecker,
   )
+
   await writeClientSource(
     path.join("node_modules", "@samen", "client", "generated"),
+    path.join("node_modules", ".samen"),
     clientSource,
   )
 }

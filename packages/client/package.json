@@ -1,7 +1,7 @@
 {
   "name": "@samen/client",
   "version": "0.8.0-alpha.6",
-  "main": "generated/SamenClient.js",
+  "main": "generated/index.js",
   "bin": {
     "samen-client": "dist/cli.js"
   },

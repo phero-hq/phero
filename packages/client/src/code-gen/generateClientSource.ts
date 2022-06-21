@@ -15,8 +15,6 @@ export default function generateClientSource(
   appDeclarationVersion: ParsedAppDeclarationVersion,
   typeChecker: ts.TypeChecker,
 ): ClientSource {
-  const t1 = Date.now()
-
   const { domainModels, services } = appDeclarationVersion
   const parsedDomainErrors = appDeclarationVersion.errors.map(parseError)
   const domainRefMaker = new ReferenceMaker(
@@ -74,10 +72,24 @@ export default function generateClientSource(
 
   const optsParam = generateOptsParam(appDeclarationVersion)
 
+  const clientIdentifier = "SamenClient"
+  const domainIdentifier = "domain"
+
+  const samenIndexSource = tsx.sourceFile(
+    tsx.exportDeclaration({
+      identifiers: [clientIdentifier],
+      module: `./${clientIdentifier}`,
+    }),
+    tsx.exportNamespaceDeclaration({
+      identifier: `${domainIdentifier}`,
+      module: `./${domainIdentifier}`,
+    }),
+  )
+
   const classDeclr: ts.ClassDeclaration = ts.factory.createClassDeclaration(
     undefined,
     [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
-    ts.factory.createIdentifier("SamenClient"),
+    ts.factory.createIdentifier(clientIdentifier),
     undefined,
     [hertitageClause],
     [
@@ -172,12 +184,18 @@ export default function generateClientSource(
     classDeclr,
   )
 
-  const t2 = Date.now()
-  // console.log("Generate client in ", t2 - t1)
+  const programIndexSource = tsx.sourceFile(
+    tsx.exportDeclaration({
+      identifiers: [clientIdentifier, domainIdentifier],
+      module: `../../../.samen`,
+    }),
+  )
 
   return {
+    samenIndexSource,
     samenClientSource,
     domainSource,
+    programIndexSource,
   }
 }
 
