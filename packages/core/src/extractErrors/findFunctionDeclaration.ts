@@ -1,34 +1,40 @@
 import ts from "typescript"
-import { ParseError } from "../errors"
 import { isExternalDeclaration } from "../tsUtils"
 
 export default function findFunctionDeclaration(
   callExpression: ts.CallExpression | ts.NewExpression,
   typeChecker: ts.TypeChecker,
 ): ts.FunctionLikeDeclarationBase[] {
-  const declaration = findDeclaration(callExpression.expression, typeChecker)
+  console.log(
+    "callExpression",
+    callExpression.expression.kind,
+    callExpression.getText(),
+  )
+  // const declarations = findDeclaration(callExpression.expression, typeChecker)
+
+  const symbol = typeChecker.getSymbolAtLocation(callExpression.expression)
+
+  if (!symbol) {
+    console.log("[]", 1)
+    return []
+  }
+
+  const declaration = symbol.valueDeclaration ?? symbol.declarations?.[0]
 
   if (!declaration) {
+    console.log("[]", 2)
     return []
   }
 
   if (ts.isSetAccessorDeclaration(declaration)) {
+    console.log("[]", 4)
     return []
-  }
-
-  if (
-    ts.isFunctionDeclaration(declaration) ||
-    ts.isMethodDeclaration(declaration) ||
-    ts.isFunctionDeclaration(declaration) ||
-    ts.isConstructorDeclaration(declaration) ||
-    ts.isGetAccessorDeclaration(declaration)
-  ) {
-    return [declaration]
   }
 
   // Not sure about this one...
   // occurs with `console.log`
   if (ts.isMethodSignature(declaration)) {
+    console.log("[]", 5)
     return []
   }
 
@@ -36,25 +42,33 @@ export default function findFunctionDeclaration(
     return findConstructorAndSuperConstructors(declaration)
   }
 
+  if (ts.isParameter(declaration)) {
+    console.log("[]", 6)
+    return []
+  }
+
+  if (isFunctionLike(declaration)) {
+    // TODO callExpression.arguments
+
+    return [declaration]
+  }
+
+  // TODO deze if moet weg
   if (
     ts.isVariableDeclaration(declaration) &&
     declaration.initializer &&
-    ts.isArrowFunction(declaration.initializer)
+    isFunctionLike(declaration.initializer)
   ) {
     return [declaration.initializer]
   }
 
-  if (ts.isParameter(declaration)) {
-    return []
-  }
-
+  // TODO deze if moet weg
   if (
     ts.isNewExpression(callExpression) &&
     ts.isIdentifier(callExpression.expression) &&
     callExpression.expression.text === "Promise" &&
     callExpression.arguments?.length === 1 &&
-    (ts.isArrowFunction(callExpression.arguments[0]) ||
-      ts.isFunctionDeclaration(callExpression.arguments[0]))
+    isFunctionLike(callExpression.arguments[0])
   ) {
     const promiseExecutor = callExpression.arguments[0]
     // TODO: we detected `new Promise((resolve, reject) => ...)`
@@ -63,13 +77,50 @@ export default function findFunctionDeclaration(
     return [promiseExecutor]
   }
 
+  // TODO staat deze op de juiste plek?
   if (isExternalDeclaration(declaration)) {
+    console.log("[]", 3)
     return []
   }
 
-  throw new ParseError(
-    `Unsupported call expression ${declaration.kind.toString()}`,
-    declaration,
+  if (
+    ts.isImportDeclaration(declaration) ||
+    ts.isImportClause(declaration) ||
+    ts.isImportSpecifier(declaration)
+  ) {
+    const aliasSymbol = typeChecker.getAliasedSymbol(symbol)
+    if (!aliasSymbol.valueDeclaration) {
+      return []
+    }
+    if (isFunctionLike(aliasSymbol.valueDeclaration)) {
+      return [aliasSymbol.valueDeclaration]
+    }
+  }
+
+  // if (ts.isPropertyAssignment(declaration)) {
+  //   return findDeclaration(declaration.initializer, typeChecker)
+  // }
+
+  // console.log("callExpression.expression", callExpression.expression.getText())
+  // console.log("declaration", declaration.getText())
+  // console.log("declaration", declaration.getSourceFile().fileName)
+
+  // throw new ParseError(
+  //   `Unsupported call expression ${declaration.kind.toString()}`,
+  //   declaration,
+  // )
+
+  console.log("findDeclarations()")
+  return findDeclarations(callExpression.expression, typeChecker)
+}
+
+function isFunctionLike(node: ts.Node): node is ts.FunctionLikeDeclarationBase {
+  return (
+    ts.isArrowFunction(node) ||
+    ts.isFunctionDeclaration(node) ||
+    ts.isMethodDeclaration(node) ||
+    ts.isConstructorDeclaration(node) ||
+    ts.isGetAccessorDeclaration(node)
   )
 }
 
@@ -94,58 +145,208 @@ function findConstructorAndSuperConstructors(
   ].filter((classElement) => ts.isConstructorDeclaration(classElement))
 }
 
-function findDeclaration(
+function findDeclarations(
   node: ts.Node,
   typeChecker: ts.TypeChecker,
-): ts.Declaration | undefined {
-  const symbol = typeChecker.getSymbolAtLocation(node)
+): ts.FunctionLikeDeclarationBase[] {
+  console.log("NODE", node.kind)
 
-  if (!symbol) {
-    return
+  if (ts.isPropertyAccessExpression(node)) {
+    return findDeclarations(node.expression, typeChecker)
   }
 
-  if (symbol.valueDeclaration) {
-    return symbol.valueDeclaration
+  if (ts.isIdentifier(node)) {
+    const symbol = typeChecker.getSymbolAtLocation(node)
+
+    if (!symbol?.valueDeclaration) {
+      return []
+    }
+
+    return findDeclarations(symbol.valueDeclaration, typeChecker)
   }
 
-  // external imports
-  const declaration = symbol.declarations?.[0]
-  if (!declaration) {
-    return
+  if (ts.isVariableDeclaration(node)) {
+    if (!node.initializer) {
+      return []
+    }
+
+    return findDeclarations(node.initializer, typeChecker)
   }
 
-  if (isExternalImport(declaration)) {
-    return
+  if (ts.isObjectLiteralExpression(node)) {
+    return node.properties.flatMap((prop) => {
+      if (ts.isPropertyAssignment(prop)) {
+        return findDeclarations(prop.initializer, typeChecker)
+      }
+      if (
+        ts.isShorthandPropertyAssignment(prop) &&
+        prop.objectAssignmentInitializer
+      ) {
+        // TODO follow prop.name, it could reference a variable with a call expr as initializer
+        return findDeclarations(prop.objectAssignmentInitializer, typeChecker)
+      }
+      if (ts.isSpreadAssignment(prop)) {
+        // TODO follow prop.name, it could reference a variable with a call expr as initializer
+        return findDeclarations(prop.expression, typeChecker)
+      }
+
+      return []
+    })
   }
 
-  if (
-    ts.isImportDeclaration(declaration) ||
-    ts.isImportClause(declaration) ||
-    ts.isImportSpecifier(declaration)
-  ) {
-    const aliasSymbol = typeChecker.getAliasedSymbol(symbol)
-    return aliasSymbol.valueDeclaration
+  // if (ts.isPropertyAssignment(node)) {
+  //   return findDeclarations(node.initializer, typeChecker)
+  // }
+
+  // if (ts.isElementAccessExpression(node)) {
+  //   for (const x of findFunctionRefInsideVar(node, typeChecker)) {
+  //     console.log("X", x.getText())
+  //   }
+  // }
+
+  // const symbol = typeChecker.getSymbolAtLocation(node)
+
+  // if (!symbol) {
+  //   return []
+  // }
+
+  // const declaration = symbol.valueDeclaration ?? symbol.declarations?.[0]
+
+  // if (!declaration) {
+  //   return []
+  // }
+
+  // if (isExternalDeclaration(declaration)) {
+  //   return []
+  // }
+
+  // if (
+  //   ts.isImportDeclaration(declaration) ||
+  //   ts.isImportClause(declaration) ||
+  //   ts.isImportSpecifier(declaration)
+  // ) {
+  //   const aliasSymbol = typeChecker.getAliasedSymbol(symbol)
+
+  //   if (!aliasSymbol.valueDeclaration) {
+  //     return []
+  //   }
+  //   if (isFunctionLike(aliasSymbol.valueDeclaration)) {
+  //     return [aliasSymbol.valueDeclaration]
+  //   }
+  // }
+
+  // if (isFunctionLike(node)) {
+  //   return [node]
+  // }
+
+  if (isFunctionLike(node)) {
+    return [node]
   }
 
-  return declaration
+  console.log("OEPS!")
+
+  return []
 }
 
-// TODO we should be using isExternal on ts.Program
-// We can fix this after the refactor
-function isExternalImport(declaration: ts.Node): boolean {
-  if (
-    ts.isImportDeclaration(declaration) &&
-    ts.isStringLiteral(declaration.moduleSpecifier) &&
-    !declaration.moduleSpecifier.text.startsWith(".")
-  ) {
-    return true
-  }
-  if (ts.isImportClause(declaration)) {
-    return isExternalImport(declaration.parent)
-  }
-  if (ts.isImportSpecifier(declaration)) {
-    return isExternalImport(declaration.parent.parent.parent)
+/**
+ * Makes sure it can find funcTwo & funcThree:
+ * const obj = {
+ *    aad: {
+ *       x: funcTwo,
+ *       y: funcThree,
+ *    },
+ * }
+ */
+function findFunctionRefInsideVar(
+  node: ts.Node,
+  typeChecker: ts.TypeChecker,
+): ts.Declaration[] {
+  if (ts.isPropertyAssignment(node)) {
+    if (!node.initializer) {
+      return []
+    }
+    return findFunctionRefInsideVar(node.initializer, typeChecker)
   }
 
-  return false
+  if (ts.isPropertyAccessExpression(node)) {
+    return findFunctionRefInsideVar(node.expression, typeChecker)
+  }
+
+  if (ts.isElementAccessExpression(node)) {
+    const symbol = typeChecker.getSymbolAtLocation(node.expression)
+
+    if (!symbol?.valueDeclaration) {
+      return []
+    }
+
+    return findFunctionRefInsideVar(symbol.valueDeclaration, typeChecker)
+  }
+
+  if (ts.isVariableDeclaration(node)) {
+    if (!node.initializer) {
+      return []
+    }
+
+    return findFunctionRefInsideVar(node.initializer, typeChecker)
+  }
+
+  if (ts.isObjectLiteralExpression(node)) {
+    return node.properties.flatMap((prop) => {
+      if (ts.isPropertyAssignment(prop)) {
+        return findFunctionRefInsideVar(prop.initializer, typeChecker)
+      }
+      if (
+        ts.isShorthandPropertyAssignment(prop) &&
+        prop.objectAssignmentInitializer
+      ) {
+        // TODO follow prop.name, it could reference a variable with a call expr as initializer
+        return findFunctionRefInsideVar(
+          prop.objectAssignmentInitializer,
+          typeChecker,
+        )
+      }
+      if (ts.isSpreadAssignment(prop)) {
+        // TODO follow prop.name, it could reference a variable with a call expr as initializer
+        return findFunctionRefInsideVar(prop.expression, typeChecker)
+      }
+
+      return []
+    })
+  }
+
+  if (ts.isIdentifier(node)) {
+    const symbol = typeChecker.getSymbolAtLocation(node)
+
+    if (!symbol?.valueDeclaration) {
+      return []
+    }
+
+    return findFunctionRefInsideVar(symbol.valueDeclaration, typeChecker)
+  }
+
+  if (
+    ts.isImportDeclaration(node) ||
+    ts.isImportClause(node) ||
+    ts.isImportSpecifier(node)
+  ) {
+    const symbol = typeChecker.getSymbolAtLocation(node)
+
+    if (!symbol) {
+      return []
+    }
+
+    const aliasSymbol = typeChecker.getAliasedSymbol(symbol)
+
+    if (!aliasSymbol.valueDeclaration) {
+      return []
+    }
+
+    return [aliasSymbol.valueDeclaration]
+  }
+
+  if (isFunctionLike(node)) {
+    return [node]
+  }
+
+  return []
 }

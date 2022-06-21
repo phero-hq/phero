@@ -1118,6 +1118,126 @@ describe("recursivelyFindThrowStatements", () => {
       ).toHaveLength(1)
     })
 
+    test("external object literal expression", () => {
+      const {
+        statements: [obj, funcOne],
+        typeChecker,
+      } = compileStatements(
+        `
+      const obj = {
+        x: funcTwo,
+      }
+
+      function funcOne(a: string): boolean {
+        return obj.x(a)
+      }
+
+      function funcTwo(a: string): boolean {
+        throw new Error('error')
+        return true
+      }
+    `,
+      )
+
+      expect(
+        recursivelyFindThrowStatements(
+          funcOne as ts.FunctionDeclaration,
+          typeChecker,
+        ),
+      ).toHaveLength(1)
+    })
+
+    test.skip("external 2 object literal expression", () => {
+      const {
+        statements: [obj, funcOne],
+        typeChecker,
+      } = compileStatements(
+        `
+        const obj = {
+          aad: {
+        x: funcTwo,
+          },
+      }
+        function funcOne(a: string): boolean {
+        const obj2 = obj.aad
+        const obj3 = obj2
+        return obj3["x"](a)
+      }
+
+      function funcTwo(a: string): boolean {
+        throw new Error('error')
+        return true
+      }
+    `,
+      )
+
+      expect(
+        recursivelyFindThrowStatements(
+          funcOne as ts.FunctionDeclaration,
+          typeChecker,
+        ),
+      ).toHaveLength(1)
+    })
+
+    test.skip("external 3 object literal expression", () => {
+      const {
+        statements: [obj, funcOne],
+        typeChecker,
+      } = compileStatements(
+        `
+        const obj = {
+          
+        x: funcTwo,
+          
+      }
+        function funcOne(a: string): boolean {
+        return obj["x"](a)
+      }
+
+      function funcTwo(a: string): boolean {
+        throw new Error('error')
+        return true
+      }
+    `,
+      )
+
+      expect(
+        recursivelyFindThrowStatements(
+          funcOne as ts.FunctionDeclaration,
+          typeChecker,
+        ),
+      ).toHaveLength(1)
+    })
+
+    test.skip("external 4 object literal expression", () => {
+      const {
+        statements: [obj, funcOne],
+        typeChecker,
+      } = compileStatements(
+        `
+        const obj = [{  
+          x: funcTwo,    
+        }]
+      
+        function funcOne(a: string): boolean {
+        return obj[0]["x"](a)
+      }
+
+      function funcTwo(a: string): boolean {
+        throw new Error('error')
+        return true
+      }
+    `,
+      )
+
+      expect(
+        recursivelyFindThrowStatements(
+          funcOne as ts.FunctionDeclaration,
+          typeChecker,
+        ),
+      ).toHaveLength(1)
+    })
+
     test("object literal expression", () => {
       const {
         statements: [funcOne],
@@ -1163,6 +1283,67 @@ describe("recursivelyFindThrowStatements", () => {
       function funcTwo(a: string): 'x' {
         throw new Error('error')
         return 'x'
+      }
+    `,
+      )
+
+      expect(
+        recursivelyFindThrowStatements(
+          funcOne as ts.FunctionDeclaration,
+          typeChecker,
+        ),
+      ).toHaveLength(1)
+    })
+
+    test("call expression", () => {
+      const {
+        statements: [funcOne],
+        typeChecker,
+      } = compileStatements(
+        `
+      function funcOne(a: string): boolean {
+        return funcThree(funcTwo("a"))
+      }
+
+      function funcTwo(a: string): boolean {
+        throw new Error('error')
+        return true
+      }
+
+      function funcThree(b: boolean): boolean {
+        return b
+      }
+      // function funcThree(f: (a: string) => boolean): boolean {
+      //   return f("x")
+      // }
+    `,
+      )
+
+      expect(
+        recursivelyFindThrowStatements(
+          funcOne as ts.FunctionDeclaration,
+          typeChecker,
+        ),
+      ).toHaveLength(1)
+    })
+
+    test.skip("call expression, higher order function", () => {
+      const {
+        statements: [funcOne],
+        typeChecker,
+      } = compileStatements(
+        `
+      function funcOne(a: string): boolean {
+        return funcThree(funcTwo)
+      }
+
+      function funcTwo(a: string): boolean {
+        throw new Error('error')
+        return true
+      }
+
+      function funcThree(f: (a: string) => boolean): boolean {
+        return f("x")
       }
     `,
       )
