@@ -17,6 +17,34 @@ export type DevEventListenerConnectionStatus =
   | "DISCONNECTED"
   | "EMITTER_NOT_FOUND"
 
+export type ServerDevEventRPC =
+  | ServerDevEventRPCStart
+  | ServerDevEventRPCSuccess
+  | ServerDevEventRPCFailed
+
+export type ServerDevEventRPCStart = {
+  type: "RPC_START"
+  url: string
+  requestId: string
+}
+
+export type ServerDevEventRPCSuccess = {
+  type: "RPC_SUCCESS"
+  url: string
+  status: number
+  ms: number
+  requestId: string
+}
+
+export type ServerDevEventRPCFailed = {
+  type: "RPC_FAILED"
+  url: string
+  status: number
+  errorMessage: string
+  ms: number
+  requestId: string
+}
+
 export type ServerDevEvent =
   | DevEventEmitterConnectionEvent
 
@@ -40,23 +68,9 @@ export type ServerDevEvent =
   | { type: "BUILD_RPCS_FAILED"; errorMessage: string }
 
   // Running the RPC's
-  | {
-      type: "RPC_START"
-      url?: string
-    }
-  | {
-      type: "RPC_SUCCESS"
-      url?: string
-      status: number
-      ms: number
-    }
-  | {
-      type: "RPC_FAILED"
-      url?: string
-      status: number
-      errorMessage: string
-      ms: number
-    }
+  | ServerDevEventRPCStart
+  | ServerDevEventRPCSuccess
+  | ServerDevEventRPCFailed
 
 export type ClientDevEvent =
   | DevEventEmitterConnectionEvent

@@ -8,7 +8,7 @@ import {
 } from "@samen/core"
 import crypto from "crypto"
 import { promises as fs } from "fs"
-import http from "http"
+import http, { request } from "http"
 import path, { resolve } from "path"
 import ts from "typescript"
 import WatchProgram from "./WatchProgram"
@@ -40,6 +40,7 @@ export default class DevServer {
   private readonly projectPath: string
   private readonly eventEmitter: ServerDevEventEmitter
   private routes: RPCRoutes = {}
+  private requestIndex = 0
 
   constructor(command: ServerCommandServe, projectPath: string) {
     this.command = command
@@ -145,6 +146,13 @@ export default class DevServer {
     req: http.IncomingMessage,
     res: http.ServerResponse,
   ) {
+    if (!req.url) {
+      throw new Error("No url in request")
+    }
+
+    this.requestIndex = this.requestIndex + 1
+    const requestId = `${this.requestIndex}`
+
     res.setHeader("Access-Control-Allow-Origin", "*")
     res.setHeader("Access-Control-Allow-Methods", "POST")
     res.setHeader("Access-Control-Allow-Headers", "content-type, authorization")
@@ -170,7 +178,7 @@ export default class DevServer {
       }
     }
 
-    this.eventEmitter.emit({ type: "RPC_START", url: req.url })
+    this.eventEmitter.emit({ type: "RPC_START", url: req.url, requestId })
 
     if (req.method === "POST") {
       res.setHeader("Content-Type", "application/json")
@@ -192,6 +200,7 @@ export default class DevServer {
                 url: req.url,
                 status: res.statusCode,
                 ms: Date.now() - startTime,
+                requestId,
               })
             } else if (rpcResult.status === 400) {
               res.write(JSON.stringify(rpcResult.errors, null, 4))
@@ -201,6 +210,7 @@ export default class DevServer {
                 status: res.statusCode,
                 errorMessage: JSON.stringify(rpcResult.errors),
                 ms: Date.now() - startTime,
+                requestId,
               })
             } else if (rpcResult.status === 500) {
               res.write(JSON.stringify(rpcResult.error))
@@ -210,6 +220,7 @@ export default class DevServer {
                 status: res.statusCode,
                 errorMessage: rpcResult.error,
                 ms: Date.now() - startTime,
+                requestId,
               })
             } else {
               throw new Error("Unsupported http status")
@@ -226,6 +237,7 @@ export default class DevServer {
               status: 500,
               errorMessage,
               ms: Date.now() - startTime,
+              requestId,
             })
           } finally {
             res.end()
@@ -244,6 +256,7 @@ export default class DevServer {
       status: 404,
       errorMessage: "RPC not found",
       ms: Date.now() - startTime,
+      requestId,
     })
   }
 

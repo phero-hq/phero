@@ -2,14 +2,15 @@ import {
   addDevEventListener,
   ServerCommandServe,
   ServerDevEvent,
+  ServerDevEventRPC,
 } from "@samen/dev"
 import { Box, Text } from "ink"
 import path from "path"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { spawnChildProcess } from "../../process"
 import { ServerProject } from "../../utils/getProjects"
-import ActivityIndicator from "../ActivityIndicator"
-import ProjectStatusEventList, { StyledEvent } from "./ProjectStatusEventList"
+import ProjectStatus from "../ProjectStatus"
+import ServerProjectStatusRequests from "./ServerProjectStatusRequests"
 
 export default function ServerProjectStatus({
   project,
@@ -22,9 +23,20 @@ export default function ServerProjectStatus({
   const [isBuilding, setBuilding] = useState(true)
   const [error, setError] = useState<string>()
 
-  const [events, setEvents] = useState<StyledEvent[]>([])
-  const addEvent = useCallback((addedEvent: StyledEvent) => {
-    setEvents((oldEvents) => [...oldEvents, addedEvent])
+  const [requests, setRequests] = useState<ServerDevEventRPC[]>([])
+  const oldRequests = useRef<ServerDevEventRPC[]>([])
+  const addRequest = useCallback((addedRequest: ServerDevEventRPC) => {
+    const newRequests = [...oldRequests.current]
+    const index = newRequests.findIndex(
+      (r) => r.requestId === addedRequest.requestId,
+    )
+    if (index === -1) {
+      newRequests.push(addedRequest)
+    } else {
+      newRequests[index] = addedRequest
+    }
+    setRequests(newRequests)
+    oldRequests.current = newRequests
   }, [])
 
   const onEvent = useCallback((event: ServerDevEvent) => {
@@ -36,27 +48,20 @@ export default function ServerProjectStatus({
 
     switch (event.type) {
       case "LISTENER_CONNECTED":
-        setStatus("Waiting for changes")
-        setBuilding(false)
-        break
-
       case "SERVE_INIT":
+      case "SERVE_READY":
         setStatus("Initializing server...")
         setBuilding(true)
         break
 
-      case "SERVE_READY":
-        setStatus("Waiting for changes")
-        setBuilding(false)
-        break
-
+      // TODO
       // case "BUILD_PROJECT_START":
       //   setStatus("Building project...")
       //   setBuilding(true)
       //   break
 
       case "BUILD_PROJECT_SUCCESS":
-        setStatus("Waiting for changes")
+        setStatus("Project is built")
         setBuilding(false)
         break
 
@@ -72,7 +77,7 @@ export default function ServerProjectStatus({
         break
 
       case "BUILD_MANIFEST_SUCCESS":
-        setStatus("Waiting for changes")
+        setStatus("Manifest is generated")
         setBuilding(false)
         break
 
@@ -88,7 +93,7 @@ export default function ServerProjectStatus({
         break
 
       case "BUILD_RPCS_SUCCESS":
-        setStatus("Waiting for changes")
+        setStatus("Server is ready, waiting for changes.")
         setBuilding(false)
         break
 
@@ -98,18 +103,15 @@ export default function ServerProjectStatus({
         break
 
       case "RPC_START":
-        addEvent(["default", `${event.url}...`])
+        addRequest(event)
         break
 
       case "RPC_SUCCESS":
-        addEvent(["default", `${event.url} (${event.ms}ms)`])
+        addRequest(event)
         break
 
       case "RPC_FAILED":
-        addEvent([
-          "error",
-          `${event.url} (${event.ms}ms)\n  ${event.status}: ${event.errorMessage}`,
-        ])
+        addRequest(event)
         break
 
       default:
@@ -143,32 +145,23 @@ export default function ServerProjectStatus({
   }, [])
 
   return (
-    <Box flexDirection="column" flexGrow={1}>
-      <Text>samen-server @ {project.path}</Text>
+    <Box flexDirection="column">
+      <ProjectStatus
+        type="server"
+        projectPath={project.path}
+        status={isBuilding ? "busy" : error ? "error" : "default"}
+        message={status}
+      />
 
-      <Box marginTop={1} marginBottom={1}>
-        {isBuilding ? (
-          <Text>
-            <Text color="yellow">
-              <ActivityIndicator />
-            </Text>
-            {` ${status}`}
-          </Text>
-        ) : error ? (
-          <Text>
-            <Text color="red">✖</Text>
-            <Text>{` ${status}\n`}</Text>
-            <Text>{error}</Text>
-          </Text>
-        ) : (
-          <Text>
-            <Text color="green">✓</Text>
-            {` ${status}`}
-          </Text>
-        )}
-      </Box>
-
-      <ProjectStatusEventList events={events} />
+      {error ? (
+        <Box paddingX={4} paddingTop={1}>
+          <Text color="red">{error}</Text>
+        </Box>
+      ) : requests.length > 0 ? (
+        <Box paddingX={4} paddingY={1}>
+          <ServerProjectStatusRequests requests={requests} />
+        </Box>
+      ) : null}
     </Box>
   )
 }

@@ -55,7 +55,7 @@ export default class DevEnv extends React.Component<Props, State> {
 function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
   const [isLoading, setLoading] = useState(true)
   const [projects, setProjects] = useState<Project[]>([])
-  const { orientation, columns, rows } = useScreenSize()
+  const { rows } = useScreenSize()
 
   const updateProjects = useCallback(async () => {
     try {
@@ -81,22 +81,13 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
   }
 
   return (
-    <Box
-      width={columns}
-      height={command.verbose ? undefined : rows}
-      flexDirection={orientation === "portrait" ? "column" : "row"}
-    >
-      {projects.map((project, index) => (
-        <Box
-          key={project.path}
-          flexGrow={project.type === "server" ? 1 : undefined}
-          flexBasis={project.type === "server" ? "100%" : undefined}
-          paddingY={1}
-          paddingLeft={1}
-          paddingRight={4}
-        >
-          {project.type === "client" && (
+    // <Box height={command.verbose ? undefined : rows}>
+    <Box flexDirection="column" width="100%" padding={1}>
+      {projects.map((project, index) => {
+        if (project.type === "client") {
+          return (
             <ClientProjectStatus
+              key={project.path}
               project={project}
               command={{
                 name: ClientCommandName.Watch,
@@ -105,9 +96,13 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
                 verbose: command.verbose,
               }}
             />
-          )}
-          {project.type === "server" && (
+          )
+        }
+
+        if (project.type === "server") {
+          return (
             <ServerProjectStatus
+              key={project.path}
               project={project}
               command={{
                 name: ServerCommandName.Serve,
@@ -115,9 +110,10 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
                 verbose: command.verbose,
               }}
             />
-          )}
-        </Box>
-      ))}
+          )
+        }
+      })}
     </Box>
+    // </Box>
   )
 }
