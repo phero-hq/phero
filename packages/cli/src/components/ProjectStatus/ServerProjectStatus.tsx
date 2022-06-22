@@ -32,6 +32,8 @@ export default function ServerProjectStatus({
       console.log("server", event)
     }
 
+    setError(undefined)
+
     switch (event.type) {
       case "LISTENER_CONNECTED":
         setStatus("Waiting for changes")
@@ -48,10 +50,10 @@ export default function ServerProjectStatus({
         setBuilding(false)
         break
 
-      case "BUILD_PROJECT_START":
-        setStatus("Building project...")
-        setBuilding(true)
-        break
+      // case "BUILD_PROJECT_START":
+      //   setStatus("Building project...")
+      //   setBuilding(true)
+      //   break
 
       case "BUILD_PROJECT_SUCCESS":
         setStatus("Waiting for changes")
@@ -60,7 +62,7 @@ export default function ServerProjectStatus({
 
       case "BUILD_PROJECT_FAILED":
         setStatus("Could not build project")
-        setError(event.error)
+        setError(event.errorMessage)
         setBuilding(false)
         break
 
@@ -76,7 +78,7 @@ export default function ServerProjectStatus({
 
       case "BUILD_MANIFEST_FAILED":
         setStatus("Could not build manifest")
-        setError(event.error)
+        setError(event.errorMessage)
         setBuilding(false)
         break
 
@@ -92,7 +94,6 @@ export default function ServerProjectStatus({
 
       case "BUILD_RPCS_FAILED":
         setStatus(`Could not build RPC's`)
-        setError(event.error)
         setBuilding(false)
         break
 
@@ -107,7 +108,7 @@ export default function ServerProjectStatus({
       case "RPC_FAILED":
         addEvent([
           "error",
-          `${event.url} (${event.ms}ms)\n  ${event.status}: ${event.message}`,
+          `${event.url} (${event.ms}ms)\n  ${event.status}: ${event.errorMessage}`,
         ])
         break
 
@@ -152,6 +153,12 @@ export default function ServerProjectStatus({
               <ActivityIndicator />
             </Text>
             {` ${status}`}
+          </Text>
+        ) : error ? (
+          <Text>
+            <Text color="red">✖</Text>
+            <Text>{` ${status}\n`}</Text>
+            <Text>{error}</Text>
           </Text>
         ) : (
           <Text>

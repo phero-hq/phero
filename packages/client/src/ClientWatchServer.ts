@@ -1,3 +1,4 @@
+import { PortInUseError } from "@samen/core"
 import {
   addDevEventListener,
   ClientDevEventEmitter,
@@ -69,7 +70,7 @@ export default class ClientWatchServer {
     } catch (error) {
       this.eventEmitter.emit({
         type: "BUILD_FAILED",
-        error: error instanceof Error ? error.message : "unknown",
+        errorMessage: error instanceof Error ? error.message : "unknown",
       })
     }
   }
@@ -83,7 +84,7 @@ export default class ClientWatchServer {
     })
     server.on("error", (error) => {
       if (hasErrorCode(error) && error.code === "EADDRINUSE") {
-        throw new Error(`Port ${this.command.port} is already in use`)
+        throw new PortInUseError(this.command.port)
       } else {
         throw error
       }

@@ -4,11 +4,12 @@ import {
   generateRPCProxy,
   ParsedSamenApp,
   parseSamenApp,
+  PortInUseError,
 } from "@samen/core"
 import crypto from "crypto"
 import { promises as fs } from "fs"
 import http from "http"
-import path from "path"
+import path, { resolve } from "path"
 import ts from "typescript"
 import WatchProgram from "./WatchProgram"
 
@@ -35,22 +36,20 @@ function hasErrorCode(error: unknown): error is { code: string } {
 }
 
 export default class DevServer {
-  private readonly server: http.Server
-  private readonly program: WatchProgram
   private readonly command: ServerCommandServe
   private readonly projectPath: string
   private readonly eventEmitter: ServerDevEventEmitter
-
   private routes: RPCRoutes = {}
-  private currentClientCodeHash = ""
-  private clients: http.ServerResponse[] = []
 
   constructor(command: ServerCommandServe, projectPath: string) {
     this.command = command
     this.projectPath = projectPath
     this.eventEmitter = new ServerDevEventEmitter()
-    this.server = this.startHttpServer()
-    this.program = this.startWatch()
+  }
+
+  public async start() {
+    const server = await this.startHttpServer()
+    const program = this.startWatch()
   }
 
   private get manifestPath(): string {
@@ -64,32 +63,40 @@ export default class DevServer {
 
   private startWatch(): WatchProgram {
     // Start code watch
-    this.eventEmitter.emit({ type: "BUILD_PROJECT_START" })
-    const program = new WatchProgram(this.projectPath)
-    program.onCompileSucceeded(this.codeCompiled.bind(this))
-    program.onError(this.codeErrored.bind(this))
+    const program = new WatchProgram(
+      this.projectPath,
+      this.buildProjectSuccess.bind(this),
+      this.buildProjectFailed.bind(this),
+    )
+    program.start()
     return program
   }
 
-  private startHttpServer(): http.Server {
-    this.eventEmitter.emit({ type: "SERVE_INIT" })
-    const server = http.createServer()
-    server.on("request", this.requestHandler.bind(this))
-    server.on("listening", () => {
-      this.eventEmitter.emit({ type: "SERVE_READY" })
+  private startHttpServer(): Promise<http.Server> {
+    return new Promise((resolve, reject) => {
+      this.eventEmitter.emit({ type: "SERVE_INIT" })
+      const server = http.createServer()
+
+      server.on("request", this.requestHandler.bind(this))
+
+      server.on("listening", () => {
+        resolve(server)
+        this.eventEmitter.emit({ type: "SERVE_READY" })
+      })
+
+      server.on("error", (error) => {
+        if (hasErrorCode(error) && error.code === "EADDRINUSE") {
+          reject(new PortInUseError(this.command.port))
+        } else {
+          reject(error)
+        }
+      })
+
+      server.listen(this.command.port)
     })
-    server.on("error", (error) => {
-      if (hasErrorCode(error) && error.code === "EADDRINUSE") {
-        throw new Error(`Port ${this.command.port} is already in use`)
-      } else {
-        throw error
-      }
-    })
-    server.listen(this.command.port)
-    return server
   }
 
-  private async codeCompiled(
+  private async buildProjectSuccess(
     samenSourceFile: ts.SourceFile,
     typeChecker: ts.TypeChecker,
   ): Promise<void> {
@@ -103,10 +110,9 @@ export default class DevServer {
       await fs.writeFile(this.manifestPath, dts)
       this.eventEmitter.emit({ type: "BUILD_MANIFEST_SUCCESS" })
     } catch (error) {
-      console.error(error)
       this.eventEmitter.emit({
         type: "BUILD_MANIFEST_FAILED",
-        error: "TODO",
+        errorMessage: error instanceof Error ? error.message : "unknown error",
       })
       return
     }
@@ -120,17 +126,19 @@ export default class DevServer {
 
       this.eventEmitter.emit({ type: "BUILD_RPCS_SUCCESS" })
     } catch (error) {
-      console.error(error)
       this.eventEmitter.emit({
         type: "BUILD_RPCS_FAILED",
-        error: "TODO",
+        errorMessage: error instanceof Error ? error.message : "unknown error",
       })
       return
     }
   }
 
-  private codeErrored(diagnostics: readonly ts.Diagnostic[]) {
-    this.eventEmitter.emit({ type: "BUILD_PROJECT_FAILED", error: "TODO" })
+  private buildProjectFailed(errorMessage: string) {
+    this.eventEmitter.emit({
+      type: "BUILD_PROJECT_FAILED",
+      errorMessage,
+    })
   }
 
   private async requestHandler(
@@ -191,32 +199,32 @@ export default class DevServer {
                 type: "RPC_FAILED",
                 url: req.url,
                 status: res.statusCode,
-                message: JSON.stringify(rpcResult.errors),
+                errorMessage: JSON.stringify(rpcResult.errors),
                 ms: Date.now() - startTime,
               })
             } else if (rpcResult.status === 500) {
               res.write(JSON.stringify(rpcResult.error))
-              console.error(rpcResult.error)
               this.eventEmitter.emit({
                 type: "RPC_FAILED",
                 url: req.url,
                 status: res.statusCode,
-                message: rpcResult.error,
+                errorMessage: rpcResult.error,
                 ms: Date.now() - startTime,
               })
             } else {
               throw new Error("Unsupported http status")
             }
-          } catch (e: any) {
+          } catch (e) {
             // Indicates a bug in Samen
+            const errorMessage =
+              e instanceof Error ? e.message : "unknown error"
             res.statusCode = 500
-            console.error(e)
-            res.write(JSON.stringify({ error: e.message }))
+            res.write(JSON.stringify({ errorMessage }))
             this.eventEmitter.emit({
               type: "RPC_FAILED",
               url: req.url,
               status: 500,
-              message: JSON.stringify({ error: e.message }),
+              errorMessage,
               ms: Date.now() - startTime,
             })
           } finally {
@@ -234,7 +242,7 @@ export default class DevServer {
       type: "RPC_FAILED",
       url: req.url,
       status: 404,
-      message: "RPC not found",
+      errorMessage: "RPC not found",
       ms: Date.now() - startTime,
     })
   }

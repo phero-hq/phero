@@ -18,3 +18,9 @@ export class ParseError extends Error {
     super(message + "-->" + node.getText())
   }
 }
+
+export class PortInUseError extends Error {
+  constructor(port: number) {
+    super(`Port ${port} is already in use`)
+  }
+}
