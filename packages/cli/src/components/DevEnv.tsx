@@ -44,11 +44,7 @@ export default class DevEnv extends React.Component<Props, State> {
       return null
     }
 
-    return (
-      <ScreenSizeProvider>
-        <DevEnvContent command={this.props.command} />
-      </ScreenSizeProvider>
-    )
+    return <DevEnvContent command={this.props.command} />
   }
 }
 
