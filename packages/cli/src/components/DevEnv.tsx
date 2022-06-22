@@ -7,11 +7,10 @@ import {
   ServerCommandName,
 } from "@samen/dev"
 import { Box } from "ink"
-import React, { useCallback, useEffect, useState } from "react"
-import { ScreenSizeProvider, useScreenSize } from "../context/ScreenSizeContext"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { fatalError } from "../process"
-import getProjects, { Project } from "../utils/getProjects"
-import ActivityIndicator from "./ActivityIndicator"
+import { Project } from "../types"
+import getProjects from "../utils/getProjects"
 import ClientProjectStatus from "./ProjectStatus/ClientProjectStatus"
 import ServerProjectStatus from "./ProjectStatus/ServerProjectStatus"
 
@@ -49,9 +48,17 @@ export default class DevEnv extends React.Component<Props, State> {
 }
 
 function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
-  const [isLoading, setLoading] = useState(true)
   const [projects, setProjects] = useState<Project[]>([])
-  const { rows } = useScreenSize()
+
+  const maxProjectPathLength = useMemo(() => {
+    let result = 0
+    for (const project of projects) {
+      if (project.path.length > result) {
+        result = project.path.length
+      }
+    }
+    return result
+  }, [projects])
 
   const updateProjects = useCallback(async () => {
     try {
@@ -67,17 +74,10 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
   }, [])
 
   useEffect(() => {
-    const interval = setInterval(updateProjects, 10000)
-    updateProjects().then(() => setLoading(false))
-    return () => clearInterval(interval)
+    updateProjects()
   }, [])
 
-  if (isLoading) {
-    return <ActivityIndicator />
-  }
-
   return (
-    // <Box height={command.verbose ? undefined : rows}>
     <Box flexDirection="column" width="100%" padding={1}>
       {projects.map((project, index) => {
         if (project.type === "client") {
@@ -91,6 +91,7 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
                 server: { url: DEFAULT_SERVER_URL },
                 verbose: command.verbose,
               }}
+              maxProjectPathLength={maxProjectPathLength}
             />
           )
         }
@@ -105,11 +106,11 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
                 port: DEFAULT_SERVER_PORT,
                 verbose: command.verbose,
               }}
+              maxProjectPathLength={maxProjectPathLength}
             />
           )
         }
       })}
     </Box>
-    // </Box>
   )
 }

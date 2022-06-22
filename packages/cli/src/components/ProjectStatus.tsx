@@ -8,6 +8,7 @@ interface Props {
   projectPath: string
   status: StyledEventStatus
   message: string
+  maxProjectPathLength: number
 }
 
 export default function ProjectStatus({
@@ -15,15 +16,15 @@ export default function ProjectStatus({
   projectPath,
   status,
   message,
+  maxProjectPathLength,
 }: Props): JSX.Element {
   return (
     <Box>
-      <Box marginRight={1}>
-        <Text dimColor>{`[samen-${type} @ `}</Text>
+      <Box marginRight={1} width={15 + maxProjectPathLength}>
+        <Text dimColor>{`samen-${type} @ `}</Text>
         <Text dimColor color="yellow">
           {projectPath}
         </Text>
-        <Text dimColor>]</Text>
       </Box>
 
       <Box>

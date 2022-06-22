@@ -7,17 +7,17 @@ import { Box, Text } from "ink"
 import path from "path"
 import { useCallback, useEffect, useState } from "react"
 import { spawnChildProcess } from "../../process"
-import { StyledEvent } from "../../types"
-import { ClientProject } from "../../utils/getProjects"
-import ActivityIndicator from "../ActivityIndicator"
+import { ClientProject, StyledEvent } from "../../types"
 import ProjectStatus from "../ProjectStatus"
 
 export default function ClientProjectStatus({
   project,
   command,
+  maxProjectPathLength,
 }: {
   project: ClientProject
   command: ClientCommandWatch
+  maxProjectPathLength: number
 }) {
   const [event, setEvent] = useState<StyledEvent>(["busy", "Initializing..."])
   const [error, setError] = useState<string>()
@@ -95,6 +95,7 @@ export default function ClientProjectStatus({
         projectPath={project.path}
         status={event[0]}
         message={event[1]}
+        maxProjectPathLength={maxProjectPathLength}
       />
 
       {error && (

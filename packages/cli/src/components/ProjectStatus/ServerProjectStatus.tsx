@@ -8,16 +8,18 @@ import { Box, Text } from "ink"
 import path from "path"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { spawnChildProcess } from "../../process"
-import { ServerProject } from "../../utils/getProjects"
+import { ServerProject } from "../../types"
 import ProjectStatus from "../ProjectStatus"
 import ServerProjectStatusRequests from "./ServerProjectStatusRequests"
 
 export default function ServerProjectStatus({
   project,
   command,
+  maxProjectPathLength,
 }: {
   project: ServerProject
   command: ServerCommandServe
+  maxProjectPathLength: number
 }) {
   const [status, setStatus] = useState<string>("Initializing...")
   const [isBuilding, setBuilding] = useState(true)
@@ -151,6 +153,7 @@ export default function ServerProjectStatus({
         projectPath={project.path}
         status={isBuilding ? "busy" : error ? "error" : "default"}
         message={status}
+        maxProjectPathLength={maxProjectPathLength}
       />
 
       {error ? (
