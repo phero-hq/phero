@@ -8,6 +8,14 @@ import {
 import http from "http"
 import buildClient from "./utils/buildClient"
 
+function hasErrorCode(error: unknown): error is { code: string } {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    typeof (error as any).code === "string"
+  )
+}
+
 export default class ClientWatchServer {
   private readonly server: http.Server
   private readonly command: ClientCommandWatch
@@ -72,6 +80,13 @@ export default class ClientWatchServer {
     server.on("request", this.requestHandler.bind(this))
     server.on("listening", () => {
       this.eventEmitter.emit({ type: "WATCH_READY" })
+    })
+    server.on("error", (error) => {
+      if (hasErrorCode(error) && error.code === "EADDRINUSE") {
+        throw new Error(`Port ${this.command.port} is already in use`)
+      } else {
+        throw error
+      }
     })
     server.listen(this.command.port)
     return server

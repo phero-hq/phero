@@ -29,19 +29,26 @@ export function spawnChildProcess(
   argv: string[],
   cwd: string,
 ): ChildProcess {
-  const { kill, pid } = spawn(executable, argv, { cwd })
+  const { kill, pid, stderr } = spawn(executable, argv, { cwd })
     .on("close", (code) => {
-      fatalError(`${cwd + executable} closed with code: ${code}`)
+      throw new Error(`${executable} closed with code: ${code}`)
     })
-    .on("exit", (code) => {
-      fatalError(`${cwd + executable} exited with code: ${code}`)
+    .on("exit", (code, signal) => {
+      throw new Error(`${executable} exited with code: ${code} ${signal}`)
     })
     .on("disconnect", () => {
-      fatalError(`${cwd + executable} disconnected`)
+      throw new Error(`${executable} disconnected`)
+    })
+    .on("uncaughtException", () => {
+      throw new Error(`uncaughtException in ${executable}`)
     })
     .on("error", (error) => {
-      fatalError(`${cwd + executable} errored with message: ${error.message}`)
+      throw new Error(`${executable} errored with message: ${error.message}`)
     })
+
+  stderr.on("data", (data) => {
+    throw new Error(data.toString().trim())
+  })
 
   const childProcess = {
     executable,

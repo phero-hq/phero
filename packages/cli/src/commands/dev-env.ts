@@ -7,8 +7,6 @@ import { fatalError, killAll } from "../process"
 export default function devEnv(command: SamenCommandDevEnv) {
   process
     .on("SIGINT", () => killAll("SIGINT"))
-    .on("SIGQUIT", () => killAll("SIGQUIT"))
-    .on("SIGTERM", () => killAll("SIGTERM"))
     .on("exit", () => killAll("SIGINT"))
     .on("beforeExit", () => killAll("SIGINT"))
     .on("uncaughtException", (error) => fatalError(error))

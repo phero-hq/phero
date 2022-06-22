@@ -40,6 +40,7 @@ export default class DevEnv extends React.Component<Props, State> {
 
   render() {
     if (this.state.error) {
+      // This clears the UI, so that `fatalError` can print the error and exit:
       return null
     }
 
