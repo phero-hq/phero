@@ -1,4 +1,3 @@
-import { ServerDevEventEmitter, ServerCommandServe } from "@samen/dev"
 import {
   generateAppDeclarationFile,
   generateRPCProxy,
@@ -6,10 +5,11 @@ import {
   parseSamenApp,
   PortInUseError,
 } from "@samen/core"
+import { ServerCommandServe, ServerDevEventEmitter } from "@samen/dev"
 import crypto from "crypto"
 import { promises as fs } from "fs"
-import http, { request } from "http"
-import path, { resolve } from "path"
+import http from "http"
+import path from "path"
 import ts from "typescript"
 import WatchProgram from "./WatchProgram"
 
@@ -178,7 +178,12 @@ export default class DevServer {
       }
     }
 
-    this.eventEmitter.emit({ type: "RPC_START", url: req.url, requestId })
+    this.eventEmitter.emit({
+      type: "RPC_START",
+      url: req.url,
+      requestId,
+      dateTime: new Date().toISOString(),
+    })
 
     if (req.method === "POST") {
       res.setHeader("Content-Type", "application/json")
@@ -201,6 +206,7 @@ export default class DevServer {
                 status: res.statusCode,
                 ms: Date.now() - startTime,
                 requestId,
+                dateTime: new Date().toISOString(),
               })
             } else if (rpcResult.status === 400) {
               res.write(JSON.stringify(rpcResult.errors, null, 4))
@@ -211,6 +217,7 @@ export default class DevServer {
                 errorMessage: JSON.stringify(rpcResult.errors),
                 ms: Date.now() - startTime,
                 requestId,
+                dateTime: new Date().toISOString(),
               })
             } else if (rpcResult.status === 500) {
               res.write(JSON.stringify(rpcResult.error))
@@ -221,6 +228,7 @@ export default class DevServer {
                 errorMessage: rpcResult.error,
                 ms: Date.now() - startTime,
                 requestId,
+                dateTime: new Date().toISOString(),
               })
             } else {
               throw new Error("Unsupported http status")
@@ -238,6 +246,7 @@ export default class DevServer {
               errorMessage,
               ms: Date.now() - startTime,
               requestId,
+              dateTime: new Date().toISOString(),
             })
           } finally {
             res.end()
@@ -257,6 +266,7 @@ export default class DevServer {
       errorMessage: "RPC not found",
       ms: Date.now() - startTime,
       requestId,
+      dateTime: new Date().toISOString(),
     })
   }
 

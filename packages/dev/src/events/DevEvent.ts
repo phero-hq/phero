@@ -26,6 +26,7 @@ export type ServerDevEventRPCStart = {
   type: "RPC_START"
   url: string
   requestId: string
+  dateTime: string // ISO-8601
 }
 
 export type ServerDevEventRPCSuccess = {
@@ -34,6 +35,7 @@ export type ServerDevEventRPCSuccess = {
   status: number
   ms: number
   requestId: string
+  dateTime: string // ISO-8601
 }
 
 export type ServerDevEventRPCFailed = {
@@ -43,6 +45,7 @@ export type ServerDevEventRPCFailed = {
   errorMessage: string
   ms: number
   requestId: string
+  dateTime: string // ISO-8601
 }
 
 export type ServerDevEvent =

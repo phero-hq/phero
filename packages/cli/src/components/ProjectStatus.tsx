@@ -22,9 +22,7 @@ export default function ProjectStatus({
     <Box>
       <Box marginRight={1} width={15 + maxProjectPathLength}>
         <Text dimColor>{`samen-${type} @ `}</Text>
-        <Text dimColor color="yellow">
-          {projectPath}
-        </Text>
+        <Text color="yellow">{projectPath}</Text>
       </Box>
 
       <Box>

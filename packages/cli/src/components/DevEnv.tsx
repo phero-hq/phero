@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { fatalError } from "../process"
 import { Project } from "../types"
 import getProjects from "../utils/getProjects"
+import maxLength from "../utils/maxLength"
 import ClientProjectStatus from "./ProjectStatus/ClientProjectStatus"
 import ServerProjectStatus from "./ProjectStatus/ServerProjectStatus"
 
@@ -51,13 +52,7 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
   const [projects, setProjects] = useState<Project[]>([])
 
   const maxProjectPathLength = useMemo(() => {
-    let result = 0
-    for (const project of projects) {
-      if (project.path.length > result) {
-        result = project.path.length
-      }
-    }
-    return result
+    return maxLength(projects.map((p) => p.path))
   }, [projects])
 
   const updateProjects = useCallback(async () => {
