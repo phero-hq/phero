@@ -1,9 +1,14 @@
-import { ClientCommandWatch, ClientDevEvent } from "@samen/dev"
+import {
+  addDevEventListener,
+  ClientCommandWatch,
+  ClientDevEvent,
+} from "@samen/dev"
 import { Box, Text } from "ink"
-import Spinner from "ink-spinner"
+import path from "path"
 import { useCallback, useEffect, useState } from "react"
+import { spawnChildProcess } from "../../process"
 import { ClientProject } from "../../utils/getProjects"
-import { spawnClientWatch } from "../../utils/processes"
+import ActivityIndicator from "../ActivityIndicator"
 import { StyledEvent } from "./ProjectStatusEventList"
 
 export default function ClientProjectStatus({
@@ -65,8 +70,26 @@ export default function ClientProjectStatus({
   }, [])
 
   useEffect(() => {
-    const kill = spawnClientWatch(project.path, onEvent, command)
-    return () => kill()
+    const removeEventListener = addDevEventListener(
+      `http://localhost:${command.port}`,
+      onEvent,
+      (status) => {
+        if (command.verbose) {
+          console.log({ status })
+        }
+      },
+    )
+
+    const childProcess = spawnChildProcess(
+      "./node_modules/.bin/samen-client",
+      ["watch", "--port", `${command.port}`],
+      path.resolve(project.path),
+    )
+
+    return () => {
+      removeEventListener()
+      childProcess.kill("SIGINT")
+    }
   }, [])
 
   return (
@@ -77,7 +100,7 @@ export default function ClientProjectStatus({
         {event[0] === "busy" && (
           <Text>
             <Text color="yellow">
-              <Spinner type="triangle" />
+              <ActivityIndicator />
             </Text>
             {` ${event[1]}`}
           </Text>

@@ -6,28 +6,43 @@ import {
   SamenCommandDevEnv,
   ServerCommandName,
 } from "@samen/dev"
-import { Box, Text } from "ink"
-import React, { ErrorInfo, useCallback, useEffect, useState } from "react"
+import { Box } from "ink"
+import React, { useCallback, useEffect, useState } from "react"
 import { ScreenSizeProvider, useScreenSize } from "../context/ScreenSizeContext"
+import { fatalError } from "../process"
 import getProjects, { Project } from "../utils/getProjects"
-import ErrorMessage from "./ErrorMessage"
+import ActivityIndicator from "./ActivityIndicator"
 import ClientProjectStatus from "./ProjectStatus/ClientProjectStatus"
 import ServerProjectStatus from "./ProjectStatus/ServerProjectStatus"
 
-export default class DevEnv extends React.Component<{
+interface Props {
   command: SamenCommandDevEnv
-}> {
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    if (this.props.command.verbose) {
-      console.error("Error:", error)
-      console.error(errorInfo)
-    } else {
-      console.error("Something went wrong, try again.")
+}
+
+interface State {
+  error?: Error
+}
+
+export default class DevEnv extends React.Component<Props, State> {
+  state: State = {}
+
+  static getDerivedStateFromError(error: Error) {
+    return { error }
+  }
+
+  componentDidUpdate() {
+    if (this.state.error) {
+      setTimeout(() => {
+        fatalError(this.state.error)
+      }, 100)
     }
-    process.exit(1)
   }
 
   render() {
+    if (this.state.error) {
+      return null
+    }
+
     return (
       <ScreenSizeProvider>
         <DevEnvContent command={this.props.command} />
@@ -38,80 +53,70 @@ export default class DevEnv extends React.Component<{
 
 function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
   const [isLoading, setLoading] = useState(true)
-  const [error, setError] = useState<unknown>()
   const [projects, setProjects] = useState<Project[]>([])
   const { orientation, columns, rows } = useScreenSize()
 
   const updateProjects = useCallback(async () => {
     try {
-      setProjects(await getProjects())
+      const newProjects = await getProjects()
+      if (newProjects.length === 0) {
+        throw new Error("No Samen project found")
+      } else {
+        setProjects(newProjects)
+      }
     } catch (error) {
-      console.log("error!!!", error)
-      setError(error)
+      fatalError(error)
     }
   }, [])
 
   useEffect(() => {
     const interval = setInterval(updateProjects, 10000)
-    updateProjects().then(() => {
-      console.log("not loading anymore")
-      setLoading(false)
-    })
+    updateProjects().then(() => setLoading(false))
     return () => clearInterval(interval)
   }, [])
 
-  if (error) {
-    return <ErrorMessage error={error} verbose={command.verbose} />
-  }
-
   if (isLoading) {
-    return <Text>Initializing...</Text>
+    return <ActivityIndicator />
   }
 
   return (
-    <>
-      {projects.length === 0 ? (
-        <Text>No projects found</Text>
-      ) : (
+    <Box
+      width={columns}
+      height={command.verbose ? undefined : rows}
+      flexDirection={orientation === "portrait" ? "column" : "row"}
+    >
+      {projects.map((project, index) => (
         <Box
-          width={columns}
-          height={command.verbose ? undefined : rows}
-          flexDirection={orientation === "portrait" ? "column" : "row"}
+          key={project.path}
+          flexGrow={project.type === "server" ? 1 : undefined}
+          flexBasis={project.type === "server" ? "100%" : undefined}
+          paddingY={1}
+          paddingLeft={1}
+          paddingRight={4}
         >
-          {projects.map((project, index) => (
-            <Box
-              key={project.path}
-              flexGrow={project.type === "server" ? 1 : undefined}
-              flexBasis={project.type === "server" ? "100%" : undefined}
-              paddingY={1}
-              paddingLeft={1}
-              paddingRight={4}
-            >
-              {project.type === "client" && (
-                <ClientProjectStatus
-                  project={project}
-                  command={{
-                    name: ClientCommandName.Watch,
-                    port: DEFAULT_CLIENT_PORT + index,
-                    server: { url: DEFAULT_SERVER_URL },
-                    verbose: command.verbose,
-                  }}
-                />
-              )}
-              {project.type === "server" && (
-                <ServerProjectStatus
-                  project={project}
-                  command={{
-                    name: ServerCommandName.Serve,
-                    port: DEFAULT_SERVER_PORT,
-                    verbose: command.verbose,
-                  }}
-                />
-              )}
-            </Box>
-          ))}
+          {project.type === "client" && (
+            <ClientProjectStatus
+              project={project}
+              command={{
+                name: ClientCommandName.Watch,
+                port: DEFAULT_CLIENT_PORT + index,
+                server: { url: DEFAULT_SERVER_URL },
+                verbose: command.verbose,
+              }}
+            />
+          )}
+          {project.type === "server" && (
+            <ServerProjectStatus
+              project={project}
+              command={{
+                name: ServerCommandName.Serve,
+                port: DEFAULT_SERVER_PORT,
+                verbose: command.verbose,
+              }}
+            />
+          )}
         </Box>
-      )}
-    </>
+      ))}
+    </Box>
   )
 }

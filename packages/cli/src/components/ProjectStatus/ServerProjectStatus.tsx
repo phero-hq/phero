@@ -1,9 +1,14 @@
-import { ServerCommandServe, ServerDevEvent } from "@samen/dev"
+import {
+  addDevEventListener,
+  ServerCommandServe,
+  ServerDevEvent,
+} from "@samen/dev"
 import { Box, Text } from "ink"
-import Spinner from "ink-spinner"
+import path from "path"
 import { useCallback, useEffect, useState } from "react"
+import { spawnChildProcess } from "../../process"
 import { ServerProject } from "../../utils/getProjects"
-import { spawnServerWatch } from "../../utils/processes"
+import ActivityIndicator from "../ActivityIndicator"
 import ProjectStatusEventList, { StyledEvent } from "./ProjectStatusEventList"
 
 export default function ServerProjectStatus({
@@ -114,8 +119,26 @@ export default function ServerProjectStatus({
   }, [])
 
   useEffect(() => {
-    const kill = spawnServerWatch(project.path, onEvent, command)
-    return () => kill()
+    const removeEventListener = addDevEventListener(
+      `http://localhost:${command.port}`,
+      onEvent,
+      (status) => {
+        if (command.verbose) {
+          console.log({ status })
+        }
+      },
+    )
+
+    const childProcess = spawnChildProcess(
+      "./node_modules/.bin/samen-server",
+      ["serve", "--port", `${command.port}`],
+      path.resolve(project.path),
+    )
+
+    return () => {
+      removeEventListener()
+      childProcess.kill("SIGINT")
+    }
   }, [])
 
   return (
@@ -126,7 +149,7 @@ export default function ServerProjectStatus({
         {isBuilding ? (
           <Text>
             <Text color="yellow">
-              <Spinner type="triangle" />
+              <ActivityIndicator />
             </Text>
             {` ${status}`}
           </Text>
