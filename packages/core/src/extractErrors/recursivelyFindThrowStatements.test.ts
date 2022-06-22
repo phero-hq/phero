@@ -1147,7 +1147,7 @@ describe("recursivelyFindThrowStatements", () => {
       ).toHaveLength(1)
     })
 
-    test.skip("external 2 object literal expression", () => {
+    test("external 2 object literal expression", () => {
       const {
         statements: [obj, funcOne],
         typeChecker,
@@ -1179,7 +1179,7 @@ describe("recursivelyFindThrowStatements", () => {
       ).toHaveLength(1)
     })
 
-    test.skip("external 3 object literal expression", () => {
+    test("external 3 object literal expression", () => {
       const {
         statements: [obj, funcOne],
         typeChecker,
@@ -1209,7 +1209,7 @@ describe("recursivelyFindThrowStatements", () => {
       ).toHaveLength(1)
     })
 
-    test.skip("external 4 object literal expression", () => {
+    test("external 4 object literal expression", () => {
       const {
         statements: [obj, funcOne],
         typeChecker,
@@ -1327,7 +1327,7 @@ describe("recursivelyFindThrowStatements", () => {
       ).toHaveLength(1)
     })
 
-    test.skip("call expression, higher order function", () => {
+    test("call expression, higher order function", () => {
       const {
         statements: [funcOne],
         typeChecker,
@@ -1460,6 +1460,40 @@ describe("recursivelyFindThrowStatements", () => {
         ),
       ).toHaveLength(1)
     })
+
+    test("method and constructor", () => {
+      const {
+        statements: [funcOne],
+        typeChecker,
+      } = compileStatements(
+        `
+      function funcOne(a: string): boolean {
+        if (a == "x") {
+          new Aap().test()
+        }
+      }
+
+      class Aap {
+        constructor(private x: string) {
+          throw new Error("error 1")
+        }
+
+        test() {
+          if (this.x === "y") {
+            throw new Error("error 2")
+          }
+        }
+      }
+    `,
+      )
+
+      expect(
+        recursivelyFindThrowStatements(
+          funcOne as ts.FunctionDeclaration,
+          typeChecker,
+        ),
+      ).toHaveLength(2)
+    })
   })
 
   describe("lambda and inner function", () => {
@@ -1491,6 +1525,75 @@ describe("recursivelyFindThrowStatements", () => {
         const x = () => {
           throw new Error('error')
         }
+        return x();
+      }
+    `,
+        ts.SyntaxKind.FunctionDeclaration,
+      )
+
+      expect(
+        recursivelyFindThrowStatements(
+          funcOne as ts.FunctionDeclaration,
+          typeChecker,
+        ),
+      ).toHaveLength(1)
+    })
+    test("called inner lambda", () => {
+      const { statement: funcOne, typeChecker } = compileStatement(
+        `
+      function funcOne(a: string): boolean {
+        
+        const y = () => {
+          throw new Error('error')
+        }
+        const x = () => y()
+        
+        return x();
+      }
+    `,
+        ts.SyntaxKind.FunctionDeclaration,
+      )
+
+      expect(
+        recursivelyFindThrowStatements(
+          funcOne as ts.FunctionDeclaration,
+          typeChecker,
+        ),
+      ).toHaveLength(1)
+    })
+    test("called function expressions", () => {
+      const { statement: funcOne, typeChecker } = compileStatement(
+        `
+      function funcOne(a: string): boolean {
+        
+        const y = function() {
+          throw new Error('error')
+        }
+        const x = () => y()
+        
+        return x();
+      }
+    `,
+        ts.SyntaxKind.FunctionDeclaration,
+      )
+
+      expect(
+        recursivelyFindThrowStatements(
+          funcOne as ts.FunctionDeclaration,
+          typeChecker,
+        ),
+      ).toHaveLength(1)
+    })
+    test("called inner functions", () => {
+      const { statement: funcOne, typeChecker } = compileStatement(
+        `
+      function funcOne(a: string): boolean {
+        
+        function y() {
+          throw new Error('error')
+        }
+        const x = () => y()
+        
         return x();
       }
     `,

@@ -3,8 +3,13 @@ import ts from "typescript"
 export default function findFunctionStatements(
   func: ts.FunctionLikeDeclarationBase,
 ): ts.Statement[] {
-  if (!func.body || !ts.isBlock(func.body)) {
+  if (!func.body) {
     return []
+  }
+
+  if (!ts.isBlock(func.body)) {
+    // an arrow function with an Expression as body, e.g.: () => 1 + 2
+    return [ts.factory.createExpressionStatement(func.body)]
   }
 
   return func.body.statements.flatMap((st) => findInnerStatements(st, []))

@@ -5,81 +5,207 @@ export default function findFunctionDeclaration(
   callExpression: ts.CallExpression | ts.NewExpression,
   typeChecker: ts.TypeChecker,
 ): ts.FunctionLikeDeclarationBase[] {
-  console.log(
-    "callExpression",
-    callExpression.expression.kind,
-    callExpression.getText(),
-  )
-  // const declarations = findDeclaration(callExpression.expression, typeChecker)
+  return unpackExpression(callExpression, typeChecker)
+}
 
-  const symbol = typeChecker.getSymbolAtLocation(callExpression.expression)
+function unpackExpression(
+  expression: ts.Expression,
+  typeChecker: ts.TypeChecker,
+): ts.FunctionLikeDeclarationBase[] {
+  if (ts.isIdentifier(expression)) {
+    const declaration = getDeclarationForExpression(expression, typeChecker)
 
-  if (!symbol) {
-    console.log("[]", 1)
-    return []
+    if (!declaration) {
+      return []
+    }
+
+    return unpackDeclaration(declaration, expression, typeChecker)
   }
 
-  const declaration = symbol.valueDeclaration ?? symbol.declarations?.[0]
+  if (ts.isCallExpression(expression)) {
+    return [
+      ...unpackExpression(expression.expression, typeChecker),
+      ...expression.arguments.flatMap((arg) =>
+        unpackExpression(arg, typeChecker),
+      ),
+    ]
+  }
 
-  if (!declaration) {
-    console.log("[]", 2)
-    return []
+  if (ts.isNewExpression(expression)) {
+    return [
+      ...unpackExpression(expression.expression, typeChecker),
+      ...(expression.arguments?.flatMap((arg) =>
+        unpackExpression(arg, typeChecker),
+      ) ?? []),
+    ]
+  }
+
+  if (ts.isYieldExpression(expression)) {
+    return expression.expression
+      ? unpackExpression(expression.expression, typeChecker)
+      : []
+  }
+
+  if (ts.isBinaryExpression(expression)) {
+    return [expression.left, expression.right].flatMap((sub) =>
+      unpackExpression(sub, typeChecker),
+    )
+  }
+
+  if (ts.isConditionalExpression(expression)) {
+    return [
+      expression.condition,
+      expression.whenTrue,
+      expression.whenFalse,
+    ].flatMap((sub) => unpackExpression(sub, typeChecker))
+  }
+
+  if (ts.isAsExpression(expression)) {
+    return unpackExpression(expression.expression, typeChecker)
+  }
+
+  if (ts.isPrefixUnaryExpression(expression)) {
+    return unpackExpression(expression.operand, typeChecker)
+  }
+  if (ts.isPostfixUnaryExpression(expression)) {
+    return unpackExpression(expression.operand, typeChecker)
+  }
+
+  if (ts.isDeleteExpression(expression)) {
+    return unpackExpression(expression.expression, typeChecker)
+  }
+  if (ts.isTypeOfExpression(expression)) {
+    return unpackExpression(expression.expression, typeChecker)
+  }
+  if (ts.isVoidExpression(expression)) {
+    return unpackExpression(expression.expression, typeChecker)
+  }
+  if (ts.isAwaitExpression(expression)) {
+    return unpackExpression(expression.expression, typeChecker)
+  }
+  if (ts.isTemplateExpression(expression)) {
+    return expression.templateSpans.flatMap((s) =>
+      unpackExpression(s.expression, typeChecker),
+    )
+  }
+  if (ts.isParenthesizedExpression(expression)) {
+    return unpackExpression(expression.expression, typeChecker)
+  }
+
+  if (ts.isPropertyAccessExpression(expression)) {
+    return [
+      ...unpackExpression(expression.expression, typeChecker),
+      ...unpackExpression(expression.name, typeChecker),
+    ]
+  }
+
+  if (ts.isElementAccessExpression(expression)) {
+    return unpackExpression(expression.expression, typeChecker)
+  }
+
+  if (ts.isArrayLiteralExpression(expression)) {
+    return expression.elements.flatMap((el) =>
+      unpackExpression(el, typeChecker),
+    )
+  }
+
+  if (ts.isSpreadElement(expression)) {
+    return unpackExpression(expression.expression, typeChecker)
+  }
+
+  if (ts.isObjectLiteralExpression(expression)) {
+    return expression.properties.flatMap((prop) => {
+      if (ts.isPropertyAssignment(prop)) {
+        return unpackExpression(prop.initializer, typeChecker)
+      }
+      if (ts.isShorthandPropertyAssignment(prop)) {
+        // TODO follow prop.name, it could reference a variable with a call node as initializer
+        return prop.objectAssignmentInitializer
+          ? unpackExpression(prop.objectAssignmentInitializer, typeChecker)
+          : []
+      }
+      if (ts.isSpreadAssignment(prop)) {
+        // TODO follow prop.name, it could reference a variable with a call node as initializer
+        return unpackExpression(prop.expression, typeChecker)
+      }
+
+      return []
+    })
+  }
+
+  if (ts.isTypeAssertionExpression(expression)) {
+    return unpackExpression(expression.expression, typeChecker)
+  }
+
+  if (ts.isNonNullExpression(expression)) {
+    return unpackExpression(expression.expression, typeChecker)
+  }
+
+  if (
+    ts.isToken(expression) &&
+    expression.kind === ts.SyntaxKind.SuperKeyword
+  ) {
+    const declaration = getDeclarationForExpression(expression, typeChecker)
+    if (!declaration) {
+      return []
+    }
+    return unpackDeclaration(declaration, expression, typeChecker)
+  }
+
+  if (ts.isArrowFunction(expression) || ts.isFunctionExpression(expression)) {
+    return [expression]
+  }
+
+  return []
+}
+
+function unpackDeclaration(
+  declaration: ts.Declaration,
+  expression: ts.Expression,
+  typeChecker: ts.TypeChecker,
+): ts.FunctionLikeDeclarationBase[] {
+  if (ts.isVariableDeclaration(declaration)) {
+    if (!declaration.initializer) {
+      return []
+    }
+
+    return unpackExpression(declaration.initializer, typeChecker)
   }
 
   if (ts.isSetAccessorDeclaration(declaration)) {
-    console.log("[]", 4)
     return []
   }
 
   // Not sure about this one...
   // occurs with `console.log`
   if (ts.isMethodSignature(declaration)) {
-    console.log("[]", 5)
     return []
   }
 
   if (ts.isClassDeclaration(declaration)) {
-    return findConstructorAndSuperConstructors(declaration)
+    const constructor = declaration.members.find((m) =>
+      ts.isConstructorDeclaration(m),
+    )
+
+    const extendedClass = declaration.heritageClauses?.find(
+      (clause) => clause.token == ts.SyntaxKind.ExtendsKeyword,
+    )?.types[0]
+
+    return [
+      ...(constructor && ts.isConstructorDeclaration(constructor)
+        ? [constructor]
+        : []),
+      ...(extendedClass && ts.isClassDeclaration(extendedClass)
+        ? unpackDeclaration(extendedClass, expression, typeChecker)
+        : []),
+    ]
   }
 
   if (ts.isParameter(declaration)) {
-    console.log("[]", 6)
     return []
   }
 
-  if (isFunctionLike(declaration)) {
-    // TODO callExpression.arguments
-
-    return [declaration]
-  }
-
-  // TODO deze if moet weg
-  if (
-    ts.isVariableDeclaration(declaration) &&
-    declaration.initializer &&
-    isFunctionLike(declaration.initializer)
-  ) {
-    return [declaration.initializer]
-  }
-
-  // TODO deze if moet weg
-  if (
-    ts.isNewExpression(callExpression) &&
-    ts.isIdentifier(callExpression.expression) &&
-    callExpression.expression.text === "Promise" &&
-    callExpression.arguments?.length === 1 &&
-    isFunctionLike(callExpression.arguments[0])
-  ) {
-    const promiseExecutor = callExpression.arguments[0]
-    // TODO: we detected `new Promise((resolve, reject) => ...)`
-    // we should also catch calls on the "reject" function in order
-    // to find all errors
-    return [promiseExecutor]
-  }
-
-  // TODO staat deze op de juiste plek?
   if (isExternalDeclaration(declaration)) {
-    console.log("[]", 3)
     return []
   }
 
@@ -88,265 +214,41 @@ export default function findFunctionDeclaration(
     ts.isImportClause(declaration) ||
     ts.isImportSpecifier(declaration)
   ) {
-    const aliasSymbol = typeChecker.getAliasedSymbol(symbol)
-    if (!aliasSymbol.valueDeclaration) {
-      return []
-    }
-    if (isFunctionLike(aliasSymbol.valueDeclaration)) {
-      return [aliasSymbol.valueDeclaration]
-    }
-  }
-
-  // if (ts.isPropertyAssignment(declaration)) {
-  //   return findDeclaration(declaration.initializer, typeChecker)
-  // }
-
-  // console.log("callExpression.expression", callExpression.expression.getText())
-  // console.log("declaration", declaration.getText())
-  // console.log("declaration", declaration.getSourceFile().fileName)
-
-  // throw new ParseError(
-  //   `Unsupported call expression ${declaration.kind.toString()}`,
-  //   declaration,
-  // )
-
-  console.log("findDeclarations()")
-  return findDeclarations(callExpression.expression, typeChecker)
-}
-
-function isFunctionLike(node: ts.Node): node is ts.FunctionLikeDeclarationBase {
-  return (
-    ts.isArrowFunction(node) ||
-    ts.isFunctionDeclaration(node) ||
-    ts.isMethodDeclaration(node) ||
-    ts.isConstructorDeclaration(node) ||
-    ts.isGetAccessorDeclaration(node)
-  )
-}
-
-function findConstructorAndSuperConstructors(
-  classDeclaration: ts.ClassDeclaration,
-): ts.ConstructorDeclaration[] {
-  const constructor = classDeclaration.members.find((m) =>
-    ts.isConstructorDeclaration(m),
-  )
-
-  const extendedClass = classDeclaration.heritageClauses?.find(
-    (clause) => clause.token == ts.SyntaxKind.ExtendsKeyword,
-  )?.types[0]
-
-  return [
-    ...(constructor && ts.isConstructorDeclaration(constructor)
-      ? [constructor]
-      : []),
-    ...(extendedClass && ts.isClassDeclaration(extendedClass)
-      ? findConstructorAndSuperConstructors(extendedClass)
-      : []),
-  ].filter((classElement) => ts.isConstructorDeclaration(classElement))
-}
-
-function findDeclarations(
-  node: ts.Node,
-  typeChecker: ts.TypeChecker,
-): ts.FunctionLikeDeclarationBase[] {
-  console.log("NODE", node.kind)
-
-  if (ts.isPropertyAccessExpression(node)) {
-    return findDeclarations(node.expression, typeChecker)
-  }
-
-  if (ts.isIdentifier(node)) {
-    const symbol = typeChecker.getSymbolAtLocation(node)
-
-    if (!symbol?.valueDeclaration) {
-      return []
-    }
-
-    return findDeclarations(symbol.valueDeclaration, typeChecker)
-  }
-
-  if (ts.isVariableDeclaration(node)) {
-    if (!node.initializer) {
-      return []
-    }
-
-    return findDeclarations(node.initializer, typeChecker)
-  }
-
-  if (ts.isObjectLiteralExpression(node)) {
-    return node.properties.flatMap((prop) => {
-      if (ts.isPropertyAssignment(prop)) {
-        return findDeclarations(prop.initializer, typeChecker)
-      }
-      if (
-        ts.isShorthandPropertyAssignment(prop) &&
-        prop.objectAssignmentInitializer
-      ) {
-        // TODO follow prop.name, it could reference a variable with a call expr as initializer
-        return findDeclarations(prop.objectAssignmentInitializer, typeChecker)
-      }
-      if (ts.isSpreadAssignment(prop)) {
-        // TODO follow prop.name, it could reference a variable with a call expr as initializer
-        return findDeclarations(prop.expression, typeChecker)
-      }
-
-      return []
-    })
-  }
-
-  // if (ts.isPropertyAssignment(node)) {
-  //   return findDeclarations(node.initializer, typeChecker)
-  // }
-
-  // if (ts.isElementAccessExpression(node)) {
-  //   for (const x of findFunctionRefInsideVar(node, typeChecker)) {
-  //     console.log("X", x.getText())
-  //   }
-  // }
-
-  // const symbol = typeChecker.getSymbolAtLocation(node)
-
-  // if (!symbol) {
-  //   return []
-  // }
-
-  // const declaration = symbol.valueDeclaration ?? symbol.declarations?.[0]
-
-  // if (!declaration) {
-  //   return []
-  // }
-
-  // if (isExternalDeclaration(declaration)) {
-  //   return []
-  // }
-
-  // if (
-  //   ts.isImportDeclaration(declaration) ||
-  //   ts.isImportClause(declaration) ||
-  //   ts.isImportSpecifier(declaration)
-  // ) {
-  //   const aliasSymbol = typeChecker.getAliasedSymbol(symbol)
-
-  //   if (!aliasSymbol.valueDeclaration) {
-  //     return []
-  //   }
-  //   if (isFunctionLike(aliasSymbol.valueDeclaration)) {
-  //     return [aliasSymbol.valueDeclaration]
-  //   }
-  // }
-
-  // if (isFunctionLike(node)) {
-  //   return [node]
-  // }
-
-  if (isFunctionLike(node)) {
-    return [node]
-  }
-
-  console.log("OEPS!")
-
-  return []
-}
-
-/**
- * Makes sure it can find funcTwo & funcThree:
- * const obj = {
- *    aad: {
- *       x: funcTwo,
- *       y: funcThree,
- *    },
- * }
- */
-function findFunctionRefInsideVar(
-  node: ts.Node,
-  typeChecker: ts.TypeChecker,
-): ts.Declaration[] {
-  if (ts.isPropertyAssignment(node)) {
-    if (!node.initializer) {
-      return []
-    }
-    return findFunctionRefInsideVar(node.initializer, typeChecker)
-  }
-
-  if (ts.isPropertyAccessExpression(node)) {
-    return findFunctionRefInsideVar(node.expression, typeChecker)
-  }
-
-  if (ts.isElementAccessExpression(node)) {
-    const symbol = typeChecker.getSymbolAtLocation(node.expression)
-
-    if (!symbol?.valueDeclaration) {
-      return []
-    }
-
-    return findFunctionRefInsideVar(symbol.valueDeclaration, typeChecker)
-  }
-
-  if (ts.isVariableDeclaration(node)) {
-    if (!node.initializer) {
-      return []
-    }
-
-    return findFunctionRefInsideVar(node.initializer, typeChecker)
-  }
-
-  if (ts.isObjectLiteralExpression(node)) {
-    return node.properties.flatMap((prop) => {
-      if (ts.isPropertyAssignment(prop)) {
-        return findFunctionRefInsideVar(prop.initializer, typeChecker)
-      }
-      if (
-        ts.isShorthandPropertyAssignment(prop) &&
-        prop.objectAssignmentInitializer
-      ) {
-        // TODO follow prop.name, it could reference a variable with a call expr as initializer
-        return findFunctionRefInsideVar(
-          prop.objectAssignmentInitializer,
-          typeChecker,
-        )
-      }
-      if (ts.isSpreadAssignment(prop)) {
-        // TODO follow prop.name, it could reference a variable with a call expr as initializer
-        return findFunctionRefInsideVar(prop.expression, typeChecker)
-      }
-
-      return []
-    })
-  }
-
-  if (ts.isIdentifier(node)) {
-    const symbol = typeChecker.getSymbolAtLocation(node)
-
-    if (!symbol?.valueDeclaration) {
-      return []
-    }
-
-    return findFunctionRefInsideVar(symbol.valueDeclaration, typeChecker)
-  }
-
-  if (
-    ts.isImportDeclaration(node) ||
-    ts.isImportClause(node) ||
-    ts.isImportSpecifier(node)
-  ) {
-    const symbol = typeChecker.getSymbolAtLocation(node)
-
+    const symbol = typeChecker.getSymbolAtLocation(expression)
     if (!symbol) {
       return []
     }
 
     const aliasSymbol = typeChecker.getAliasedSymbol(symbol)
-
     if (!aliasSymbol.valueDeclaration) {
       return []
     }
 
-    return [aliasSymbol.valueDeclaration]
+    return unpackDeclaration(
+      aliasSymbol.valueDeclaration,
+      expression,
+      typeChecker,
+    )
   }
 
-  if (isFunctionLike(node)) {
-    return [node]
+  if (
+    ts.isArrowFunction(declaration) ||
+    ts.isFunctionDeclaration(declaration) ||
+    ts.isMethodDeclaration(declaration) ||
+    ts.isConstructorDeclaration(declaration) ||
+    ts.isGetAccessorDeclaration(declaration)
+  ) {
+    return [declaration]
   }
 
   return []
+}
+
+function getDeclarationForExpression(
+  expression: ts.Expression,
+  typeChecker: ts.TypeChecker,
+): ts.Declaration | undefined {
+  const symbol = typeChecker.getSymbolAtLocation(expression)
+  const declaration = symbol?.valueDeclaration ?? symbol?.declarations?.[0]
+  return declaration
 }
