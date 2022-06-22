@@ -84,26 +84,6 @@ export default async function writeClientSource(
   if (clientEmitResult.emitSkipped) {
     throw new Error("compilation failed")
   }
-
-  const baseIndexPath = path.join(outputPathBase, `index.ts`)
-  const baseIndexPathExists = await exists(baseIndexPath)
-  if (!baseIndexPathExists) {
-    await fs.writeFile(
-      path.join(outputPathBase, `index.ts`),
-      printSourceFile(client.programIndexSource),
-      { encoding: "utf-8" },
-    )
-
-    const program = ts.createProgram([path.join(outputPathBase, "index.ts")], {
-      declaration: true,
-    })
-
-    const emitResult = program.emit()
-
-    if (emitResult.emitSkipped) {
-      throw new Error("compilation failed")
-    }
-  }
 }
 
 export function printSourceFile(source: ts.SourceFile): string {

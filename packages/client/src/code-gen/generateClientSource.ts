@@ -184,18 +184,10 @@ export default function generateClientSource(
     classDeclr,
   )
 
-  const programIndexSource = tsx.sourceFile(
-    tsx.exportDeclaration({
-      identifiers: [clientIdentifier, domainIdentifier],
-      module: `../../../../.samen`,
-    }),
-  )
-
   return {
     samenIndexSource,
     samenClientSource,
     domainSource,
-    programIndexSource,
   }
 }
 
