@@ -6,112 +6,106 @@ import {
   SamenCommandDevEnv,
   ServerCommandName,
 } from "@samen/dev"
-import { Box, Text } from "ink"
-import React, { ErrorInfo, useCallback, useEffect, useState } from "react"
-import { ScreenSizeProvider, useScreenSize } from "../context/ScreenSizeContext"
-import getProjects, { Project } from "../utils/getProjects"
-import ErrorMessage from "./ErrorMessage"
+import { Box } from "ink"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
+import { fatalError } from "../process"
+import { Project } from "../types"
+import getProjects from "../utils/getProjects"
+import maxLength from "../utils/maxLength"
 import ClientProjectStatus from "./ProjectStatus/ClientProjectStatus"
 import ServerProjectStatus from "./ProjectStatus/ServerProjectStatus"
 
-export default class DevEnv extends React.Component<{
+interface Props {
   command: SamenCommandDevEnv
-}> {
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    if (this.props.command.verbose) {
-      console.error("Error:", error)
-      console.error(errorInfo)
-    } else {
-      console.error("Something went wrong, try again.")
+}
+
+interface State {
+  error?: Error
+}
+
+export default class DevEnv extends React.Component<Props, State> {
+  state: State = {}
+
+  static getDerivedStateFromError(error: Error) {
+    return { error }
+  }
+
+  componentDidUpdate() {
+    if (this.state.error) {
+      setTimeout(() => {
+        fatalError(this.state.error)
+      }, 100)
     }
-    process.exit(1)
   }
 
   render() {
-    return (
-      <ScreenSizeProvider>
-        <DevEnvContent command={this.props.command} />
-      </ScreenSizeProvider>
-    )
+    if (this.state.error) {
+      // This clears the UI, so that `fatalError` can print the error and exit:
+      return null
+    }
+
+    return <DevEnvContent command={this.props.command} />
   }
 }
 
 function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
-  const [isLoading, setLoading] = useState(true)
-  const [error, setError] = useState<unknown>()
   const [projects, setProjects] = useState<Project[]>([])
-  const { orientation, columns, rows } = useScreenSize()
+
+  const maxProjectPathLength = useMemo(() => {
+    return maxLength(projects.map((p) => p.path))
+  }, [projects])
 
   const updateProjects = useCallback(async () => {
     try {
-      setProjects(await getProjects())
+      const newProjects = await getProjects()
+      if (newProjects.length === 0) {
+        throw new Error("No Samen project found")
+      } else {
+        setProjects(newProjects)
+      }
     } catch (error) {
-      console.log("error!!!", error)
-      setError(error)
+      fatalError(error)
     }
   }, [])
 
   useEffect(() => {
-    const interval = setInterval(updateProjects, 10000)
-    updateProjects().then(() => {
-      console.log("not loading anymore")
-      setLoading(false)
-    })
-    return () => clearInterval(interval)
+    updateProjects()
   }, [])
 
-  if (error) {
-    return <ErrorMessage error={error} verbose={command.verbose} />
-  }
-
-  if (isLoading) {
-    return <Text>Initializing...</Text>
-  }
-
   return (
-    <>
-      {projects.length === 0 ? (
-        <Text>No projects found</Text>
-      ) : (
-        <Box
-          width={columns}
-          height={command.verbose ? undefined : rows}
-          flexDirection={orientation === "portrait" ? "column" : "row"}
-        >
-          {projects.map((project, index) => (
-            <Box
+    <Box flexDirection="column" width="100%" padding={1}>
+      {projects.map((project, index) => {
+        if (project.type === "client") {
+          return (
+            <ClientProjectStatus
               key={project.path}
-              flexGrow={project.type === "server" ? 1 : undefined}
-              flexBasis={project.type === "server" ? "100%" : undefined}
-              paddingY={1}
-              paddingLeft={1}
-              paddingRight={4}
-            >
-              {project.type === "client" && (
-                <ClientProjectStatus
-                  project={project}
-                  command={{
-                    name: ClientCommandName.Watch,
-                    port: DEFAULT_CLIENT_PORT + index,
-                    server: { url: DEFAULT_SERVER_URL },
-                    verbose: command.verbose,
-                  }}
-                />
-              )}
-              {project.type === "server" && (
-                <ServerProjectStatus
-                  project={project}
-                  command={{
-                    name: ServerCommandName.Serve,
-                    port: DEFAULT_SERVER_PORT,
-                    verbose: command.verbose,
-                  }}
-                />
-              )}
-            </Box>
-          ))}
-        </Box>
-      )}
-    </>
+              project={project}
+              command={{
+                name: ClientCommandName.Watch,
+                port: DEFAULT_CLIENT_PORT + index,
+                server: { url: DEFAULT_SERVER_URL },
+                verbose: command.verbose,
+              }}
+              maxProjectPathLength={maxProjectPathLength}
+            />
+          )
+        }
+
+        if (project.type === "server") {
+          return (
+            <ServerProjectStatus
+              key={project.path}
+              project={project}
+              command={{
+                name: ServerCommandName.Serve,
+                port: DEFAULT_SERVER_PORT,
+                verbose: command.verbose,
+              }}
+              maxProjectPathLength={maxProjectPathLength}
+            />
+          )
+        }
+      })}
+    </Box>
   )
 }

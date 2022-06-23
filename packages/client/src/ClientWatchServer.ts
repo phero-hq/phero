@@ -1,3 +1,4 @@
+import { hasErrorCode, PortInUseError } from "@samen/core"
 import {
   addDevEventListener,
   ClientDevEventEmitter,
@@ -61,7 +62,7 @@ export default class ClientWatchServer {
     } catch (error) {
       this.eventEmitter.emit({
         type: "BUILD_FAILED",
-        error: error instanceof Error ? error.message : "unknown",
+        errorMessage: error instanceof Error ? error.message : "unknown",
       })
     }
   }
@@ -73,6 +74,13 @@ export default class ClientWatchServer {
     server.on("listening", () => {
       this.eventEmitter.emit({ type: "WATCH_READY" })
     })
+    server.on("error", (error) => {
+      if (hasErrorCode(error) && error.code === "EADDRINUSE") {
+        throw new PortInUseError(this.command.port)
+      } else {
+        throw error
+      }
+    })
     server.listen(this.command.port)
     return server
   }
@@ -83,7 +91,7 @@ export default class ClientWatchServer {
   ) {
     res.setHeader("Access-Control-Allow-Origin", "*")
     res.setHeader("Access-Control-Allow-Methods", "POST")
-    res.setHeader("Access-Control-Allow-Headers", "content-type, authorization")
+    res.setHeader("Access-Control-Allow-Headers", "content-type")
 
     if (req.method === "OPTIONS") {
       res.statusCode = 200

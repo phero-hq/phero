@@ -17,6 +17,37 @@ export type DevEventListenerConnectionStatus =
   | "DISCONNECTED"
   | "EMITTER_NOT_FOUND"
 
+export type ServerDevEventRPC =
+  | ServerDevEventRPCStart
+  | ServerDevEventRPCSuccess
+  | ServerDevEventRPCFailed
+
+export type ServerDevEventRPCStart = {
+  type: "RPC_START"
+  url: string
+  requestId: string
+  dateTime: string // ISO-8601
+}
+
+export type ServerDevEventRPCSuccess = {
+  type: "RPC_SUCCESS"
+  url: string
+  status: number
+  ms: number
+  requestId: string
+  dateTime: string // ISO-8601
+}
+
+export type ServerDevEventRPCFailed = {
+  type: "RPC_FAILED"
+  url: string
+  status: number
+  errorMessage: string
+  ms: number
+  requestId: string
+  dateTime: string // ISO-8601
+}
+
 export type ServerDevEvent =
   | DevEventEmitterConnectionEvent
 
@@ -25,38 +56,24 @@ export type ServerDevEvent =
   | { type: "SERVE_READY" }
 
   // Building the project
-  | { type: "BUILD_PROJECT_START" }
+  // | { type: "BUILD_PROJECT_START" } // TODO: Implement this one
   | { type: "BUILD_PROJECT_SUCCESS" }
-  | { type: "BUILD_PROJECT_FAILED"; error: string }
+  | { type: "BUILD_PROJECT_FAILED"; errorMessage: string }
 
   // Building the manifest file
   | { type: "BUILD_MANIFEST_START" }
   | { type: "BUILD_MANIFEST_SUCCESS" }
-  | { type: "BUILD_MANIFEST_FAILED"; error: string }
+  | { type: "BUILD_MANIFEST_FAILED"; errorMessage: string }
 
   // Building the RPC's
   | { type: "BUILD_RPCS_START" }
   | { type: "BUILD_RPCS_SUCCESS" }
-  | { type: "BUILD_RPCS_FAILED"; error: string }
+  | { type: "BUILD_RPCS_FAILED"; errorMessage: string }
 
   // Running the RPC's
-  | {
-      type: "RPC_START"
-      url?: string
-    }
-  | {
-      type: "RPC_SUCCESS"
-      url?: string
-      status: number
-      ms: number
-    }
-  | {
-      type: "RPC_FAILED"
-      url?: string
-      status: number
-      message: string
-      ms: number
-    }
+  | ServerDevEventRPCStart
+  | ServerDevEventRPCSuccess
+  | ServerDevEventRPCFailed
 
 export type ClientDevEvent =
   | DevEventEmitterConnectionEvent
@@ -73,7 +90,7 @@ export type ClientDevEvent =
   // Building the client
   | { type: "BUILD_START" }
   | { type: "BUILD_SUCCESS" }
-  | { type: "BUILD_FAILED"; error: string }
+  | { type: "BUILD_FAILED"; errorMessage: string }
 
 // Event emitters
 
@@ -104,15 +121,22 @@ class DevEventEmitter<T extends ServerDevEvent | ClientDevEvent> {
     res.write("retry: 2000\n")
     res.write("data: " + JSON.stringify(connectedEvent) + "\n\n")
 
-    this.emit(connectedEvent)
+    this.emitToListeners(connectedEvent, [res])
     if (this.lastEvent) {
-      this.emit(this.lastEvent)
+      this.emitToListeners(this.lastEvent, [res])
     }
   }
 
   public emit(event: DevEventEmitterConnectionEvent | T) {
     this.lastEvent = event
-    this.listeners.forEach((connection) => {
+    this.emitToListeners(event, this.listeners)
+  }
+
+  private emitToListeners(
+    event: DevEventEmitterConnectionEvent | T,
+    listeners: http.ServerResponse[],
+  ) {
+    listeners.forEach((connection) => {
       const id = new Date().toISOString()
       connection.write("id: " + id + "\n")
       connection.write("retry: 2000\n")

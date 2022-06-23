@@ -1,17 +1,6 @@
 import path from "path"
 import { promises as fs } from "fs"
-
-export interface ClientProject {
-  type: "client"
-  path: string
-}
-
-export interface ServerProject {
-  type: "server"
-  path: string
-}
-
-export type Project = ClientProject | ServerProject
+import { Project } from "../types"
 
 export default async function getProjects(): Promise<Project[]> {
   const projects: (Project | undefined)[] = []
