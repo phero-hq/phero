@@ -1,6 +1,7 @@
 import {
   generateAppDeclarationFile,
   generateRPCProxy,
+  hasErrorCode,
   ParsedSamenApp,
   parseSamenApp,
   PortInUseError,
@@ -25,14 +26,6 @@ interface Headers {
 
 interface RPCRoutes {
   [name: string]: (request: { headers: Headers; body: any }) => Promise<any>
-}
-
-function hasErrorCode(error: unknown): error is { code: string } {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    typeof (error as any).code === "string"
-  )
 }
 
 export default class DevServer {

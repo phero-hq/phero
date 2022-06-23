@@ -1,4 +1,4 @@
-import { PortInUseError } from "@samen/core"
+import { hasErrorCode, PortInUseError } from "@samen/core"
 import {
   addDevEventListener,
   ClientDevEventEmitter,
@@ -8,14 +8,6 @@ import {
 } from "@samen/dev"
 import http from "http"
 import buildClient from "./utils/buildClient"
-
-function hasErrorCode(error: unknown): error is { code: string } {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    typeof (error as any).code === "string"
-  )
-}
 
 export default class ClientWatchServer {
   private readonly server: http.Server
