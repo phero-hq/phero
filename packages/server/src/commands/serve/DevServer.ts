@@ -148,7 +148,7 @@ export default class DevServer {
 
     res.setHeader("Access-Control-Allow-Origin", "*")
     res.setHeader("Access-Control-Allow-Methods", "POST")
-    res.setHeader("Access-Control-Allow-Headers", "content-type, authorization")
+    res.setHeader("Access-Control-Allow-Headers", "content-type")
 
     const startTime = Date.now()
 
