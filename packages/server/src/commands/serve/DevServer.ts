@@ -42,8 +42,18 @@ export default class DevServer {
   }
 
   public async start() {
-    const server = await this.startHttpServer()
-    const program = this.startWatch()
+    try {
+      this.eventEmitter.emit({ type: "SERVE_INIT" })
+      const server = await this.startHttpServer()
+      const program = this.startWatch()
+      this.eventEmitter.emit({ type: "SERVE_READY" })
+    } catch (error) {
+      if (hasErrorCode(error) && error.code === "EADDRINUSE") {
+        throw new PortInUseError(this.command.port)
+      } else {
+        throw error
+      }
+    }
   }
 
   private get manifestPath(): string {
@@ -68,25 +78,12 @@ export default class DevServer {
 
   private startHttpServer(): Promise<http.Server> {
     return new Promise((resolve, reject) => {
-      this.eventEmitter.emit({ type: "SERVE_INIT" })
       const server = http.createServer()
-
-      server.on("request", this.requestHandler.bind(this))
-
-      server.on("listening", () => {
-        resolve(server)
-        this.eventEmitter.emit({ type: "SERVE_READY" })
-      })
-
-      server.on("error", (error) => {
-        if (hasErrorCode(error) && error.code === "EADDRINUSE") {
-          reject(new PortInUseError(this.command.port))
-        } else {
-          reject(error)
-        }
-      })
-
-      server.listen(this.command.port)
+      server
+        .on("request", this.requestHandler.bind(this))
+        .on("listening", () => resolve(server))
+        .on("error", (error) => reject(error))
+        .listen(this.command.port)
     })
   }
 
@@ -117,7 +114,6 @@ export default class DevServer {
       const output = generateRPCProxy(app, typeChecker)
       await fs.writeFile(this.samenExecutionJS, output.js)
       this.clearRequireCache()
-
       this.eventEmitter.emit({ type: "BUILD_RPCS_SUCCESS" })
     } catch (error) {
       this.eventEmitter.emit({
