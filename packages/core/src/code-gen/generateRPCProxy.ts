@@ -633,7 +633,6 @@ function generateInnerFunction(
                                   }),
                                 ],
                                 body: [
-                                  tsx.verbatim("console.log(`huhhhhh`);"),
                                   // resolvers[currResolverIndex].exec.reject(err)
                                   tsx.statement.expression(
                                     tsx.expression.call(
