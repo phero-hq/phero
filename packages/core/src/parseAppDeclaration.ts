@@ -93,14 +93,9 @@ function parseDomainDeclarations({
   return versionModules.reduce(
     (result, versionModule) => ({
       ...result,
-      [versionModule.name]: {
-        models: versionModule.statements.map((st) => {
-          if (!isModel(st)) {
-            throw new ParseError("Unexpected statement", st)
-          }
-          return st
-        }),
-      },
+      [versionModule.name]: parseServiceDeclarationVersion(
+        versionModule.statements,
+      ),
     }),
     {},
   )

@@ -33,7 +33,7 @@ export class BaseSamenClient {
     serviceName: string,
     functionName: string,
     body: object,
-    errorParser: <TError extends Error>(error: any) => TError,
+    errorParser: (error: any) => Error,
     resultParser: (data: any) => ParseResult<T>,
   ): Promise<T> {
     let result
@@ -70,7 +70,7 @@ export class BaseSamenClient {
     serviceName: string,
     functionName: string,
     body: object,
-    errorParser: <TError extends Error>(error: any) => TError,
+    errorParser: (error: any) => Error,
   ): Promise<void> {
     let result
 

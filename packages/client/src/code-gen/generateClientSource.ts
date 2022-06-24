@@ -266,6 +266,10 @@ function generateParsersForReturnTypes(
 function generateError(parsedError: ParsedError): ts.ClassDeclaration {
   return tsx.classDeclaration({
     name: parsedError.name,
+    extendsType: ts.factory.createExpressionWithTypeArguments(
+      tsx.expression.identifier("Error"),
+      undefined,
+    ),
     export: true,
     constructor: tsx.constructor({
       params: parsedError.props.map((prop) =>
@@ -276,7 +280,13 @@ function generateError(parsedError: ParsedError): ts.ClassDeclaration {
           type: prop.type,
         }),
       ),
-      block: tsx.block(),
+      block: tsx.block(
+        tsx.statement.expression(
+          tsx.expression.call(tsx.expression.identifier("super"), {
+            args: ["message"],
+          }),
+        ),
+      ),
     }),
   })
 }

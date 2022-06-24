@@ -287,6 +287,10 @@ export function generateErrorClass(
 ): ts.ClassDeclaration {
   return tsx.classDeclaration({
     name: error.name,
+    extendsType: ts.factory.createExpressionWithTypeArguments(
+      tsx.expression.identifier("Error"),
+      undefined,
+    ),
     export: true,
     constructor: tsx.constructor({
       params: error.properties.map((prop) =>

@@ -7,6 +7,8 @@ interface ClassProps {
   typeParams?: ts.TypeParameterDeclaration[]
   constructor?: ts.ConstructorDeclaration
   properties?: ts.PropertyDeclaration[]
+  extendsType?: ts.ExpressionWithTypeArguments
+  implementTypes?: ts.ExpressionWithTypeArguments[]
 }
 
 export function classDeclaration(props: ClassProps): ts.ClassDeclaration {
@@ -15,10 +17,40 @@ export function classDeclaration(props: ClassProps): ts.ClassDeclaration {
     generateModifiers([props.export && ts.SyntaxKind.ExportKeyword]),
     props.name,
     props.typeParams,
-    undefined,
+    getHeritageClauses(props),
     [
       ...(props.constructor ? [props.constructor] : []),
       ...(props.properties ?? []),
     ],
   )
+}
+
+function getHeritageClauses({
+  extendsType,
+  implementTypes,
+}: ClassProps): ts.HeritageClause[] | undefined {
+  const result: ts.HeritageClause[] = []
+
+  if (extendsType) {
+    result.push(
+      ts.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
+        extendsType,
+      ]),
+    )
+  }
+
+  if (implementTypes?.length) {
+    result.push(
+      ts.factory.createHeritageClause(
+        ts.SyntaxKind.ImplementsKeyword,
+        implementTypes,
+      ),
+    )
+  }
+
+  if (result.length) {
+    return result
+  }
+
+  return undefined
 }
