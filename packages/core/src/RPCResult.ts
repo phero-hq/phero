@@ -27,5 +27,9 @@ export interface RPCBadRequestResult {
 
 export interface RPCInternalServerErrorResult {
   status: 500
-  error: Record<string, any>
+  error: {
+    name: string
+    props: Record<string, any>
+    stack: string
+  }
 }

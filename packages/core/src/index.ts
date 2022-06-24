@@ -18,4 +18,5 @@ export {
 } from "./code-gen/parsers/generateParser"
 export { default as parseSamenApp, ParsedSamenApp } from "./parseSamenApp"
 export * from "./errors"
+export * from "./RPCResult"
 export * as tsx from "./tsx"

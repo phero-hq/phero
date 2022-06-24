@@ -20,7 +20,10 @@ export type DevEventListenerConnectionStatus =
 export type ServerDevEventRPC =
   | ServerDevEventRPCStart
   | ServerDevEventRPCSuccess
-  | ServerDevEventRPCFailed
+  | ServerDevEventRPCFailedValidationError
+  | ServerDevEventRPCFailedFunctionError
+  | ServerDevEventRPCFailedServerError
+  | ServerDevEventRPCFailedNotFoundError
 
 export type ServerDevEventRPCStart = {
   type: "RPC_START"
@@ -32,20 +35,60 @@ export type ServerDevEventRPCStart = {
 export type ServerDevEventRPCSuccess = {
   type: "RPC_SUCCESS"
   url: string
-  status: number
-  ms: number
   requestId: string
   dateTime: string // ISO-8601
+  ms: number
 }
 
-export type ServerDevEventRPCFailed = {
-  type: "RPC_FAILED"
+export interface ValidationError {
+  path: string
+  message: string
+}
+
+export interface RuntimeError {
+  name: string
+  props: Record<string, any>
+  stack: string
+}
+
+export interface ServerError {
+  message: string
+  stack: string
+}
+
+export type ServerDevEventRPCFailedValidationError = {
+  type: "RPC_FAILED_VALIDATION_ERROR"
   url: string
-  status: number
-  errorMessage: string
-  ms: number
   requestId: string
   dateTime: string // ISO-8601
+  ms: number
+  errors: ValidationError[]
+}
+
+export type ServerDevEventRPCFailedFunctionError = {
+  type: "RPC_FAILED_FUNCTION_ERROR"
+  url: string
+  requestId: string
+  dateTime: string // ISO-8601
+  ms: number
+  error: RuntimeError
+}
+
+export type ServerDevEventRPCFailedServerError = {
+  type: "RPC_FAILED_SERVER_ERROR"
+  url: string
+  requestId: string
+  dateTime: string // ISO-8601
+  ms: number
+  error: ServerError
+}
+
+export type ServerDevEventRPCFailedNotFoundError = {
+  type: "RPC_FAILED_NOT_FOUND_ERROR"
+  url: string
+  requestId: string
+  dateTime: string // ISO-8601
+  ms: number
 }
 
 export type ServerDevEvent =
@@ -73,7 +116,10 @@ export type ServerDevEvent =
   // Running the RPC's
   | ServerDevEventRPCStart
   | ServerDevEventRPCSuccess
-  | ServerDevEventRPCFailed
+  | ServerDevEventRPCFailedValidationError
+  | ServerDevEventRPCFailedFunctionError
+  | ServerDevEventRPCFailedServerError
+  | ServerDevEventRPCFailedNotFoundError
 
 export type ClientDevEvent =
   | DevEventEmitterConnectionEvent
