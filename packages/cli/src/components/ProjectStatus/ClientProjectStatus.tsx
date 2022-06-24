@@ -1,40 +1,40 @@
-import { ClientCommandWatch, ClientDevEvent } from "@samen/dev"
+import {
+  addDevEventListener,
+  ClientCommandWatch,
+  ClientDevEvent,
+} from "@samen/dev"
 import { Box, Text } from "ink"
-import Spinner from "ink-spinner"
+import path from "path"
 import { useCallback, useEffect, useState } from "react"
-import { ClientProject } from "../../utils/getProjects"
-import { spawnClientWatch } from "../../utils/processes"
-import { StyledEvent } from "./ProjectStatusEventList"
+import { spawnChildProcess } from "../../process"
+import { ClientProject, StyledEvent } from "../../types"
+import ProjectStatus from "../ProjectStatus"
 
 export default function ClientProjectStatus({
   project,
   command,
+  maxProjectPathLength,
 }: {
   project: ClientProject
   command: ClientCommandWatch
+  maxProjectPathLength: number
 }) {
   const [event, setEvent] = useState<StyledEvent>(["busy", "Initializing..."])
+  const [error, setError] = useState<string>()
 
   const onEvent = useCallback((event: ClientDevEvent) => {
     if (command.verbose) {
       console.log("client", event)
     }
 
+    setError(undefined)
+
     switch (event.type) {
       case "LISTENER_CONNECTED":
-        setEvent(["default", "Waiting for changes"])
-        break
-
       case "WATCH_INIT":
-        setEvent(["default", "Initializing client watch server..."])
-        break
-
       case "WATCH_READY":
-        setEvent(["default", "Waiting for changes"])
-        break
-
       case "SERVER_CONNECTED":
-        setEvent(["default", "Waiting for changes"])
+        setEvent(["default", "Initializing..."])
         break
 
       case "SERVER_DISCONNECTED":
@@ -50,11 +50,12 @@ export default function ClientProjectStatus({
         break
 
       case "BUILD_SUCCESS":
-        setEvent(["default", "Waiting for changes"])
+        setEvent(["default", "Client is ready, waiting for changes."])
         break
 
       case "BUILD_FAILED":
-        setEvent(["error", `Could not build client: ${event.error}`])
+        setEvent(["error", "Could not build client"])
+        setError(event.errorMessage)
         break
 
       default:
@@ -65,38 +66,43 @@ export default function ClientProjectStatus({
   }, [])
 
   useEffect(() => {
-    const kill = spawnClientWatch(project.path, onEvent, command)
-    return () => kill()
+    const removeEventListener = addDevEventListener(
+      `http://localhost:${command.port}`,
+      onEvent,
+      (status) => {
+        if (command.verbose) {
+          console.log({ status })
+        }
+      },
+    )
+
+    const childProcess = spawnChildProcess(
+      "./node_modules/.bin/samen-client",
+      ["watch", "--port", `${command.port}`],
+      path.resolve(project.path),
+    )
+
+    return () => {
+      removeEventListener()
+      childProcess.kill("SIGINT")
+    }
   }, [])
 
   return (
-    <Box flexDirection="column" flexGrow={0} flexShrink={0}>
-      <Text>samen-client @ {project.path}</Text>
+    <Box flexDirection="column">
+      <ProjectStatus
+        type="client"
+        projectPath={project.path}
+        status={event[0]}
+        message={event[1]}
+        maxProjectPathLength={maxProjectPathLength}
+      />
 
-      <Box marginTop={1} marginBottom={1}>
-        {event[0] === "busy" && (
-          <Text>
-            <Text color="yellow">
-              <Spinner type="triangle" />
-            </Text>
-            {` ${event[1]}`}
-          </Text>
-        )}
-
-        {event[0] === "default" && (
-          <Text>
-            <Text color="green">✓</Text>
-            {` ${event[1]}`}
-          </Text>
-        )}
-
-        {event[0] === "error" && (
-          <Text>
-            <Text color="red">✖</Text>
-            {` ${event[1]}`}
-          </Text>
-        )}
-      </Box>
+      {error && (
+        <Box paddingX={4} paddingY={1}>
+          <Text color="red">{error}</Text>
+        </Box>
+      )}
     </Box>
   )
 }

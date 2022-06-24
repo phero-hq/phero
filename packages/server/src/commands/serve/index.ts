@@ -9,5 +9,5 @@ export default function serve(command: ServerCommandServe) {
       console.log,
     )
   }
-  const devServer = new DevServer(command, process.cwd())
+  new DevServer(command, process.cwd()).start()
 }

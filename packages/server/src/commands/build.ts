@@ -36,10 +36,10 @@ export default function build(command: ServerCommandBuild) {
   }
 
   const hasES2015 = tsConfig.options.lib?.some((lib: string) =>
-    /es2015/.test(lib.toLowerCase()),
+    /(es2015$)|(es2015\.d\.ts)|(es2015.promise$)|(es2015\.promise\.d\.ts)/.test(lib.toLowerCase()),
   )
   const hasES5 = tsConfig.options.lib?.some((lib: string) =>
-    /es2015/.test(lib.toLowerCase()),
+    /(es5$)|(es5\.d\.ts)/.test(lib.toLowerCase()),
   )
 
   const compilerOpts: CompilerOptions = {

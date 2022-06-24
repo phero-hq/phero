@@ -7,21 +7,22 @@ const formatHost: ts.FormatDiagnosticsHost = {
   getNewLine: () => ts.sys.newLine,
 }
 
-type ErrorCallback = (dianostics: readonly ts.Diagnostic[]) => void
-type ChangeCallback = (
+type BuildSuccessCallback = (
   samenSourceFile: ts.SourceFile,
   typeChecker: ts.TypeChecker,
 ) => void
+type BuildFailedCallback = (errorMessage: string) => void
 
 export default class WatchProgram {
-  public readonly projectDir: string
+  public readonly projectDir: string // TODO: private?
   private readonly tsConfigFilePath: string
+  private watchProgram?: ts.WatchOfConfigFile<ts.BuilderProgram>
 
-  private errorCallback?: ErrorCallback
-  private changeCallback?: ChangeCallback
-  private readonly watchProgram: ts.WatchOfConfigFile<ts.BuilderProgram>
-
-  constructor(absoluteProjectDir: string) {
+  constructor(
+    absoluteProjectDir: string,
+    private readonly buildSuccessCallback: BuildSuccessCallback,
+    private readonly buildErrorCallback: BuildFailedCallback,
+  ) {
     this.projectDir = absoluteProjectDir
 
     const tsConfigFilePath = ts.findConfigFile(
@@ -35,78 +36,62 @@ export default class WatchProgram {
     }
 
     this.tsConfigFilePath = tsConfigFilePath
+  }
+
+  public start() {
     const host = ts.createWatchCompilerHost(
-      tsConfigFilePath,
+      this.tsConfigFilePath,
       {},
       ts.sys,
       ts.createSemanticDiagnosticsBuilderProgram,
       this.reportDiagnostic.bind(this),
-      this.reportWatchStatusChanged.bind(this),
+      this.reportWatchStatus.bind(this),
     )
-
     this.watchProgram = ts.createWatchProgram(host)
-  }
+    this.watchProgram.getProgram().emit()
 
-  public onError(callback: ErrorCallback) {
-    this.errorCallback = callback
-  }
-
-  public onCompileSucceeded(callback: ChangeCallback) {
-    this.changeCallback = callback
-    this.provideSamenFileToClient()
+    this.onBuildComplete(
+      this.watchProgram.getProgram().getSemanticDiagnostics(),
+    )
   }
 
   public close() {
-    this.watchProgram.close()
-    this.errorCallback = undefined
-    this.changeCallback = undefined
+    this.watchProgram?.close()
   }
 
-  private reportDiagnostic(diagnostic: ts.Diagnostic) {
-    console.error(
-      "TS Error",
-      diagnostic.code,
-      diagnostic.file?.fileName,
-      diagnostic.start,
-      diagnostic.length,
-      ":",
-      ts.flattenDiagnosticMessageText(
-        diagnostic.messageText,
-        formatHost.getNewLine(),
-      ),
-    )
+  private reportDiagnostic(diagnostic: ts.Diagnostic) {}
 
-    if (this.errorCallback) {
-      const diagnostics = this.watchProgram
-        .getProgram()
-        .getSemanticDiagnostics()
-      // for (const diag of diagnostics) {
-      //   if (diag.category === ts.DiagnosticCategory.Error) {
-      //   }
-      // }
-      this.errorCallback(diagnostics)
-    }
-  }
-
-  private reportWatchStatusChanged(
+  private reportWatchStatus(
     diagnostic: ts.Diagnostic,
     newLine: string,
     options: ts.CompilerOptions,
     errorCount?: number,
   ) {
-    if (errorCount === 0) {
-      this.provideSamenFileToClient()
-    } else {
-      // already handled by this.reportDiagnostic()
+    if (this.watchProgram) {
+      this.onBuildComplete(
+        this.watchProgram.getProgram().getSemanticDiagnostics(),
+      )
     }
   }
 
-  private async provideSamenFileToClient() {
-    if (!this.changeCallback) {
-      return
+  private onBuildComplete(diagnostics: readonly ts.Diagnostic[]) {
+    const errorDiagnostics = diagnostics.filter(
+      (d) => d.category === ts.DiagnosticCategory.Error,
+    )
+    if (errorDiagnostics.length > 0) {
+      this.onBuildFailed(errorDiagnostics)
+    } else {
+      this.onBuildSuccess()
+    }
+  }
+
+  private onBuildSuccess() {
+    if (!this.watchProgram) {
+      throw new Error("WatchProgram not ready")
     }
 
     const program = this.watchProgram.getProgram()
+
     // TODO check all root dirs for samen.ts
     const sourceFile = program.getSourceFile(`${this.projectDir}/src/samen.ts`)
 
@@ -114,9 +99,18 @@ export default class WatchProgram {
       throw new MissingSamenFileError(this.projectDir)
     }
 
-    this.changeCallback(
+    this.buildSuccessCallback(
       sourceFile.getSourceFile(),
       this.watchProgram.getProgram().getProgram().getTypeChecker(),
     )
+  }
+
+  private onBuildFailed(diagnostics: readonly ts.Diagnostic[]) {
+    const errorMessage = ts.formatDiagnostics(diagnostics, {
+      getCanonicalFileName: (f) => f,
+      getCurrentDirectory: () => this.projectDir,
+      getNewLine: () => "\n",
+    })
+    this.buildErrorCallback(errorMessage)
   }
 }

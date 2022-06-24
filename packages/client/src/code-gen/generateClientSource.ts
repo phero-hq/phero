@@ -75,10 +75,24 @@ export default function generateClientSource(
 
   const optsParam = generateOptsParam(appDeclarationVersion)
 
+  const clientIdentifier = "SamenClient"
+  const domainIdentifier = "domain"
+
+  const samenIndexSource = tsx.sourceFile(
+    tsx.exportDeclaration({
+      identifiers: [clientIdentifier],
+      module: `./${clientIdentifier}`,
+    }),
+    tsx.exportNamespaceDeclaration({
+      identifier: `${domainIdentifier}`,
+      module: `./${domainIdentifier}`,
+    }),
+  )
+
   const classDeclr: ts.ClassDeclaration = ts.factory.createClassDeclaration(
     undefined,
     [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
-    ts.factory.createIdentifier("SamenClient"),
+    ts.factory.createIdentifier(clientIdentifier),
     undefined,
     [hertitageClause],
     [
@@ -168,6 +182,7 @@ export default function generateClientSource(
   )
 
   return {
+    samenIndexSource,
     samenClientSource,
     domainSource,
   }
