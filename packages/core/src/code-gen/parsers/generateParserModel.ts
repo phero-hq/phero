@@ -488,7 +488,7 @@ export default function generateParserModel(
           ) {
             position = declr.parent.typeParameters?.indexOf(declr) ?? -1
           } else {
-            throw new Error("Should ve either inteface or TypeAlias")
+            throw new Error("Should be either inteface or TypeAlias")
           }
         }
 
