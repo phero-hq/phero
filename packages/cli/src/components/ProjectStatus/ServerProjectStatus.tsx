@@ -135,7 +135,7 @@ export default function ServerProjectStatus({
     )
 
     const childProcess = spawnChildProcess(
-      "./node_modules/.bin/samen-server",
+      "samen-server",
       ["serve", "--port", `${command.port}`],
       path.resolve(project.path),
     )

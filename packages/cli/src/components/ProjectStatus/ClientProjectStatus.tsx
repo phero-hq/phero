@@ -77,7 +77,7 @@ export default function ClientProjectStatus({
     )
 
     const childProcess = spawnChildProcess(
-      "./node_modules/.bin/samen-client",
+      "samen-client",
       ["watch", "--port", `${command.port}`],
       path.resolve(project.path),
     )
