@@ -1,16 +1,12 @@
 import ts from "typescript"
-import { generateInlineParser } from "./code-gen/generateRPCProxy"
+import { generateParserBody } from "./code-gen/parsers/generateParser"
 import generateParserFromModel from "./code-gen/parsers/generateParserFromModel"
 import generateParserModel from "./code-gen/parsers/generateParserModel"
 import { ParseError } from "./errors"
 import { ParsedError } from "./extractErrors/parseThrowStatement"
 import { getReturnType } from "./extractFunctionFromServiceProperty"
 import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
-import {
-  getNameAsString,
-  isExternalType,
-  getFullyQualifiedName,
-} from "./tsUtils"
+import { getNameAsString, isExternalType } from "./tsUtils"
 import * as tsx from "./tsx"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
@@ -34,11 +30,11 @@ export function generateFunction(
   refMaker: ReferenceMaker,
 ): ts.FunctionDeclaration {
   return ts.factory.createFunctionDeclaration(
-    undefined, // TODO decoraters are prohibited
+    undefined, // decoraters are prohibited
     [exportModifier, asyncModifier],
-    undefined, // TODO asteriks is prohibited
+    undefined, // asteriks is prohibited
     func.name,
-    undefined, // TODO typeParameters are prohibited
+    undefined, // typeParameters are prohibited
     generateFunctionParameters(func, refMaker),
     ts.factory.createTypeReferenceNode("Promise", [
       generateTypeNode(func.returnType, refMaker),
@@ -165,6 +161,7 @@ function generateClientFunctionBlock(
   const isVoid = returnType.kind === ts.SyntaxKind.VoidKeyword
 
   const returnTypeNode = generateTypeNode(returnType, refMaker)
+
   return tsx.block(
     tsx.statement.return(
       tsx.expression.call(
@@ -205,11 +202,16 @@ function generateClientFunctionBlock(
               }),
             ),
             `error_parser_${serviceName}`,
-            ts.isTypeReferenceNode(returnType)
-              ? makeReferenceToParserFunction(returnType, typeChecker)
-              : tsx.expression.identifier(
-                  `${getNameAsString(func.name!)}ResultParser`,
-                ),
+            ...(isVoid
+              ? []
+              : [
+                  makeReferenceToParserFunction(
+                    returnType,
+                    returnTypeNode,
+                    refMaker,
+                    typeChecker,
+                  ),
+                ]),
           ],
         },
       ),
@@ -247,14 +249,17 @@ export function generateModel(model: Model, refMaker: ReferenceMaker): Model {
       model.heritageClauses?.map((hc) =>
         ts.factory.createHeritageClause(
           hc.token,
-          hc.types.map((t) =>
-            ts.factory.createExpressionWithTypeArguments(
+          hc.types.map((t) => {
+            return ts.factory.createExpressionWithTypeArguments(
               ts.isIdentifier(t.expression)
                 ? refMaker.fromIdentifier(t.expression)
+                : ts.isPropertyAccessExpression(t.expression) &&
+                  ts.isIdentifier(t.expression.name)
+                ? refMaker.fromIdentifier(t.expression.name)
                 : t.expression,
               t.typeArguments?.map((t) => generateTypeNode(t, refMaker)),
-            ),
-          ),
+            )
+          }),
         ),
       ),
       model.members.map((m) => generateTypeElement(m, refMaker)),
@@ -362,19 +367,21 @@ function generateTypeElement(
 
 function makeReferenceToParserFunction(
   typeNode: ts.TypeNode,
+  returnTypeNode: ts.TypeNode,
+  refMaker: ReferenceMaker,
   typeChecker: ts.TypeChecker,
 ): ts.Expression {
-  if (ts.isTypeReferenceNode(typeNode) && !typeNode.typeArguments) {
-    return tsx.expression.propertyAccess(
-      `${getFullyQualifiedName(typeNode, typeChecker).base}Parser`,
-      "parse",
-    )
-  }
-
-  return generateInlineParser({
-    returnType: tsx.type.any,
-    parser: generateParserFromModel(
-      generateParserModel(typeChecker, typeNode, "data"),
+  return tsx.arrowFunction({
+    params: [tsx.param({ name: "data", type: tsx.type.any })],
+    returnType: tsx.type.reference({
+      name: "ParseResult",
+      args: [returnTypeNode],
+    }),
+    body: generateParserBody(
+      returnTypeNode,
+      generateParserFromModel(
+        generateParserModel(typeChecker, typeNode, "data"),
+      ),
     ),
   })
 }

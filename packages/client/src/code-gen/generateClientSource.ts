@@ -15,8 +15,6 @@ export default function generateClientSource(
   appDeclarationVersion: ParsedAppDeclarationVersion,
   typeChecker: ts.TypeChecker,
 ): ClientSource {
-  const t1 = Date.now()
-
   const { domainModels, services } = appDeclarationVersion
   const parsedDomainErrors = appDeclarationVersion.errors.map(parseError)
   const domainRefMaker = new ReferenceMaker(
@@ -50,7 +48,10 @@ export default function generateClientSource(
 
   const importDomain = tsx.importDeclaration({
     names: [
-      ...domainModels.map((model) => model.name.text),
+      ...domainModels.flatMap((model) => [
+        model.name.text,
+        `${model.name.text}Parser`,
+      ]),
       ...parsedDomainErrors.map((err) => err.name),
       ...services.map((service) => service.name),
     ],
@@ -151,16 +152,10 @@ export default function generateClientSource(
     ],
   )
 
-  const parserDeclrs: ts.FunctionDeclaration[] = generateParsersForReturnTypes(
-    appDeclarationVersion,
-    typeChecker,
-  )
-
   const samenClientSource = tsx.sourceFile(
     importDomain,
     importBaseSamenClient,
     importParserTypes,
-    ...parserDeclrs,
     ...services.map((service) =>
       generateErrorParser(service.name, [
         ...parsedDomainErrors,
@@ -171,9 +166,6 @@ export default function generateClientSource(
     ),
     classDeclr,
   )
-
-  const t2 = Date.now()
-  // console.log("Generate client in ", t2 - t1)
 
   return {
     samenClientSource,
@@ -231,36 +223,6 @@ function generateContextParam(
       ),
     ),
   )
-}
-
-function generateParsersForReturnTypes(
-  appDeclarationVersion: ParsedAppDeclarationVersion,
-  typeChecker: ts.TypeChecker,
-): ts.FunctionDeclaration[] {
-  const result: ts.FunctionDeclaration[] = []
-
-  for (const service of appDeclarationVersion.services) {
-    for (const func of service.functions) {
-      const returnType: ts.TypeNode | undefined =
-        func.type && ts.isTypeReferenceNode(func.type)
-          ? func.type.typeArguments?.[0]
-          : undefined
-
-      if (!returnType || ts.isTypeReferenceNode(returnType)) {
-        continue
-      }
-
-      result.push(
-        generateNonModelParser(
-          returnType,
-          returnType,
-          typeChecker,
-          `${func.name?.getText()}ResultParser`,
-        ),
-      )
-    }
-  }
-  return result
 }
 
 function generateError(parsedError: ParsedError): ts.ClassDeclaration {

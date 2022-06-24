@@ -268,7 +268,7 @@ export function isExternalSourceFile(sourceFile: ts.SourceFile): boolean {
 }
 
 export function getNameAsString(
-  name: ts.PropertyName | ts.EntityName | ts.BindingName,
+  name: ts.PropertyName | ts.EntityName | ts.BindingName | ts.Identifier,
 ): string {
   if (!name) {
     throw new Error("No name")
@@ -302,10 +302,9 @@ export function getFullyQualifiedName(
   full: string
 } {
   const type = typeChecker.getTypeFromTypeNode(typeNode)
-  const base = typeChecker
-    .getFullyQualifiedName(type.aliasSymbol ?? type.symbol)
-    .replace(/^"[^"]+"\./, "") // remove file name
-    .replace(/\.v_\d+_\d+_\d+/, "") // remove version
+  const base = cleanUpTypeName(
+    typeChecker.getFullyQualifiedName(type.aliasSymbol ?? type.symbol),
+  )
 
   const fullyQualifiedTypeArgs = typeNode.typeArguments?.map((typeArg) =>
     ts.isTypeReferenceNode(typeArg)
@@ -325,6 +324,12 @@ export function getFullyQualifiedName(
     typeArgs,
     full: `${base}${typeArgs ?? ""}`,
   }
+}
+
+function cleanUpTypeName(typeName: string): string {
+  return typeName
+    .replace(/^"[^"]+"\./, "") // remove file name
+    .replace(/(domain\.)?v_\d+_\d+_\d+\./, "") // remove version, and domain before it
 }
 
 export function getTypeName(typeNode: ts.TypeNode): string | undefined {
