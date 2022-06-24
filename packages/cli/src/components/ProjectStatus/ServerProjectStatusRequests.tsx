@@ -77,7 +77,12 @@ export default function ServerProjectStatusRequests({ requests }: Props) {
                     <Text dimColor>{request.ms}ms</Text>
                   </Box>
 
-                  <Box marginTop={1} marginLeft={2} flexDirection="column">
+                  <Box
+                    marginTop={1}
+                    marginLeft={2}
+                    marginBottom={1}
+                    flexDirection="column"
+                  >
                     <Box marginBottom={1}>
                       <Text color="red">
                         {request.errors.length === 1
