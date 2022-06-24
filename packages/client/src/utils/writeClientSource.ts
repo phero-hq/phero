@@ -58,11 +58,11 @@ export default async function writeClientSource(
   }
 
   const baseParseResultPath = path.join(outputPathClient, "ParseResult.ts")
-  const baseParseResultPathExists = exists(baseParseResultPath)
+  const baseParseResultPathExists = await exists(baseParseResultPath)
   if (!baseParseResultPathExists) {
     await fs.copyFile(
       path.join(__dirname, "../../src/templates/ParseResult.ts"),
-      path.join(outputPathClient, "ParseResult.ts"),
+      baseParseResultPath,
     )
   }
 
