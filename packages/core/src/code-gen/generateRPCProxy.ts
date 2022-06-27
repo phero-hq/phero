@@ -769,9 +769,6 @@ function wrapWithErrorHandler(
     catch: {
       error: "error",
       block: [
-        tsx.verbatim(`console.log("errorerrorerror", error)`),
-        tsx.verbatim(`console.log("errorname", error.constructor.name)`),
-        tsx.verbatim(`console.log("iserror", error instanceof Error)`),
         generateErrorParsingFunction(
           service.name,
           domainErrors,
@@ -920,6 +917,10 @@ function generateErrorParsingFunction(
                 ),
               ),
             ),
+            tsx.property.assignment(
+              "stack",
+              tsx.expression.propertyAccess("error", "stack"),
+            ),
           ),
         ),
       ),
@@ -935,6 +936,10 @@ function generateErrorParsingFunction(
                   tsx.literal.string("Internal Server Error"),
                 ),
               ),
+            ),
+            tsx.property.assignment(
+              "stack",
+              tsx.expression.propertyAccess("error", "stack"),
             ),
           ),
         ),
@@ -983,6 +988,10 @@ function generateErrorParsingFunction(
                   ),
                 ),
               ),
+            ),
+            tsx.property.assignment(
+              "stack",
+              tsx.expression.propertyAccess("error", "stack"),
             ),
           ),
         ),

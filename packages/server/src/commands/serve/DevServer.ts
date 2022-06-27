@@ -5,6 +5,7 @@ import {
   ParsedSamenApp,
   parseSamenApp,
   PortInUseError,
+  RPCResult,
 } from "@samen/core"
 import { ServerCommandServe, ServerDevEventEmitter } from "@samen/dev"
 import crypto from "crypto"
@@ -25,7 +26,10 @@ interface Headers {
 }
 
 interface RPCRoutes {
-  [name: string]: (request: { headers: Headers; body: any }) => Promise<any>
+  [name: string]: (request: {
+    headers: Headers
+    body: any
+  }) => Promise<RPCResult<any>>
 }
 
 export default class DevServer {
@@ -176,7 +180,6 @@ export default class DevServer {
 
     if (req.method === "POST") {
       res.setHeader("Content-Type", "application/json")
-
       if (req.url) {
         const route = this.routes[req.url]
         if (route) {
@@ -192,50 +195,53 @@ export default class DevServer {
               this.eventEmitter.emit({
                 type: "RPC_SUCCESS",
                 url: req.url,
-                status: res.statusCode,
                 ms: Date.now() - startTime,
                 requestId,
                 dateTime: new Date().toISOString(),
               })
             } else if (rpcResult.status === 400) {
+              // Validation error(s)
               res.write(JSON.stringify(rpcResult.errors, null, 4))
               this.eventEmitter.emit({
-                type: "RPC_FAILED",
+                type: "RPC_FAILED_VALIDATION_ERROR",
                 url: req.url,
-                status: res.statusCode,
-                errorMessage: JSON.stringify(rpcResult.errors),
                 ms: Date.now() - startTime,
                 requestId,
                 dateTime: new Date().toISOString(),
+                errors: rpcResult.errors,
               })
             } else if (rpcResult.status === 500) {
+              // Error is thrown
               res.write(JSON.stringify(rpcResult.error))
               this.eventEmitter.emit({
-                type: "RPC_FAILED",
+                type: "RPC_FAILED_FUNCTION_ERROR",
                 url: req.url,
-                status: res.statusCode,
-                errorMessage: rpcResult.error,
                 ms: Date.now() - startTime,
                 requestId,
                 dateTime: new Date().toISOString(),
+                error: rpcResult.error,
               })
             } else {
               throw new Error("Unsupported http status")
             }
           } catch (e) {
             // Indicates a bug in Samen
-            const errorMessage =
-              e instanceof Error ? e.message : "unknown error"
             res.statusCode = 500
-            res.write(JSON.stringify({ errorMessage }))
+            res.write(
+              JSON.stringify({
+                errorMessage: e instanceof Error ? e.message : "unknown error",
+              }),
+            )
             this.eventEmitter.emit({
-              type: "RPC_FAILED",
+              type: "RPC_FAILED_SERVER_ERROR",
               url: req.url,
-              status: 500,
-              errorMessage,
               ms: Date.now() - startTime,
               requestId,
               dateTime: new Date().toISOString(),
+              error: {
+                message: e instanceof Error ? e.message : "unknown error",
+                stack: (e instanceof Error && e.stack) || "",
+              },
             })
           } finally {
             res.end()
@@ -249,10 +255,8 @@ export default class DevServer {
     res.write(`{ "error": "RPC not found" }`)
     res.end()
     this.eventEmitter.emit({
-      type: "RPC_FAILED",
+      type: "RPC_FAILED_NOT_FOUND_ERROR",
       url: req.url,
-      status: 404,
-      errorMessage: "RPC not found",
       ms: Date.now() - startTime,
       requestId,
       dateTime: new Date().toISOString(),

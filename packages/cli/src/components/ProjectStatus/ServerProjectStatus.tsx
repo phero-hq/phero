@@ -105,14 +105,11 @@ export default function ServerProjectStatus({
         break
 
       case "RPC_START":
-        addRequest(event)
-        break
-
       case "RPC_SUCCESS":
-        addRequest(event)
-        break
-
-      case "RPC_FAILED":
+      case "RPC_FAILED_VALIDATION_ERROR":
+      case "RPC_FAILED_FUNCTION_ERROR":
+      case "RPC_FAILED_SERVER_ERROR":
+      case "RPC_FAILED_NOT_FOUND_ERROR":
         addRequest(event)
         break
 
@@ -135,7 +132,7 @@ export default function ServerProjectStatus({
     )
 
     const childProcess = spawnChildProcess(
-      "./node_modules/.bin/samen-server",
+      "samen-server",
       ["serve", "--port", `${command.port}`],
       path.resolve(project.path),
     )

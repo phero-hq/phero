@@ -1,4 +1,5 @@
 import { spawn } from "child_process"
+import { hasErrorCode } from "./utils/errors"
 
 interface ChildProcess {
   executable: string // ./node_modules/.bin/samen-*
@@ -25,25 +26,35 @@ export function fatalError(error: unknown) {
 }
 
 export function spawnChildProcess(
-  executable: string,
+  executableName: string,
   argv: string[],
   cwd: string,
 ): ChildProcess {
+  const executable = `./node_modules/.bin/${executableName}`
   const { kill, pid, stderr } = spawn(executable, argv, { cwd })
     .on("close", (code) => {
-      throw new Error(`${executable} closed with code: ${code}`)
+      throw new Error(`${executableName} closed with code: ${code}`)
     })
     .on("exit", (code, signal) => {
-      throw new Error(`${executable} exited with code: ${code} ${signal}`)
+      throw new Error(`${executableName} exited with code: ${code} ${signal}`)
     })
     .on("disconnect", () => {
-      throw new Error(`${executable} disconnected`)
+      throw new Error(`${executableName} disconnected`)
     })
     .on("uncaughtException", () => {
-      throw new Error(`uncaughtException in ${executable}`)
+      throw new Error(`uncaughtException in ${executableName}`)
     })
     .on("error", (error) => {
-      throw new Error(`${executable} errored with message: ${error.message}`)
+      if (hasErrorCode(error)) {
+        switch (error.code) {
+          case "ENOENT":
+            throw new Error(`${executableName} is not installed in ${cwd}`)
+        }
+      } else {
+        throw new Error(
+          `${executableName} errored with message: ${error.message}`,
+        )
+      }
     })
 
   stderr.on("data", (data) => {
