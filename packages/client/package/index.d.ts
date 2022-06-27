@@ -1,1 +1,1 @@
-export { SamenClient, domain } from "../../../../.samen"
+export * from "../../../../.samen"

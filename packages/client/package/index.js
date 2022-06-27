@@ -6,8 +6,11 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
 }));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
 exports.__esModule = true;
-exports.domain = exports.SamenClient = void 0;
-var _samen_1 = require("../../../../.samen");
-__createBinding(exports, _samen_1, "SamenClient");
-__createBinding(exports, _samen_1, "domain");
+exports.SamenClient = void 0;
+var SamenClient_1 = require("../../../../.samen/SamenClient")
+__createBinding(exports, SamenClient_1, "SamenClient");
+__exportStar(require("../../../../.samen/domain"), exports)
