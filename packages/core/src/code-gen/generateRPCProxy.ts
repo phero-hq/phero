@@ -844,7 +844,7 @@ function generateRPCFunctionCall({
               ),
             ),
           ),
-          tsx.verbatim("console.log(`hallo??`)"),
+          // tsx.verbatim("console.log(`hallo??`)"),
           // await Promise.all(middlewarePromises);
           tsx.statement.expression(
             tsx.expression.await(
