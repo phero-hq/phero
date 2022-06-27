@@ -7,7 +7,6 @@ import {
   ParsedAppDeclarationVersion,
   tsx,
   generateModelParser,
-  generateNonModelParser,
 } from "@samen/core"
 import { ClientSource } from "../ClientSource"
 
@@ -84,7 +83,7 @@ export default function generateClientSource(
       module: `./${clientIdentifier}`,
     }),
     tsx.exportNamespaceDeclaration({
-      identifier: `${domainIdentifier}`,
+      identifier: "*",
       module: `./${domainIdentifier}`,
     }),
   )
