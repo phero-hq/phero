@@ -24,7 +24,6 @@ export default function generateClientSource(
   )
 
   const importParserTypes = tsx.importDeclaration({
-    isTypeOnly: true,
     names: ["ParseResult", "ValidationError"],
     module: "./ParseResult",
   })
