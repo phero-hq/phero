@@ -29,9 +29,10 @@ export function spawnChildProcess(
   executableName: string,
   argv: string[],
   cwd: string,
+  onLog?: (data: string) => void,
 ): ChildProcess {
   const executable = `./node_modules/.bin/${executableName}`
-  const { kill, pid, stderr } = spawn(executable, argv, { cwd })
+  const { kill, pid, stdout, stderr } = spawn(executable, argv, { cwd })
     .on("close", (code) => {
       throw new Error(`${executableName} closed with code: ${code}`)
     })
@@ -57,9 +58,8 @@ export function spawnChildProcess(
       }
     })
 
-  stderr.on("data", (data) => {
-    throw new Error(data.toString().trim())
-  })
+  stdout.on("data", (data) => onLog?.(data.toString().trim()))
+  stderr.on("data", (data) => onLog?.(data.toString().trim()))
 
   const childProcess = {
     executable,

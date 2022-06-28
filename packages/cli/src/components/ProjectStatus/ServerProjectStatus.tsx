@@ -2,44 +2,32 @@ import {
   addDevEventListener,
   ServerCommandServe,
   ServerDevEvent,
-  ServerDevEventRPC,
 } from "@samen/dev"
-import { Box, Text } from "ink"
+import { Box } from "ink"
 import path from "path"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { spawnChildProcess } from "../../process"
 import { ServerProject } from "../../types"
 import ProjectStatus from "../ProjectStatus"
-import ServerProjectStatusRequests from "./ServerProjectStatusRequests"
+import {
+  ServerProjectStatusRowLog,
+  ServerProjectStatusRowRpc,
+} from "./ServerProjectStatusRows"
 
 export default function ServerProjectStatus({
   project,
   command,
   maxProjectPathLength,
+  onAddRow,
 }: {
   project: ServerProject
   command: ServerCommandServe
   maxProjectPathLength: number
+  onAddRow: (row: JSX.Element) => void
 }) {
   const [status, setStatus] = useState<string>("Initializing...")
   const [isBuilding, setBuilding] = useState(true)
   const [error, setError] = useState<string>()
-
-  const [requests, setRequests] = useState<ServerDevEventRPC[]>([])
-  const oldRequests = useRef<ServerDevEventRPC[]>([])
-  const addRequest = useCallback((addedRequest: ServerDevEventRPC) => {
-    const newRequests = [...oldRequests.current]
-    const index = newRequests.findIndex(
-      (r) => r.requestId === addedRequest.requestId,
-    )
-    if (index === -1) {
-      newRequests.push(addedRequest)
-    } else {
-      newRequests[index] = addedRequest
-    }
-    setRequests(newRequests)
-    oldRequests.current = newRequests
-  }, [])
 
   const onEvent = useCallback((event: ServerDevEvent) => {
     if (command.verbose) {
@@ -110,7 +98,7 @@ export default function ServerProjectStatus({
       case "RPC_FAILED_FUNCTION_ERROR":
       case "RPC_FAILED_SERVER_ERROR":
       case "RPC_FAILED_NOT_FOUND_ERROR":
-        addRequest(event)
+        onAddRow(<ServerProjectStatusRowRpc event={event} />)
         break
 
       default:
@@ -135,6 +123,13 @@ export default function ServerProjectStatus({
       "samen-server",
       ["serve", "--port", `${command.port}`],
       path.resolve(project.path),
+      (log) =>
+        onAddRow(
+          <ServerProjectStatusRowLog
+            log={log}
+            dateTime={new Date().toISOString()}
+          />,
+        ),
     )
 
     return () => {
@@ -153,15 +148,15 @@ export default function ServerProjectStatus({
         maxProjectPathLength={maxProjectPathLength}
       />
 
-      {error ? (
+      {/* {error ? (
         <Box paddingX={4} paddingTop={1}>
           <Text color="red">{error}</Text>
         </Box>
       ) : requests.length > 0 ? (
         <Box paddingX={4} paddingY={1}>
-          <ServerProjectStatusRequests requests={requests} />
+          <ServerProjectStatusRequests requests={requests} logs={logs} />
         </Box>
-      ) : null}
+      ) : null} */}
     </Box>
   )
 }
