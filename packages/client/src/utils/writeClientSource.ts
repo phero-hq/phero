@@ -35,11 +35,11 @@ export default async function writeClientSource(
       encoding: "utf-8",
     }),
     fs.copyFile(
-      path.join(__dirname, "../../src/templates/BaseSamenClient.ts"),
+      path.join(__dirname, "../../package/BaseSamenClient.ts"),
       baseSamenClientPath,
     ),
     fs.copyFile(
-      path.join(__dirname, "../../src/templates/ParseResult.ts"),
+      path.join(__dirname, "../../package/ParseResult.ts"),
       parseResultPath,
     ),
   ])
