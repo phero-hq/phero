@@ -73,6 +73,7 @@ export default class DevServer {
     // Start code watch
     const program = new WatchProgram(
       this.projectPath,
+      this.buildProjectStart.bind(this),
       this.buildProjectSuccess.bind(this),
       this.buildProjectFailed.bind(this),
     )
@@ -89,6 +90,10 @@ export default class DevServer {
         .on("error", (error) => reject(error))
         .listen(this.command.port)
     })
+  }
+
+  private buildProjectStart() {
+    this.eventEmitter.emit({ type: "BUILD_PROJECT_START" })
   }
 
   private async buildProjectSuccess(

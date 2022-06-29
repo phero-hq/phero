@@ -94,7 +94,7 @@ export type ServerDevEvent =
   | { type: "SERVE_READY" }
 
   // Building the project
-  // | { type: "BUILD_PROJECT_START" } // TODO: Implement this one
+  | { type: "BUILD_PROJECT_START" }
   | { type: "BUILD_PROJECT_SUCCESS" }
   | { type: "BUILD_PROJECT_FAILED"; errorMessage: string }
 

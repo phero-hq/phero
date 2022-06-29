@@ -44,11 +44,11 @@ export default function ServerProjectStatus({
         setError(undefined)
         break
 
-      // TODO
-      // case "BUILD_PROJECT_START":
-      //   setStatus("Building project...")
-      //   setBuilding(true)
-      //   break
+      case "BUILD_PROJECT_START":
+        setStatus("Building project...")
+        setBuilding(true)
+        setError(undefined)
+        break
 
       case "BUILD_PROJECT_SUCCESS":
         setStatus("Project is built")
