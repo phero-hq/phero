@@ -6,7 +6,6 @@ import { ClientCommandBuild, ClientServerLocation } from "@samen/dev"
 import { promises as fs } from "fs"
 import http from "http"
 import https from "https"
-import path from "path"
 import generateClientSource from "../code-gen/generateClientSource"
 import writeClientSource from "./writeClientSource"
 
@@ -21,11 +20,7 @@ export default async function buildClient(
     declaration.typeChecker,
   )
 
-  await writeClientSource(
-    path.join("node_modules", "@samen", "client", "generated"),
-    path.join(".samen"),
-    clientSource,
-  )
+  await writeClientSource(clientSource)
 }
 
 async function getManifestSource(
