@@ -22,6 +22,6 @@ function generateVoidValidator(
   return ts.factory.createBinaryExpression(
     ts.factory.createTypeOfExpression(pointer.dataVarExpr),
     ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsEqualsToken),
-    ts.factory.createIdentifier("undefined"),
+    ts.factory.createStringLiteral("undefined"),
   )
 }

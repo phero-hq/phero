@@ -69,8 +69,10 @@ export default function generateRPCProxy(
     }
 
     class ContextParseError extends Error {
-      constructor(public readonly errors: ValidationError[]) {
+      constructor(public readonly errors: ValidationError[], public readonly input: any) {
         super("ContextParseError")
+        // https://github.com/microsoft/TypeScript/issues/22585
+        Object.setPrototypeOf(this, ContextParseError.prototype)
       }
     }
   `),
@@ -108,7 +110,7 @@ export default function generateRPCProxy(
   const file = ts.createSourceFile(
     "samen-execution.ts",
     "",
-    ts.ScriptTarget.ES5,
+    ts.ScriptTarget.ES2015, // TODO should respect the target of the user
     false,
     ts.ScriptKind.TS,
   )
@@ -243,8 +245,6 @@ function generateInnerFunction(
 
             ...(service.config.middleware
               ? [
-                  tsx.const({ name: "v4", init: tsx.literal.true }),
-
                   tsx.const({
                     name: "resolvers",
                     init: tsx.literal.array(
@@ -416,6 +416,7 @@ function generateInnerFunction(
 
                       generateIfParseResultNotOkayEarlyReturn({
                         parseResult: "parsedContextParseResult",
+                        input: "ctx",
                       }),
 
                       tsx.const({
@@ -436,6 +437,7 @@ function generateInnerFunction(
 
                       generateIfParseResultNotOkayEarlyReturn({
                         parseResult: "parsedParamsParseResult",
+                        input: "input",
                       }),
 
                       tsx.const({
@@ -718,6 +720,7 @@ function generateInnerFunction(
 
             generateIfParseResultNotOkayEarlyReturn({
               parseResult: "inputParseResult",
+              input: "input",
             }),
 
             generateRPCFunctionCall({ service, funcDef }),
@@ -844,7 +847,6 @@ function generateRPCFunctionCall({
               ),
             ),
           ),
-          // tsx.verbatim("console.log(`hallo??`)"),
           // await Promise.all(middlewarePromises);
           tsx.statement.expression(
             tsx.expression.await(
@@ -864,6 +866,7 @@ function generateRPCFunctionCall({
 
     generateIfParseResultNotOkayEarlyReturn({
       parseResult: "outputParseResult",
+      input: "output",
     }),
 
     generateReturnOkay(),
@@ -890,12 +893,18 @@ function generateErrorParsingFunction(
       "instanceof",
       tsx.expression.identifier("ContextParseError"),
     ),
-    then: tsx.statement.return(
-      tsx.literal.object(
-        tsx.property.assignment("status", tsx.literal.number(400)),
-        tsx.property.assignment(
-          "errors",
-          tsx.expression.propertyAccess("error", "errors"),
+    then: tsx.block(
+      tsx.statement.return(
+        tsx.literal.object(
+          tsx.property.assignment("status", tsx.literal.number(400)),
+          tsx.property.assignment(
+            "input",
+            tsx.expression.propertyAccess("error", "input"),
+          ),
+          tsx.property.assignment(
+            "errors",
+            tsx.expression.propertyAccess("error", "errors"),
+          ),
         ),
       ),
     ),
@@ -1003,8 +1012,10 @@ function generateErrorParsingFunction(
 
 function generateIfParseResultNotOkayEarlyReturn({
   parseResult,
+  input,
 }: {
   parseResult: string
+  input: string
 }) {
   return tsx.statement.if({
     expression: tsx.expression.binary(
@@ -1017,7 +1028,10 @@ function generateIfParseResultNotOkayEarlyReturn({
         tsx.expression.call("rejectEXEC", {
           args: [
             tsx.expression.new("ContextParseError", {
-              args: [tsx.expression.propertyAccess(parseResult, "errors")],
+              args: [
+                tsx.expression.propertyAccess(parseResult, "errors"),
+                tsx.expression.identifier(input),
+              ],
             }),
           ],
         }),

@@ -54,7 +54,13 @@ export class BaseSamenClient {
     const data = await result.json()
 
     if (!result.ok) {
-      throw errorParser(data)
+      if (result.status === 400) {
+        throw new Error(
+          `Result of RPC ${serviceName}.${functionName} has incorrect output.`,
+        )
+      } else {
+        throw errorParser(data)
+      }
     }
 
     const parseResult = resultParser(data)

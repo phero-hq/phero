@@ -75,6 +75,14 @@ export function ServerProjectStatusRowRpc({
               </Text>
             </Box>
 
+            <Box marginBottom={1}>
+              <Text color="red">
+                {event.input === undefined
+                  ? "undefined"
+                  : JSON.stringify(event.input, null, 2)}
+              </Text>
+            </Box>
+
             <KeyValueTable
               content={event.errors.reduce(
                 (result, error) => ({

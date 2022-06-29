@@ -19,6 +19,7 @@ export interface RPCOkResult<T> {
 export interface RPCBadRequestResult {
   status: 400
   errors: ValidationError[]
+  input: any
 }
 
 // export interface RPCUnauthorizedResult {
