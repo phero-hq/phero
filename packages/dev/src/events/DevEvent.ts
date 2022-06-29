@@ -63,6 +63,7 @@ export type ServerDevEventRPCFailedValidationError = {
   dateTime: string // ISO-8601
   ms: number
   errors: ValidationError[]
+  input: any
 }
 
 export type ServerDevEventRPCFailedFunctionError = {

@@ -91,10 +91,10 @@ export function printSourceFile(source: ts.SourceFile): string {
 }
 
 async function exists(pathString: string) {
-  try {
-    await fs.access(pathString)
-    return true
-  } catch {
-    return false
-  }
+  // try {
+  //   await fs.access(pathString)
+  //   return true
+  // } catch {
+  return false
+  // }
 }

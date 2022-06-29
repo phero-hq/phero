@@ -24,7 +24,7 @@ export class DevServerCompilerHost {
         // support for Pick, Omit, and other TS utilities
         "lib.es5.d.ts",
       ],
-      target: ts.ScriptTarget.ES5,
+      target: ts.ScriptTarget.ES2015,
       module: ts.ModuleKind.CommonJS,
     }
 

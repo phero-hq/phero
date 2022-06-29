@@ -91,6 +91,14 @@ export default function ServerProjectStatusRequests({ requests }: Props) {
                       </Text>
                     </Box>
 
+                    <Box marginBottom={1}>
+                      <Text color="red">
+                        {request.input === undefined
+                          ? "undefined"
+                          : JSON.stringify(request.input, null, 2)}
+                      </Text>
+                    </Box>
+
                     <KeyValueTable
                       content={request.errors.reduce(
                         (result, error) => ({
