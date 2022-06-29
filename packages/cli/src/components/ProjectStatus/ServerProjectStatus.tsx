@@ -28,6 +28,7 @@ export default function ServerProjectStatus({
   const [status, setStatus] = useState<string>("Initializing...")
   const [isBuilding, setBuilding] = useState(true)
   const [error, setError] = useState<string>()
+  const [isErrorVisible, setErrorVisible] = useState(false)
 
   const onEvent = useCallback((event: ServerDevEvent) => {
     if (command.verbose) {
@@ -114,13 +115,25 @@ export default function ServerProjectStatus({
   }, [])
 
   useEffect(() => {
+    // It's not possible to instantly connect to the
+    // event-emitter. Hide the error for a short while,
+    // to make it easier on the experience:
+    const timeout = setTimeout(() => setErrorVisible(true), 5000)
+    return () => clearTimeout(timeout)
+  }, [])
+
+  useEffect(() => {
+    const eventUrl = `http://localhost:${command.port}`
     const removeEventListener = addDevEventListener(
-      `http://localhost:${command.port}`,
+      eventUrl,
       onEvent,
-      (status) => {
+      () => {
         if (command.verbose) {
-          console.log({ status })
+          console.log("Listener to samen-server process connected")
         }
+      },
+      (error) => {
+        setError(`Could not connect to event emitter at ${eventUrl} (${error})`)
       },
     )
 
@@ -153,7 +166,7 @@ export default function ServerProjectStatus({
         maxProjectPathLength={maxProjectPathLength}
       />
 
-      {error && (
+      {error && isErrorVisible && (
         <Box paddingX={4} paddingTop={1}>
           <Text color="red">{error}</Text>
         </Box>

@@ -1,10 +1,9 @@
 import { hasErrorCode, PortInUseError } from "@samen/core"
 import {
   addDevEventListener,
-  ClientDevEventEmitter,
-  DevEventListenerConnectionStatus,
-  ServerDevEvent,
   ClientCommandWatch,
+  ClientDevEventEmitter,
+  ServerDevEvent,
 } from "@samen/dev"
 import http from "http"
 import buildClient from "./utils/buildClient"
@@ -13,6 +12,7 @@ export default class ClientWatchServer {
   private readonly server: http.Server
   private readonly command: ClientCommandWatch
   private readonly eventEmitter: ClientDevEventEmitter
+  private eventEmitterHasBeenConnectedOnce = false
 
   constructor(command: ClientCommandWatch) {
     this.command = command
@@ -21,7 +21,8 @@ export default class ClientWatchServer {
     addDevEventListener(
       this.command.server.url,
       this.onServerEvent.bind(this),
-      this.onChangeServerEventConnectionStatus.bind(this),
+      this.onServerEventEmitterOpen.bind(this),
+      this.onServerEventEmitterError.bind(this),
     )
 
     this.server = this.startHttpServer()
@@ -35,22 +36,17 @@ export default class ClientWatchServer {
     }
   }
 
-  private async onChangeServerEventConnectionStatus(
-    status: DevEventListenerConnectionStatus,
-  ) {
-    switch (status) {
-      case "CONNECTED":
-        this.eventEmitter.emit({ type: "SERVER_CONNECTED" })
-        await this.buildClient()
-        break
+  private async onServerEventEmitterOpen() {
+    this.eventEmitterHasBeenConnectedOnce = true
+    this.eventEmitter.emit({ type: "SERVER_CONNECTED" })
+    await this.buildClient()
+  }
 
-      case "DISCONNECTED":
-        this.eventEmitter.emit({ type: "SERVER_DISCONNECTED" })
-        break
-
-      case "EMITTER_NOT_FOUND":
-        this.eventEmitter.emit({ type: "SERVER_NOT_FOUND" })
-        break
+  private onServerEventEmitterError(errorMessage: string) {
+    if (this.eventEmitterHasBeenConnectedOnce) {
+      this.eventEmitter.emit({ type: "SERVER_DISCONNECTED", errorMessage })
+    } else {
+      this.eventEmitter.emit({ type: "SERVER_NOT_FOUND", errorMessage })
     }
   }
 
