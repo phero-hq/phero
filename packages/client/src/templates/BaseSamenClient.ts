@@ -55,12 +55,8 @@ export class BaseSamenClient {
 
     if (!result.ok) {
       if (result.status === 400) {
-        console.error(
-          `Result of RPC ${serviceName}.${functionName} has incorrect output`,
-          data,
-        )
         throw new Error(
-          `Result of RPC ${serviceName}.${functionName} has incorrect output`,
+          `Result of RPC ${serviceName}.${functionName} has incorrect output.`,
         )
       } else {
         throw errorParser(data)
