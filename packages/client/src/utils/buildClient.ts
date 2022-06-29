@@ -6,7 +6,6 @@ import { ClientCommandBuild, ClientServerLocation } from "@samen/dev"
 import { promises as fs } from "fs"
 import http from "http"
 import https from "https"
-import path from "path"
 import generateClientSource from "../code-gen/generateClientSource"
 import writeClientSource from "./writeClientSource"
 
