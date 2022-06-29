@@ -12,11 +12,6 @@ type DevEventEmitterConnectionEvent =
   | { type: "LISTENER_CONNECTED"; id: string }
   | { type: "LISTENER_DISCONNECTED"; id: string }
 
-export type DevEventListenerConnectionStatus =
-  | "CONNECTED"
-  | "DISCONNECTED"
-  | "EMITTER_NOT_FOUND"
-
 export type ServerDevEventRPC =
   | ServerDevEventRPCStart
   | ServerDevEventRPCSuccess
@@ -99,7 +94,7 @@ export type ServerDevEvent =
   | { type: "SERVE_READY" }
 
   // Building the project
-  // | { type: "BUILD_PROJECT_START" } // TODO: Implement this one
+  | { type: "BUILD_PROJECT_START" }
   | { type: "BUILD_PROJECT_SUCCESS" }
   | { type: "BUILD_PROJECT_FAILED"; errorMessage: string }
 
@@ -130,8 +125,8 @@ export type ClientDevEvent =
 
   // Connecting to a server's emitter
   | { type: "SERVER_CONNECTED" }
-  | { type: "SERVER_DISCONNECTED" }
-  | { type: "SERVER_NOT_FOUND" }
+  | { type: "SERVER_DISCONNECTED"; errorMessage: string }
+  | { type: "SERVER_NOT_FOUND"; errorMessage: string }
 
   // Building the client
   | { type: "BUILD_START" }
@@ -200,23 +195,14 @@ export class ClientDevEventEmitter extends DevEventEmitter<ClientDevEvent> {}
 export function addDevEventListener<T extends ServerDevEvent | ClientDevEvent>(
   url: string,
   onEvent: (event: T) => void,
-  onChangeConnectionStatus: (status: DevEventListenerConnectionStatus) => void,
+  onOpen: () => void,
+  onError: (errorMessage: string) => void,
 ): () => void {
   const eventSource = new EventSource(url)
 
-  let didConnect = false
-  eventSource.onopen = () => {
-    didConnect = true
-    onChangeConnectionStatus("CONNECTED")
-  }
+  eventSource.onopen = () => onOpen()
 
-  eventSource.onerror = () => {
-    if (didConnect) {
-      onChangeConnectionStatus("DISCONNECTED")
-    } else {
-      onChangeConnectionStatus("EMITTER_NOT_FOUND")
-    }
-  }
+  eventSource.onerror = (error) => onError((error as any).message)
 
   eventSource.onmessage = async (message) => {
     onEvent(JSON.parse(message.data) as T)

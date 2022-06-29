@@ -2,51 +2,38 @@ import {
   addDevEventListener,
   ServerCommandServe,
   ServerDevEvent,
-  ServerDevEventRPC,
 } from "@samen/dev"
 import { Box, Text } from "ink"
 import path from "path"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { spawnChildProcess } from "../../process"
 import { ServerProject } from "../../types"
 import ProjectStatus from "../ProjectStatus"
-import ServerProjectStatusRequests from "./ServerProjectStatusRequests"
+import {
+  ServerProjectStatusRowLog,
+  ServerProjectStatusRowRpc,
+} from "./ServerProjectStatusRows"
 
 export default function ServerProjectStatus({
   project,
   command,
   maxProjectPathLength,
+  onAddRow,
 }: {
   project: ServerProject
   command: ServerCommandServe
   maxProjectPathLength: number
+  onAddRow: (row: JSX.Element) => void
 }) {
   const [status, setStatus] = useState<string>("Initializing...")
   const [isBuilding, setBuilding] = useState(true)
   const [error, setError] = useState<string>()
-
-  const [requests, setRequests] = useState<ServerDevEventRPC[]>([])
-  const oldRequests = useRef<ServerDevEventRPC[]>([])
-  const addRequest = useCallback((addedRequest: ServerDevEventRPC) => {
-    const newRequests = [...oldRequests.current]
-    const index = newRequests.findIndex(
-      (r) => r.requestId === addedRequest.requestId,
-    )
-    if (index === -1) {
-      newRequests.push(addedRequest)
-    } else {
-      newRequests[index] = addedRequest
-    }
-    setRequests(newRequests)
-    oldRequests.current = newRequests
-  }, [])
+  const [isErrorVisible, setErrorVisible] = useState(false)
 
   const onEvent = useCallback((event: ServerDevEvent) => {
     if (command.verbose) {
       console.log("server", event)
     }
-
-    setError(undefined)
 
     switch (event.type) {
       case "LISTENER_CONNECTED":
@@ -54,54 +41,61 @@ export default function ServerProjectStatus({
       case "SERVE_READY":
         setStatus("Initializing server...")
         setBuilding(true)
+        setError(undefined)
         break
 
-      // TODO
-      // case "BUILD_PROJECT_START":
-      //   setStatus("Building project...")
-      //   setBuilding(true)
-      //   break
+      case "BUILD_PROJECT_START":
+        setStatus("Building project...")
+        setBuilding(true)
+        setError(undefined)
+        break
 
       case "BUILD_PROJECT_SUCCESS":
         setStatus("Project is built")
         setBuilding(false)
+        setError(undefined)
         break
 
       case "BUILD_PROJECT_FAILED":
         setStatus("Could not build project")
-        setError(event.errorMessage)
         setBuilding(false)
+        setError(event.errorMessage)
         break
 
       case "BUILD_MANIFEST_START":
         setStatus("Building manifest...")
         setBuilding(true)
+        setError(undefined)
         break
 
       case "BUILD_MANIFEST_SUCCESS":
         setStatus("Manifest is generated")
         setBuilding(false)
+        setError(undefined)
         break
 
       case "BUILD_MANIFEST_FAILED":
         setStatus("Could not build manifest")
-        setError(event.errorMessage)
         setBuilding(false)
+        setError(event.errorMessage)
         break
 
       case "BUILD_RPCS_START":
         setStatus(`Building RPC's...`)
         setBuilding(true)
+        setError(undefined)
         break
 
       case "BUILD_RPCS_SUCCESS":
         setStatus("Server is ready, waiting for changes.")
         setBuilding(false)
+        setError(undefined)
         break
 
       case "BUILD_RPCS_FAILED":
         setStatus(`Could not build RPC's`)
         setBuilding(false)
+        setError(undefined)
         break
 
       case "RPC_START":
@@ -110,7 +104,7 @@ export default function ServerProjectStatus({
       case "RPC_FAILED_FUNCTION_ERROR":
       case "RPC_FAILED_SERVER_ERROR":
       case "RPC_FAILED_NOT_FOUND_ERROR":
-        addRequest(event)
+        onAddRow(<ServerProjectStatusRowRpc event={event} />)
         break
 
       default:
@@ -121,13 +115,25 @@ export default function ServerProjectStatus({
   }, [])
 
   useEffect(() => {
+    // It's not possible to instantly connect to the
+    // event-emitter. Hide the error for a short while,
+    // to make it easier on the experience:
+    const timeout = setTimeout(() => setErrorVisible(true), 5000)
+    return () => clearTimeout(timeout)
+  }, [])
+
+  useEffect(() => {
+    const eventUrl = `http://localhost:${command.port}`
     const removeEventListener = addDevEventListener(
-      `http://localhost:${command.port}`,
+      eventUrl,
       onEvent,
-      (status) => {
+      () => {
         if (command.verbose) {
-          console.log({ status })
+          console.log("Listener to samen-server process connected")
         }
+      },
+      (error) => {
+        setError(`Could not connect to event emitter at ${eventUrl} (${error})`)
       },
     )
 
@@ -135,6 +141,13 @@ export default function ServerProjectStatus({
       "samen-server",
       ["serve", "--port", `${command.port}`],
       path.resolve(project.path),
+      (log) =>
+        onAddRow(
+          <ServerProjectStatusRowLog
+            log={log}
+            dateTime={new Date().toISOString()}
+          />,
+        ),
     )
 
     return () => {
@@ -153,15 +166,11 @@ export default function ServerProjectStatus({
         maxProjectPathLength={maxProjectPathLength}
       />
 
-      {error ? (
+      {error && isErrorVisible && (
         <Box paddingX={4} paddingTop={1}>
           <Text color="red">{error}</Text>
         </Box>
-      ) : requests.length > 0 ? (
-        <Box paddingX={4} paddingY={1}>
-          <ServerProjectStatusRequests requests={requests} />
-        </Box>
-      ) : null}
+      )}
     </Box>
   )
 }

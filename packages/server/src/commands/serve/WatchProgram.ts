@@ -7,6 +7,7 @@ const formatHost: ts.FormatDiagnosticsHost = {
   getNewLine: () => ts.sys.newLine,
 }
 
+type BuildStartCallback = () => void
 type BuildSuccessCallback = (
   samenSourceFile: ts.SourceFile,
   typeChecker: ts.TypeChecker,
@@ -20,6 +21,7 @@ export default class WatchProgram {
 
   constructor(
     absoluteProjectDir: string,
+    private readonly buildStartCallback: BuildStartCallback,
     private readonly buildSuccessCallback: BuildSuccessCallback,
     private readonly buildErrorCallback: BuildFailedCallback,
   ) {
@@ -68,10 +70,18 @@ export default class WatchProgram {
     errorCount?: number,
   ) {
     if (this.watchProgram) {
-      this.onBuildComplete(
-        this.watchProgram.getProgram().getSemanticDiagnostics(),
-      )
+      if (diagnostic.code === 6031 || diagnostic.code === 6032) {
+        this.onBuildStart()
+      } else {
+        this.onBuildComplete(
+          this.watchProgram.getProgram().getSemanticDiagnostics(),
+        )
+      }
     }
+  }
+
+  private onBuildStart() {
+    this.buildStartCallback()
   }
 
   private onBuildComplete(diagnostics: readonly ts.Diagnostic[]) {
