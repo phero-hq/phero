@@ -21,11 +21,7 @@ export default async function buildClient(
     declaration.typeChecker,
   )
 
-  await writeClientSource(
-    path.join("node_modules", "@samen", "client", "generated"),
-    path.join(".samen"),
-    clientSource,
-  )
+  await writeClientSource(clientSource)
 }
 
 async function getManifestSource(

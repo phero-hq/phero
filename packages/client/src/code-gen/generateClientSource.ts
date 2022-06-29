@@ -8,12 +8,11 @@ import {
   tsx,
   generateModelParser,
 } from "@samen/core"
-import { ClientSource } from "../ClientSource"
 
 export default function generateClientSource(
   appDeclarationVersion: ParsedAppDeclarationVersion,
   typeChecker: ts.TypeChecker,
-): ClientSource {
+): ts.SourceFile {
   const { domainModels, services } = appDeclarationVersion
   const parsedDomainErrors = appDeclarationVersion.errors.map(parseError)
   const domainRefMaker = new ReferenceMaker(
@@ -23,13 +22,12 @@ export default function generateClientSource(
     undefined,
   )
 
-  const importParserTypes = tsx.importDeclaration({
-    names: ["ParseResult", "ValidationError"],
-    module: "./ParseResult",
+  const importsFromClientPackage = tsx.importDeclaration({
+    names: ["Fetch", "BaseSamenClient", "ParseResult", "ValidationError"],
+    module: "@samen/client",
   })
 
-  const domainSource = tsx.sourceFile(
-    importParserTypes,
+  const domainSource = [
     ...domainModels.map((model) => generateModel(model, domainRefMaker)),
     ...domainModels.map((model) => generateModelParser(model, typeChecker)),
     ...parsedDomainErrors.map(generateError),
@@ -42,24 +40,7 @@ export default function generateClientSource(
         ...service.errors.map(parseError).map(generateError),
       ]),
     ),
-  )
-
-  const importDomain = tsx.importDeclaration({
-    names: [
-      ...domainModels.flatMap((model) => [
-        model.name.text,
-        `${model.name.text}Parser`,
-      ]),
-      ...parsedDomainErrors.map((err) => err.name),
-      ...services.map((service) => service.name),
-    ],
-    module: "./domain",
-  })
-
-  const importBaseSamenClient = tsx.importDeclaration({
-    names: ["BaseSamenClient", "Fetch"],
-    module: "./BaseSamenClient",
-  })
+  ]
 
   const hertitageClause: ts.HeritageClause = ts.factory.createHeritageClause(
     ts.SyntaxKind.ExtendsKeyword,
@@ -73,24 +54,10 @@ export default function generateClientSource(
 
   const optsParam = generateOptsParam(appDeclarationVersion)
 
-  const clientIdentifier = "SamenClient"
-  const domainIdentifier = "domain"
-
-  const samenIndexSource = tsx.sourceFile(
-    tsx.exportDeclaration({
-      identifiers: [clientIdentifier],
-      module: `./${clientIdentifier}`,
-    }),
-    tsx.exportNamespaceDeclaration({
-      identifier: "*",
-      module: `./${domainIdentifier}`,
-    }),
-  )
-
   const classDeclr: ts.ClassDeclaration = ts.factory.createClassDeclaration(
     undefined,
     [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
-    ts.factory.createIdentifier(clientIdentifier),
+    "SamenClient",
     undefined,
     [hertitageClause],
     [
@@ -165,9 +132,8 @@ export default function generateClientSource(
   )
 
   const samenClientSource = tsx.sourceFile(
-    importDomain,
-    importBaseSamenClient,
-    importParserTypes,
+    importsFromClientPackage,
+    ...domainSource,
     ...services.map((service) =>
       generateErrorParser(service.name, [
         ...parsedDomainErrors,
@@ -179,11 +145,7 @@ export default function generateClientSource(
     classDeclr,
   )
 
-  return {
-    samenIndexSource,
-    samenClientSource,
-    domainSource,
-  }
+  return samenClientSource
 }
 
 function generateOptsParam(
