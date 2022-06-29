@@ -34,5 +34,11 @@
       "@babel/preset-env",
       "@babel/preset-react"
     ]
+  },
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Press Play Development B.V.",
+    "email": "samen@pressplay.dev",
+    "url": "https://pressplay.dev"
   }
 }
