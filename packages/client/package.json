@@ -1,6 +1,6 @@
 {
   "name": "@samen/client",
-  "version": "0.9.0-rc.0",
+  "version": "0.9.0-rc.1",
   "main": "package/index.js",
   "bin": {
     "samen-client": "dist/cli.js"
@@ -16,8 +16,8 @@
     "postbuild": "cp package.json ./dist/package.json"
   },
   "dependencies": {
-    "@samen/core": "^0.9.0-rc.0",
-    "@samen/dev": "^0.9.0-rc.0",
+    "@samen/core": "^0.9.0-rc.1",
+    "@samen/dev": "^0.9.0-rc.1",
     "typescript": "^4.4.4"
   },
   "devDependencies": {
