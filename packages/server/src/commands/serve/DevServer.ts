@@ -49,8 +49,8 @@ export default class DevServer {
     try {
       this.eventEmitter.emit({ type: "SERVE_INIT" })
       const server = await this.startHttpServer()
-      const program = this.startWatch()
       this.eventEmitter.emit({ type: "SERVE_READY" })
+      const program = this.startWatch()
     } catch (error) {
       if (hasErrorCode(error) && error.code === "EADDRINUSE") {
         throw new PortInUseError(this.command.port)
@@ -73,6 +73,7 @@ export default class DevServer {
     // Start code watch
     const program = new WatchProgram(
       this.projectPath,
+      this.buildProjectStart.bind(this),
       this.buildProjectSuccess.bind(this),
       this.buildProjectFailed.bind(this),
     )
@@ -89,6 +90,10 @@ export default class DevServer {
         .on("error", (error) => reject(error))
         .listen(this.command.port)
     })
+  }
+
+  private buildProjectStart() {
+    this.eventEmitter.emit({ type: "BUILD_PROJECT_START" })
   }
 
   private async buildProjectSuccess(

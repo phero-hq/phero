@@ -6,8 +6,8 @@ import {
   SamenCommandDevEnv,
   ServerCommandName,
 } from "@samen/dev"
-import { Box } from "ink"
-import React, { useCallback, useEffect, useMemo, useState } from "react"
+import { Box, Spacer, Static, Text } from "ink"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { fatalError } from "../process"
 import { Project } from "../types"
 import getProjects from "../utils/getProjects"
@@ -72,8 +72,22 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
     updateProjects()
   }, [])
 
+  const [rows, setRows] = useState<JSX.Element[]>([])
+  const oldRows = useRef<JSX.Element[]>([])
+  const onAddRow = useCallback((row: JSX.Element) => {
+    const newRows = [...oldRows.current, row]
+    oldRows.current = newRows
+    setRows(newRows)
+  }, [])
+
   return (
-    <Box flexDirection="column" width="100%" padding={1}>
+    <Box flexDirection="column">
+      <Static items={rows}>
+        {(item, index) => <Box key={index}>{item}</Box>}
+      </Static>
+
+      {rows.length > 0 && <Box height={1} />}
+
       {projects.map((project, index) => {
         if (project.type === "client") {
           return (
@@ -102,6 +116,7 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
                 verbose: command.verbose,
               }}
               maxProjectPathLength={maxProjectPathLength}
+              onAddRow={onAddRow}
             />
           )
         }
