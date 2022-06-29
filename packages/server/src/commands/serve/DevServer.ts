@@ -49,8 +49,8 @@ export default class DevServer {
     try {
       this.eventEmitter.emit({ type: "SERVE_INIT" })
       const server = await this.startHttpServer()
-      const program = this.startWatch()
       this.eventEmitter.emit({ type: "SERVE_READY" })
+      const program = this.startWatch()
     } catch (error) {
       if (hasErrorCode(error) && error.code === "EADDRINUSE") {
         throw new PortInUseError(this.command.port)
