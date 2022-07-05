@@ -78,12 +78,14 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
       (log) => onAddRow(<Text color="red">{log}</Text>),
     )
 
-    setProjects(newProjects)
-    setLoading(false)
+    return newProjects
   }, [])
 
   useEffect(() => {
-    initialize().catch(fatalError)
+    initialize()
+      .then(setProjects)
+      .catch(fatalError)
+      .finally(() => setLoading(false))
   }, [])
 
   return (
