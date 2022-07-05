@@ -10,8 +10,10 @@ import { Box, Spacer, Static, Text } from "ink"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { fatalError } from "../process"
 import { Project } from "../types"
+import checkAndWarnForVersions from "../utils/checkAndWarnForVersions"
 import getProjects from "../utils/getProjects"
 import maxLength from "../utils/maxLength"
+import ActivityIndicator from "./ActivityIndicator"
 import ClientProjectStatus from "./ProjectStatus/ClientProjectStatus"
 import ServerProjectStatus from "./ProjectStatus/ServerProjectStatus"
 
@@ -50,27 +52,11 @@ export default class DevEnv extends React.Component<Props, State> {
 
 function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
   const [projects, setProjects] = useState<Project[]>([])
+  const [isLoading, setLoading] = useState(true)
 
   const maxProjectPathLength = useMemo(() => {
     return maxLength(projects.map((p) => p.path))
   }, [projects])
-
-  const updateProjects = useCallback(async () => {
-    try {
-      const newProjects = await getProjects()
-      if (newProjects.length === 0) {
-        throw new Error("No Samen project found")
-      } else {
-        setProjects(newProjects)
-      }
-    } catch (error) {
-      fatalError(error)
-    }
-  }, [])
-
-  useEffect(() => {
-    updateProjects()
-  }, [])
 
   const [rows, setRows] = useState<JSX.Element[]>([])
   const oldRows = useRef<JSX.Element[]>([])
@@ -80,6 +66,26 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
     setRows(newRows)
   }, [])
 
+  const initialize = useCallback(async () => {
+    const newProjects = await getProjects()
+
+    if (newProjects.length === 0) {
+      throw new Error("No Samen project found")
+    }
+
+    await checkAndWarnForVersions(
+      newProjects.map((p) => p.path),
+      (log) => onAddRow(<Text color="red">{log}</Text>),
+    )
+
+    setProjects(newProjects)
+    setLoading(false)
+  }, [])
+
+  useEffect(() => {
+    initialize().catch(fatalError)
+  }, [])
+
   return (
     <Box flexDirection="column">
       <Static items={rows}>
@@ -87,6 +93,8 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
       </Static>
 
       {rows.length > 0 && <Box height={1} />}
+
+      {isLoading && <ActivityIndicator />}
 
       {projects.map((project, index) => {
         if (project.type === "client") {
