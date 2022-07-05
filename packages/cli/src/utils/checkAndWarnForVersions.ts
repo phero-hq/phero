@@ -26,10 +26,7 @@ async function getOutdatedGlobal(): Promise<Result> {
 
 async function getOutdatedLocal(cwd: string): Promise<Result> {
   try {
-    await exec(`npm outdated --json ${global ? "--global" : ""}`, {
-      encoding: "utf-8",
-      cwd,
-    })
+    await exec("npm outdated --json", { encoding: "utf-8", cwd })
   } catch (error) {
     if (error instanceof Error && (error as any).stdout) {
       const result = JSON.parse((error as any).stdout) as Record<string, any>
