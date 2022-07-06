@@ -1,68 +1,103 @@
+import path from "path"
+import https from "https"
+import semver from "semver"
 import util from "util"
 import childProcess from "child_process"
+import { promises as fs } from "fs"
+
 const exec = util.promisify(childProcess.exec)
 
-type Result = [string, { current: string; latest: string; location: string }][]
-
-async function getOutdatedGlobal(): Promise<Result> {
-  try {
-    await exec("npm outdated --json --global", { encoding: "utf-8" })
-  } catch (error) {
-    if (error instanceof Error && (error as any).stdout) {
-      const result = JSON.parse((error as any).stdout) as Record<string, any>
-      return Object.entries(result)
-        .filter(
-          ([packageName]) =>
-            packageName === "samen" || packageName.startsWith("@samen/"),
-        )
-        .map(([packageName, info]) => [
-          packageName,
-          { current: info.current, latest: info.latest, location: "global" },
-        ])
-    }
-  }
-  return []
+type Item = {
+  name: string
+  current: string
+  latest: string
+  location: string
 }
 
-async function getOutdatedLocal(cwd: string): Promise<Result> {
+async function getLatestFor(packageName: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    https.get(`https://registry.npmjs.org/${packageName}`, (res) => {
+      let json = ""
+      res.on("data", (data) => {
+        json += data
+      })
+      res.on("end", () => {
+        const response = JSON.parse(json)
+        const latest = response["dist-tags"]?.latest
+        if (!latest) {
+          reject(new Error("No latest found"))
+        }
+        resolve(latest)
+      })
+      res.on("error", reject)
+    })
+  })
+}
+
+async function getGlobalItems(): Promise<Item[]> {
+  const current = (await exec("samen --version")).stdout.trim()
+  const latest = await getLatestFor("samen")
+
+  if (semver.gt(latest, current)) {
+    return [{ name: "samen", location: "global", current, latest }]
+  } else {
+    return []
+  }
+}
+
+async function getLocalItem(
+  cwd: string,
+  packageName: string,
+): Promise<Item | undefined> {
   try {
-    await exec("npm outdated --json", { encoding: "utf-8", cwd })
+    const pkgPath = path.join(cwd, "node_modules", packageName, "package.json")
+    const pkgFile = await fs.readFile(pkgPath, { encoding: "utf8" })
+    const pkgJson = JSON.parse(pkgFile)
+    const current = pkgJson.version
+    const latest = await getLatestFor(packageName)
+
+    if (semver.gt(latest, current)) {
+      return { name: packageName, location: cwd, current, latest }
+    }
   } catch (error) {
-    if (error instanceof Error && (error as any).stdout) {
-      const result = JSON.parse((error as any).stdout) as Record<string, any>
-      return Object.entries(result)
-        .filter(
-          ([packageName]) =>
-            packageName === "samen" || packageName.startsWith("@samen/"),
-        )
-        .map(([packageName, info]) => [
-          packageName,
-          { current: info.current, latest: info.latest, location: cwd },
-        ])
+    return undefined
+  }
+}
+
+async function getLocalItems(cwd: string): Promise<Item[]> {
+  const items: Item[] = []
+  for (const packageName of ["@samen/client", "@samen/server"]) {
+    const item = await getLocalItem(cwd, packageName)
+    if (item) {
+      items.push(item)
     }
   }
-  return []
+  return items
 }
 
 export default async function checkAndWarnForVersions(
   cwds: string[],
   onLog: (log: string) => void,
 ): Promise<void> {
-  let outdated: Result = []
+  try {
+    let items: Item[] = []
 
-  outdated.push(...(await getOutdatedGlobal()))
+    items.push(...(await getGlobalItems()))
 
-  for (const cwd of cwds) {
-    outdated.push(...(await getOutdatedLocal(cwd)))
-  }
-
-  if (outdated.length > 0) {
-    onLog("\nSome packages are outdated:\n")
-    for (const [packageName, info] of outdated) {
-      onLog(`  ${packageName}`)
-      onLog(`    Location: ${info.location}`)
-      onLog(`    Current:  ${info.current}`)
-      onLog(`    Latest:   ${info.latest}\n`)
+    for (const cwd of cwds) {
+      items.push(...(await getLocalItems(cwd)))
     }
+
+    if (items.length > 0) {
+      onLog("\nSome packages are outdated:\n")
+      for (const item of items) {
+        onLog(`  ${item.name}`)
+        onLog(`    Location: ${item.location}`)
+        onLog(`    Current:  ${item.current}`)
+        onLog(`    Latest:   ${item.latest}\n`)
+      }
+    }
+  } catch (error) {
+    // ignore
   }
 }
