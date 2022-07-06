@@ -47,13 +47,12 @@ async function getGlobalItems(): Promise<Item[]> {
 
 async function getLocalItem(
   cwd: string,
+  executable: string,
   packageName: string,
 ): Promise<Item | undefined> {
   try {
-    const pkgPath = path.join(cwd, "node_modules", packageName, "package.json")
-    const pkgFile = await fs.readFile(pkgPath, { encoding: "utf8" })
-    const pkgJson = JSON.parse(pkgFile)
-    const current = pkgJson.version
+    const command = `./node_modules/.bin/${executable} --version`
+    const current = (await exec(command, { cwd })).stdout.trim()
     const latest = await getLatestFor(packageName)
 
     if (semver.gt(latest, current)) {
@@ -66,12 +65,13 @@ async function getLocalItem(
 
 async function getLocalItems(cwd: string): Promise<Item[]> {
   const items: Item[] = []
-  for (const packageName of ["@samen/client", "@samen/server"]) {
-    const item = await getLocalItem(cwd, packageName)
-    if (item) {
-      items.push(item)
-    }
-  }
+
+  const clientItem = await getLocalItem(cwd, "samen-client", "@samen/client")
+  if (clientItem) items.push(clientItem)
+
+  const serverItem = await getLocalItem(cwd, "samen-server", "@samen/server")
+  if (serverItem) items.push(serverItem)
+
   return items
 }
 
