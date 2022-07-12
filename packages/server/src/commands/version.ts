@@ -5,6 +5,6 @@ export default function version() {
   const packageJson = JSON.parse(
     readFileSync(path.resolve(__dirname, `../package.json`)).toString(),
   )
-  console.log(`${packageJson.name}@${packageJson.version}`)
+  console.log(packageJson.version)
   process.exit(0)
 }
