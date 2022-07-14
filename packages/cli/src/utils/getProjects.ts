@@ -34,11 +34,17 @@ async function getProject(filePath: string): Promise<Project | undefined> {
   const packageString = await fs.readFile(filePath, "utf-8")
   const packageJson = JSON.parse(packageString)
 
-  if (packageJson.dependencies?.["@samen/client"]) {
+  if (
+    packageJson.dependencies?.["@samen/client"] ||
+    packageJson.devDependencies?.["@samen/client"]
+  ) {
     return { type: "client", path: formatProjectPath(filePath) }
   }
 
-  if (packageJson.dependencies?.["@samen/server"]) {
+  if (
+    packageJson.dependencies?.["@samen/server"] ||
+    packageJson.devDependencies?.["@samen/server"]
+  ) {
     return { type: "server", path: formatProjectPath(filePath) }
   }
 }
