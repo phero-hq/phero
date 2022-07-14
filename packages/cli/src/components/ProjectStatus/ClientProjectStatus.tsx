@@ -19,7 +19,7 @@ export default function ClientProjectStatus({
   command: ClientCommandWatch
   maxProjectPathLength: number
 }) {
-  const [event, setEvent] = useState<StyledEvent>(["busy", "Initializing..."])
+  const [event, setEvent] = useState<StyledEvent>(["busy", "Loading..."])
   const [error, setError] = useState<string>()
   const [isErrorVisible, setErrorVisible] = useState(false)
 
@@ -33,7 +33,7 @@ export default function ClientProjectStatus({
       case "WATCH_INIT":
       case "WATCH_READY":
       case "SERVER_CONNECTED":
-        setEvent(["default", "Initializing..."])
+        setEvent(["default", "Loading..."])
         setError(undefined)
         break
 

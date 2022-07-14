@@ -12,6 +12,8 @@ import { fatalError } from "../process"
 import { Project } from "../types"
 import getProjects from "../utils/getProjects"
 import maxLength from "../utils/maxLength"
+import ActivityIndicator from "./ActivityIndicator"
+import Init from "./Init"
 import ClientProjectStatus from "./ProjectStatus/ClientProjectStatus"
 import ServerProjectStatus from "./ProjectStatus/ServerProjectStatus"
 
@@ -49,20 +51,15 @@ export default class DevEnv extends React.Component<Props, State> {
 }
 
 function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
-  const [projects, setProjects] = useState<Project[]>([])
+  const [projects, setProjects] = useState<Project[]>()
 
   const maxProjectPathLength = useMemo(() => {
-    return maxLength(projects.map((p) => p.path))
+    return maxLength(projects?.map((p) => p.path) ?? [])
   }, [projects])
 
   const updateProjects = useCallback(async () => {
     try {
-      const newProjects = await getProjects()
-      if (newProjects.length === 0) {
-        throw new Error("No Samen project found")
-      } else {
-        setProjects(newProjects)
-      }
+      setProjects(await getProjects())
     } catch (error) {
       fatalError(error)
     }
@@ -81,46 +78,54 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
   }, [])
 
   return (
-    <Box flexDirection="column">
+    <Box flexDirection="column" paddingY={1}>
       <Static items={rows}>
         {(item, index) => <Box key={index}>{item}</Box>}
       </Static>
 
       {rows.length > 0 && <Box height={1} />}
 
-      {projects.map((project, index) => {
-        if (project.type === "client") {
-          return (
-            <ClientProjectStatus
-              key={project.path}
-              project={project}
-              command={{
-                name: ClientCommandName.Watch,
-                port: DEFAULT_CLIENT_PORT + index,
-                server: { url: DEFAULT_SERVER_URL },
-                verbose: command.verbose,
-              }}
-              maxProjectPathLength={maxProjectPathLength}
-            />
-          )
-        }
+      {projects ? (
+        <>
+          {projects.length === 0 && <Init />}
 
-        if (project.type === "server") {
-          return (
-            <ServerProjectStatus
-              key={project.path}
-              project={project}
-              command={{
-                name: ServerCommandName.Serve,
-                port: DEFAULT_SERVER_PORT,
-                verbose: command.verbose,
-              }}
-              maxProjectPathLength={maxProjectPathLength}
-              onAddRow={onAddRow}
-            />
-          )
-        }
-      })}
+          {projects.map((project, index) => {
+            if (project.type === "client") {
+              return (
+                <ClientProjectStatus
+                  key={project.path}
+                  project={project}
+                  command={{
+                    name: ClientCommandName.Watch,
+                    port: DEFAULT_CLIENT_PORT + index,
+                    server: { url: DEFAULT_SERVER_URL },
+                    verbose: command.verbose,
+                  }}
+                  maxProjectPathLength={maxProjectPathLength}
+                />
+              )
+            }
+
+            if (project.type === "server") {
+              return (
+                <ServerProjectStatus
+                  key={project.path}
+                  project={project}
+                  command={{
+                    name: ServerCommandName.Serve,
+                    port: DEFAULT_SERVER_PORT,
+                    verbose: command.verbose,
+                  }}
+                  maxProjectPathLength={maxProjectPathLength}
+                  onAddRow={onAddRow}
+                />
+              )
+            }
+          })}
+        </>
+      ) : (
+        <ActivityIndicator />
+      )}
     </Box>
   )
 }

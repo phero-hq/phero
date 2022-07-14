@@ -25,7 +25,7 @@ export default function ServerProjectStatus({
   maxProjectPathLength: number
   onAddRow: (row: JSX.Element) => void
 }) {
-  const [status, setStatus] = useState<string>("Initializing...")
+  const [status, setStatus] = useState<string>("Loading...")
   const [isBuilding, setBuilding] = useState(true)
   const [error, setError] = useState<string>()
   const [isErrorVisible, setErrorVisible] = useState(false)
@@ -39,7 +39,7 @@ export default function ServerProjectStatus({
       case "LISTENER_CONNECTED":
       case "SERVE_INIT":
       case "SERVE_READY":
-        setStatus("Initializing server...")
+        setStatus("Loading server...")
         setBuilding(true)
         setError(undefined)
         break
