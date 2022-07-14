@@ -69,6 +69,16 @@ function SelectIndicator({ isSelected }: { isSelected?: boolean }) {
   return <Text color="yellow">{isSelected ? "▶ " : "  "}</Text>
 }
 
+function SelectItem({
+  isSelected,
+  label,
+}: {
+  isSelected?: boolean
+  label: string
+}) {
+  return <Text color={isSelected ? "yellow" : undefined}>{label}</Text>
+}
+
 async function hasPackageInstalled(name: string): Promise<boolean> {
   const packageJson = await fs.readFile("./package.json", { encoding: "utf-8" })
   const { dependencies, devDependencies } = JSON.parse(packageJson)
@@ -98,8 +108,9 @@ export default function Init() {
       await exec(`npm i @samen/server`)
     }
 
+    // TODO: Get src-directory from tsconfig
     if (!(await hasSourceFile("src/samen.ts"))) {
-      await exec(`echo "${serverSamenFile}" >> src/samen.ts`)
+      await exec(`mkdir -p src && echo "${serverSamenFile}" >> src/samen.ts`)
     }
 
     setDone(true)
@@ -112,8 +123,9 @@ export default function Init() {
       await exec(`npm i @samen/client`)
     }
 
+    // TODO: Get src-directory from tsconfig
     if (!(await hasSourceFile("src/samen.ts"))) {
-      await exec(`echo "${clientSamenFile}" >> src/samen.ts`)
+      await exec(`mkdir -p src && echo "${clientSamenFile}" >> src/samen.ts`)
     }
 
     setDone(true)
@@ -166,6 +178,7 @@ export default function Init() {
                 ]}
                 onSelect={onSelect}
                 indicatorComponent={SelectIndicator}
+                itemComponent={SelectItem}
               />
             </Box>
           )}
