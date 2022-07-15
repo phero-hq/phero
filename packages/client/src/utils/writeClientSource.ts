@@ -15,7 +15,9 @@ export default async function writeClientSource(
   // TODO check where the source lives
   const hasSourceDir = await fileExists(path.join("src"))
   await fs.writeFile(
-    hasSourceDir ? path.join("./src/samen.ts") : path.join("./samen.ts"),
+    hasSourceDir
+      ? path.join("./src/samen.generated.ts")
+      : path.join("./samen.generated.ts"),
     printSourceFile(clientSamenSourceFile),
     {
       encoding: "utf-8",

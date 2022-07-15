@@ -6,6 +6,8 @@ import help from "./commands/help"
 import init from "./commands/init"
 import redirect from "./commands/redirect"
 import version from "./commands/version"
+import { fatalError } from "./process"
+import checkAndWarnForVersions from "./utils/checkAndWarnForVersions"
 
 const command = parseSamenCommand(process.argv.slice(2))
 
@@ -15,7 +17,9 @@ switch (command.name) {
     break
 
   case SamenCommandName.Help:
-    help()
+    checkAndWarnForVersions([process.cwd()], console.warn)
+      .then(() => help())
+      .catch(fatalError)
     break
 
   case SamenCommandName.DevEnv:
@@ -27,10 +31,15 @@ switch (command.name) {
     break
 
   case SamenCommandName.Client:
-    redirect("./node_modules/.bin/samen-client", command.argv)
+    checkAndWarnForVersions([process.cwd()], console.warn)
+      .then(() => redirect("./node_modules/.bin/samen-client", command.argv))
+      .catch(fatalError)
+
     break
 
   case SamenCommandName.Server:
-    redirect("./node_modules/.bin/samen-server", command.argv)
+    checkAndWarnForVersions([process.cwd()], console.warn)
+      .then(() => redirect("./node_modules/.bin/samen-server", command.argv))
+      .catch(fatalError)
     break
 }
