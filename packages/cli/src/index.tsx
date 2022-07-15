@@ -18,7 +18,7 @@ switch (command.name) {
 
   case SamenCommandName.Help:
     checkAndWarnForVersions([process.cwd()], console.warn)
-      .then(() => help())
+      .then(() => help(command))
       .catch(fatalError)
     break
 

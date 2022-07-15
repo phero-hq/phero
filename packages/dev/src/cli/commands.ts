@@ -105,6 +105,7 @@ export interface SamenCommandVersion {
 
 export interface SamenCommandHelp {
   name: SamenCommandName.Help
+  command?: SamenCommandName
 }
 
 export interface SamenCommandServer {
@@ -245,7 +246,7 @@ export function parseSamenCommand(argv: string[]): SamenCommand {
   }
 
   if (args["--help"]) {
-    return { name: SamenCommandName.Help }
+    return { name: SamenCommandName.Help, command: name }
   }
 
   if (args["--version"]) {
