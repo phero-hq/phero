@@ -45,10 +45,10 @@ async function deleteArticle(id: string): Promise<void> {
 }
 
 export const articleService = createService({
-  getAll: createFunction(getAllArticles),
-  getById: createFunction(getArticleById),
-  create: createFunction(createArticle),
-  delete: createFunction(deleteArticle),
+  getAllArticles: createFunction(getAllArticles),
+  getArticleById: createFunction(getArticleById),
+  createArticle: createFunction(createArticle),
+  deleteArticle: createFunction(deleteArticle),
 })
 `
 
