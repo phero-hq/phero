@@ -3,6 +3,7 @@
 import { parseSamenCommand, SamenCommandName } from "@samen/dev"
 import devEnv from "./commands/dev-env"
 import help from "./commands/help"
+import init from "./commands/init"
 import redirect from "./commands/redirect"
 import version from "./commands/version"
 
@@ -19,6 +20,10 @@ switch (command.name) {
 
   case SamenCommandName.DevEnv:
     devEnv(command)
+    break
+
+  case SamenCommandName.Init:
+    init(command)
     break
 
   case SamenCommandName.Client:

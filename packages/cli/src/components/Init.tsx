@@ -7,6 +7,7 @@ import { Box, Text } from "ink"
 import SelectInput from "ink-select-input/build"
 import { useCallback, useEffect, useState } from "react"
 import ActivityIndicator from "./ActivityIndicator"
+import { SamenCommandInit } from "@samen/dev"
 
 const serverSamenFile = `import { createService, createFunction } from '@samen/server'
 
@@ -52,7 +53,7 @@ export const articleService = createService({
 })
 `
 
-const clientSamenFile = `import { SamenClient } from '@samen/client'
+const clientSamenFile = `import { SamenClient } from './samen.generated'
 
 const client = new SamenClient()
 
@@ -88,6 +89,12 @@ async function hasPackageInstalled(name: string): Promise<boolean> {
   ].some((key) => key === name)
 }
 
+async function installPackage(name: string): Promise<void> {
+  if (!(await hasPackageInstalled(name))) {
+    await exec(`npm i ${name}`)
+  }
+}
+
 async function hasSourceFile(filePath: string): Promise<boolean> {
   try {
     await fs.access(filePath)
@@ -97,48 +104,56 @@ async function hasSourceFile(filePath: string): Promise<boolean> {
   }
 }
 
-export default function Init() {
-  const [currentOption, setCurrentOption] = useState<OptionValue>()
+async function createSourceFile(
+  filePath: string,
+  content: string,
+): Promise<void> {
+  if (!(await hasSourceFile(filePath))) {
+    await exec(`mkdir -p src && echo "${content}" >> ${filePath}`)
+  }
+}
+
+async function fileContains(filePath: string, line: string): Promise<boolean> {
+  const content = await fs.readFile(filePath, { encoding: "utf-8" })
+  return content.includes(line)
+}
+
+async function addLineToFile(filePath: string, line: string): Promise<void> {
+  if (
+    !(await hasSourceFile(filePath)) ||
+    !(await fileContains(filePath, line))
+  ) {
+    await exec(`echo "${line}" >> ${filePath}`)
+  }
+}
+
+export default function Init({ command }: { command: SamenCommandInit }) {
+  const [env, setEnv] = useState<SamenCommandInit["env"]>(command.env)
   const [isDone, setDone] = useState(false)
 
   const initServer = useCallback(async () => {
-    setCurrentOption(OptionValue.InitServer)
-
-    if (!(await hasPackageInstalled("@samen/server"))) {
-      await exec(`npm i @samen/server`)
-    }
-
-    // TODO: Get src-directory from tsconfig
-    if (!(await hasSourceFile("src/samen.ts"))) {
-      await exec(`mkdir -p src && echo "${serverSamenFile}" >> src/samen.ts`)
-    }
-
+    await installPackage("@samen/server")
+    await createSourceFile("src/samen.ts", serverSamenFile) // TODO: Get src-directory from tsconfig
     setDone(true)
   }, [])
 
   const initClient = useCallback(async () => {
-    setCurrentOption(OptionValue.InitClient)
-
-    if (!(await hasPackageInstalled("@samen/client"))) {
-      await exec(`npm i @samen/client`)
-    }
-
-    // TODO: Get src-directory from tsconfig
-    if (!(await hasSourceFile("src/samen.ts"))) {
-      await exec(`mkdir -p src && echo "${clientSamenFile}" >> src/samen.ts`)
-    }
-
+    await installPackage("@samen/client")
+    await createSourceFile("src/samen.ts", clientSamenFile) // TODO: Get src-directory from tsconfig
+    await addLineToFile(".gitignore", "samen.generated.ts")
     setDone(true)
   }, [])
 
   const onSelect = useCallback(async ({ value }: { value: OptionValue }) => {
     switch (value) {
       case OptionValue.InitServer: {
+        setEnv("server")
         await initServer()
         break
       }
 
       case OptionValue.InitClient: {
+        setEnv("client")
         await initClient()
         break
       }
@@ -155,13 +170,22 @@ export default function Init() {
     }
   }, [])
 
+  useEffect(() => {
+    if (command.env === "client") {
+      initClient()
+    }
+    if (command.env === "server") {
+      initServer()
+    }
+  }, [command.env])
+
   return (
     <Box flexDirection="column">
       {isDone ? (
         <Text>Ready to go! Run `samen` again to continue.</Text>
       ) : (
         <>
-          {!currentOption && (
+          {!env && (
             <Box flexDirection="column">
               <Box paddingBottom={1}>
                 <Text>
@@ -183,9 +207,9 @@ export default function Init() {
             </Box>
           )}
 
-          {currentOption && (
+          {env && (
             <>
-              {currentOption === OptionValue.InitServer && (
+              {env === "server" && (
                 <Text>
                   <ActivityIndicator />
                   <Text dimColor> Initializing </Text>
@@ -194,7 +218,7 @@ export default function Init() {
                 </Text>
               )}
 
-              {currentOption === OptionValue.InitClient && (
+              {env === "client" && (
                 <Text>
                   <ActivityIndicator />
                   <Text dimColor> Initializing </Text>

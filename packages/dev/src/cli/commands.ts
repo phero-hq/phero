@@ -96,6 +96,7 @@ export enum SamenCommandName {
   Server = "server",
   Client = "client",
   DevEnv = "dev-env",
+  Init = "init",
 }
 
 export interface SamenCommandVersion {
@@ -121,12 +122,18 @@ export interface SamenCommandDevEnv {
   verbose: boolean
 }
 
+export interface SamenCommandInit {
+  name: SamenCommandName.Init
+  env?: "client" | "server"
+}
+
 export type SamenCommand =
   | SamenCommandVersion
   | SamenCommandHelp
   | SamenCommandServer
   | SamenCommandClient
   | SamenCommandDevEnv
+  | SamenCommandInit
 
 export function parseServerCommand(argv: string[]): ServerCommand {
   const args = arg(
@@ -243,6 +250,16 @@ export function parseSamenCommand(argv: string[]): SamenCommand {
 
   if (args["--version"]) {
     return { name: SamenCommandName.Version }
+  }
+
+  if (name === SamenCommandName.Init) {
+    if (argv[1] === "client") {
+      return { name, env: "client" }
+    } else if (argv[1] === "server") {
+      return { name, env: "server" }
+    } else {
+      return { name }
+    }
   }
 
   if (name === undefined) {

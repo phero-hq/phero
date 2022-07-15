@@ -4,6 +4,7 @@ import {
   DEFAULT_SERVER_PORT,
   DEFAULT_SERVER_URL,
   SamenCommandDevEnv,
+  SamenCommandName,
   ServerCommandName,
 } from "@samen/dev"
 import { Box, Spacer, Static, Text } from "ink"
@@ -78,7 +79,7 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
   }, [])
 
   return (
-    <Box flexDirection="column" paddingY={1}>
+    <Box flexDirection="column">
       <Static items={rows}>
         {(item, index) => <Box key={index}>{item}</Box>}
       </Static>
@@ -87,7 +88,14 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
 
       {projects ? (
         <>
-          {projects.length === 0 && <Init />}
+          {projects.length === 0 && (
+            <Init
+              command={{
+                name: SamenCommandName.Init,
+                env: undefined,
+              }}
+            />
+          )}
 
           {projects.map((project, index) => {
             if (project.type === "client") {
