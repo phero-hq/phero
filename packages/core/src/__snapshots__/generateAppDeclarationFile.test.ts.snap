@@ -3,14 +3,14 @@
 exports[`generateAppDeclarationFile errors should generate common errors in domain 1`] = `
 "export declare namespace domain {
     namespace v_1_0_0 {
-        class CommonError {
+        class CommonError extends Error {
             constructor(message: string);
         }
     }
 }
 export declare namespace hamburgerService {
     namespace v_1_0_0 {
-        class HamburgerError {
+        class HamburgerError extends Error {
             constructor(message: string);
         }
         function getHamburger(): Promise<string>;
@@ -19,7 +19,7 @@ export declare namespace hamburgerService {
 }
 export declare namespace articleService {
     namespace v_1_0_0 {
-        class ArticleError {
+        class ArticleError extends Error {
             constructor(message: string);
         }
         function getArticle(): Promise<string>;
@@ -32,7 +32,7 @@ export declare namespace articleService {
 exports[`generateAppDeclarationFile errors should generate multi-service multi-error 1`] = `
 "export declare namespace hamburgerService {
     namespace v_1_0_0 {
-        class HamburgerError {
+        class HamburgerError extends Error {
             constructor(message: string);
         }
         function getHamburger(): Promise<string>;
@@ -40,7 +40,7 @@ exports[`generateAppDeclarationFile errors should generate multi-service multi-e
 }
 export declare namespace articleService {
     namespace v_1_0_0 {
-        class ArticleError {
+        class ArticleError extends Error {
             constructor(message: string);
         }
         function getArticle(): Promise<string>;
@@ -52,7 +52,7 @@ export declare namespace articleService {
 exports[`generateAppDeclarationFile errors should generate properties on generated error classes 1`] = `
 "export declare namespace articleService {
     namespace v_1_0_0 {
-        class ArticleError {
+        class ArticleError extends Error {
             constructor(message: string, myPublicProp: number, myProp: number);
         }
         function getArticle(): Promise<string>;
@@ -64,7 +64,7 @@ exports[`generateAppDeclarationFile errors should generate properties on generat
 exports[`generateAppDeclarationFile errors should generate service error 1`] = `
 "export declare namespace articleService {
     namespace v_1_0_0 {
-        class ArticleError {
+        class ArticleError extends Error {
             constructor(message: string);
         }
         function getArticle(): Promise<string>;
