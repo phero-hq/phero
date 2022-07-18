@@ -1,4 +1,4 @@
-import ts from "typescript"
+import ts, { ClassDeclaration } from "typescript"
 import { ParseError } from "./errors"
 import { ParsedError } from "./extractErrors/parseThrowStatement"
 import extractServiceFromSamenExport from "./extractServiceFromSamenExport"
@@ -68,8 +68,6 @@ export default function parseSamenApp(
   samenSourceFile: ts.SourceFile,
   typeChecker: ts.TypeChecker,
 ): ParsedSamenApp {
-  const t1 = Date.now()
-
   const exportStatements = samenSourceFile.statements.filter(
     (s) =>
       hasModifier(s, ts.SyntaxKind.ExportKeyword) || ts.isExportDeclaration(s),
@@ -102,41 +100,57 @@ export default function parseSamenApp(
     }
   }
 
-  const seenModels: Model[] = []
+  const modelMap: Map<Model, string[]> = new Map<Model, string[]>()
+
+  for (const service of services) {
+    for (const model of service.models) {
+      if (modelMap.has(model)) {
+        if (!modelMap.get(model)!.includes(service.name)) {
+          modelMap.set(model, [...modelMap.get(model)!, service.name])
+        }
+      } else {
+        modelMap.set(model, [service.name])
+      }
+    }
+  }
+
   const sharedModels: Model[] = []
-
-  for (const model of services.flatMap((s) => s.models)) {
-    if (sharedModels.includes(model)) {
-      continue
-    } else if (seenModels.includes(model)) {
-      if (!sharedModels.includes(model)) {
-        sharedModels.push(model)
-      }
-    } else {
-      seenModels.push(model)
+  for (const [model, serviceNames] of modelMap) {
+    if (serviceNames.length > 1) {
+      sharedModels.push(model)
     }
   }
 
-  const seenErrors: ts.ClassDeclaration[] = []
+  const errorMap: Map<ClassDeclaration, string[]> = new Map<
+    ClassDeclaration,
+    string[]
+  >()
+
+  for (const service of services) {
+    for (const { ref: errorClass } of service.errors) {
+      if (errorMap.has(errorClass)) {
+        if (!errorMap.get(errorClass)!.includes(service.name)) {
+          errorMap.set(errorClass, [...errorMap.get(errorClass)!, service.name])
+        }
+      } else {
+        errorMap.set(errorClass, [service.name])
+      }
+    }
+  }
+
   const sharedErrors: ParsedError[] = []
+  const sharedErrorClasses: ClassDeclaration[] = []
 
-  for (const error of services.flatMap((s) => s.errors)) {
-    const sharedErrorClasses = sharedErrors.map((e) => e.ref)
-    if (sharedErrorClasses.includes(error.ref)) {
-      continue
-    } else if (seenErrors.includes(error.ref)) {
-      if (!sharedErrorClasses.includes(error.ref)) {
-        sharedErrors.push(error)
-      }
-    } else {
-      seenErrors.push(error.ref)
+  const allParsedErrors = services.flatMap((s) => s.errors)
+  for (const [errorClass, serviceNames] of errorMap) {
+    if (serviceNames.length > 1) {
+      const parsedErr = allParsedErrors.find((e) => e.ref === errorClass)!
+
+      sharedErrors.push(parsedErr)
+      sharedErrorClasses.push(errorClass)
     }
   }
 
-  const sharedErrorClasses = sharedErrors.map((e) => e.ref)
-
-  const t2 = Date.now()
-  // console.log("parseSamenApp in", t2 - t1)
   return {
     models: sharedModels,
     errors: sharedErrors,
