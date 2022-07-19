@@ -56,7 +56,7 @@ describe("generateAppDeclarationFile", () => {
       expect(parsedApp).toMatchSnapshot()
     })
   })
-  describe.only("errors", () => {
+  describe("errors", () => {
     test("should generate service error", () => {
       const parsedApp = generate(
         createTestProgram(`
@@ -176,6 +176,36 @@ describe("generateAppDeclarationFile", () => {
             getArticle: createFunction(getArticle),
           })
         `),
+      )
+
+      expect(parsedApp).toMatchSnapshot()
+    })
+  })
+
+  describe("typeAliases", () => {
+    test("type aliases which are aliases of aliases", () => {
+      const parsedApp = generate(
+        createTestProgram({
+          routine: `
+          export async function getRoutine(versionId: string): Promise<Result> {
+            return {x: 1}
+          }
+
+          export type Result = TypeRef
+
+          export type TypeRef = TypeReal
+
+          export type TypeReal = {x: number}
+          `,
+
+          samen: `
+          import {getRoutine} from './routine'
+          
+          export const workoutRoutineService = createService({
+            getRoutine: createFunction(getRoutine),
+          })
+        `,
+        }),
       )
 
       expect(parsedApp).toMatchSnapshot()
