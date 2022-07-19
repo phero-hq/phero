@@ -437,6 +437,12 @@ function generateTypeNode(
     )
   }
 
+  if (ts.isTupleTypeNode(type)) {
+    return ts.factory.createTupleTypeNode(
+      type.elements.map((el) => generateTypeNode(el, refMaker)),
+    )
+  }
+
   return type
 }
 
