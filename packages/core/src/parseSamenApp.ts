@@ -156,8 +156,21 @@ export default function parseSamenApp(
     errors: sharedErrors,
     services: services.map((service) => ({
       ...service,
-      models: service.models.filter((m) => !sharedModels.includes(m)),
-      errors: service.errors.filter((e) => !sharedErrorClasses.includes(e.ref)),
+      models: removeShared(deduplicate(service.models), sharedModels),
+      errors: deduplicate(
+        service.errors.filter((e) => !sharedErrorClasses.includes(e.ref)),
+      ),
     })),
   }
+}
+
+function removeShared<T>(objs: T[], sharedObjs: T[]): T[] {
+  return objs.filter((m) => !sharedObjs.includes(m))
+}
+
+function deduplicate<T>(objs: T[]): T[] {
+  return objs.reduce(
+    (result, obj) => (result.includes(obj) ? result : [...result, obj]),
+    [] as T[],
+  )
 }
