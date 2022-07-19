@@ -6,6 +6,7 @@ import { isExternalDeclaration, isExternalTypeNode } from "./tsUtils"
 const IGNORE_SYNTAX_KIND = [
   ts.SyntaxKind.StringKeyword,
   ts.SyntaxKind.NumberKeyword,
+  ts.SyntaxKind.LiteralType,
   ts.SyntaxKind.ImportSpecifier,
 ]
 
@@ -89,7 +90,11 @@ export default function extractModels(
         doType(el)
       }
     } else if (!IGNORE_SYNTAX_KIND.includes(typeNode.kind)) {
-      throw new ParseError("Model extracting not possible for node", typeNode)
+      console.error("typeNode", typeNode.kind)
+      throw new ParseError(
+        "Model extracting not possible for node" + typeNode.kind,
+        typeNode,
+      )
     }
   }
 
@@ -125,11 +130,9 @@ export default function extractModels(
     } else if (ts.isTypeParameterDeclaration(declaration)) {
       doType(declaration.constraint)
       doType(declaration.default)
-    } else if (ts.isTypeLiteralNode(declaration)) {
-      doMembers(declaration.members)
     } else if (!IGNORE_SYNTAX_KIND.includes(declaration.kind)) {
       throw new ParseError(
-        "Model extracting not possible for node",
+        "Model extracting not possible for declaration",
         declaration,
       )
     }
