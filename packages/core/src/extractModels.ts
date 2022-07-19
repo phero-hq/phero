@@ -5,9 +5,12 @@ import { isExternalDeclaration, isExternalTypeNode } from "./tsUtils"
 
 const IGNORE_SYNTAX_KIND = [
   ts.SyntaxKind.StringKeyword,
+  ts.SyntaxKind.BooleanKeyword,
   ts.SyntaxKind.NumberKeyword,
   ts.SyntaxKind.LiteralType,
   ts.SyntaxKind.ImportSpecifier,
+  ts.SyntaxKind.VoidKeyword,
+  ts.SyntaxKind.AnyKeyword,
 ]
 
 export default function extractModels(
@@ -90,10 +93,11 @@ export default function extractModels(
         doType(el)
       }
     } else if (!IGNORE_SYNTAX_KIND.includes(typeNode.kind)) {
-      console.error("typeNode", typeNode.kind)
-      throw new ParseError(
-        "Model extracting not possible for node" + typeNode.kind,
-        typeNode,
+      console.warn(
+        new ParseError(
+          "Model extracting not possible for node" + typeNode.kind,
+          typeNode,
+        ),
       )
     }
   }
@@ -131,9 +135,11 @@ export default function extractModels(
       doType(declaration.constraint)
       doType(declaration.default)
     } else if (!IGNORE_SYNTAX_KIND.includes(declaration.kind)) {
-      throw new ParseError(
-        "Model extracting not possible for declaration",
-        declaration,
+      console.warn(
+        new ParseError(
+          "Model extracting not possible for declaration",
+          declaration,
+        ),
       )
     }
   }
