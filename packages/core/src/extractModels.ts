@@ -88,6 +88,10 @@ export default function extractModels(
     } else if (ts.isIndexedAccessTypeNode(typeNode)) {
       doType(typeNode.objectType)
       doType(typeNode.indexType)
+    } else if (ts.isTupleTypeNode(typeNode)) {
+      for (const el of typeNode.elements) {
+        doType(el)
+      }
     }
   }
 
