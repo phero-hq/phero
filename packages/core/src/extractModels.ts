@@ -91,7 +91,7 @@ export default function extractModels(
     } else if (!IGNORE_SYNTAX_KIND.includes(typeNode.kind)) {
       console.warn(
         new ParseError(
-          "Model extracting not possible for node" + typeNode.kind,
+          "Model extracting not possible for node " + typeNode.kind,
           typeNode,
         ),
       )
@@ -133,10 +133,12 @@ export default function extractModels(
     } else if (ts.isTypeParameterDeclaration(declaration)) {
       doType(declaration.constraint)
       doType(declaration.default)
+    } else if (ts.isTypeLiteralNode(declaration)) {
+      doMembers(declaration.members)
     } else if (!IGNORE_SYNTAX_KIND.includes(declaration.kind)) {
       console.warn(
         new ParseError(
-          "Model extracting not possible for declaration",
+          "Model extracting not possible for declaration " + declaration.kind,
           declaration,
         ),
       )
