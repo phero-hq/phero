@@ -65,14 +65,7 @@ export default function extractModels(
         doDeclaration(declaration)
       }
     } else if (ts.isTypeLiteralNode(typeNode)) {
-      for (const member of typeNode.members) {
-        if (ts.isPropertySignature(member)) {
-          doType(member.type)
-        } else if (ts.isIndexSignatureDeclaration(member)) {
-          // TODO name, but could be computed property
-          doType(member.type)
-        }
-      }
+      doMembers(typeNode.members)
     } else if (ts.isUnionTypeNode(typeNode)) {
       for (const unionElementType of typeNode.types) {
         doType(unionElementType)
@@ -106,11 +99,7 @@ export default function extractModels(
     }
 
     if (ts.isInterfaceDeclaration(declaration)) {
-      for (const member of declaration.members) {
-        if (ts.isPropertySignature(member)) {
-          doType(member.type)
-        }
-      }
+      doMembers(declaration.members)
       for (const heritageClause of declaration.heritageClauses ?? []) {
         for (const type of heritageClause.types) {
           doType(type)
@@ -136,11 +125,24 @@ export default function extractModels(
     } else if (ts.isTypeParameterDeclaration(declaration)) {
       doType(declaration.constraint)
       doType(declaration.default)
+    } else if (ts.isTypeLiteralNode(declaration)) {
+      doMembers(declaration.members)
     } else if (!IGNORE_SYNTAX_KIND.includes(declaration.kind)) {
       throw new ParseError(
         "Model extracting not possible for node",
         declaration,
       )
+    }
+  }
+
+  function doMembers(members: ts.NodeArray<ts.TypeElement>): void {
+    for (const member of members) {
+      if (ts.isPropertySignature(member)) {
+        doType(member.type)
+      } else if (ts.isIndexSignatureDeclaration(member)) {
+        // TODO name, but could be computed property
+        doType(member.type)
+      }
     }
   }
 
