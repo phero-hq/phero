@@ -89,7 +89,13 @@ export default function generateAppDeclarationFile(
   vHost.addFile("api.ts", generateTS(namespaceDeclrs))
 
   const program = vHost.createProgram("api.ts")
-  program.emit()
+  const emitResult = program.emit()
+
+  if (emitResult.diagnostics.length) {
+    console.error("OOPS SOMETHING IS WRONG")
+    console.error(generateTS(namespaceDeclrs))
+    console.error(emitResult)
+  }
 
   const t2 = Date.now()
   // console.log("generateAppDeclarationFile in", t2 - t1)
