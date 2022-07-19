@@ -65,6 +65,9 @@ export default function extractModels(
       for (const member of typeNode.members) {
         if (ts.isPropertySignature(member)) {
           doType(member.type)
+        } else if (ts.isIndexSignatureDeclaration(member)) {
+          // TODO name, but could be computed property
+          doType(member.type)
         }
       }
     } else if (ts.isUnionTypeNode(typeNode)) {
