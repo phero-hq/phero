@@ -1,7 +1,7 @@
 import ts from "typescript"
 import { ParseError } from "./errors"
 import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
-import { isExternalDeclaration, isExternalTypeNode } from "./tsUtils"
+import { isExternalDeclaration } from "./tsUtils"
 
 const IGNORE_SYNTAX_KIND = [
   ts.SyntaxKind.StringKeyword,
@@ -34,10 +34,6 @@ export default function extractModels(
     } else if (ts.isTypeReferenceNode(typeNode)) {
       for (const typeArgument of typeNode.typeArguments ?? []) {
         doType(typeArgument)
-      }
-
-      if (isExternalTypeNode(typeNode)) {
-        return
       }
 
       const type = typeChecker.getTypeFromTypeNode(typeNode)
@@ -104,6 +100,9 @@ export default function extractModels(
 
   function doDeclaration(declaration: ts.Declaration | undefined): void {
     if (!declaration) {
+      return
+    }
+    if (isExternalDeclaration(declaration)) {
       return
     }
 
