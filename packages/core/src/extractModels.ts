@@ -42,14 +42,10 @@ export default function extractModels(
       // NOTE this happens in two occasions:
       // 1. we got a `type X = Y` where Y itself is also a type alias
       // 2. we got a `type X = [A, B]`, X is a tuple
-      if (!type.symbol) {
-        const typeNameSymbol = typeChecker.getSymbolAtLocation(
-          typeNode.typeName,
-        )
-        if (typeNameSymbol?.declarations?.length) {
-          for (const declr of typeNameSymbol.declarations) {
-            doDeclaration(declr)
-          }
+      const typeNameSymbol = typeChecker.getSymbolAtLocation(typeNode.typeName)
+      if (typeNameSymbol?.declarations?.length) {
+        for (const declr of typeNameSymbol.declarations) {
+          doDeclaration(declr)
         }
       }
 

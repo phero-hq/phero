@@ -72,3 +72,35 @@ exports[`generateAppDeclarationFile errors should generate service error 1`] = `
 }
 "
 `;
+
+exports[`generateAppDeclarationFile middleware should parse middleware 1`] = `
+"export declare namespace samen {
+    type SamenContext<T> = T;
+}
+export declare namespace articleService {
+    namespace v_1_0_0 {
+        interface User {
+            uid: string;
+        }
+        type SamenContext<T = {}> = T;
+        function getArticle(aap: string, ctx: samen.SamenContext<{
+            uid: string;
+        }>): Promise<string>;
+    }
+}
+"
+`;
+
+exports[`generateAppDeclarationFile typeAliases type aliases which are aliases of aliases 1`] = `
+"export declare namespace workoutRoutineService {
+    namespace v_1_0_0 {
+        type TypeReal = {
+            x: number;
+        };
+        type TypeRef = TypeReal;
+        type Result = TypeRef;
+        function getRoutine(versionId: string): Promise<Result>;
+    }
+}
+"
+`;
