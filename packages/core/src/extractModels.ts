@@ -11,6 +11,7 @@ const IGNORE_SYNTAX_KIND = [
   ts.SyntaxKind.ImportSpecifier,
   ts.SyntaxKind.VoidKeyword,
   ts.SyntaxKind.AnyKeyword,
+  ts.SyntaxKind.UndefinedKeyword,
 ]
 
 export default function extractModels(
@@ -89,12 +90,7 @@ export default function extractModels(
         doType(el)
       }
     } else if (!IGNORE_SYNTAX_KIND.includes(typeNode.kind)) {
-      console.warn(
-        new ParseError(
-          "Model extracting not possible for node " + typeNode.kind,
-          typeNode,
-        ),
-      )
+      console.warn("Model extracting not possible for node " + typeNode.kind)
     }
   }
 
@@ -137,10 +133,7 @@ export default function extractModels(
       doMembers(declaration.members)
     } else if (!IGNORE_SYNTAX_KIND.includes(declaration.kind)) {
       console.warn(
-        new ParseError(
-          "Model extracting not possible for declaration " + declaration.kind,
-          declaration,
-        ),
+        "Model extracting not possible for declaration " + declaration.kind,
       )
     }
   }
