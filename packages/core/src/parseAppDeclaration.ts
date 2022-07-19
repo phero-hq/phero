@@ -158,14 +158,14 @@ function parseServiceDeclarationVersion(
 function parseContextType(
   func: ts.FunctionDeclaration,
 ): ts.TypeNode | undefined {
-  const lastParam = func.parameters[func.parameters.length - 1]
+  const firstParam = func.parameters[0]
   if (
-    lastParam &&
-    lastParam.type &&
-    ts.isTypeReferenceNode(lastParam.type) &&
-    getNameAsString(lastParam.type.typeName) === "SamenContext"
+    firstParam &&
+    firstParam.type &&
+    ts.isTypeReferenceNode(firstParam.type) &&
+    getNameAsString(firstParam.type.typeName) === "SamenContext"
   ) {
-    return lastParam.type.typeArguments?.[0]
+    return firstParam.type.typeArguments?.[0]
   }
 
   return undefined
