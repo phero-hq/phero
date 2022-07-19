@@ -1,6 +1,13 @@
 import ts from "typescript"
+import { ParseError } from "./errors"
 import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
 import { isExternalDeclaration, isExternalTypeNode } from "./tsUtils"
+
+const IGNORE_SYNTAX_KIND = [
+  ts.SyntaxKind.StringKeyword,
+  ts.SyntaxKind.NumberKeyword,
+  ts.SyntaxKind.ImportSpecifier,
+]
 
 export default function extractModels(
   funcs: ParsedSamenFunctionDefinition[],
@@ -92,6 +99,8 @@ export default function extractModels(
       for (const el of typeNode.elements) {
         doType(el)
       }
+    } else if (!IGNORE_SYNTAX_KIND.includes(typeNode.kind)) {
+      throw new ParseError("Model extracting not possible for node", typeNode)
     }
   }
 
@@ -131,6 +140,11 @@ export default function extractModels(
     } else if (ts.isTypeParameterDeclaration(declaration)) {
       doType(declaration.constraint)
       doType(declaration.default)
+    } else if (!IGNORE_SYNTAX_KIND.includes(declaration.kind)) {
+      throw new ParseError(
+        "Model extracting not possible for node",
+        declaration,
+      )
     }
   }
 
