@@ -45,7 +45,7 @@ async function deleteArticle(id: string): Promise<void> {
   fakeDb = fakeDb.filter((article) => article.id !== id)
 }
 
-export const articleService = createService({
+export const articles = createService({
   getAllArticles: createFunction(getAllArticles),
   getArticleById: createFunction(getArticleById),
   createArticle: createFunction(createArticle),
