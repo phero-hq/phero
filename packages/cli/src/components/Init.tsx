@@ -198,7 +198,7 @@ export default function Init({ command }: { command: SamenCommandInit }) {
                 items={[
                   { value: OptionValue.InitServer, label: "Initialize server" },
                   { value: OptionValue.InitClient, label: "Initialize client" },
-                  { value: OptionValue.ShutDown, label: "Do nothing" },
+                  { value: OptionValue.ShutDown, label: "Exit" },
                 ]}
                 onSelect={onSelect}
                 indicatorComponent={SelectIndicator}
