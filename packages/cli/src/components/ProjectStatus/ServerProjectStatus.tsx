@@ -5,9 +5,10 @@ import {
 } from "@samen/dev"
 import { Box, Text } from "ink"
 import path from "path"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { spawnChildProcess } from "../../process"
 import { ServerProject } from "../../types"
+import ActivityIndicator from "../ActivityIndicator"
 import ProjectStatus from "../ProjectStatus"
 import {
   ServerProjectStatusRowLog,
@@ -28,6 +29,11 @@ export default function ServerProjectStatus({
   const [status, setStatus] = useState<string>("Loading...")
   const [isBuilding, setBuilding] = useState(true)
   const [error, setError] = useState<string>()
+
+  // It's not possible to instantly connect to the
+  // event-emitter. Hide the error for a short while,
+  // to make it easier on the experience:
+  const errorTimeout = useRef<NodeJS.Timeout>()
   const [isErrorVisible, setErrorVisible] = useState(false)
 
   const onEvent = useCallback((event: ServerDevEvent) => {
@@ -60,6 +66,7 @@ export default function ServerProjectStatus({
         setStatus("Could not build project")
         setBuilding(false)
         setError(event.errorMessage)
+        setErrorVisible(true)
         break
 
       case "BUILD_MANIFEST_START":
@@ -78,6 +85,7 @@ export default function ServerProjectStatus({
         setStatus("Could not build manifest")
         setBuilding(false)
         setError(event.errorMessage)
+        setErrorVisible(true)
         break
 
       case "BUILD_RPCS_START":
@@ -95,7 +103,8 @@ export default function ServerProjectStatus({
       case "BUILD_RPCS_FAILED":
         setStatus(`Could not build RPC's`)
         setBuilding(false)
-        setError(undefined)
+        setError(event.errorMessage)
+        setErrorVisible(true)
         break
 
       case "RPC_START":
@@ -115,11 +124,11 @@ export default function ServerProjectStatus({
   }, [])
 
   useEffect(() => {
-    // It's not possible to instantly connect to the
-    // event-emitter. Hide the error for a short while,
-    // to make it easier on the experience:
-    const timeout = setTimeout(() => setErrorVisible(true), 5000)
-    return () => clearTimeout(timeout)
+    return () => {
+      if (errorTimeout.current) {
+        clearTimeout(errorTimeout.current)
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -134,6 +143,7 @@ export default function ServerProjectStatus({
       },
       (error) => {
         setError(`Could not connect to event emitter at ${eventUrl} (${error})`)
+        errorTimeout.current = setTimeout(() => setErrorVisible(true), 5000)
       },
     )
 
