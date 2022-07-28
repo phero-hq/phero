@@ -26,12 +26,28 @@ export const samenHelp = chalk`
   Use {bold $ samen server} or {bold $ samen server} instead.
 
 {dim Available commands}
-  server, client
+  init, server, client
 
 {dim Options}
   -h, --help        Output usage information
   -v, --version     Output the version number
   --verbose         Output debug information
+`
+
+export const samenHelpInit = chalk`
+{dim Usage}
+  {yellow {dim $} samen {bold init}}
+  {yellow {dim $} samen {bold init client}}
+  {yellow {dim $} samen {bold init server}}
+
+{dim Description}
+  Initialises a samen server or client project. Assumes npm and TypeScript
+  to be installed and ready:
+
+    {yellow {dim $} npm init}
+    {yellow {dim $} npm i typescript --save-dev}
+    {yellow {dim $} npx tsc --init}
+    {yellow {dim $} npx samen init}
 `
 
 export const serverHelp = chalk`

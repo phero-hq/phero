@@ -70,7 +70,7 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
     const newProjects = await getProjects()
 
     if (newProjects.length === 0) {
-      throw new Error("No Samen project found")
+      throw new Error("No Samen project found, run `samen init` to create one.")
     }
 
     await checkAndWarnForVersions(
@@ -84,7 +84,10 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
   useEffect(() => {
     initialize()
       .then(setProjects)
-      .catch(fatalError)
+      .catch((error) => {
+        setLoading(false)
+        fatalError(error)
+      })
       .finally(() => setLoading(false))
   }, [])
 
