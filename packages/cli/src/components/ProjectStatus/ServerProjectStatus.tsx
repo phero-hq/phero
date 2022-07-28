@@ -95,7 +95,7 @@ export default function ServerProjectStatus({
       case "BUILD_RPCS_FAILED":
         setStatus(`Could not build RPC's`)
         setBuilding(false)
-        setError(undefined)
+        setError(event.errorMessage)
         break
 
       case "RPC_START":
