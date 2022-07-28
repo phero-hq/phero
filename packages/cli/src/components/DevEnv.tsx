@@ -4,17 +4,16 @@ import {
   DEFAULT_SERVER_PORT,
   DEFAULT_SERVER_URL,
   SamenCommandDevEnv,
-  SamenCommandName,
   ServerCommandName,
 } from "@samen/dev"
 import { Box, Spacer, Static, Text } from "ink"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { fatalError } from "../process"
 import { Project } from "../types"
+import checkAndWarnForVersions from "../utils/checkAndWarnForVersions"
 import getProjects from "../utils/getProjects"
 import maxLength from "../utils/maxLength"
 import ActivityIndicator from "./ActivityIndicator"
-import Init from "./Init"
 import ClientProjectStatus from "./ProjectStatus/ClientProjectStatus"
 import ServerProjectStatus from "./ProjectStatus/ServerProjectStatus"
 
@@ -52,23 +51,12 @@ export default class DevEnv extends React.Component<Props, State> {
 }
 
 function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
-  const [projects, setProjects] = useState<Project[]>()
+  const [projects, setProjects] = useState<Project[]>([])
+  const [isLoading, setLoading] = useState(true)
 
   const maxProjectPathLength = useMemo(() => {
-    return maxLength(projects?.map((p) => p.path) ?? [])
+    return maxLength(projects.map((p) => p.path))
   }, [projects])
-
-  const updateProjects = useCallback(async () => {
-    try {
-      setProjects(await getProjects())
-    } catch (error) {
-      fatalError(error)
-    }
-  }, [])
-
-  useEffect(() => {
-    updateProjects()
-  }, [])
 
   const [rows, setRows] = useState<JSX.Element[]>([])
   const oldRows = useRef<JSX.Element[]>([])
@@ -76,6 +64,31 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
     const newRows = [...oldRows.current, row]
     oldRows.current = newRows
     setRows(newRows)
+  }, [])
+
+  const initialize = useCallback(async () => {
+    const newProjects = await getProjects()
+
+    if (newProjects.length === 0) {
+      throw new Error("No Samen project found, run `samen init` to create one.")
+    }
+
+    await checkAndWarnForVersions(
+      newProjects.map((p) => p.path),
+      (log) => onAddRow(<Text color="red">{log}</Text>),
+    )
+
+    return newProjects
+  }, [])
+
+  useEffect(() => {
+    initialize()
+      .then(setProjects)
+      .catch((error) => {
+        setLoading(false)
+        fatalError(error)
+      })
+      .finally(() => setLoading(false))
   }, [])
 
   return (
@@ -86,54 +99,41 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
 
       {rows.length > 0 && <Box height={1} />}
 
-      {projects ? (
-        <>
-          {projects.length === 0 && (
-            <Init
+      {isLoading && <ActivityIndicator />}
+
+      {projects.map((project, index) => {
+        if (project.type === "client") {
+          return (
+            <ClientProjectStatus
+              key={project.path}
+              project={project}
               command={{
-                name: SamenCommandName.Init,
-                env: undefined,
+                name: ClientCommandName.Watch,
+                port: DEFAULT_CLIENT_PORT + index,
+                server: { url: DEFAULT_SERVER_URL },
+                verbose: command.verbose,
               }}
+              maxProjectPathLength={maxProjectPathLength}
             />
-          )}
+          )
+        }
 
-          {projects.map((project, index) => {
-            if (project.type === "client") {
-              return (
-                <ClientProjectStatus
-                  key={project.path}
-                  project={project}
-                  command={{
-                    name: ClientCommandName.Watch,
-                    port: DEFAULT_CLIENT_PORT + index,
-                    server: { url: DEFAULT_SERVER_URL },
-                    verbose: command.verbose,
-                  }}
-                  maxProjectPathLength={maxProjectPathLength}
-                />
-              )
-            }
-
-            if (project.type === "server") {
-              return (
-                <ServerProjectStatus
-                  key={project.path}
-                  project={project}
-                  command={{
-                    name: ServerCommandName.Serve,
-                    port: DEFAULT_SERVER_PORT,
-                    verbose: command.verbose,
-                  }}
-                  maxProjectPathLength={maxProjectPathLength}
-                  onAddRow={onAddRow}
-                />
-              )
-            }
-          })}
-        </>
-      ) : (
-        <ActivityIndicator />
-      )}
+        if (project.type === "server") {
+          return (
+            <ServerProjectStatus
+              key={project.path}
+              project={project}
+              command={{
+                name: ServerCommandName.Serve,
+                port: DEFAULT_SERVER_PORT,
+                verbose: command.verbose,
+              }}
+              maxProjectPathLength={maxProjectPathLength}
+              onAddRow={onAddRow}
+            />
+          )
+        }
+      })}
     </Box>
   )
 }
