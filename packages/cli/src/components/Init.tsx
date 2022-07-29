@@ -11,53 +11,26 @@ import { SamenCommandInit } from "@samen/dev"
 
 const serverSamenFile = `import { createService, createFunction } from '@samen/server'
 
-interface Article {
-  id: string
-  title: string
-  body: string
+async function helloWorld(name: string): Promise<string> {
+  return \`Hi there, \${name}!\`
 }
 
-class ArticleNotFoundError extends Error {
-  constructor(public id: string) {
-    super('Article not found by id: ' + id)
-  }
-}
-
-let fakeDb: Article[] = []
-
-async function getAllArticles(): Promise<Article[]> {
-  return fakeDb
-}
-
-async function getArticleById(id: string): Promise<Article> {
-  const article = fakeDb.find((article) => article.id === id)
-  if (!article) {
-    throw new ArticleNotFoundError(id)
-  }
-  return article
-}
-
-async function createArticle(article: Article): Promise<void> {
-  fakeDb = [...fakeDb, article]
-}
-
-async function deleteArticle(id: string): Promise<void> {
-  fakeDb = fakeDb.filter((article) => article.id !== id)
-}
-
-export const articles = createService({
-  getAllArticles: createFunction(getAllArticles),
-  getArticleById: createFunction(getArticleById),
-  createArticle: createFunction(createArticle),
-  deleteArticle: createFunction(deleteArticle),
+export const helloWorldService = createService({
+  helloWorld: createFunction(helloWorld),
 })
 `
 
-const clientSamenFile = `import { SamenClient } from './samen.generated'
+const clientSamenFile = `import { SamenClient } from "./samen.generated";
 
-const client = new SamenClient()
+const fetch = window.fetch.bind(this);
+const client = new SamenClient(fetch);
 
-export default client
+async function main() {
+  const message = await client.helloWorldService.helloWorld('Jim')
+  console.log(message) // \`Hi there, Jim!\`
+}
+
+main()
 `
 
 enum OptionValue {
