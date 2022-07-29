@@ -1,6 +1,18 @@
 import ts from "typescript"
+import { ParseError } from "./errors"
 import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
-import { isExternalDeclaration, isExternalTypeNode } from "./tsUtils"
+import { isExternalDeclaration } from "./tsUtils"
+
+const IGNORE_SYNTAX_KIND = [
+  ts.SyntaxKind.StringKeyword,
+  ts.SyntaxKind.BooleanKeyword,
+  ts.SyntaxKind.NumberKeyword,
+  ts.SyntaxKind.LiteralType,
+  ts.SyntaxKind.ImportSpecifier,
+  ts.SyntaxKind.VoidKeyword,
+  ts.SyntaxKind.AnyKeyword,
+  ts.SyntaxKind.UndefinedKeyword,
+]
 
 export default function extractModels(
   funcs: ParsedSamenFunctionDefinition[],
@@ -25,12 +37,18 @@ export default function extractModels(
         doType(typeArgument)
       }
 
-      if (isExternalTypeNode(typeNode)) {
-        return
-      }
-
       const type = typeChecker.getTypeFromTypeNode(typeNode)
       const symbol = type.aliasSymbol ?? type.symbol
+
+      // NOTE this happens in two occasions:
+      // 1. we got a `type X = Y` where Y itself is also a type alias
+      // 2. we got a `type X = [A, B]`, X is a tuple
+      const typeNameSymbol = typeChecker.getSymbolAtLocation(typeNode.typeName)
+      if (typeNameSymbol?.declarations?.length) {
+        for (const declr of typeNameSymbol.declarations) {
+          doDeclaration(declr)
+        }
+      }
 
       if (addedSymbols.includes(symbol)) {
         return
@@ -48,11 +66,7 @@ export default function extractModels(
         doDeclaration(declaration)
       }
     } else if (ts.isTypeLiteralNode(typeNode)) {
-      for (const member of typeNode.members) {
-        if (ts.isPropertySignature(member)) {
-          doType(member.type)
-        }
-      }
+      doMembers(typeNode.members)
     } else if (ts.isUnionTypeNode(typeNode)) {
       for (const unionElementType of typeNode.types) {
         doType(unionElementType)
@@ -71,6 +85,12 @@ export default function extractModels(
     } else if (ts.isIndexedAccessTypeNode(typeNode)) {
       doType(typeNode.objectType)
       doType(typeNode.indexType)
+    } else if (ts.isTupleTypeNode(typeNode)) {
+      for (const el of typeNode.elements) {
+        doType(el)
+      }
+    } else if (!IGNORE_SYNTAX_KIND.includes(typeNode.kind)) {
+      console.warn("Model extracting not possible for node " + typeNode.kind)
     }
   }
 
@@ -78,13 +98,12 @@ export default function extractModels(
     if (!declaration) {
       return
     }
+    if (isExternalDeclaration(declaration)) {
+      return
+    }
 
     if (ts.isInterfaceDeclaration(declaration)) {
-      for (const member of declaration.members) {
-        if (ts.isPropertySignature(member)) {
-          doType(member.type)
-        }
-      }
+      doMembers(declaration.members)
       for (const heritageClause of declaration.heritageClauses ?? []) {
         for (const type of heritageClause.types) {
           doType(type)
@@ -110,6 +129,23 @@ export default function extractModels(
     } else if (ts.isTypeParameterDeclaration(declaration)) {
       doType(declaration.constraint)
       doType(declaration.default)
+    } else if (ts.isTypeLiteralNode(declaration)) {
+      doMembers(declaration.members)
+    } else if (!IGNORE_SYNTAX_KIND.includes(declaration.kind)) {
+      console.warn(
+        "Model extracting not possible for declaration " + declaration.kind,
+      )
+    }
+  }
+
+  function doMembers(members: ts.NodeArray<ts.TypeElement>): void {
+    for (const member of members) {
+      if (ts.isPropertySignature(member)) {
+        doType(member.type)
+      } else if (ts.isIndexSignatureDeclaration(member)) {
+        // TODO name, but could be computed property
+        doType(member.type)
+      }
     }
   }
 

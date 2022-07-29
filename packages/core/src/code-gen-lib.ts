@@ -69,7 +69,9 @@ function generateFunctionParameters(
   })
 
   if (func.serviceContext) {
-    result.push(
+    return [
+      // Note: we need to pass the context parameter as the first argument because we can
+      // have optional parameters
       ts.factory.createParameterDeclaration(
         undefined,
         undefined,
@@ -79,7 +81,8 @@ function generateFunctionParameters(
         generateTypeNode(func.serviceContext.type, refMaker),
         undefined,
       ),
-    )
+      ...result,
+    ]
   }
 
   return result
@@ -434,6 +437,12 @@ function generateTypeNode(
     return ts.factory.createIndexedAccessTypeNode(
       generateTypeNode(type.objectType, refMaker),
       generateTypeNode(type.indexType, refMaker),
+    )
+  }
+
+  if (ts.isTupleTypeNode(type)) {
+    return ts.factory.createTupleTypeNode(
+      type.elements.map((el) => generateTypeNode(el, refMaker)),
     )
   }
 

@@ -500,7 +500,7 @@ export default function generateParserModel(
         }
       } else if ((type.flags & ts.TypeFlags.Object) === ts.TypeFlags.Object) {
         return generateObjectType(type, node, depth)
-      } else if (type.isUnion()) {
+      } else if (type.isUnionOrIntersection()) {
         return {
           type: ParserModelType.Reference,
           baseTypeName: getMemberName(node.typeName),
