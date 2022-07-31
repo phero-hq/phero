@@ -13,10 +13,6 @@ export function printSamenApp(app: ParsedSamenApp): string {
         name: service.name,
         funcs: service.funcs.map((func) => ({
           name: func.name,
-          config: {
-            ...func.config,
-            // middleware: func.config.middleware?.map(printFunctionDeclaration),
-          },
           func: printFunctionDeclaration(func.actualFunction),
         })),
       })),

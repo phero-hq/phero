@@ -1,9 +1,8 @@
 import ts from "typescript"
 import { ParsedSamenApp } from ".."
-import { getReturnType } from "../extractFunctionFromServiceProperty"
+import parseReturnType from "../parseReturnType"
 import {
   ParsedSamenFunctionDefinition,
-  ParsedSamenServiceConfig,
   ParsedSamenServiceDefinition,
 } from "../parseSamenApp"
 import { printCode } from "../tsTestUtils"
@@ -14,9 +13,9 @@ import generateModelParser, {
 import generateParserFromModel from "./parsers/generateParserFromModel"
 import generateParserModel from "./parsers/generateParserModel"
 
-import * as tsx from "../tsx"
-import { generateMiddlewareParsers } from "../generatedMiddlewareRunner"
 import { ParsedError } from "../extractErrors/parseThrowStatement"
+import { generateMiddlewareParsers } from "../generatedMiddlewareRunner"
+import * as tsx from "../tsx"
 
 const factory = ts.factory
 
@@ -236,7 +235,7 @@ function generateInnerFunction(
                 parser: generateParserFromModel(
                   generateParserModel(
                     typeChecker,
-                    getReturnType(funcDef.actualFunction),
+                    parseReturnType(funcDef.actualFunction),
                     "data",
                   ),
                 ),

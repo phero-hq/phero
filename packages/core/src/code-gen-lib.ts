@@ -4,7 +4,7 @@ import generateParserFromModel from "./code-gen/parsers/generateParserFromModel"
 import generateParserModel from "./code-gen/parsers/generateParserModel"
 import { ParseError } from "./errors"
 import { ParsedError } from "./extractErrors/parseThrowStatement"
-import { getReturnType } from "./extractFunctionFromServiceProperty"
+import parseReturnType from "./parseReturnType"
 import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
 import { getNameAsString, isExternalType } from "./tsUtils"
 import * as tsx from "./tsx"
@@ -159,8 +159,7 @@ function generateClientFunctionBlock(
   refMaker: ReferenceMaker,
   typeChecker: ts.TypeChecker,
 ): ts.Block {
-  // TODO should not use getReturnType or refactor
-  const returnType = getReturnType(func)
+  const returnType = parseReturnType(func)
   const isVoid = returnType.kind === ts.SyntaxKind.VoidKeyword
 
   const returnTypeNode = generateTypeNode(returnType, refMaker)

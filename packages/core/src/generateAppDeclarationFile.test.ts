@@ -21,7 +21,7 @@ describe("generateAppDeclarationFile", () => {
     test("should parse middleware", () => {
       const parsedApp = generate(
         createTestProgram(`
-        type NextFunction<T = void> = T extends void
+        type SamenNextFunction<T = void> = T extends void
           ? () => Promise<void>
           : (ctx: T) => Promise<void>
         type SamenContext<T = {}> = T
@@ -33,18 +33,18 @@ describe("generateAppDeclarationFile", () => {
 
         interface User { uid: string }
 
-        async function requireUID(params: SamenParams, ctx: SamenContext<{ uid: string }>, next: NextFunction<{ uid: string, x: string }>) {
+        async function requireUID(params: SamenParams, ctx: SamenContext<{ uid: string }>, next: SamenNextFunction<{ uid: string, x: string }>) {
           // valideer id token
           await next({ uid, x })
         }
         
-        async function requireCmsUser(params: SamenParams, ctx: SamenContext<{ uid: string, x: string }>, next: NextFunction<{ user: User }>) {
+        async function requireCmsUser(params: SamenParams, ctx: SamenContext<{ uid: string, x: string }>, next: SamenNextFunction<{ user: User }>) {
           // zet om naar user, of het cms user is
           await next({ user: { uid } })
         }
 
         export const articleService = createService({
-          getArticle: createFunction(getArticle),
+          getArticle,
         }, {
           middleware: [requireUID, requireCmsUser],
         })
@@ -68,7 +68,7 @@ describe("generateAppDeclarationFile", () => {
           }
 
           export const articleService = createService({
-            getArticle: createFunction(getArticle),
+            getArticle,
           })
         `),
       )
@@ -88,7 +88,7 @@ describe("generateAppDeclarationFile", () => {
           
 
           export const hamburgerService = createService({
-            getHamburger: createFunction(getHamburger),
+            getHamburger,
           })
           
           class ArticleError extends Error {
@@ -99,7 +99,7 @@ describe("generateAppDeclarationFile", () => {
           }
 
           export const articleService = createService({
-            getArticle: createFunction(getArticle),
+            getArticle,
           })
         `),
       )
@@ -125,8 +125,8 @@ describe("generateAppDeclarationFile", () => {
           }
           
           export const hamburgerService = createService({
-            getHamburger: createFunction(getHamburger),
-            setHamburger: createFunction(setHamburger),
+            getHamburger,
+            setHamburger,
           })
           
           class ArticleError extends Error {
@@ -141,8 +141,8 @@ describe("generateAppDeclarationFile", () => {
           }
 
           export const articleService = createService({
-            getArticle: createFunction(getArticle),
-            setArticle: createFunction(setArticle),
+            getArticle,
+            setArticle,
           })
         `),
       )
@@ -173,7 +173,7 @@ describe("generateAppDeclarationFile", () => {
           }
 
           export const articleService = createService({
-            getArticle: createFunction(getArticle),
+            getArticle,
           })
         `),
       )
@@ -202,7 +202,7 @@ describe("generateAppDeclarationFile", () => {
           import {getRoutine} from './routine'
           
           export const workoutRoutineService = createService({
-            getRoutine: createFunction(getRoutine),
+            getRoutine,
           })
         `,
         }),

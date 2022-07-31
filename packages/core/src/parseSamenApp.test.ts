@@ -51,7 +51,7 @@ describe("parseSamenApp", () => {
         }
         
         export const articleService = createService({
-          getArticle: createFunction(getArticle),
+          getArticle,
         })
       `),
       )
@@ -63,49 +63,12 @@ describe("parseSamenApp", () => {
             funcs: [
               expect.objectContaining({
                 name: "getArticle",
-                config: {},
               }),
             ],
           }),
         ],
       })
 
-      expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
-        "getArticle",
-      )
-    })
-
-    test("should parse a simple service/function with config", () => {
-      const parsedApp = parseProgram(
-        createTestProgram(`
-        async function getArticle(): Promise<string> {
-          return "ok"
-        }
-        
-        export const articleService = createService({
-          getArticle: createFunction(getArticle, {
-            memory: 1024
-          }),
-        })
-      `),
-      )
-
-      expect(parsedApp).toMatchObject({
-        services: [
-          expect.objectContaining({
-            name: "articleService",
-            funcs: [
-              expect.objectContaining({
-                name: "getArticle",
-                config: {
-                  memory: 1024,
-                },
-              }),
-            ],
-          }),
-        ],
-      })
       expectFunctionDeclrWithName(
         parsedApp.services[0].funcs[0].actualFunction,
         "getArticle",
@@ -120,9 +83,7 @@ describe("parseSamenApp", () => {
         }
         
         export const articleService = createService({
-          getArticleX: createFunction(getArticle, {
-            memory: 1024
-          }),
+          getArticleX: getArticle,
         })
       `),
       )
@@ -134,9 +95,6 @@ describe("parseSamenApp", () => {
             funcs: [
               expect.objectContaining({
                 name: "getArticleX",
-                config: {
-                  memory: 1024,
-                },
               }),
             ],
           }),
@@ -160,8 +118,8 @@ describe("parseSamenApp", () => {
         }
         
         export const articleService = createService({
-          getArticle: createFunction(getArticle),
-          editArticle: createFunction(editArticle),
+          getArticle: getArticle,
+          editArticle,
         })
       `),
       )
@@ -173,117 +131,9 @@ describe("parseSamenApp", () => {
             funcs: [
               expect.objectContaining({
                 name: "getArticle",
-                config: {},
               }),
               expect.objectContaining({
                 name: "editArticle",
-                config: {},
-              }),
-            ],
-          }),
-        ],
-      })
-      expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
-        "getArticle",
-      )
-      expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[1].actualFunction,
-        "editArticle",
-      )
-    })
-
-    test("should parse a service with 2 functions with different config", () => {
-      const parsedApp = parseProgram(
-        createTestProgram(`
-        async function getArticle(): Promise<string> {
-          return "ok"
-        }
-        
-        async function editArticle(): Promise<string> {
-          return "ok"
-        }
-        
-        export const articleService = createService({
-          getArticle: createFunction(getArticle, {
-            memory: 512,
-          }),
-          editArticle: createFunction(editArticle, {
-            memory: 1024,
-          }),
-        })
-      `),
-      )
-
-      expect(parsedApp).toMatchObject({
-        services: [
-          expect.objectContaining({
-            name: "articleService",
-            funcs: [
-              expect.objectContaining({
-                name: "getArticle",
-                config: {
-                  memory: 512,
-                },
-              }),
-              expect.objectContaining({
-                name: "editArticle",
-                config: {
-                  memory: 1024,
-                },
-              }),
-            ],
-          }),
-        ],
-      })
-      expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
-        "getArticle",
-      )
-      expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[1].actualFunction,
-        "editArticle",
-      )
-    })
-
-    test("should parse a service with default config", () => {
-      const parsedApp = parseProgram(
-        createTestProgram(`
-        async function getArticle(): Promise<string> {
-          return "ok"
-        }
-        
-        async function editArticle(): Promise<string> {
-          return "ok"
-        }
-        
-        export const articleService = createService({
-          getArticle: createFunction(getArticle),
-          editArticle: createFunction(editArticle, {
-            memory: 1024,
-          }),
-        }, {
-          memory: 512,
-        })
-      `),
-      )
-
-      expect(parsedApp).toMatchObject({
-        services: [
-          expect.objectContaining({
-            name: "articleService",
-            funcs: [
-              expect.objectContaining({
-                name: "getArticle",
-                config: {
-                  memory: 512,
-                },
-              }),
-              expect.objectContaining({
-                name: "editArticle",
-                config: {
-                  memory: 1024,
-                },
               }),
             ],
           }),
@@ -302,7 +152,7 @@ describe("parseSamenApp", () => {
     test("should parse middleware config", () => {
       const parsedApp = parseProgram(
         createTestProgram(`
-        interface NextFunction {}type NextFunction<T = void> = T extends void
+        type SamenNextFunction<T = void> = T extends void
           ? () => Promise<void>
           : (ctx: T) => Promise<void>
         type SamenContext<T = {}> = T
@@ -316,17 +166,14 @@ describe("parseSamenApp", () => {
           return "ok"
         }
         
-        async function requireCMSUser(params: SamenParams, ctx: SamenContext, next: NextFunction): Promise<string> {
+        async function requireCMSUser(params: SamenParams, ctx: SamenContext, next: SamenNextFunction): Promise<string> {
           return "ok"
         }
         
         export const articleService = createService({
-          getArticle: createFunction(getArticle),
-          editArticle: createFunction(editArticle, {
-            memory: 1024,
-          }),
+          getArticle: getArticle,
+          editArticle,
         }, {
-          memory: 512,
           middleware: [requireCMSUser],
         })
       `),
@@ -339,15 +186,9 @@ describe("parseSamenApp", () => {
             funcs: [
               expect.objectContaining({
                 name: "getArticle",
-                config: expect.objectContaining({
-                  memory: 512,
-                }),
               }),
               expect.objectContaining({
                 name: "editArticle",
-                config: expect.objectContaining({
-                  memory: 1024,
-                }),
               }),
             ],
           }),
@@ -376,7 +217,7 @@ describe("parseSamenApp", () => {
     test("should parse multiple services", () => {
       const parsedApp = parseProgram(
         createTestProgram(`
-        interface NextFunction {}type NextFunction<T = void> = T extends void
+        type SamenNextFunction<T = void> = T extends void
           ? () => Promise<void>
           : (ctx: T) => Promise<void>
         type SamenContext<T = {}> = T
@@ -390,20 +231,17 @@ describe("parseSamenApp", () => {
           return "ok"
         }
         
-        async function requireCMSUser(params: SamenParams, ctx: SamenContext, next: NextFunction): Promise<string> {
+        async function requireCMSUser(params: SamenParams, ctx: SamenContext, next: SamenNextFunction): Promise<string> {
           return "ok"
         }
         
         export const frontendService = createService({
-          getArticle: createFunction(getArticle),
-        }, {
-          memory: 512,
+          getArticle,
         })
         
         export const cmsService = createService({
-          editArticle: createFunction(editArticle),
+          editArticle: editArticle,
         }, {
-          memory: 1024,
           middleware: [requireCMSUser],
         })
       `),
@@ -416,9 +254,6 @@ describe("parseSamenApp", () => {
             funcs: [
               expect.objectContaining({
                 name: "getArticle",
-                config: expect.objectContaining({
-                  memory: 512,
-                }),
               }),
             ],
           }),
@@ -427,9 +262,6 @@ describe("parseSamenApp", () => {
             funcs: [
               expect.objectContaining({
                 name: "editArticle",
-                config: expect.objectContaining({
-                  memory: 1024,
-                }),
               }),
             ],
           }),
@@ -450,6 +282,7 @@ describe("parseSamenApp", () => {
       )
     })
   })
+
   describe("alternative syntax", () => {
     test("should parse a simple service/function with no config", () => {
       const parsedApp = parseProgram(
@@ -459,7 +292,7 @@ describe("parseSamenApp", () => {
         }
         
         export const articleService = createService({
-          getArticle: createFunction(getArticle),
+          getArticle,
         })
       `),
       )
@@ -471,7 +304,6 @@ describe("parseSamenApp", () => {
             funcs: [
               expect.objectContaining({
                 name: "getArticle",
-                config: {},
               }),
             ],
           }),
@@ -501,9 +333,9 @@ describe("parseSamenApp", () => {
           import {getArticle, editArticle, publishArticle as xxx} from './other'       
 
           export const articleService = createService({
-            getArticle: createFunction(getArticle),
-            editArticle: createFunction(editArticle),
-            publishArticle: createFunction(xxx),
+            getArticle: getArticle,
+            editArticle,
+            publishArticle: xxx,
           })`,
         }),
       )
@@ -515,15 +347,12 @@ describe("parseSamenApp", () => {
             funcs: [
               expect.objectContaining({
                 name: "getArticle",
-                config: {},
               }),
               expect.objectContaining({
                 name: "editArticle",
-                config: {},
               }),
               expect.objectContaining({
                 name: "publishArticle",
-                config: {},
               }),
             ],
           }),
@@ -550,7 +379,7 @@ describe("parseSamenApp", () => {
             return ""
           }
 
-          const editArticle = createFunction(_editArticle)
+          const editArticle = _editArticle
 
           export const articleService = createService({
             editArticle: editArticle,
@@ -564,7 +393,6 @@ describe("parseSamenApp", () => {
             funcs: [
               expect.objectContaining({
                 name: "editArticle",
-                config: {},
               }),
             ],
           }),
@@ -583,7 +411,7 @@ describe("parseSamenApp", () => {
           const _editArticle = async (): Promise<string> => {
             return ""
           }
-          export const editArticle = createFunction(_editArticle)
+          export const editArticle = _editArticle
           `,
           samen: `
           import {editArticle} from './other'          
@@ -601,7 +429,6 @@ describe("parseSamenApp", () => {
             funcs: [
               expect.objectContaining({
                 name: "editArticle",
-                config: {},
               }),
             ],
           }),
@@ -620,7 +447,7 @@ describe("parseSamenApp", () => {
           const _editArticle = async (): Promise<string> => {
             return ""
           }
-          export const editArticle = createFunction(_editArticle)
+          export const editArticle = _editArticle
           `,
           samen: `
           import * as other from './other'          
@@ -638,7 +465,6 @@ describe("parseSamenApp", () => {
             funcs: [
               expect.objectContaining({
                 name: "editArticle",
-                config: {},
               }),
             ],
           }),
@@ -661,7 +487,7 @@ describe("parseSamenApp", () => {
           other: `
           import {_editArticle} from './yetAnother'
 
-          export const editArticle = createFunction(_editArticle)
+          export const editArticle = _editArticle
           `,
           samen: `
           import * as articleServiceXXX from './other'          
@@ -677,7 +503,6 @@ describe("parseSamenApp", () => {
             funcs: [
               expect.objectContaining({
                 name: "editArticle",
-                config: {},
               }),
             ],
           }),
@@ -696,7 +521,7 @@ describe("parseSamenApp", () => {
           const _editArticle = async (): Promise<string> => {
             return ""
           }
-          const editArticle = createFunction(_editArticle)
+          const editArticle = _editArticle
 
           export const articleService = createService({
             editArticle: editArticle,
@@ -716,7 +541,6 @@ describe("parseSamenApp", () => {
             funcs: [
               expect.objectContaining({
                 name: "editArticle",
-                config: {},
               }),
             ],
           }),
@@ -734,7 +558,7 @@ describe("parseSamenApp", () => {
           const _editArticle = async (): Promise<string> => {
             return ""
           }
-          const editArticle = createFunction(_editArticle)
+          const editArticle = _editArticle
 
           export const articleService = {
             editArticle: editArticle,
@@ -754,7 +578,6 @@ describe("parseSamenApp", () => {
             funcs: [
               expect.objectContaining({
                 name: "editArticle",
-                config: {},
               }),
             ],
           }),
@@ -774,7 +597,7 @@ describe("parseSamenApp", () => {
             return ""
           }
           
-          const editArticle = createFunction(_editArticle)
+          const editArticle = _editArticle
 
           export const articleService = createService({
             editArticle: editArticle,
@@ -793,7 +616,6 @@ describe("parseSamenApp", () => {
             funcs: [
               expect.objectContaining({
                 name: "editArticle",
-                config: {},
               }),
             ],
           }),
@@ -805,86 +627,13 @@ describe("parseSamenApp", () => {
       )
     })
 
-    test("should parse inline function expression", () => {
-      const parsedApp = parseProgram(
-        createTestProgram({
-          other: `
-          export const editArticle = createFunction(async function _editArticle(): Promise<string> {
-            return "ok"
-          })
-          `,
-          samen: `
-          import {editArticle} from './other'
-
-          export const articleService = createService({
-            editArticle: editArticle,
-          })
-          `,
-        }),
-      )
-
-      expect(parsedApp).toMatchObject({
-        services: [
-          expect.objectContaining({
-            name: "articleService",
-            funcs: [
-              expect.objectContaining({
-                name: "editArticle",
-                config: {},
-              }),
-            ],
-          }),
-        ],
-      })
-      expectFunctionExpressionWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
-        "_editArticle",
-      )
-    })
-    test("should parse inline arrow function expression", () => {
-      const parsedApp = parseProgram(
-        createTestProgram({
-          other: `
-          export const editArticle = createFunction(async (): Promise<string> => {
-            return "ok"
-          })
-          `,
-          samen: `
-          import {editArticle} from './other'
-
-          export const articleService = createService({
-            editArticle: editArticle,
-          })
-          `,
-        }),
-      )
-
-      expect(parsedApp).toMatchObject({
-        services: [
-          expect.objectContaining({
-            name: "articleService",
-            funcs: [
-              expect.objectContaining({
-                name: "editArticle",
-                config: {},
-              }),
-            ],
-          }),
-        ],
-      })
-      expectArrowFunctionWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
-        undefined,
-      )
-    })
-
     test("should parse unnamed function expression", () => {
       const parsedApp = parseProgram(
         createTestProgram({
           other: `
-          export const editArticle = createFunction(async function(): Promise<string> {
+          export const editArticle = async function(): Promise<string> {
             return "ok"
-          })
+          }
           `,
           samen: `
           import {editArticle} from './other'
@@ -903,7 +652,6 @@ describe("parseSamenApp", () => {
             funcs: [
               expect.objectContaining({
                 name: "editArticle",
-                config: {},
               }),
             ],
           }),
@@ -912,110 +660,6 @@ describe("parseSamenApp", () => {
       expectFunctionExpressionWithName(
         parsedApp.services[0].funcs[0].actualFunction,
         undefined,
-      )
-    })
-
-    test("should parse short hand assignment function", () => {
-      const parsedApp = parseProgram(
-        createTestProgram(`
-        const editArticle = createFunction(async function inlineFunc(): Promise<string> {
-          return "ok"
-        })
-
-        export const articleService = createService({
-          editArticle,
-        })
-        `),
-      )
-
-      expect(parsedApp).toMatchObject({
-        services: [
-          expect.objectContaining({
-            name: "articleService",
-            funcs: [
-              expect.objectContaining({
-                name: "editArticle",
-              }),
-            ],
-          }),
-        ],
-      })
-      expectFunctionExpressionWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
-        "inlineFunc",
-      )
-    })
-
-    test("should parse short hand assignment function without config", () => {
-      const parsedApp = parseProgram(
-        createTestProgram(`
-        function editArticle(): Promise<string> {
-          return "ok"
-        }
-
-        export const articleService = createService({
-          editArticle,
-        })
-        `),
-      )
-
-      expect(parsedApp).toMatchObject({
-        services: [
-          expect.objectContaining({
-            name: "articleService",
-            funcs: [
-              expect.objectContaining({
-                name: "editArticle",
-              }),
-            ],
-          }),
-        ],
-      })
-      expectFunctionDeclarationWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
-        "editArticle",
-      )
-    })
-
-    test("should parse a imported+referenced function config", () => {
-      const parsedApp = parseProgram(
-        createTestProgram({
-          other: `
-            const timeout = 5
-            
-            export const config = {
-              timeout,
-            }
-          `,
-          samen: `
-          import {config} from './other'
-
-          function editArticle(): Promise<string> {
-            return "ok"
-          }
-
-          export const articleService = createService({
-            editArticle: createFunction(editArticle, config),
-          })
-        `,
-        }),
-      )
-
-      expect(parsedApp).toMatchObject({
-        services: [
-          expect.objectContaining({
-            name: "articleService",
-            funcs: [
-              expect.objectContaining({
-                name: "editArticle",
-              }),
-            ],
-          }),
-        ],
-      })
-      expectFunctionDeclarationWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
-        "editArticle",
       )
     })
   })
@@ -1036,7 +680,7 @@ describe("parseSamenApp", () => {
           import {editArticle} from './other'
 
           export const articleService = createService({
-            editArticle: createFunction(editArticle),
+            editArticle: editArticle,
           })
         `,
         }),
@@ -1055,6 +699,7 @@ describe("parseSamenApp", () => {
         ],
       })
     })
+
     test("should parse errors within multiple functions", () => {
       const parsedApp = parseProgram(
         createTestProgram({
@@ -1074,8 +719,8 @@ describe("parseSamenApp", () => {
           import {getArticle, editArticle} from './other'
 
           export const articleService = createService({
-            getArticle: createFunction(getArticle),
-            editArticle: createFunction(editArticle),
+            getArticle,
+            editArticle: editArticle,
           })
         `,
         }),
@@ -1094,6 +739,7 @@ describe("parseSamenApp", () => {
         ],
       })
     })
+
     test("should parse errors within multiple files with the same name", () => {
       const parsedApp = parseProgram(
         createTestProgram({
@@ -1118,8 +764,8 @@ describe("parseSamenApp", () => {
           import {editArticle} from './otherTwo'
 
           export const articleService = createService({
-            getArticle: createFunction(getArticle),
-            editArticle: createFunction(editArticle),
+            getArticle: getArticle,
+            editArticle,
           })
         `,
         }),
@@ -1166,8 +812,8 @@ describe("parseSamenApp", () => {
           import {editArticle} from './otherTwo'
 
           export const articleService = createService({
-            getArticle: createFunction(getArticle),
-            editArticle: createFunction(editArticle),
+            getArticle: getArticle,
+            editArticle,
           })
         `,
         }),

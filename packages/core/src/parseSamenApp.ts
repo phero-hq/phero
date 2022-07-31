@@ -25,12 +25,9 @@ export type Model =
 
 export interface ParsedSamenFunctionDefinition {
   name: string
-  // TODO for clashing service models
-  // models: Model[]
   actualFunction: ts.FunctionLikeDeclarationBase
   parameters: ts.ParameterDeclaration[]
   returnType: ts.TypeNode
-  config: ParsedSamenFunctionConfig
   serviceContext?: {
     type: ts.TypeNode
     paramName?: string
@@ -38,18 +35,8 @@ export interface ParsedSamenFunctionDefinition {
 }
 
 export interface ParsedSamenServiceConfig {
-  memory?: number
-  timeout?: number
-
-  minInstance?: number
-  maxInstance?: number
   middleware?: ParsedMiddlewareConfig[]
   contextType?: ts.TypeNode
-}
-
-export interface ParsedSamenFunctionConfig {
-  memory?: number
-  timeout?: number
 }
 
 export interface ParsedMiddlewareConfig {
@@ -57,11 +44,6 @@ export interface ParsedMiddlewareConfig {
   nextType: ts.TypeNode | undefined
   contextType: ts.TypeNode
   middleware: ts.FunctionLikeDeclarationBase
-}
-
-export enum SamenLibFunctions {
-  CreateService = "createService",
-  CreateFunction = "createFunction",
 }
 
 export default function parseSamenApp(

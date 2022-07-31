@@ -1,17 +1,12 @@
 import ts from "typescript"
 import { ParseError } from "./errors"
 import extractErrors from "./extractErrors/extractErrors"
-import extractFunctionFromServiceProperty from "./extractFunctionFromServiceProperty"
 import extractModels from "./extractModels"
-import getLibFunctionCall from "./getLibFunctionCall"
+import getCreateServiceCallExpression from "./getCreateServiceCallExpression"
 import { parseContext } from "./parseContext"
-import {
-  ParsedSamenFunctionDefinition,
-  ParsedSamenServiceDefinition,
-  SamenLibFunctions,
-} from "./parseSamenApp"
-import parseServiceConfig, { mergeFunctionConfigs } from "./parseServiceConfig"
-import { hasModifier, resolveSymbol } from "./tsUtils"
+import parseFunctionDefinitions from "./parseFunctionDefinitions"
+import { ParsedSamenServiceDefinition } from "./parseSamenApp"
+import parseServiceConfig from "./parseServiceConfig"
 
 export default function extractServiceFromSamenExport(
   serviceExport: ts.VariableDeclaration | ts.ExportSpecifier,
@@ -20,10 +15,9 @@ export default function extractServiceFromSamenExport(
   const serviceName = serviceExport.name.getText()
 
   // check if the value of the export is a function call to "creatService"
-  const createServiceCallExpr = getLibFunctionCall(
+  const createServiceCallExpr = getCreateServiceCallExpression(
     serviceExport,
     typeChecker,
-    SamenLibFunctions.CreateService,
   )
 
   if (!createServiceCallExpr) {
@@ -44,10 +38,7 @@ export default function extractServiceFromSamenExport(
 
   return {
     name: serviceName,
-    funcs: functionDefinitions.map((func) => ({
-      ...func,
-      config: mergeFunctionConfigs(parsedServiceConfig, func.config),
-    })),
+    funcs: functionDefinitions,
     models: extractModels(functionDefinitions, typeChecker),
     errors: extractErrors(
       [
@@ -58,63 +49,4 @@ export default function extractServiceFromSamenExport(
     ),
     config: parsedServiceConfig,
   }
-}
-
-function parseFunctionDefinitions(
-  node: ts.Node | undefined,
-  typeChecker: ts.TypeChecker,
-): ParsedSamenFunctionDefinition[] {
-  if (!node) {
-    return []
-  }
-
-  if (ts.isObjectLiteralExpression(node)) {
-    const result: ParsedSamenFunctionDefinition[] = []
-    const propertyAssignments = node.properties
-    for (const propertyAssignment of propertyAssignments) {
-      const func = extractFunctionFromServiceProperty(
-        propertyAssignment,
-        typeChecker,
-      )
-      result.push(func)
-    }
-    return result
-  }
-
-  if (ts.isIdentifier(node)) {
-    const symbol = resolveSymbol(node, typeChecker)
-    if (symbol) {
-      return parseFunctionDefinitions(symbol.valueDeclaration, typeChecker)
-    }
-  }
-
-  if (ts.isVariableDeclaration(node)) {
-    return parseFunctionDefinitions(node.initializer, typeChecker)
-  }
-
-  if (ts.isPropertyAccessExpression(node)) {
-    return parseFunctionDefinitions(node.getLastToken(), typeChecker)
-  }
-
-  if (ts.isSourceFile(node)) {
-    const result: ParsedSamenFunctionDefinition[] = []
-    for (const statement of node.statements) {
-      if (hasModifier(statement, ts.SyntaxKind.ExportKeyword)) {
-        if (ts.isVariableStatement(statement)) {
-          for (const varDeclr of statement.declarationList.declarations) {
-            const func = extractFunctionFromServiceProperty(
-              varDeclr,
-              typeChecker,
-            )
-            result.push(func)
-          }
-        } else {
-          return []
-        }
-      }
-    }
-    return result
-  }
-
-  return []
 }
