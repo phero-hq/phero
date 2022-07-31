@@ -1,7 +1,7 @@
 import ts from "typescript"
 import generateAppDeclarationFile from "./generateAppDeclarationFile"
 
-import parseSamenApp from "./parseSamenApp"
+import { parseSamenApp } from "./parseSamenApp"
 import { createTestProgram } from "./tsTestUtils"
 
 function generate(prog: ts.Program): string {

@@ -1,14 +1,14 @@
 import ts from "typescript"
-import { ParseError } from "./errors"
-import extractErrors from "./extractErrors/extractErrors"
-import extractModels from "./extractModels"
+import { ParseError } from "../errors"
+import extractErrors from "../extractErrors/extractErrors"
+import parseModels from "./parseModels"
 import getCreateServiceCallExpression from "./getCreateServiceCallExpression"
 import { parseContext } from "./parseContext"
 import parseFunctionDefinitions from "./parseFunctionDefinitions"
 import { ParsedSamenServiceDefinition } from "./parseSamenApp"
 import parseServiceConfig from "./parseServiceConfig"
 
-export default function extractServiceFromSamenExport(
+export default function parseServiceDefinition(
   serviceExport: ts.VariableDeclaration | ts.ExportSpecifier,
   typeChecker: ts.TypeChecker,
 ): ParsedSamenServiceDefinition {
@@ -39,7 +39,7 @@ export default function extractServiceFromSamenExport(
   return {
     name: serviceName,
     funcs: functionDefinitions,
-    models: extractModels(functionDefinitions, typeChecker),
+    models: parseModels(functionDefinitions, typeChecker),
     errors: extractErrors(
       [
         ...functionDefinitions.map((f) => f.actualFunction),

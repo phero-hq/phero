@@ -1,9 +1,8 @@
 import ts from "typescript"
-import { ParseError } from "./errors"
+import { ParseError } from "../errors"
 import parseReturnType from "./parseReturnType"
 import { ParsedSamenFunctionDefinition } from "./parseSamenApp"
-import { printCode } from "./tsTestUtils"
-import { resolveSymbol } from "./tsUtils"
+import { resolveSymbol } from "../tsUtils"
 
 export default function parseFunctionDefinition(
   node: ts.ObjectLiteralElementLike | ts.VariableDeclaration,

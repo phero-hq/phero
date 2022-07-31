@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { resolveSymbol } from "./tsUtils"
+import { resolveSymbol } from "../tsUtils"
 
 export default function getCreateServiceCallExpression(
   node: ts.Node | undefined,

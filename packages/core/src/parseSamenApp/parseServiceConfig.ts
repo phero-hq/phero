@@ -1,8 +1,8 @@
 import ts from "typescript"
-import { ParseError } from "./errors"
+import { ParseError } from "../errors"
 import parseFunctionConfigMiddlewares from "./parseMiddlewares"
 import { ParsedSamenServiceConfig } from "./parseSamenApp"
-import { resolveSymbol } from "./tsUtils"
+import { resolveSymbol } from "../tsUtils"
 
 export default function parseServiceConfig(
   node: ts.Node | undefined,

@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { ParsedSamenApp } from ".."
-import parseReturnType from "../parseReturnType"
+import parseReturnType from "../parseSamenApp/parseReturnType"
 import {
   ParsedSamenFunctionDefinition,
   ParsedSamenServiceDefinition,
@@ -14,7 +14,7 @@ import generateParserFromModel from "./parsers/generateParserFromModel"
 import generateParserModel from "./parsers/generateParserModel"
 
 import { ParsedError } from "../extractErrors/parseThrowStatement"
-import { generateMiddlewareParsers } from "../generatedMiddlewareRunner"
+import generateMiddlewareParsers from "../generateMiddlewareParsers"
 import * as tsx from "../tsx"
 
 const factory = ts.factory

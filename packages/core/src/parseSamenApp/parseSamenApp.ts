@@ -1,8 +1,8 @@
 import ts, { ClassDeclaration } from "typescript"
-import { ParseError } from "./errors"
-import { ParsedError } from "./extractErrors/parseThrowStatement"
-import extractServiceFromSamenExport from "./extractServiceFromSamenExport"
-import { hasModifier } from "./tsUtils"
+import { ParseError } from "../errors"
+import { ParsedError } from "../extractErrors/parseThrowStatement"
+import parseServiceDefinition from "./parseServiceDefinition"
+import { hasModifier } from "../tsUtils"
 
 export interface ParsedSamenApp {
   models: Model[]
@@ -46,7 +46,7 @@ export interface ParsedMiddlewareConfig {
   middleware: ts.FunctionLikeDeclarationBase
 }
 
-export default function parseSamenApp(
+export function parseSamenApp(
   samenSourceFile: ts.SourceFile,
   typeChecker: ts.TypeChecker,
 ): ParsedSamenApp {
@@ -60,7 +60,7 @@ export default function parseSamenApp(
   for (const statement of exportStatements) {
     if (ts.isVariableStatement(statement)) {
       for (const varDeclr of statement.declarationList.declarations) {
-        const service = extractServiceFromSamenExport(varDeclr, typeChecker)
+        const service = parseServiceDefinition(varDeclr, typeChecker)
         services.push(service)
       }
     } else if (ts.isExportDeclaration(statement)) {
@@ -74,7 +74,7 @@ export default function parseSamenApp(
       }
 
       for (const specifier of statement.exportClause.elements) {
-        const service = extractServiceFromSamenExport(specifier, typeChecker)
+        const service = parseServiceDefinition(specifier, typeChecker)
         services.push(service)
       }
     } else {

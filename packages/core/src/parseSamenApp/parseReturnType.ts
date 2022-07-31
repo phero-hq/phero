@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { ParseError } from "./errors"
+import { ParseError } from "../errors"
 
 export default function parseReturnType(
   node: ts.FunctionLikeDeclarationBase,

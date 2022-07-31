@@ -4,8 +4,11 @@ import generateParserFromModel from "./code-gen/parsers/generateParserFromModel"
 import generateParserModel from "./code-gen/parsers/generateParserModel"
 import { ParseError } from "./errors"
 import { ParsedError } from "./extractErrors/parseThrowStatement"
-import parseReturnType from "./parseReturnType"
-import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
+import parseReturnType from "./parseSamenApp/parseReturnType"
+import {
+  Model,
+  ParsedSamenFunctionDefinition,
+} from "./parseSamenApp/parseSamenApp"
 import { getNameAsString, isExternalType } from "./tsUtils"
 import * as tsx from "./tsx"
 

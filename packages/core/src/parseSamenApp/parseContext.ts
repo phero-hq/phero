@@ -3,13 +3,13 @@ import generateParserModel, {
   MemberParserModel,
   ObjectParserModel,
   ParserModelType,
-} from "./code-gen/parsers/generateParserModel"
-import { ParseError } from "./errors"
+} from "../code-gen/parsers/generateParserModel"
+import { ParseError } from "../errors"
 import {
   ParsedSamenFunctionDefinition,
   ParsedSamenServiceConfig,
 } from "./parseSamenApp"
-import { getNameAsString } from "./tsUtils"
+import { getNameAsString } from "../tsUtils"
 
 export function parseContext(
   serviceConfig: ParsedSamenServiceConfig,

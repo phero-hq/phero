@@ -1,7 +1,6 @@
 import ts from "typescript"
-import { ParseError } from "./errors"
+import { isExternalDeclaration } from "../tsUtils"
 import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
-import { isExternalDeclaration } from "./tsUtils"
 
 const IGNORE_SYNTAX_KIND = [
   ts.SyntaxKind.StringKeyword,

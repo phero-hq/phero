@@ -1,8 +1,8 @@
 import ts from "typescript"
-import { ParseError } from "./errors"
+import { ParseError } from "../errors"
 import { ParsedMiddlewareConfig } from "./parseSamenApp"
-import { getFirstChildOfKind, getTypeName, resolveSymbol } from "./tsUtils"
-import * as tsx from "./tsx"
+import { getFirstChildOfKind, getTypeName, resolveSymbol } from "../tsUtils"
+import * as tsx from "../tsx"
 
 export default function parseFunctionConfigMiddlewares(
   configObject: ts.ObjectLiteralExpression,

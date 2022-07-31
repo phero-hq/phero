@@ -1,7 +1,7 @@
 import ts from "typescript"
 import parseFunctionDefinition from "./parseFunctionDefinition"
 import { ParsedSamenFunctionDefinition } from "./parseSamenApp"
-import { hasModifier, resolveSymbol } from "./tsUtils"
+import { hasModifier, resolveSymbol } from "../tsUtils"
 
 export default function parseFunctionDefinitions(
   node: ts.Node | undefined,

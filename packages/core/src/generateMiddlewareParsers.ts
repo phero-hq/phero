@@ -2,10 +2,10 @@ import ts from "typescript"
 import { generateInlineParser } from "./code-gen/generateRPCProxy"
 import generateParserFromModel from "./code-gen/parsers/generateParserFromModel"
 import generateParserModel from "./code-gen/parsers/generateParserModel"
-import { ParsedSamenServiceConfig } from "./parseSamenApp"
+import { ParsedSamenServiceConfig } from "./parseSamenApp/parseSamenApp"
 import * as tsx from "./tsx"
 
-export function generateMiddlewareParsers(
+export default function generateMiddlewareParsers(
   serviceName: string,
   serviceConfig: ParsedSamenServiceConfig,
   typeChecker: ts.TypeChecker,

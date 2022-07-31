@@ -2,8 +2,8 @@
 
 import ts from "typescript"
 
-import parseSamenApp, { ParsedSamenApp } from "./parseSamenApp"
-import { createTestProgram } from "./tsTestUtils"
+import { parseSamenApp, ParsedSamenApp } from "./parseSamenApp"
+import { createTestProgram } from "../tsTestUtils"
 
 function parseProgram(prog: ts.Program): ParsedSamenApp {
   // if (prog.getSemanticDiagnostics().length) {
