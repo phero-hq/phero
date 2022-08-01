@@ -814,7 +814,6 @@ function generateRPCFunctionCall({
             service.name,
             "functions",
             funcDef.name,
-            "func",
           ),
           {
             args: [
