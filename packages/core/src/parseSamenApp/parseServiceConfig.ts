@@ -1,11 +1,8 @@
 import ts from "typescript"
-import { ParseError } from "./errors"
+import { ParseError } from "../errors"
 import parseFunctionConfigMiddlewares from "./parseMiddlewares"
-import {
-  ParsedSamenFunctionConfig,
-  ParsedSamenServiceConfig,
-} from "./parseSamenApp"
-import { resolveSymbol } from "./tsUtils"
+import { ParsedSamenServiceConfig } from "./parseSamenApp"
+import { resolveSymbol } from "../tsUtils"
 
 export default function parseServiceConfig(
   node: ts.Node | undefined,
@@ -16,25 +13,13 @@ export default function parseServiceConfig(
   }
 
   if (ts.isObjectLiteralExpression(node)) {
-    const memory = parseConfigNumberPropValue(node, "memory", typeChecker)
-    const timeout = parseConfigNumberPropValue(node, "timeout", typeChecker)
-    const minInstance = parseConfigNumberPropValue(
-      node,
-      "minInstance",
-      typeChecker,
-    )
-    const maxInstance = parseConfigNumberPropValue(
-      node,
-      "maxInstance",
-      typeChecker,
-    )
     const middleware = parseFunctionConfigMiddlewares(
       node,
       "middleware",
       typeChecker,
     )
 
-    return { memory, timeout, minInstance, maxInstance, middleware }
+    return { middleware }
   }
 
   if (ts.isIdentifier(node)) {
@@ -51,7 +36,7 @@ export default function parseServiceConfig(
   throw new ParseError("Unsupport syntax for function config", node)
 }
 
-export function parseConfigNumberPropValue(
+function parseConfigNumberPropValue(
   configObject: ts.ObjectLiteralExpression,
   name: string,
   typeChecker: ts.TypeChecker,
@@ -94,15 +79,5 @@ export function parseConfigNumberPropValue(
       `Unsupported syntax for service config prop ${name} (3)`,
       node,
     )
-  }
-}
-
-export function mergeFunctionConfigs(
-  serviceConfig: ParsedSamenServiceConfig,
-  functionConfig: ParsedSamenFunctionConfig,
-): ParsedSamenFunctionConfig {
-  return {
-    memory: functionConfig.memory ?? serviceConfig.memory,
-    timeout: functionConfig.timeout ?? serviceConfig.timeout,
   }
 }

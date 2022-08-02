@@ -4,8 +4,11 @@ import generateParserFromModel from "./code-gen/parsers/generateParserFromModel"
 import generateParserModel from "./code-gen/parsers/generateParserModel"
 import { ParseError } from "./errors"
 import { ParsedError } from "./extractErrors/parseThrowStatement"
-import { getReturnType } from "./extractFunctionFromServiceProperty"
-import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
+import parseReturnType from "./parseSamenApp/parseReturnType"
+import {
+  Model,
+  ParsedSamenFunctionDefinition,
+} from "./parseSamenApp/parseSamenApp"
 import { getNameAsString, isExternalType } from "./tsUtils"
 import * as tsx from "./tsx"
 
@@ -109,12 +112,12 @@ export function generateClientFunction(
   let context: { name: string; type: ts.TypeNode } | undefined
 
   if (contextType) {
-    const lastParam = func.parameters[func.parameters.length - 1]
-    if (isLastParamSamenContext(func)) {
+    const firstParam = func.parameters[0]
+    if (isParamSamenContextParam(firstParam)) {
       // skip last parameter if we have a context param
-      parameters = parameters.slice(0, func.parameters.length - 1)
+      parameters = parameters.slice(1)
       context = {
-        name: getNameAsString(lastParam.name),
+        name: getNameAsString(firstParam.name),
         type: contextType,
       }
     }
@@ -139,16 +142,12 @@ export function generateClientFunction(
   )
 }
 
-function isLastParamSamenContext(
-  func: ts.FunctionLikeDeclarationBase,
-): boolean {
-  const lastParam = func.parameters[func.parameters.length - 1]
-
+function isParamSamenContextParam(param: ts.ParameterDeclaration): boolean {
   return (
-    !!lastParam &&
-    !!lastParam.type &&
-    ts.isTypeReferenceNode(lastParam.type) &&
-    getNameAsString(lastParam.type.typeName) === "SamenContext"
+    !!param &&
+    !!param.type &&
+    ts.isTypeReferenceNode(param.type) &&
+    getNameAsString(param.type.typeName) === "SamenContext"
   )
 }
 
@@ -159,8 +158,7 @@ function generateClientFunctionBlock(
   refMaker: ReferenceMaker,
   typeChecker: ts.TypeChecker,
 ): ts.Block {
-  // TODO should not use getReturnType or refactor
-  const returnType = getReturnType(func)
+  const returnType = parseReturnType(func)
   const isVoid = returnType.kind === ts.SyntaxKind.VoidKeyword
 
   const returnTypeNode = generateTypeNode(returnType, refMaker)
@@ -185,7 +183,7 @@ function generateClientFunctionBlock(
                   throw new Error("No support for prop binding names yet")
                 }
 
-                if (context && func.parameters.length - 1 === i) {
+                if (context && i === 0) {
                   return tsx.property.assignment(
                     context.name,
                     tsx.expression.await(

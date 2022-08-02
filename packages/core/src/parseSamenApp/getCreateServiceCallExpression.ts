@@ -1,11 +1,9 @@
 import ts from "typescript"
-import { SamenLibFunctions } from "./parseSamenApp"
-import { resolveSymbol } from "./tsUtils"
+import { resolveSymbol } from "../tsUtils"
 
-export default function getLibFunctionCall(
+export default function getCreateServiceCallExpression(
   node: ts.Node | undefined,
   typeChecker: ts.TypeChecker,
-  libFunc: SamenLibFunctions,
 ): ts.CallExpression | undefined {
   if (!node) {
     return
@@ -14,35 +12,37 @@ export default function getLibFunctionCall(
   if (
     ts.isCallExpression(node) &&
     ts.isIdentifier(node.expression) &&
-    node.expression.text === libFunc.toString()
+    node.expression.text === "createService"
   ) {
     return node
   }
 
   if (ts.isPropertyAssignment(node)) {
-    return getLibFunctionCall(node.initializer, typeChecker, libFunc)
+    return getCreateServiceCallExpression(node.initializer, typeChecker)
   }
 
   if (ts.isIdentifier(node)) {
     const symbol = resolveSymbol(node, typeChecker)
     if (symbol) {
-      return getLibFunctionCall(symbol.valueDeclaration, typeChecker, libFunc)
+      return getCreateServiceCallExpression(
+        symbol.valueDeclaration,
+        typeChecker,
+      )
     }
   }
 
   if (ts.isVariableDeclaration(node)) {
-    return getLibFunctionCall(node.initializer, typeChecker, libFunc)
+    return getCreateServiceCallExpression(node.initializer, typeChecker)
   }
 
   if (ts.isPropertyAccessExpression(node)) {
-    return getLibFunctionCall(node.getLastToken(), typeChecker, libFunc)
+    return getCreateServiceCallExpression(node.getLastToken(), typeChecker)
   }
 
   if (ts.isExportSpecifier(node)) {
-    return getLibFunctionCall(
+    return getCreateServiceCallExpression(
       node.propertyName ?? node.name,
       typeChecker,
-      libFunc,
     )
   }
 
@@ -51,6 +51,6 @@ export default function getLibFunctionCall(
     if (!symbol || !symbol.valueDeclaration) {
       return undefined
     }
-    return getLibFunctionCall(symbol.valueDeclaration, typeChecker, libFunc)
+    return getCreateServiceCallExpression(symbol.valueDeclaration, typeChecker)
   }
 }

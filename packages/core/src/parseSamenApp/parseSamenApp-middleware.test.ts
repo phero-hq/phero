@@ -2,8 +2,8 @@
 
 import ts from "typescript"
 
-import parseSamenApp, { ParsedSamenApp } from "./parseSamenApp"
-import { createTestProgram } from "./tsTestUtils"
+import { parseSamenApp, ParsedSamenApp } from "./parseSamenApp"
+import { createTestProgram } from "../tsTestUtils"
 
 function parseProgram(prog: ts.Program): ParsedSamenApp {
   // if (prog.getSemanticDiagnostics().length) {
@@ -45,7 +45,7 @@ describe("parseSamenApp middleware", () => {
   test("should parse middleware", () => {
     const parsedApp = parseProgram(
       createTestProgram(`
-        type NextFunction<T = void> = T extends void
+        type SamenNextFunction<T = void> = T extends void
           ? () => Promise<void>
           : (ctx: T) => Promise<void>
 
@@ -56,12 +56,12 @@ describe("parseSamenApp middleware", () => {
           return "ok"
         }
 
-        async function myMiddleware(params: SamenParams, context: SamenContext, next: NextFunction<{ x: number }) {
+        async function myMiddleware(params: SamenParams, context: SamenContext, next: SamenNextFunction<{ x: number }) {
           await next({ x: 123 })
         }
 
         export const articleService = createService({
-          getArticle: createFunction(getArticle),
+          getArticle,
         }, {
           middleware: [myMiddleware]
         })
@@ -75,7 +75,6 @@ describe("parseSamenApp middleware", () => {
           funcs: [
             expect.objectContaining({
               name: "getArticle",
-              // config: {},
             }),
           ],
         }),

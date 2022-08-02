@@ -1,8 +1,8 @@
 import ts from "typescript"
-import { ParseError } from "./errors"
+import { ParseError } from "../errors"
 import { ParsedMiddlewareConfig } from "./parseSamenApp"
-import { getFirstChildOfKind, getTypeName, resolveSymbol } from "./tsUtils"
-import * as tsx from "./tsx"
+import { getFirstChildOfKind, getTypeName, resolveSymbol } from "../tsUtils"
+import * as tsx from "../tsx"
 
 export default function parseFunctionConfigMiddlewares(
   configObject: ts.ObjectLiteralExpression,
@@ -53,7 +53,7 @@ function parseMiddlewareConfig(
 ): ParsedMiddlewareConfig {
   if (middleware.parameters.length != 3) {
     throw new ParseError(
-      `Middleware should have three parameters "(params: SamenParams<P>, ctx: SamenContext<C>, next: NextFunction<T>)"`,
+      `Middleware should have three parameters "(params: SamenParams<P>, ctx: SamenContext<C>, next: SamenNextFunction<T>)"`,
       middleware,
     )
   }
@@ -110,10 +110,10 @@ function parseNextType(
   if (
     !nextType ||
     !ts.isTypeReferenceNode(nextType) ||
-    getTypeName(nextType) !== "NextFunction"
+    getTypeName(nextType) !== "SamenNextFunction"
   ) {
     throw new ParseError(
-      `Middleware next parameter has no or incorrect type, should be defined like "next: NextFunction<T>"`,
+      `Middleware next parameter has no or incorrect type, should be defined like "next: SamenNextFunction<T>"`,
       nextParam,
     )
   }
