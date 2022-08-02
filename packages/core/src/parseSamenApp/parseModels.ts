@@ -13,7 +13,7 @@ const IGNORE_SYNTAX_KIND = [
   ts.SyntaxKind.UndefinedKeyword,
 ]
 
-export default function extractModels(
+export default function parseModels(
   funcs: ParsedSamenFunctionDefinition[],
   typeChecker: ts.TypeChecker,
 ): Model[] {
