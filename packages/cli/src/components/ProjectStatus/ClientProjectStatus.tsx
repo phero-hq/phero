@@ -58,7 +58,7 @@ export default function ClientProjectStatus({
         break
 
       case "BUILD_FAILED":
-        setEvent(["error", "Could not build client" + event.errorMessage])
+        setEvent(["error", "Could not build client"])
         setError(event.errorMessage)
         break
 
