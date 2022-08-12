@@ -161,8 +161,14 @@ const gcHandler = (p: Props): string => {
           return;
         }
         const firebaseAdmin = require('firebase-admin')
-        const idToken = await firebaseAdmin.auth().verifyIdToken(idTokenString)
-        body.idToken = idToken;
+        try {
+          const idToken = await firebaseAdmin.auth().verifyIdToken(idTokenString)
+          body.idToken = idToken;
+        } catch (error) {
+          logger.warn("IdToken not valid: ", error.message)
+          res.status(401).end();
+          return;
+        }
         /// AUTH
       `
           : ""
