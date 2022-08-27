@@ -20,7 +20,7 @@ function generateNullValidator(
   pointer: Pointer<NullParserModel>,
 ): ts.Expression {
   return ts.factory.createBinaryExpression(
-    ts.factory.createTypeOfExpression(pointer.dataVarExpr),
+    pointer.dataVarExpr,
     ts.factory.createToken(ts.SyntaxKind.ExclamationEqualsEqualsToken),
     ts.factory.createNull(),
   )
