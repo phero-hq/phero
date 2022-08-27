@@ -145,6 +145,7 @@ function generateHelperFucntions(): ts.Node {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "POST",
+        "Access-Control-Allow-Headers": "content-type",
       })
       switch (response.status) {
         case 200:
