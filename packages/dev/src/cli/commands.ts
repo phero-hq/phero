@@ -10,7 +10,7 @@ export enum ServerCommandName {
   Version = "version",
   Help = "help",
   Serve = "serve",
-  Build = "build",
+  Export = "export",
 }
 
 export interface ServerCommandVersion {
@@ -28,8 +28,8 @@ export interface ServerCommandServe {
   port: number
 }
 
-export interface ServerCommandBuild {
-  name: ServerCommandName.Build
+export interface ServerCommandExport {
+  name: ServerCommandName.Export
   verbose: boolean
 }
 
@@ -37,7 +37,7 @@ export type ServerCommand =
   | ServerCommandVersion
   | ServerCommandHelp
   | ServerCommandServe
-  | ServerCommandBuild
+  | ServerCommandExport
 
 // Client
 
@@ -166,7 +166,7 @@ export function parseServerCommand(argv: string[]): ServerCommand {
       const port = args["--port"] ?? DEFAULT_SERVER_PORT
       return { name, verbose, port }
 
-    case ServerCommandName.Build:
+    case ServerCommandName.Export:
       return { name, verbose }
 
     default:

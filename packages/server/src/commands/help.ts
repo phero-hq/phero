@@ -2,14 +2,14 @@ import {
   ServerCommandHelp,
   ServerCommandName,
   serverHelp,
-  serverHelpBuild,
+  serverHelpExport,
   serverHelpServe,
 } from "@samen/dev"
 
 export default function help(command: ServerCommandHelp) {
   switch (command.command) {
-    case ServerCommandName.Build:
-      console.log(serverHelpBuild)
+    case ServerCommandName.Export:
+      console.log(serverHelpExport)
       break
 
     case ServerCommandName.Serve:

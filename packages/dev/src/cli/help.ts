@@ -76,9 +76,9 @@ export const serverHelpServe = chalk`
   -p, --port    3030  Custom port for the server to be running on
 `
 
-export const serverHelpBuild = chalk`
+export const serverHelpExport = chalk`
 {dim Usage}
-  {yellow {dim $} samen server {bold build} [options]}
+  {yellow {dim $} samen server {bold export} [options]}
 
 {dim Description}
   Takes a samen-file, parses it and generates a manifest and the

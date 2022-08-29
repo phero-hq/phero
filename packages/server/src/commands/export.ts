@@ -1,6 +1,6 @@
 import path from "path"
 import fs from "fs"
-import { ServerCommandBuild } from "@samen/dev"
+import { ServerCommandExport } from "@samen/dev"
 import ts, { CompilerOptions } from "typescript"
 import {
   generateAppDeclarationFile,
@@ -11,7 +11,7 @@ import {
   parseSamenApp,
 } from "@samen/core"
 
-export default function build(command: ServerCommandBuild) {
+export default function exportCommand(command: ServerCommandExport) {
   const projectPath = process.cwd()
 
   const tsConfigFilePath = ts.findConfigFile(
@@ -36,7 +36,9 @@ export default function build(command: ServerCommandBuild) {
   }
 
   const hasES2015 = tsConfig.options.lib?.some((lib: string) =>
-    /(es2015$)|(es2015\.d\.ts)|(es2015.promise$)|(es2015\.promise\.d\.ts)/.test(lib.toLowerCase()),
+    /(es2015$)|(es2015\.d\.ts)|(es2015.promise$)|(es2015\.promise\.d\.ts)/.test(
+      lib.toLowerCase(),
+    ),
   )
   const hasES5 = tsConfig.options.lib?.some((lib: string) =>
     /(es5$)|(es5\.d\.ts)/.test(lib.toLowerCase()),
