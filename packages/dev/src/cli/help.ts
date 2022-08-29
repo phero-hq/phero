@@ -89,6 +89,19 @@ export const serverHelpExport = chalk`
   --verbose         Output debug information
 `
 
+export const serverHelpBuild = chalk`
+{dim Usage}
+  {yellow {dim $} samen server {bold build} [options]}
+
+{dim Description}
+  Takes a samen-file, parses it and generates a manifest for it.
+  Assumes a samen-file at {yellow src/samen.ts}.
+
+{dim Options}
+  -h, --help        Output usage information
+  --verbose         Output debug information
+`
+
 export const clientHelp = chalk`
 {dim Usage}
   {yellow {dim $} {bold samen client} [command] [options]}

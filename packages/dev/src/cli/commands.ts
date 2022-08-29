@@ -11,6 +11,7 @@ export enum ServerCommandName {
   Help = "help",
   Serve = "serve",
   Export = "export",
+  Build = "build",
 }
 
 export interface ServerCommandVersion {
@@ -33,11 +34,17 @@ export interface ServerCommandExport {
   verbose: boolean
 }
 
+export interface ServerCommandBuild {
+  name: ServerCommandName.Build
+  verbose: boolean
+}
+
 export type ServerCommand =
   | ServerCommandVersion
   | ServerCommandHelp
   | ServerCommandServe
   | ServerCommandExport
+  | ServerCommandBuild
 
 // Client
 
@@ -167,6 +174,9 @@ export function parseServerCommand(argv: string[]): ServerCommand {
       return { name, verbose, port }
 
     case ServerCommandName.Export:
+      return { name, verbose }
+
+    case ServerCommandName.Build:
       return { name, verbose }
 
     default:
