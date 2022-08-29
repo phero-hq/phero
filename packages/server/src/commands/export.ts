@@ -70,7 +70,7 @@ export default function exportCommand(command: ServerCommandExport) {
     rootNames: [`${projectPath}/src/samen.ts`],
   })
 
-  const emitResult = program.emit()
+  program.emit()
 
   const samenSourceFile = program.getSourceFile(`${projectPath}/src/samen.ts`)
 
@@ -86,7 +86,7 @@ export default function exportCommand(command: ServerCommandExport) {
 
   const buildPath = path.join(projectPath, ".build")
 
-  const manifestPath = path.join(buildPath, "samen-manifest.d.ts")
+  const manifestPath = path.join(projectPath, "samen-manifest.d.ts")
   fs.writeFileSync(manifestPath, dts)
 
   const samenExecutionJS = path.join(buildPath, "samen-execution.js")
@@ -102,5 +102,9 @@ export default function exportCommand(command: ServerCommandExport) {
   fs.copyFileSync(
     path.join(projectPath, "package-lock.json"),
     path.join(buildPath, "package-lock.json"),
+  )
+  fs.copyFileSync(
+    path.join(projectPath, "samen-manifest.d.ts"),
+    path.join(buildPath, "samen-manifest.d.ts"),
   )
 }
