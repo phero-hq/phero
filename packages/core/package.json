@@ -11,7 +11,7 @@
     "test": "jest src",
     "prepublish": "npm run clean && npm run build"
   },
-  "dependencies": {
+  "peerDependencies": {
     "typescript": "^4.4.4"
   },
   "devDependencies": {
