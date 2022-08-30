@@ -1,6 +1,10 @@
 import ts from "typescript"
 import * as tsx from "./tsx"
-import { ParsedSamenApp } from "./parseSamenApp"
+import {
+  ParsedCORSConfig,
+  ParsedSamenApp,
+  ParsedSamenServiceDefinition,
+} from "./parseSamenApp"
 import { VirtualCompilerHost } from "./VirtualCompilerHost"
 
 const factory = ts.factory
@@ -38,15 +42,20 @@ export default function generateProductionServer(
         false,
         undefined,
         factory.createNamedImports(
-          app.services.flatMap((service) =>
-            service.funcs.map((func) =>
+          app.services.flatMap((service) => [
+            factory.createImportSpecifier(
+              false,
+              undefined,
+              generateIdentifierForServiceCorsConfig(service.name),
+            ),
+            ...service.funcs.map((func) =>
               factory.createImportSpecifier(
                 false,
                 undefined,
                 generateIdentifierForRPCFunction(service.name, func.name),
               ),
             ),
-          ),
+          ]),
         ),
       ),
       factory.createStringLiteral("./samen-execution"),
@@ -55,7 +64,7 @@ export default function generateProductionServer(
   )
 
   tsNodes.push(generateRequestListener(app))
-  tsNodes.push(generateCreateAndStartServer(), generateHelperFucntions())
+  tsNodes.push(generateCreateAndStartServer(), generateHelperFunctions())
 
   const printer = ts.createPrinter({
     newLine: ts.NewLineKind.LineFeed,
@@ -85,7 +94,7 @@ export default function generateProductionServer(
 
   prog.emit()
 
-  console.log(vHost.getFile("samen-production-server.ts"))
+  // console.log(vHost.getFile("samen-production-server.ts"))
 
   const js = vHost.getFile("samen-production-server.js")
 
@@ -103,6 +112,12 @@ function generateIdentifierForRPCFunction(
   return factory.createIdentifier(`rpc_executor_${serviceName}__${funcName}`)
 }
 
+function generateIdentifierForServiceCorsConfig(
+  serviceName: string,
+): ts.Identifier {
+  return factory.createIdentifier(`service_cors_config__${serviceName}`)
+}
+
 function generateCreateAndStartServer(): ts.Node {
   return tsx.verbatim(`
       const PORT = process.env.PORT ?? 2222
@@ -115,13 +130,16 @@ function generateCreateAndStartServer(): ts.Node {
     `)
 }
 
-function generateHelperFucntions(): ts.Node {
+function generateHelperFunctions(): ts.Node {
   return tsx.verbatim(`
-    function parsePathName(url) {
+    function parseServiceAndFunction(url) {
       const { pathname } = new URL(\`http://host\${url}\`)
-      return pathname.endsWith("/")
+      const sanitizedPathname = pathname.endsWith("/")
         ? pathname.slice(0, pathname.length - 1)
         : pathname
+
+      const [serviceName, functionName] = sanitizedPathname.split('/').slice(1);
+      return { serviceName, functionName };
     }
 
     function readBody(request) {
@@ -140,19 +158,39 @@ function generateHelperFucntions(): ts.Node {
       })
     }
 
-    function writeResponse(response, res) {
-      res.writeHead(response.status, {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST",
-        "Access-Control-Allow-Headers": "content-type",
-      })
+    async function writeResponse(originWhitelist, responseOrLazyResponse, res, req) {
+      res.setHeader("Content-Type", "application/json")
+
+      if (originWhitelist && originWhitelist.length > 0 && req.headers.origin !== undefined) {
+        const isValidOrigin = originWhitelist.includes(req.headers.origin)
+        
+        if (!isValidOrigin) {
+          res.statusCode = 401;
+          res.end(JSON.stringify({ error: "Invalid origin" }));
+          return
+        }
+        
+        res.setHeader("Access-Control-Allow-Origin", req.headers.origin)
+        res.setHeader("Vary", "origin")
+        res.setHeader("Access-Control-Allow-Methods", "POST")
+        res.setHeader("Access-Control-Allow-Headers", "content-type")
+      }
+
+      const response = typeof responseOrLazyResponse === "function" 
+        ? responseOrLazyResponse()
+        : responseOrLazyResponse
+
+      res.statusCode = response.status
+      
       switch (response.status) {
         case 200:
           res.end(JSON.stringify(response.result))
           break
         case 400:
           res.end(JSON.stringify({ errors: response.errors }))
+          break
+        case 401:
+          res.end(JSON.stringify({ error: response.error }))
           break
         case 404:
           res.end(JSON.stringify({ error: response.error }))
@@ -168,27 +206,24 @@ function generateHelperFucntions(): ts.Node {
   `)
 }
 
+function writeResponseStatement(expression: ts.Expression) {
+  return tsx.statement.expression(
+    tsx.expression.call("writeResponse", {
+      args: ["originWhitelist", expression, "res", "req"],
+    }),
+  )
+}
+
+function write404ResponseStatement() {
+  return writeResponseStatement(
+    tsx.literal.object(
+      tsx.property.assignment("status", tsx.literal.number(404)),
+      tsx.property.assignment("error", tsx.literal.string("RPC Not Found")),
+    ),
+  )
+}
+
 function generateRequestListener(app: ParsedSamenApp): ts.Node {
-  const writeResponseStatement = (expression: ts.Expression) => {
-    return tsx.statement.expression(
-      tsx.expression.call("writeResponse", {
-        args: [expression, "res"],
-      }),
-    )
-  }
-
-  const generateDefaultCase = () => ({
-    statements: [
-      writeResponseStatement(
-        tsx.literal.object(
-          tsx.property.assignment("status", tsx.literal.number(404)),
-          tsx.property.assignment("error", tsx.literal.string("RPC Not Found")),
-        ),
-      ),
-      tsx.statement.break,
-    ],
-  })
-
   return tsx.function({
     name: "requestListener",
     params: [
@@ -198,72 +233,119 @@ function generateRequestListener(app: ParsedSamenApp): ts.Node {
     async: true,
     returnType: tsx.type.void,
     body: [
-      tsx.statement.switch({
-        expression: tsx.expression.propertyAccess("req", "method"),
-        cases: [
-          {
-            expression: "OPTIONS",
-            statements: [
-              writeResponseStatement(
-                tsx.literal.object(
-                  tsx.property.assignment("status", tsx.literal.number(200)),
-                  tsx.property.assignment("result", tsx.literal.string("")),
-                ),
-              ),
-              tsx.statement.break,
-            ],
-          },
-          {
-            expression: "POST",
-            statements: [
-              tsx.statement.switch({
-                expression: tsx.expression.call("parsePathName", {
-                  args: [tsx.expression.propertyAccess("req", "url")],
-                }),
-                cases: app.services.flatMap((service) =>
-                  service.funcs.map((func) => ({
-                    expression: `/${service.name}/${func.name}`,
-                    statements: [
-                      writeResponseStatement(
-                        tsx.expression.await(
-                          tsx.expression.call(
-                            generateIdentifierForRPCFunction(
-                              service.name,
-                              func.name,
-                            ),
-                            {
-                              args: [
-                                tsx.expression.call(
-                                  tsx.expression.propertyAccess(
-                                    "JSON",
-                                    "parse",
-                                  ),
-                                  {
-                                    args: [
-                                      tsx.expression.await(
-                                        tsx.expression.call("readBody", {
-                                          args: ["req"],
-                                        }),
-                                      ),
-                                    ],
-                                  },
-                                ),
-                              ],
-                            },
-                          ),
-                        ),
-                      ),
-                      tsx.statement.break,
-                    ],
-                  })),
-                ),
-              }),
-              tsx.statement.break,
-            ],
-          },
-        ],
-        defaultCase: generateDefaultCase(),
+      tsx.const({
+        name: "requestedFunction",
+        init: tsx.expression.call("parseServiceAndFunction", {
+          args: [tsx.expression.propertyAccess("req", "url")],
+        }),
       }),
+      switchServices(app),
     ],
+  })
+}
+
+function switchServices(app: ParsedSamenApp) {
+  return tsx.statement.switch({
+    expression: tsx.expression.propertyAccess(
+      "requestedFunction",
+      "serviceName",
+    ),
+    cases: app.services.map((service) => ({
+      expression: service.name,
+      statements: [
+        tsx.const({
+          name: "serviceCorsConfig",
+          init: tsx.expression.await(
+            tsx.expression.call(
+              generateIdentifierForServiceCorsConfig(service.name),
+            ),
+          ),
+        }),
+        tsx.const({
+          name: "originWhitelist",
+          init: tsx.expression.ternary(
+            tsx.expression.identifier("serviceCorsConfig"),
+            tsx.expression.propertyAccess(
+              "serviceCorsConfig",
+              "originWhitelist",
+            ),
+            tsx.literal.undefined,
+          ),
+        }),
+        switchHttpMethods(service),
+        tsx.statement.return(),
+      ],
+    })),
+    defaultCase: {
+      statements: [write404ResponseStatement(), tsx.statement.break],
+    },
+  })
+}
+
+function switchHttpMethods(service: ParsedSamenServiceDefinition) {
+  return tsx.statement.switch({
+    expression: tsx.expression.propertyAccess("req", "method"),
+    cases: [
+      {
+        expression: "OPTIONS",
+        statements: [
+          writeResponseStatement(
+            tsx.literal.object(
+              tsx.property.assignment("status", tsx.literal.number(200)),
+              tsx.property.assignment("result", tsx.literal.string("")),
+            ),
+          ),
+          tsx.statement.break,
+        ],
+      },
+      {
+        expression: "POST",
+        statements: [switchService(service), tsx.statement.break],
+      },
+    ],
+    defaultCase: {
+      statements: [write404ResponseStatement(), tsx.statement.break],
+    },
+  })
+}
+
+function switchService(service: ParsedSamenServiceDefinition) {
+  return tsx.statement.switch({
+    expression: tsx.expression.propertyAccess(
+      "requestedFunction",
+      "functionName",
+    ),
+    cases: service.funcs.map((func) => ({
+      expression: func.name,
+      statements: [
+        writeResponseStatement(
+          tsx.expression.await(
+            tsx.expression.call(
+              generateIdentifierForRPCFunction(service.name, func.name),
+              {
+                args: [
+                  tsx.expression.call(
+                    tsx.expression.propertyAccess("JSON", "parse"),
+                    {
+                      args: [
+                        tsx.expression.await(
+                          tsx.expression.call("readBody", {
+                            args: ["req"],
+                          }),
+                        ),
+                      ],
+                    },
+                  ),
+                ],
+              },
+            ),
+          ),
+        ),
+        tsx.statement.break,
+      ],
+    })),
+    defaultCase: {
+      statements: [write404ResponseStatement(), tsx.statement.break],
+    },
   })
 }
