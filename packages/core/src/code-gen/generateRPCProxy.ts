@@ -25,27 +25,27 @@ export default function generateRPCProxy(
 ): { js: string } {
   const tsNodes: ts.Node[] = []
 
-  for (const service of app.services) {
-    tsNodes.push(
-      factory.createImportDeclaration(
+  tsNodes.push(
+    factory.createImportDeclaration(
+      undefined,
+      undefined,
+      factory.createImportClause(
+        false,
         undefined,
-        undefined,
-        factory.createImportClause(
-          false,
-          undefined,
-          factory.createNamedImports([
+        factory.createNamedImports(
+          app.services.map((service) =>
             factory.createImportSpecifier(
               false,
               undefined,
               factory.createIdentifier(service.name),
             ),
-          ]),
+          ),
         ),
-        factory.createStringLiteral("./samen"),
-        undefined,
       ),
-    )
-  }
+      factory.createStringLiteral("./samen"),
+      undefined,
+    ),
+  )
 
   tsNodes.push(...types)
 
