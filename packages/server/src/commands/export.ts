@@ -1,15 +1,17 @@
+import path from "path"
+import fs from "fs"
+import { ServerCommandExport } from "@samen/dev"
+import ts, { CompilerOptions } from "typescript"
 import {
   generateAppDeclarationFile,
+  generateRPCProxy,
+  generateProductionServer,
   MissingSamenFileError,
   MissingTSConfigFile,
   parseSamenApp,
 } from "@samen/core"
-import { ServerCommandBuild } from "@samen/dev"
-import fs from "fs"
-import path from "path"
-import ts, { CompilerOptions } from "typescript"
 
-export default function buildCommand(command: ServerCommandBuild) {
+export default function exportCommand(command: ServerCommandExport) {
   const projectPath = process.cwd()
 
   const tsConfigFilePath = ts.findConfigFile(
@@ -68,6 +70,8 @@ export default function buildCommand(command: ServerCommandBuild) {
     rootNames: [`${projectPath}/src/samen.ts`],
   })
 
+  program.emit()
+
   const samenSourceFile = program.getSourceFile(`${projectPath}/src/samen.ts`)
 
   if (!samenSourceFile) {
@@ -77,6 +81,30 @@ export default function buildCommand(command: ServerCommandBuild) {
   const typeChecker = program.getTypeChecker()
   const app = parseSamenApp(samenSourceFile, typeChecker)
   const dts = generateAppDeclarationFile(app, typeChecker)
+  const output = generateRPCProxy(app, typeChecker)
+  const productionServer = generateProductionServer(app, typeChecker)
+
+  const buildPath = path.join(projectPath, ".build")
+
   const manifestPath = path.join(projectPath, "samen-manifest.d.ts")
   fs.writeFileSync(manifestPath, dts)
+
+  const samenExecutionJS = path.join(buildPath, "samen-execution.js")
+  fs.writeFileSync(samenExecutionJS, output.js)
+
+  const indexJS = path.join(buildPath, "index.js")
+  fs.writeFileSync(indexJS, productionServer.js)
+
+  fs.copyFileSync(
+    path.join(projectPath, "package.json"),
+    path.join(buildPath, "package.json"),
+  )
+  fs.copyFileSync(
+    path.join(projectPath, "package-lock.json"),
+    path.join(buildPath, "package-lock.json"),
+  )
+  fs.copyFileSync(
+    path.join(projectPath, "samen-manifest.d.ts"),
+    path.join(buildPath, "samen-manifest.d.ts"),
+  )
 }

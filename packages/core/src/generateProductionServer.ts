@@ -94,8 +94,6 @@ export default function generateProductionServer(
 
   prog.emit()
 
-  // console.log(vHost.getFile("samen-production-server.ts"))
-
   const js = vHost.getFile("samen-production-server.js")
 
   if (!js) {

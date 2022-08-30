@@ -9,14 +9,14 @@ import { useCallback, useEffect, useState } from "react"
 import ActivityIndicator from "./ActivityIndicator"
 import { SamenCommandInit } from "@samen/dev"
 
-const serverSamenFile = `import { createService, createFunction } from '@samen/server'
+const serverSamenFile = `import { createService } from '@samen/server'
 
 async function helloWorld(name: string): Promise<string> {
   return \`Hi there, \${name}!\`
 }
 
 export const helloWorldService = createService({
-  helloWorld: createFunction(helloWorld),
+  helloWorld,
 })
 `
 
