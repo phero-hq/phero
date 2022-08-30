@@ -1,15 +1,22 @@
 import ts from "typescript"
 import { ParseError } from "../errors"
 import { ParsedMiddlewareConfig } from "./parseSamenApp"
-import { getFirstChildOfKind, getTypeName, resolveSymbol } from "../tsUtils"
+import {
+  getFirstChildOfKind,
+  getNameAsString,
+  getTypeName,
+  resolveSymbol,
+} from "../tsUtils"
 import * as tsx from "../tsx"
 
-export default function parseFunctionConfigMiddlewares(
+export default function parseServiceMiddlewareConfig(
   configObject: ts.ObjectLiteralExpression,
   name: string,
   typeChecker: ts.TypeChecker,
 ): ParsedMiddlewareConfig[] | undefined {
-  const prop = configObject.properties.find((p) => p.name?.getText() === name)
+  const prop = configObject.properties.find(
+    (p) => p.name && getNameAsString(p.name) === name,
+  )
 
   if (!prop) {
     return undefined
