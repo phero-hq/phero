@@ -1,6 +1,6 @@
 {
   "name": "@samen/server",
-  "version": "0.9.0-rc.6",
+  "version": "0.9.0",
   "main": "dist/index.js",
   "bin": {
     "samen-server": "dist/cli.js"
@@ -16,8 +16,8 @@
     "postbuild": "cp package.json ./dist/package.json"
   },
   "dependencies": {
-    "@samen/core": "^0.9.0-rc.6",
-    "@samen/dev": "^0.9.0-rc.6"
+    "@samen/core": "^0.9.0",
+    "@samen/dev": "^0.9.0"
   },
   "peerDependencies": {
     "typescript": "^4.4.4"
