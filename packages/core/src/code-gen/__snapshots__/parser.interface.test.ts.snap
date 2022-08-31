@@ -207,7 +207,7 @@ exports[`Parsers for an interface null member 1`] = `
         }
         else {
             result = {};
-            if (typeof data[\\"a\\"] !== null) {
+            if (data[\\"a\\"] !== null) {
                 errors.push({
                     path: \\"data.a\\",
                     message: \`not null\`

@@ -88,6 +88,11 @@ export function parseSamenApp(
   for (const service of services) {
     for (const model of service.models) {
       const modelName = model.name.text
+
+      if (modelName === "SamenContext") {
+        continue
+      }
+
       if (!modelMap.has(modelName)) {
         modelMap.set(modelName, model)
       } else if (modelMap.get(modelName) !== model) {

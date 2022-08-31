@@ -82,6 +82,24 @@ describe("parseServerCommand", () => {
       expect(run("samen-server build --verbose")).toMatchSnapshot()
     })
   })
+
+  describe("export", () => {
+    test("cmd:   'samen-server export --help'", () => {
+      expect(run("samen-server export --help")).toMatchSnapshot()
+    })
+
+    test("cmd:   'samen-server export -h'", () => {
+      expect(run("samen-server export -h")).toMatchSnapshot()
+    })
+
+    test("cmd:   'samen-server export'", () => {
+      expect(run("samen-server export")).toMatchSnapshot()
+    })
+
+    test("cmd:   'samen-server export --verbose'", () => {
+      expect(run("samen-server export --verbose")).toMatchSnapshot()
+    })
+  })
 })
 
 describe("parseClientCommand", () => {

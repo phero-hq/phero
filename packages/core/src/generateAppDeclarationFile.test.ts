@@ -27,7 +27,7 @@ describe("generateAppDeclarationFile", () => {
         type SamenContext<T = {}> = T
         type SamenParams<T = {}> = Partial<T>
 
-        async function getArticle(aap: string, ctx: SamenContext<{ user: User }>): Promise<string> {
+        async function getArticle(ctx: SamenContext<{ user: User }>, aap: string): Promise<string> {
           return "ok"
         }
 

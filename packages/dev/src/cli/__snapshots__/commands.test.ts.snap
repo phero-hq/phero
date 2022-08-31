@@ -182,6 +182,7 @@ Object {
 
 exports[`parseSamenCommand common cmd:   'samen --help' 1`] = `
 Object {
+  "command": undefined,
   "name": "help",
 }
 `;
@@ -194,6 +195,7 @@ Object {
 
 exports[`parseSamenCommand common cmd:   'samen -h' 1`] = `
 Object {
+  "command": undefined,
   "name": "help",
 }
 `;
@@ -282,6 +284,34 @@ Object {
 exports[`parseServerCommand common cmd:   'samen-server -v' 1`] = `
 Object {
   "name": "version",
+}
+`;
+
+exports[`parseServerCommand export cmd:   'samen-server export --help' 1`] = `
+Object {
+  "command": "export",
+  "name": "help",
+}
+`;
+
+exports[`parseServerCommand export cmd:   'samen-server export --verbose' 1`] = `
+Object {
+  "name": "export",
+  "verbose": true,
+}
+`;
+
+exports[`parseServerCommand export cmd:   'samen-server export -h' 1`] = `
+Object {
+  "command": "export",
+  "name": "help",
+}
+`;
+
+exports[`parseServerCommand export cmd:   'samen-server export' 1`] = `
+Object {
+  "name": "export",
+  "verbose": false,
 }
 `;
 

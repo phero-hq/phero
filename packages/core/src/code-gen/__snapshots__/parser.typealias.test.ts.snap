@@ -1305,7 +1305,7 @@ exports[`Parsers for a type alias object literal null member 1`] = `
         }
         else {
             result = {};
-            if (typeof data[\\"a\\"] !== null) {
+            if (data[\\"a\\"] !== null) {
                 errors.push({
                     path: \\"data.a\\",
                     message: \`not null\`
@@ -1939,7 +1939,7 @@ exports[`Parsers for a type alias recursive types Tree 1`] = `
         const errors: ValidationError[] = [];
         let result: any;
         {
-            const parseResult = NumberTreeParser.parse<number>(data, (data: any): ParseResult<number> => {
+            const parseResult = TreeParser.parse<number>(data, (data: any): ParseResult<number> => {
                 const errors: ValidationError[] = [];
                 let result: any;
                 if (typeof data !== \\"number\\") {
