@@ -104,7 +104,7 @@ function parseActualFunction(
   if (ts.isIdentifier(node)) {
     const symbol = resolveSymbol(node, typeChecker)
     if (!symbol?.declarations?.[0]) {
-      throw new ParseError(`S119: Can't find function [${node.kind}]`, node)
+      throw new ParseError(`S119: Can't find function (${node.kind})`, node)
     }
     return parseActualFunction(symbol.declarations?.[0], typeChecker)
   }
