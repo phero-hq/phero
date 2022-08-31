@@ -367,7 +367,7 @@ function generateTypeElement(
   }
 
   throw new ParseError(
-    "S102: We currently do not support this syntax " + typeElement.kind,
+    `S102: We currently do not support this syntax (${typeElement.kind})`,
     typeElement,
   )
 }
