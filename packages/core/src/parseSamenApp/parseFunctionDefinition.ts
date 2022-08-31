@@ -41,7 +41,7 @@ function parseFunctionName(
     ts.isArrayBindingPattern(functionName)
   ) {
     throw new ParseError(
-      "S117: Function name should we a clear identifier, no support for computed names, or binding patterns." +
+      "S117: Function name should have a clear identifier, no support for computed names or binding patterns" +
         functionName.kind,
       functionName,
     )
