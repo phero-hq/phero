@@ -160,7 +160,7 @@ function generateHelperFunctions(): ts.Node {
         
         if (!isValidOrigin) {
           res.statusCode = 401;
-          res.end(JSON.stringify({ error: "Invalid origin" }));
+          res.end(JSON.stringify({ error: "Invalid origin. Maybe you forgot to add cors config to your service?" }));
           return
         }
         
