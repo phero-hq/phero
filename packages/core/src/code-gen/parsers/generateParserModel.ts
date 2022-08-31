@@ -690,7 +690,7 @@ export default function generateParserModel(
             }
           } else {
             throw new ParseError(
-              "S150: Enum member has unsupport value",
+              "S150: Enum member has unsupported value",
               enumDeclr,
             )
           }
