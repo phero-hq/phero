@@ -52,7 +52,7 @@ describe("parseSamenApp middleware", () => {
         type SamenContext<T = {}> = T
         type SamenParams<T = {}> = Partial<T>
 
-        async function getArticle(aap: string, ctx: SamenContext<{ x: number }>): Promise<string> {
+        async function getArticle(ctx: SamenContext<{ x: number }>, aap: string): Promise<string> {
           return "ok"
         }
 

@@ -49,7 +49,7 @@ function generateParserCall(
   } else {
     return ts.factory.createCallExpression(
       ts.factory.createPropertyAccessExpression(
-        ts.factory.createIdentifier(`${pointer.model.typeName}Parser`),
+        ts.factory.createIdentifier(`${pointer.model.baseTypeName}Parser`),
         ts.factory.createIdentifier("parse"),
       ),
       pointer.model.typeArguments.map((typeArg) =>

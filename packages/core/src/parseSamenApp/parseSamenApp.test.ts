@@ -740,55 +740,6 @@ describe("parseSamenApp", () => {
       })
     })
 
-    test("should parse errors within multiple files with the same name", () => {
-      const parsedApp = parseProgram(
-        createTestProgram({
-          otherOne: `
-            class ArticleError extends Error {
-            }
-
-            export function getArticle(): Promise<string> {
-              throw new ArticleError()
-            }
-          `,
-          otherTwo: `
-            class ArticleError extends Error {
-            }
-
-            export function editArticle(): Promise<string> {
-              throw new ArticleError()
-            }
-          `,
-          samen: `
-          import {getArticle} from './otherOne'
-          import {editArticle} from './otherTwo'
-
-          export const articleService = createService({
-            getArticle: getArticle,
-            editArticle,
-          })
-        `,
-        }),
-      )
-
-      expect(parsedApp).toMatchObject({
-        services: [
-          expect.objectContaining({
-            name: "articleService",
-            errors: [
-              expect.objectContaining({
-                name: "ArticleError",
-                sourceFile: "otherOne.ts",
-              }),
-              expect.objectContaining({
-                name: "ArticleError",
-                sourceFile: "otherTwo.ts",
-              }),
-            ],
-          }),
-        ],
-      })
-    })
     test("should recognize re-export of same error class", () => {
       const parsedApp = parseProgram(
         createTestProgram({

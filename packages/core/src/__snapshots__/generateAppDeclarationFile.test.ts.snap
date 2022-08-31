@@ -3,25 +3,25 @@
 exports[`generateAppDeclarationFile errors should generate common errors in domain 1`] = `
 "export declare namespace domain {
     namespace v_1_0_0 {
+        class HamburgerError extends Error {
+            constructor(message: string);
+        }
         class CommonError extends Error {
+            constructor(message: string);
+        }
+        class ArticleError extends Error {
             constructor(message: string);
         }
     }
 }
 export declare namespace hamburgerService {
     namespace v_1_0_0 {
-        class HamburgerError extends Error {
-            constructor(message: string);
-        }
         function getHamburger(): Promise<string>;
         function setHamburger(): Promise<string>;
     }
 }
 export declare namespace articleService {
     namespace v_1_0_0 {
-        class ArticleError extends Error {
-            constructor(message: string);
-        }
         function getArticle(): Promise<string>;
         function setArticle(): Promise<string>;
     }
@@ -30,19 +30,23 @@ export declare namespace articleService {
 `;
 
 exports[`generateAppDeclarationFile errors should generate multi-service multi-error 1`] = `
-"export declare namespace hamburgerService {
+"export declare namespace domain {
     namespace v_1_0_0 {
         class HamburgerError extends Error {
             constructor(message: string);
         }
+        class ArticleError extends Error {
+            constructor(message: string);
+        }
+    }
+}
+export declare namespace hamburgerService {
+    namespace v_1_0_0 {
         function getHamburger(): Promise<string>;
     }
 }
 export declare namespace articleService {
     namespace v_1_0_0 {
-        class ArticleError extends Error {
-            constructor(message: string);
-        }
         function getArticle(): Promise<string>;
     }
 }
@@ -50,11 +54,15 @@ export declare namespace articleService {
 `;
 
 exports[`generateAppDeclarationFile errors should generate properties on generated error classes 1`] = `
-"export declare namespace articleService {
+"export declare namespace domain {
     namespace v_1_0_0 {
         class ArticleError extends Error {
             constructor(message: string, myPublicProp: number, myProp: number);
         }
+    }
+}
+export declare namespace articleService {
+    namespace v_1_0_0 {
         function getArticle(): Promise<string>;
     }
 }
@@ -62,11 +70,15 @@ exports[`generateAppDeclarationFile errors should generate properties on generat
 `;
 
 exports[`generateAppDeclarationFile errors should generate service error 1`] = `
-"export declare namespace articleService {
+"export declare namespace domain {
     namespace v_1_0_0 {
         class ArticleError extends Error {
             constructor(message: string);
         }
+    }
+}
+export declare namespace articleService {
+    namespace v_1_0_0 {
         function getArticle(): Promise<string>;
     }
 }
@@ -74,15 +86,18 @@ exports[`generateAppDeclarationFile errors should generate service error 1`] = `
 `;
 
 exports[`generateAppDeclarationFile middleware should parse middleware 1`] = `
-"export declare namespace samen {
-    type SamenContext<T> = T;
-}
-export declare namespace articleService {
+"export declare namespace domain {
     namespace v_1_0_0 {
         interface User {
             uid: string;
         }
-        type SamenContext<T = {}> = T;
+    }
+}
+export declare namespace samen {
+    type SamenContext<T> = T;
+}
+export declare namespace articleService {
+    namespace v_1_0_0 {
         function getArticle(ctx: samen.SamenContext<{
             uid: string;
         }>, aap: string): Promise<string>;
@@ -92,14 +107,18 @@ export declare namespace articleService {
 `;
 
 exports[`generateAppDeclarationFile typeAliases type aliases which are aliases of aliases 1`] = `
-"export declare namespace workoutRoutineService {
+"export declare namespace domain {
     namespace v_1_0_0 {
         type TypeReal = {
             x: number;
         };
-        type TypeRef = TypeReal;
-        type Result = TypeRef;
-        function getRoutine(versionId: string): Promise<Result>;
+        type TypeRef = domain.v_1_0_0.TypeReal;
+        type Result = domain.v_1_0_0.TypeRef;
+    }
+}
+export declare namespace workoutRoutineService {
+    namespace v_1_0_0 {
+        function getRoutine(versionId: string): Promise<domain.v_1_0_0.Result>;
     }
 }
 "
