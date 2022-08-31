@@ -182,7 +182,7 @@ function getContextIO(
 
               if (!ctxProp) {
                 throw new ParseError(
-                  `S112: Can't find property with name ${ctxMem.name}`,
+                  `S112: Can't find property with name "${ctxMem.name}"`,
                   ctxType,
                 )
               }
