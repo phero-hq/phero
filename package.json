@@ -3,7 +3,7 @@
   "description": "Samen builds and deploys serverless backend services and databases",
   "author": "Press Play Development",
   "homepage": "https://samen.io",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/samen-io/samen/issues"
   },
