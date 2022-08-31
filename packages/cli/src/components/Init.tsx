@@ -82,7 +82,8 @@ async function createSourceFile(
   content: string,
 ): Promise<void> {
   if (!(await hasSourceFile(filePath))) {
-    await exec(`mkdir -p src && echo "${content}" >> ${filePath}`)
+    await fs.mkdir("src", { recursive: true })
+    await fs.writeFile(filePath, content, { encoding: "utf-8" })
   }
 }
 
@@ -155,7 +156,7 @@ export default function Init({ command }: { command: SamenCommandInit }) {
   return (
     <Box flexDirection="column">
       {isDone ? (
-        <Text>Ready to go! Run `samen` again to continue.</Text>
+        <Text>Ready to go! Run `npx samen` again to continue.</Text>
       ) : (
         <>
           {!env && (
