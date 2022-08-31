@@ -1,6 +1,13 @@
 {
   "name": "samen",
   "version": "0.9.0",
+  "description": "Backend development toolkit for TypeScript",
+  "homepage": "https://samen.io",
+  "repository": "samen-io/samen",
+  "bugs": "https://github.com/samen-io/samen/issues",
+  "engines": {
+    "node": ">=12.22.0"
+  },
   "bin": {
     "samen": "dist/index.js"
   },

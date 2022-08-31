@@ -2,6 +2,13 @@
   "name": "@samen/client",
   "version": "0.9.0",
   "main": "dist/index.js",
+  "description": "Client library for Samen",
+  "homepage": "https://samen.io",
+  "repository": "samen-io/samen",
+  "bugs": "https://github.com/samen-io/samen/issues",
+  "engines": {
+    "node": ">=12.22.0"
+  },
   "bin": {
     "samen-client": "dist/cli.js"
   },
