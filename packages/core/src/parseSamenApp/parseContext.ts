@@ -63,9 +63,9 @@ function addFunctionContext(
 
   const ctxParam = func.parameters[ctxIndex]
 
-  if (ctxIndex !== func.parameters.length - 1) {
+  if (ctxIndex !== 0) {
     throw new ParseError(
-      `SamenContext parameter should be the last parameter`,
+      `SamenContext parameter should be the first parameter`,
       ctxParam,
     )
   }

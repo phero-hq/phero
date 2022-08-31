@@ -52,7 +52,7 @@ function generateFunctionParameters(
 ): ts.ParameterDeclaration[] {
   const parameters =
     func.serviceContext && func.serviceContext.paramName
-      ? func.parameters.slice(0, func.parameters.length - 1)
+      ? func.parameters.slice(1)
       : func.parameters
 
   const result = parameters.map((param) => {
@@ -114,7 +114,7 @@ export function generateClientFunction(
   if (contextType) {
     const firstParam = func.parameters[0]
     if (isParamSamenContextParam(firstParam)) {
-      // skip last parameter if we have a context param
+      // skip first parameter if we have a context param
       parameters = parameters.slice(1)
       context = {
         name: getNameAsString(firstParam.name),
