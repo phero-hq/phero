@@ -21,6 +21,11 @@ export type SamenMiddlewareFunction<P, C, N> = (
 
 export interface SamenServiceConfig {
   middleware?: SamenMiddlewareFunction<any, any, void>[]
+  cors?: SamenCORSConfig
+}
+
+export interface SamenCORSConfig {
+  originWhitelist: string[]
 }
 
 export function createService(

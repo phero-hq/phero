@@ -17,7 +17,7 @@ export class Property {
   }
 
   public static assignment(
-    name: string,
+    name: string | ts.PropertyName,
     init: ts.Expression,
   ): ts.PropertyAssignment {
     return ts.factory.createPropertyAssignment(name, init)

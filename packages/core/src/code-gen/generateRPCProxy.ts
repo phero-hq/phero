@@ -3,6 +3,7 @@ import { ParsedSamenApp } from ".."
 import parseReturnType from "../parseSamenApp/parseReturnType"
 import {
   ParsedSamenFunctionDefinition,
+  ParsedSamenServiceConfig,
   ParsedSamenServiceDefinition,
 } from "../parseSamenApp"
 import { printCode } from "../tsTestUtils"
@@ -25,27 +26,27 @@ export default function generateRPCProxy(
 ): { js: string } {
   const tsNodes: ts.Node[] = []
 
-  for (const service of app.services) {
-    tsNodes.push(
-      factory.createImportDeclaration(
+  tsNodes.push(
+    factory.createImportDeclaration(
+      undefined,
+      undefined,
+      factory.createImportClause(
+        false,
         undefined,
-        undefined,
-        factory.createImportClause(
-          false,
-          undefined,
-          factory.createNamedImports([
+        factory.createNamedImports(
+          app.services.map((service) =>
             factory.createImportSpecifier(
               false,
               undefined,
               factory.createIdentifier(service.name),
             ),
-          ]),
+          ),
         ),
-        factory.createStringLiteral("./samen"),
-        undefined,
       ),
-    )
-  }
+      factory.createStringLiteral("./samen"),
+      undefined,
+    ),
+  )
 
   tsNodes.push(...types)
 
@@ -83,6 +84,8 @@ export default function generateRPCProxy(
   }
 
   for (const service of app.services) {
+    tsNodes.push(generateCorsConfigFunction(service))
+
     if (service.config.middleware?.length) {
       tsNodes.push(
         generateMiddlewareParsers(service.name, service.config, typeChecker),
@@ -138,6 +141,26 @@ export default function generateRPCProxy(
   }
 
   return { js }
+}
+
+function generateCorsConfigFunction(
+  service: ParsedSamenServiceDefinition,
+): ts.FunctionDeclaration {
+  return tsx.function({
+    export: true,
+    async: true,
+    name: `service_cors_config__${service.name}`,
+    returnType: tsx.type.reference({
+      name: "Promise",
+      args: [tsx.type.array(tsx.type.string)],
+    }),
+    params: [],
+    body: [
+      tsx.statement.return(
+        tsx.expression.propertyAccess(service.name, "config", "cors"),
+      ),
+    ],
+  })
 }
 
 function generateRPCExecutor(
