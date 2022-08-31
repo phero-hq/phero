@@ -127,7 +127,7 @@ function addFunctionContext(
 
     if (!isSameMember(funcCtxMemberParser, accumulatedContextMember)) {
       throw new ParseError(
-        `S111: Context member ${funcCtxMemberParser.name} would change type of already existing context member`,
+        `S111: Context member "${funcCtxMemberParser.name}" would change type of already existing context member`,
         prop,
       )
     }
