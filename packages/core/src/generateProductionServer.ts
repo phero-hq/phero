@@ -1,10 +1,6 @@
 import ts from "typescript"
 import * as tsx from "./tsx"
-import {
-  ParsedCORSConfig,
-  ParsedSamenApp,
-  ParsedSamenServiceDefinition,
-} from "./parseSamenApp"
+import { ParsedSamenApp, ParsedSamenServiceDefinition } from "./parseSamenApp"
 import { VirtualCompilerHost } from "./VirtualCompilerHost"
 
 const factory = ts.factory
