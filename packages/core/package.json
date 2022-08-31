@@ -1,6 +1,6 @@
 {
   "name": "@samen/core",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "main": "dist/index.js",
   "homepage": "https://samen.io",
   "repository": "samen-io/samen",
