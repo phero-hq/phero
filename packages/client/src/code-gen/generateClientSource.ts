@@ -32,13 +32,7 @@ export default function generateClientSource(
     ...parsedDomainErrors.map(generateError),
     ...services.flatMap((service) => [
       ...service.models.map((model) => generateModel(model, domainRefMaker)),
-      ...service.models
-        .map((model) => generateModelParser(model, typeChecker))
-        .map((x) => {
-          console.log("jasper2", printCode(x))
-
-          return x
-        }),
+      ...service.models.map((model) => generateModelParser(model, typeChecker)),
       ...service.errors.map(parseError).map(generateError),
     ]),
   ]
