@@ -730,8 +730,6 @@ function generateInnerFunction(
                   }),
                 ]
               : [
-                  tsx.const({ name: "v3", init: tsx.literal.true }),
-
                   tsx.const({
                     name: "inputParseResult",
                     init: tsx.expression.call("inputParser", {
