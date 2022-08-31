@@ -116,5 +116,5 @@ function parseActualFunction(
     }
   }
 
-  throw new ParseError("S120: Unsupported syntax" + node.kind, node)
+  throw new ParseError(`S120: Unsupported syntax (${node.kind})`, node)
 }
