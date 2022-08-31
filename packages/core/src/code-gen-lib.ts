@@ -329,7 +329,7 @@ function generatePropertyName(propName: ts.PropertyName): ts.PropertyName {
   // } else if (ts.isPrivateIdentifier(propName)) {
   // }
   throw new ParseError(
-    "S101: We curretly do not support these kind of property names",
+    "S101: We currently do not support these kind of property names",
     propName,
   )
 }
