@@ -67,14 +67,6 @@ export default function generateAppDeclarationFile(
       generateNamespace(ts.factory.createIdentifier(service.name), [
         // export namespace v_1_0_0 {
         generateNamespace(versionIdentifier, [
-          ...service.models.map((m) =>
-            // export interface MyModel {
-            generateModel(m, refMaker),
-          ),
-          ...service.errors.map((e) =>
-            // export class Error {
-            generateErrorClass(e, refMaker),
-          ),
           // export function myFunction(): Promise<void> {
           ...service.funcs.map((func) => generateFunction(func, refMaker)),
         ]),
