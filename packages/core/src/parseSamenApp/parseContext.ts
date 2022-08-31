@@ -107,7 +107,7 @@ function addFunctionContext(
     )
     if (!prop) {
       throw new ParseError(
-        `S109: Can't find property with name ${funcCtxMemberParser.name}`,
+        `S109: Can't find property with name "${funcCtxMemberParser.name}"`,
         funcCtx,
       )
     }
