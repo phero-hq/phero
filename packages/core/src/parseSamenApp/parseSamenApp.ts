@@ -82,67 +82,38 @@ export function parseSamenApp(
     }
   }
 
-  const modelMap: Map<Model, string[]> = new Map<Model, string[]>()
+  const modelMap: Map<string, Model> = new Map<string, Model>()
+  const errorMap: Map<string, ParsedError> = new Map<string, ParsedError>()
 
   for (const service of services) {
     for (const model of service.models) {
-      if (modelMap.has(model)) {
-        if (!modelMap.get(model)!.includes(service.name)) {
-          modelMap.set(model, [...modelMap.get(model)!, service.name])
-        }
-      } else {
-        modelMap.set(model, [service.name])
+      const modelName = model.name.text
+      if (!modelMap.has(modelName)) {
+        modelMap.set(modelName, model)
+      } else if (modelMap.get(modelName) !== model) {
+        throw new ParseError(
+          "You already have a different model with the same name, currently this is not possible. We intent to implement namespaces soon, stay tuned.",
+          model,
+        )
       }
     }
-  }
-
-  const sharedModels: Model[] = []
-  for (const [model, serviceNames] of modelMap) {
-    if (serviceNames.length > 1) {
-      sharedModels.push(model)
-    }
-  }
-
-  const errorMap: Map<ClassDeclaration, string[]> = new Map<
-    ClassDeclaration,
-    string[]
-  >()
-
-  for (const service of services) {
-    for (const { ref: errorClass } of service.errors) {
-      if (errorMap.has(errorClass)) {
-        if (!errorMap.get(errorClass)!.includes(service.name)) {
-          errorMap.set(errorClass, [...errorMap.get(errorClass)!, service.name])
-        }
-      } else {
-        errorMap.set(errorClass, [service.name])
+    for (const parsedError of service.errors) {
+      const errorName = parsedError.name
+      if (!errorMap.has(errorName)) {
+        errorMap.set(errorName, parsedError)
+      } else if (errorMap.get(errorName)?.ref !== parsedError.ref) {
+        throw new ParseError(
+          "You already have a different error class with the same name, currently this is not possible. We intent to implement namespaces soon, stay tuned.",
+          parsedError.ref,
+        )
       }
-    }
-  }
-
-  const sharedErrors: ParsedError[] = []
-  const sharedErrorClasses: ClassDeclaration[] = []
-
-  const allParsedErrors = services.flatMap((s) => s.errors)
-  for (const [errorClass, serviceNames] of errorMap) {
-    if (serviceNames.length > 1) {
-      const parsedErr = allParsedErrors.find((e) => e.ref === errorClass)!
-
-      sharedErrors.push(parsedErr)
-      sharedErrorClasses.push(errorClass)
     }
   }
 
   return {
-    models: sharedModels,
-    errors: sharedErrors,
-    services: services.map((service) => ({
-      ...service,
-      models: removeShared(deduplicate(service.models), sharedModels),
-      errors: deduplicate(
-        service.errors.filter((e) => !sharedErrorClasses.includes(e.ref)),
-      ),
-    })),
+    models: [...modelMap.values()],
+    errors: [...errorMap.values()],
+    services,
   }
 }
 
