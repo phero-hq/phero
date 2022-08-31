@@ -66,11 +66,11 @@ export function parseSamenApp(
     } else if (ts.isExportDeclaration(statement)) {
       if (!statement.exportClause) {
         throw new ParseError(
-          `"export * from './file'" are not supported`,
+          `S123: "export * from './file'" are not supported`,
           statement,
         )
       } else if (!ts.isNamedExports(statement.exportClause)) {
-        throw new ParseError("Unsupported export statement", statement)
+        throw new ParseError("S124: Unsupported export statement", statement)
       }
 
       for (const specifier of statement.exportClause.elements) {
@@ -78,7 +78,7 @@ export function parseSamenApp(
         services.push(service)
       }
     } else {
-      throw new ParseError("Unsupported export statement", statement)
+      throw new ParseError("S125: Unsupported export statement", statement)
     }
   }
 

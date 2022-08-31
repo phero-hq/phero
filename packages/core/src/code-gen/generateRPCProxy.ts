@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { ParsedSamenApp } from ".."
+import { ParsedSamenApp, ParseError } from ".."
 import parseReturnType from "../parseSamenApp/parseReturnType"
 import {
   ParsedSamenFunctionDefinition,
@@ -1072,10 +1072,13 @@ function getParameterName(name: ts.BindingName): string {
   if (ts.isIdentifier(name)) {
     return name.text
   } else if (ts.isBindingName(name)) {
-    throw new Error(`No support for binding names ${printCode(name)}`)
+    throw new ParseError(
+      `S138: No support for binding names ${printCode(name)}`,
+      name,
+    )
   }
 
-  throw new Error("Name not supported")
+  throw new ParseError("S139: Name not supported", name)
 }
 
 const types = [

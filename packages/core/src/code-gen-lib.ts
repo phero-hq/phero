@@ -57,7 +57,10 @@ function generateFunctionParameters(
 
   const result = parameters.map((param) => {
     if (!param.type) {
-      throw new ParseError(`Parameter should have a type`, param)
+      throw new ParseError(
+        `S100: Parameter of your functions should have a type`,
+        param,
+      )
     }
 
     return ts.factory.createParameterDeclaration(
@@ -180,7 +183,10 @@ function generateClientFunctionBlock(
               ...func.parameters.map((p, i) => {
                 if (!ts.isIdentifier(p.name)) {
                   // TODO https://trello.com/c/UJHzzAHz/25-support-object-array-binding-patterns-in-parameter-names
-                  throw new Error("No support for prop binding names yet")
+                  throw new ParseError(
+                    "S133: No support for prop binding names yet",
+                    p.name,
+                  )
                 }
 
                 if (context && i === 0) {
@@ -323,7 +329,7 @@ function generatePropertyName(propName: ts.PropertyName): ts.PropertyName {
   // } else if (ts.isPrivateIdentifier(propName)) {
   // }
   throw new ParseError(
-    "Must be identifier, stringliteral or numericliteral",
+    "S101: We currently do not support these kind of property names",
     propName,
   )
 }
@@ -361,7 +367,7 @@ function generateTypeElement(
   }
 
   throw new ParseError(
-    "Only Property signature is allowed " + typeElement.kind,
+    `S102: We currently do not support this syntax (${typeElement.kind})`,
     typeElement,
   )
 }

@@ -1,4 +1,5 @@
 import ts from "typescript"
+import { ParseError } from "../../errors"
 import { isModel } from "../../parseAppDeclaration"
 import { Model } from "../../parseSamenApp"
 import * as tsx from "../../tsx"
@@ -15,7 +16,7 @@ export default function generateModelParser(
 ): ts.ClassDeclaration {
   const rootParserModel = generateParserModel(typeChecker, model, "data")
   if (!rootParserModel.rootTypeParser) {
-    throw new Error("Expected rootTypeParser")
+    throw new ParseError("S141: Expected rootTypeParser", model)
   }
 
   const parserStatement: ts.Statement = generateParserFromModel(rootParserModel)
@@ -212,7 +213,7 @@ export function getFunctionName(name?: ts.PropertyName): string {
     return name.text
   }
 
-  throw new Error(`Function has unsupported name`)
+  throw new ParseError(`S142: Function has unsupported name`, name)
 }
 
 export function generateNonModelParser(
@@ -222,7 +223,7 @@ export function generateNonModelParser(
   parserName: string,
 ): ts.FunctionDeclaration {
   if (isModel(model)) {
-    throw new Error("Should not be model")
+    throw new ParseError("S143: Should not be model", model)
   }
 
   const rootParserModel = generateParserModel(typeChecker, model, "data")

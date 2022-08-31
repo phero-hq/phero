@@ -60,7 +60,7 @@ function parseMiddlewareConfig(
 ): ParsedMiddlewareConfig {
   if (middleware.parameters.length != 3) {
     throw new ParseError(
-      `Middleware should have three parameters "(params: SamenParams<P>, ctx: SamenContext<C>, next: SamenNextFunction<T>)"`,
+      `S129: Middleware should have three parameters "(params: SamenParams<P>, ctx: SamenContext<C>, next: SamenNextFunction<T>)"`,
       middleware,
     )
   }
@@ -84,7 +84,7 @@ function parseParamsType(paramsParam: ts.ParameterDeclaration): ts.TypeNode {
     getTypeName(paramsType) !== "SamenParams"
   ) {
     throw new ParseError(
-      `Middleware params parameter has no or incorrect type, should be defined like "params: SamenParams<T>"`,
+      `S130: Middleware params parameter has no or incorrect type, should be defined like "params: SamenParams<T>"`,
       paramsParam,
     )
   }
@@ -101,7 +101,7 @@ function parseContextType(contextParam: ts.ParameterDeclaration): ts.TypeNode {
     getTypeName(contextType) !== "SamenContext"
   ) {
     throw new ParseError(
-      `Middleware ctx parameter has no or incorrect type, should be defined like "ctx: SamenContext<T>"`,
+      `S131: Middleware ctx parameter has no or incorrect type, should be defined like "ctx: SamenContext<T>"`,
       contextParam,
     )
   }
@@ -120,7 +120,7 @@ function parseNextType(
     getTypeName(nextType) !== "SamenNextFunction"
   ) {
     throw new ParseError(
-      `Middleware next parameter has no or incorrect type, should be defined like "next: SamenNextFunction<T>"`,
+      `S132: Middleware next parameter has no or incorrect type, should be defined like "next: SamenNextFunction<T>"`,
       nextParam,
     )
   }

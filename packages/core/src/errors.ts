@@ -15,8 +15,30 @@ export class MissingSamenFileError extends Error {
 
 export class ParseError extends Error {
   constructor(message: string, public readonly node: ts.Node) {
-    super(message + "-->" + node.getText())
+    super(generateErrorMessage(message, node))
   }
+}
+
+function generateErrorMessage(message: string, node: ts.Node): string {
+  node.getSourceFile()
+
+  return ts.formatDiagnosticsWithColorAndContext(
+    [
+      {
+        code: "-SamenError" as any as number,
+        category: ts.DiagnosticCategory.Error,
+        file: node.getSourceFile(),
+        messageText: `\n\n${message}`,
+        start: node.pos,
+        length: node.end - node.pos,
+      },
+    ],
+    {
+      getCanonicalFileName: (f) => f,
+      getCurrentDirectory: () => "",
+      getNewLine: () => "\n",
+    },
+  )
 }
 
 export class PortInUseError extends Error {

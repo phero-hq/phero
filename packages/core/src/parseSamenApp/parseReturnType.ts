@@ -7,7 +7,7 @@ export default function parseReturnType(
   const typeNode: ts.TypeNode | undefined = node.type
 
   if (!typeNode) {
-    throw new ParseError("Return type should be explicitly defined", node)
+    throw new ParseError("S121: Return type should be explicitly defined", node)
   }
 
   if (ts.isTypeReferenceNode(typeNode)) {
@@ -17,5 +17,5 @@ export default function parseReturnType(
     }
   }
 
-  throw new ParseError("Return type should be a Promise<T>", typeNode)
+  throw new ParseError("S122: Return type should be a Promise<T>", typeNode)
 }

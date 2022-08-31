@@ -1,4 +1,5 @@
 import ts from "typescript"
+import { ParseError } from "../../errors"
 import { printCode } from "../../tsTestUtils"
 import {
   getFullyQualifiedName,
@@ -246,10 +247,6 @@ export default function generateParserModel(
       parser: generate(rootNode.type, 0),
     }
   } else if (ts.isFunctionDeclaration(rootNode)) {
-    // if (!rootNode.name) {
-    //   throw new Error("Function should have name")
-    // }
-
     return {
       type: ParserModelType.Root,
       name: rootName,
@@ -265,7 +262,10 @@ export default function generateParserModel(
               : param.type
 
           if (!paramType) {
-            throw new Error("Function parameter has no returnType")
+            throw new ParseError(
+              "S153: Function parameter has no returnType",
+              param,
+            )
           }
 
           return {
@@ -294,7 +294,7 @@ export default function generateParserModel(
   function generate(node: ts.Node, depth: number): ParserModel {
     if (ts.isPropertySignature(node)) {
       if (!node.type) {
-        throw new Error("Property has no type")
+        throw new ParseError("S154: Property has no type", node)
       }
       return generate(node.type, depth)
     }
@@ -488,7 +488,10 @@ export default function generateParserModel(
           ) {
             position = declr.parent.typeParameters?.indexOf(declr) ?? -1
           } else {
-            throw new Error("Should be either inteface or TypeAlias")
+            throw new ParseError(
+              "S144: Should be either interface or TypeAlias",
+              declr,
+            )
           }
         }
 
@@ -572,10 +575,11 @@ export default function generateParserModel(
       }
     }
 
-    throw new Error(
-      `ParserModel not implemented yet: \`${printCode(node)}\` (kind:${
+    throw new ParseError(
+      `S145: ParserModel not implemented yet: \`${printCode(node)}\` (kind:${
         node.kind
       })`,
+      node,
     )
   }
 
@@ -647,14 +651,23 @@ export default function generateParserModel(
     } else if (ts.isQualifiedName(name)) {
       return name.right.text
     } else if (ts.isComputedPropertyName(name)) {
-      throw new Error(`No support for computed names ${printCode(name)}`)
+      throw new ParseError(
+        `S146: No support for computed names ${printCode(name)}`,
+        name,
+      )
     } else if (ts.isPrivateIdentifier(name)) {
-      throw new Error(`No support for private names ${printCode(name)}`)
+      throw new ParseError(
+        `S147: No support for private names ${printCode(name)}`,
+        name,
+      )
     } else if (ts.isBindingName(name)) {
-      throw new Error(`No support for binding names ${printCode(name)}`)
+      throw new ParseError(
+        `S148: No support for binding names ${printCode(name)}`,
+        name,
+      )
     }
 
-    throw new Error("Name not supported")
+    throw new ParseError("S149: Name not supported", name)
   }
 
   function getEnumParser(enumDeclr: ts.EnumDeclaration): EnumParserModel {
@@ -676,7 +689,10 @@ export default function generateParserModel(
               literal: memberValue,
             }
           } else {
-            throw new Error("Enum member has unsupport value")
+            throw new ParseError(
+              "S150: Enum member has unsupported value",
+              enumDeclr,
+            )
           }
         } else {
           return {

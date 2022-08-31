@@ -144,7 +144,10 @@ function parseServiceDeclarationVersion(
           errors: [...errors, st],
         }
       }
-      throw new ParseError("Neither model nor function", st)
+      throw new ParseError(
+        "S103: We only support enums, functions, Error classes, interfaces and type aliases",
+        st,
+      )
     },
     {
       models: [],
@@ -195,7 +198,7 @@ function parseModule(statement: ts.Statement): ParsedModule {
       statements: statement.body.statements.map((st) => st),
     }
   }
-  throw new ParseError("Unexpected statement", statement)
+  throw new ParseError("S104: Unexpected statement", statement)
 }
 
 function isUserModule(statement: ts.Statement): boolean {
