@@ -561,8 +561,6 @@ export class ReferenceMaker {
       }
     }
 
-    return this.serviceDomainName
-      ? [this.serviceDomainName, modelName]
-      : [modelName]
+    return [modelName]
   }
 }

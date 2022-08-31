@@ -41,7 +41,7 @@ function generateParserCall(
   if (pointer.model.typeArguments.length === 0) {
     return tsx.expression.call(
       tsx.expression.propertyAccess(
-        `${pointer.model.fullyQualifiedName.base}Parser`,
+        `${pointer.model.baseTypeName}Parser`,
         "parse",
       ),
       { args: [pointer.dataVarExpr] },
@@ -49,9 +49,7 @@ function generateParserCall(
   } else {
     return ts.factory.createCallExpression(
       ts.factory.createPropertyAccessExpression(
-        ts.factory.createIdentifier(
-          `${pointer.model.fullyQualifiedName.base}Parser`,
-        ),
+        ts.factory.createIdentifier(`${pointer.model.typeName}Parser`),
         ts.factory.createIdentifier("parse"),
       ),
       pointer.model.typeArguments.map((typeArg) =>
