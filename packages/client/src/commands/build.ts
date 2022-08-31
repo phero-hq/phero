@@ -7,7 +7,7 @@ export default function build(command: ClientCommandBuild) {
   } else if ("url" in command.server) {
     console.log(`Building client from server at: ${command.server.url}`)
   } else {
-    throw new Error("unexpected server config")
+    throw new Error("Unexpected server config")
   }
 
   buildClient(command.server)

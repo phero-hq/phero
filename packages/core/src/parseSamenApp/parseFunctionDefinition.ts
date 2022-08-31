@@ -9,7 +9,10 @@ export default function parseFunctionDefinition(
   typeChecker: ts.TypeChecker,
 ): ParsedSamenFunctionDefinition {
   if (ts.isSpreadAssignment(node)) {
-    throw new ParseError("Sorry, no support for spread assignment (yet)", node)
+    throw new ParseError(
+      "S116: Sorry, no support for spread assignment (yet)",
+      node,
+    )
   }
 
   const parsedSamenFunctionDef: ParsedSamenFunctionDefinition = {
@@ -38,7 +41,7 @@ function parseFunctionName(
     ts.isArrayBindingPattern(functionName)
   ) {
     throw new ParseError(
-      "Function name should we a clear identifier, no support for computed names, or binding patterns." +
+      "S117: Function name should we a clear identifier, no support for computed names, or binding patterns." +
         functionName.kind,
       functionName,
     )
@@ -57,7 +60,7 @@ function parseActualFunction(
     const symbol = typeChecker.getShorthandAssignmentValueSymbol(node)
 
     if (!symbol || !symbol.declarations?.[0]) {
-      throw new ParseError(`Can't find function [${node.kind}]`, node)
+      throw new ParseError(`S118: Can't find function [${node.kind}]`, node)
     }
 
     return parseActualFunction(symbol.declarations?.[0], typeChecker)
@@ -101,7 +104,7 @@ function parseActualFunction(
   if (ts.isIdentifier(node)) {
     const symbol = resolveSymbol(node, typeChecker)
     if (!symbol?.declarations?.[0]) {
-      throw new ParseError(`Can't find function [${node.kind}]`, node)
+      throw new ParseError(`S119: Can't find function [${node.kind}]`, node)
     }
     return parseActualFunction(symbol.declarations?.[0], typeChecker)
   }
@@ -113,5 +116,5 @@ function parseActualFunction(
     }
   }
 
-  throw new ParseError("Unsupported syntax" + node.kind, node)
+  throw new ParseError("S120: Unsupported syntax" + node.kind, node)
 }

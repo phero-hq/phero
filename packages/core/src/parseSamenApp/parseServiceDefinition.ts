@@ -21,7 +21,7 @@ export default function parseServiceDefinition(
   )
 
   if (!createServiceCallExpr) {
-    throw new ParseError("Cant find service export", serviceExport)
+    throw new ParseError("S127: Cant find service export", serviceExport)
   }
 
   // parsing arguments of createService
@@ -33,7 +33,7 @@ export default function parseServiceDefinition(
   )
 
   if (functionDefinitions.length === 0) {
-    throw new ParseError("Can't find function definitions", functionDefs)
+    throw new ParseError("S128: Can't find function definitions", functionDefs)
   }
 
   return {

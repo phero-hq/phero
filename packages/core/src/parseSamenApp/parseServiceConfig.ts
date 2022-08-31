@@ -33,5 +33,5 @@ export default function parseServiceConfig(
     return parseServiceConfig(node.initializer, typeChecker)
   }
 
-  throw new ParseError("Unsupport syntax for function config", node)
+  throw new ParseError("S126: Unsupport syntax for function config", node)
 }

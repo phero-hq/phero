@@ -1,4 +1,5 @@
 import ts from "typescript"
+import { ParseError } from "../../errors"
 import { ParserModel, ParserModelType } from "./generateParserModel"
 import { generateStringValidator } from "./generateStringParser"
 import Pointer from "./Pointer"
@@ -57,5 +58,8 @@ export function generateKeyValidator(
     )
   }
 
-  throw new Error(`Key parser type "${model.type}" not implemented`)
+  throw new ParseError(
+    `S140: Key parser type "${model.type}" not implemented`,
+    keyName,
+  )
 }

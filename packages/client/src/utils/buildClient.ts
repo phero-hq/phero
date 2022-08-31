@@ -31,7 +31,7 @@ async function getManifestSource(
   } else if ("url" in server) {
     return getManifestFromUrl(server.url)
   } else {
-    throw new Error(`unexpected server config: ${JSON.stringify(server)}`)
+    throw new Error(`Unexpected server config: ${JSON.stringify(server)}`)
   }
 }
 

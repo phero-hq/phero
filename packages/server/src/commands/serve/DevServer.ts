@@ -130,7 +130,7 @@ export default class DevServer {
     } catch (error) {
       this.eventEmitter.emit({
         type: "BUILD_RPCS_FAILED",
-        errorMessage: error instanceof Error ? error.message : "unknown error",
+        errorMessage: error instanceof Error ? error.message : "Unknown error",
       })
       return
     }
@@ -242,7 +242,7 @@ export default class DevServer {
             res.statusCode = 500
             res.write(
               JSON.stringify({
-                errorMessage: e instanceof Error ? e.message : "unknown error",
+                errorMessage: e instanceof Error ? e.message : "Unknown error",
               }),
             )
             this.eventEmitter.emit({
@@ -252,7 +252,7 @@ export default class DevServer {
               requestId,
               dateTime: new Date().toISOString(),
               error: {
-                message: e instanceof Error ? e.message : "unknown error",
+                message: e instanceof Error ? e.message : "Unknown error",
                 stack: (e instanceof Error && e.stack) || "",
               },
             })

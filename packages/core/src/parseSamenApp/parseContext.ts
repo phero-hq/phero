@@ -65,7 +65,7 @@ function addFunctionContext(
 
   if (ctxIndex !== 0) {
     throw new ParseError(
-      `SamenContext parameter should be the first parameter`,
+      `S105: SamenContext parameter should be the first parameter`,
       ctxParam,
     )
   }
@@ -74,7 +74,7 @@ function addFunctionContext(
 
   if (!ctxParamType) {
     throw new ParseError(
-      `SamenContext parameter should have a type declared`,
+      `S106: SamenContext parameter should have a type declared`,
       ctxParam,
     )
   }
@@ -84,7 +84,7 @@ function addFunctionContext(
     ctxParamType.typeArguments?.length !== 1
   ) {
     throw new ParseError(
-      `SamenContext parameter's type argument has an incorrect type`,
+      `S107: SamenContext parameter's type argument has an incorrect type`,
       ctxParam,
     )
   }
@@ -96,7 +96,10 @@ function addFunctionContext(
 
   for (const funcCtxMemberParser of funcCtxParserModel.members) {
     if (funcCtxMemberParser.type != ParserModelType.Member) {
-      throw new ParseError(`Context type can't have index members`, funcCtx)
+      throw new ParseError(
+        `S108: Context type can't have index members`,
+        funcCtx,
+      )
     }
 
     const prop = funcCtxProps.find(
@@ -104,7 +107,7 @@ function addFunctionContext(
     )
     if (!prop) {
       throw new ParseError(
-        `Can't find property with name ${funcCtxMemberParser.name}`,
+        `S109: Can't find property with name ${funcCtxMemberParser.name}`,
         funcCtx,
       )
     }
@@ -116,12 +119,15 @@ function addFunctionContext(
     )
 
     if (!accumulatedContextMember) {
-      throw new ParseError(`Property should be provided by middleware`, prop)
+      throw new ParseError(
+        `S110: Property should be provided by middleware`,
+        prop,
+      )
     }
 
     if (!isSameMember(funcCtxMemberParser, accumulatedContextMember)) {
       throw new ParseError(
-        `Context member ${funcCtxMemberParser.name} would change type of already existing context member`,
+        `S111: Context member ${funcCtxMemberParser.name} would change type of already existing context member`,
         prop,
       )
     }
@@ -176,7 +182,7 @@ function getContextIO(
 
               if (!ctxProp) {
                 throw new ParseError(
-                  `Can't find property with name ${ctxMem.name}`,
+                  `S112: Can't find property with name ${ctxMem.name}`,
                   ctxType,
                 )
               }
@@ -189,13 +195,13 @@ function getContextIO(
               const accMem = accumulatedContext.members[accMemIndex]
               if (accMem.type !== ParserModelType.Member) {
                 throw new ParseError(
-                  `Context type can't have index members`,
+                  `S113: Context type can't have index members`,
                   ctxType,
                 )
               }
               if (!isSameMember(ctxMem, accMem)) {
                 throw new ParseError(
-                  `Context member ${ctxMem.name} would change type of already existing context member`,
+                  `S114: Context member ${ctxMem.name} would change type of already existing context member`,
                   ctxType,
                 )
               }
@@ -256,7 +262,7 @@ function getRootObjectParserModel(
   )
 
   if (nextParserModel.parser.type !== ParserModelType.Object) {
-    throw new ParseError("Should be an object type", typeNode)
+    throw new ParseError("S115: Should be an object type", typeNode)
   }
 
   return nextParserModel.parser
