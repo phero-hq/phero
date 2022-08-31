@@ -60,7 +60,7 @@ function parseActualFunction(
     const symbol = typeChecker.getShorthandAssignmentValueSymbol(node)
 
     if (!symbol || !symbol.declarations?.[0]) {
-      throw new ParseError(`S118: Can't find function [${node.kind}]`, node)
+      throw new ParseError(`S118: Can't find function (${node.kind})`, node)
     }
 
     return parseActualFunction(symbol.declarations?.[0], typeChecker)
