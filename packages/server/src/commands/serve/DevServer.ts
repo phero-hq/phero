@@ -112,7 +112,10 @@ export default class DevServer {
     } catch (error) {
       this.eventEmitter.emit({
         type: "BUILD_MANIFEST_FAILED",
-        errorMessage: error instanceof Error ? error.message : "unknown error",
+        errorMessage:
+          error instanceof Error
+            ? `${error.message}\nIf you think this is a bug, please submit an issue here: https://github.com/samen-io/samen/issues`
+            : "Unknown error",
       })
       return
     }

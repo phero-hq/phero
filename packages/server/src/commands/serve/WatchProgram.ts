@@ -119,7 +119,7 @@ export default class WatchProgram {
   }
 
   private onBuildFailed(diagnostics: readonly ts.Diagnostic[]) {
-    const errorMessage = ts.formatDiagnostics(diagnostics, {
+    const errorMessage = ts.formatDiagnosticsWithColorAndContext(diagnostics, {
       getCanonicalFileName: (f) => f,
       getCurrentDirectory: () => this.projectDir,
       getNewLine: () => "\n",
