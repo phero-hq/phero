@@ -48,6 +48,9 @@ export default class WatchProgram {
       ts.createSemanticDiagnosticsBuilderProgram,
       this.reportDiagnostic.bind(this),
       this.reportWatchStatus.bind(this),
+      {
+        excludeFiles: ["samen-manifest.d.ts"],
+      },
     )
     this.watchProgram = ts.createWatchProgram(host)
     this.watchProgram.getProgram().emit()
