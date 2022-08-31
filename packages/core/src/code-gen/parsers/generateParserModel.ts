@@ -489,7 +489,7 @@ export default function generateParserModel(
             position = declr.parent.typeParameters?.indexOf(declr) ?? -1
           } else {
             throw new ParseError(
-              "S144: Should be either inteface or TypeAlias",
+              "S144: Should be either interface or TypeAlias",
               declr,
             )
           }
