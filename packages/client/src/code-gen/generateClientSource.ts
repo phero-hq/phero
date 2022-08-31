@@ -2,7 +2,6 @@ import ts from "typescript"
 import {
   generateClientFunction,
   generateModel,
-  generateNamespace,
   ReferenceMaker,
   ParsedAppDeclarationVersion,
   tsx,
@@ -31,15 +30,11 @@ export default function generateClientSource(
     ...domainModels.map((model) => generateModel(model, domainRefMaker)),
     ...domainModels.map((model) => generateModelParser(model, typeChecker)),
     ...parsedDomainErrors.map(generateError),
-    ...services.map((service) =>
-      generateNamespace(ts.factory.createIdentifier(service.name), [
-        ...service.models.map((model) => generateModel(model, domainRefMaker)),
-        ...service.models.map((model) =>
-          generateModelParser(model, typeChecker),
-        ),
-        ...service.errors.map(parseError).map(generateError),
-      ]),
-    ),
+    ...services.flatMap((service) => [
+      ...service.models.map((model) => generateModel(model, domainRefMaker)),
+      ...service.models.map((model) => generateModelParser(model, typeChecker)),
+      ...service.errors.map(parseError).map(generateError),
+    ]),
   ]
 
   const hertitageClause: ts.HeritageClause = ts.factory.createHeritageClause(
@@ -105,7 +100,7 @@ export default function generateClientSource(
           domainModels,
           typeChecker,
           undefined,
-          ts.factory.createIdentifier(name),
+          undefined,
         )
 
         return ts.factory.createPropertyDeclaration(
@@ -137,9 +132,7 @@ export default function generateClientSource(
     ...services.map((service) =>
       generateErrorParser(service.name, [
         ...parsedDomainErrors,
-        ...service.errors
-          .map(parseError)
-          .map((e) => ({ ...e, name: `${service.name}.${e.name}` })),
+        ...service.errors.map(parseError),
       ]),
     ),
     classDeclr,
