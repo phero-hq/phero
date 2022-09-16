@@ -1,29 +1,74 @@
 # Samen
 
-Samen is a toolkit for TypeScript backend development. It has a minimal API, it's fast and it generates a type-safe client for your frontend. There's no need to learn new languages or DSL's: Samen understands the code you already have, bringing your backend and frontend closer together than ever before:
+Samen is a new kind of backend framework for building RPC based API's in TypeScript. Our mission is to reduce the amount of (boilerplate) code you need to create a backend for your apps.
 
-- Define functions on the backend and call these on the frontend.
-- Throw an error on the backend and catch it on the frontend.
-- Get compile errors when backend and frontend don't match up.
-- Share models between the backend and frontend.
+Features:
 
-Which leads us to:
+- code-first, minimal API
+- generates a type-safe SDK for your frontends
+- easily share your models between server and client
+- parses the input and output based on your models
+- comes with a Terminal UI
+- middleware
+- zero dependencies, just 1 peer dependency: TypeScript
 
-- No more custom fetch implementations, where you'd write extensive type-validations (or worse: cast it to a model you've expected it to be). Samen automatically validates all input before running your code.
-- No more guessing what the path, arguments or error-codes of an API-endpoint are.
-- No more unnecessary mistakes: Samen has your back.
+## Hello World!
 
-## Design principles
+Example `src/samen.ts` in your server Node.JS module.
 
-- Code-first
-- Declarative
-- End-to-end type-safe
+```ts
+import { createService } from "@samen/server"
 
-## Documentation
+interface HelloMessage {
+  text: string
+}
 
-A complete set of documentation could be found at: [docs.samen.io](https://docs.samen.io/). For the basics, keep scrolling!
+async function sayHello(name: string): Promise<HelloMessage> {
+  return {
+    text: `Hello, ${name}`,
+  }
+}
 
-## Installation
+export const exampleService = createService({
+  sayHello,
+})
+```
+
+When you hit `npx samen` in your project directory samen will analyse your `samen.ts` file and generate an SDK for your.
+
+Example `src/HelloMessage.tsx`
+
+```ts
+import { useCallback, useState } from "react"
+import unfetch from "isomorphic-unfetch"
+
+// Samen will generate a file 'samen.generated.ts` on your client with a
+// SamenClient and the models you're using in your RPC functions
+import { SamenClient, HelloMessage } from "../samen.generated"
+
+// instantiate the generated SamenClient with your favorite fetch lib
+const samen = new SamenClient(unfetch)
+
+export function HelloMessage() {
+  const [message, setMessage] = useState<string | null>(null)
+
+  const onPress = useCallback(async () => {
+    // call your RPC function
+    const helloMessage: HelloMessage = await samen.exampleService.sayHello(
+      "Steve Jobs",
+    )
+    setMessage(helloMessage.text)
+  }, [])
+
+  if (!message) {
+    return <button onClick={onPress}>Press to get message</button>
+  }
+
+  return <div>{message}</div>
+}
+```
+
+## Quickstart
 
 Let's setup an example project of a server and client with the following structure:
 
@@ -96,39 +141,9 @@ This will do the following:
 - Generate a client to `./app/src/samen.generated.ts`.
 - Keep everything up-to-date as your Samen-file changes.
 
-## Server definition
+## Real-world example
 
-The entry point of a Samen server is the Samen-file. This TypeScript-file exports services, containing functions that return promises. An example of this could be:
-
-```ts
-import { createService } from "@samen/server"
-
-async function helloWorld(name: string): Promise<string> {
-  return `Hi there, ${name}!`
-}
-
-export const helloWorldService = createService({ helloWorld })
-```
-
-> An explicit `Promise` return-type of a Samen-function is required
-
-We're exporting a service called `helloWorldService`, containing a `helloWorld` function. The names of services and functions define how you can call them in the client. For the example above, this would be:
-
-```ts
-await client.helloWorldService.helloWorld("Jim")
-```
-
-Samen doesn't care about how you write this down, or how you organise your services and functions. For small projects this could be fine. You can even inline the functions if that's your style:
-
-```ts
-import { createService } from "@samen/server"
-
-export const helloWorldService = createService({
-  helloWorld: async (name: string): Promise<string> => `Hi there, ${name}!`,
-})
-```
-
-However, your functions would probably have more functionality than the examples so far. In most cases it's wise to move them out to their own files:
+In our hello world example we had the function inside the `samen.ts` file. In most cases it's wise to move them out to their own files:
 
 ```ts
 import { createService } from "@samen/server"
@@ -154,19 +169,20 @@ await client.userService.register()
 await client.articleService.getArticle()
 ```
 
-How you organise your functions is totally up to you! As long as Samen can find your exported services in your Samen file, it'll be all good.
+How you organise your functions is totally up to you! As long as Samen can find your exported services in your `samen.ts` file, it'll be all good.
 
 ## Using the client
 
-The client is generated by running samen and it's based on the Samen file on the server. It could be used in any TypeScript based frontend project, or even on different servers or in node-executables. Go nuts! As long as there's TypeScript, you can use the Samen client.
+The `SamenClient` class is generated by running Samen. It could be used in any TypeScript based frontend project, or even on different servers or in node-executables. Go nuts! As long as there's TypeScript, you can use the Samen client. It's defenitely not tied to React or any other frontend framework.
 
 You can initialise the client like so:
 
 ```ts
+import unfetch from "isomorphic-unfetch"
+
 import { SamenClient } from "./samen.generated"
 
-const fetch = window.fetch.bind(window)
-const client = new SamenClient(fetch, "http://localhost:3030")
+const client = new SamenClient(unfetch, "http://localhost:3030")
 ```
 
 The Samen client is a class that takes a couple of arguments:
