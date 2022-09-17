@@ -2,15 +2,15 @@
 
 Samen is a new kind of backend framework for building RPC based API's in TypeScript. Our mission is to reduce the amount of (boilerplate) code you need to create a backend for your apps.
 
-Features:
+**Features**:
 
-- code-first, minimal API
-- generates a type-safe SDK for your frontends
-- easily share your models between server and client
-- parses the input and output based on your models
-- comes with a Terminal UI
-- middleware
-- zero dependencies, just 1 peer dependency: TypeScript
+✅ code-first, minimal API  
+✨ generates a type-safe SDK for your frontends
+🚀 easily share your models between server and client  
+📋 parses the input and output based on your models  
+🔋 comes with a Terminal UI  
+🖖 middleware  
+🏛️ zero dependencies, just 1 peer dep: TypeScript
 
 ## Hello World!
 
