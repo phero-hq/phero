@@ -198,6 +198,10 @@ Once you've got an initialised client, you can call functions on the server like
 await client.exampleService.helloWorld()
 ```
 
+## Documentation
+
+A complete set of documentation could be found at: [docs.samen.io](https://docs.samen.io/). For the basics, keep scrolling!
+
 ## License
 
 Samen is [licensed as Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0).
