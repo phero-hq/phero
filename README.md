@@ -36,9 +36,9 @@ export const exampleService = createService({
 
 As you can see our function `sayHello` returns an object with the structure of `HelloMessage`. Samen will analyse the function(s) you've exposed with the `createService` API. It will gather all models (interfaces, enums and type aliases) your client will need.
 
-Now, when you hit `npx samen` in your project directory, Samen will generate an SDK for your client(s) in a file called `samen.generated.ts`. It will include a generated `SamenClient` class which just wraps all your exposed services in to one API. Of course you can then also import all the models you need, `HelloMessage` in this case.
+Now, when you hit `npx samen` in your project directory, Samen will generate an SDK for your client(s) in a file called `samen.generated.ts`. It will include a generated `SamenClient` class which wraps all your exposed services in to one API. Of course you can then also import all the models you need, `HelloMessage` in this case.
 
-Her's an example of how that looks on your frontend:
+Here's an example of how that looks on your frontend:
 
 ```ts
 import { useCallback, useState } from "react"
@@ -91,7 +91,7 @@ async function sayHello(name: string): Promise<HelloMessage> {
 }
 ```
 
-On your client you can now just catch this error:
+On your client you can now catch this error:
 
 ```ts
 import { HelloMessage, NameTooShortError } from "../samen.generated"
