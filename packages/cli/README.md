@@ -1,6 +1,6 @@
 # Samen
 
-Samen is a new kind of backend framework for building RPC based API's in TypeScript. Our mission is to reduce the amount of (boilerplate) code you need to create a backend for your apps.
+Samen is a new kind of backend framework for building RPC style API's in TypeScript. Our mission is to reduce the amount of (boilerplate) code you need to create a backend for your apps.
 
 **Features**:
 
@@ -12,9 +12,9 @@ Samen is a new kind of backend framework for building RPC based API's in TypeScr
 🖖 middleware  
 🏛️ zero dependencies, just 1 peer dep: TypeScript
 
-## Hello World!
+## Example: Hello World!
 
-Example `src/samen.ts` in your server Node.JS module.
+All you need is a file called `src/samen.ts` on your backend. Here's an example:
 
 ```ts
 import { createService } from "@samen/server"
@@ -34,9 +34,11 @@ export const exampleService = createService({
 })
 ```
 
-When you hit `npx samen` in your project directory samen will analyse your `samen.ts` file and generate an SDK for your.
+As you can see our function `sayHello` returns an object with the structure of `HelloMessage`. Samen will analyse the function(s) you've exposed with the `createService` API. It will gather all models (interfaces, enums and type aliases) your client will need.
 
-Example `src/HelloMessage.tsx`
+Now, when you hit `npx samen` in your project directory, Samen will generate an SDK for your client(s) in a file called `samen.generated.ts`. It will include a generated `SamenClient` class which wraps all your exposed services in to one API. Of course you can then also import all the models you need, `HelloMessage` in this case.
+
+Here's an example of how that looks on your frontend:
 
 ```ts
 import { useCallback, useState } from "react"
@@ -53,7 +55,7 @@ export function HelloMessage() {
   const [message, setMessage] = useState<string | null>(null)
 
   const onPress = useCallback(async () => {
-    // call your RPC function
+    // call your RPC function on your service
     const helloMessage: HelloMessage = await samen.exampleService.sayHello(
       "Steve Jobs",
     )
@@ -65,6 +67,45 @@ export function HelloMessage() {
   }
 
   return <div>{message}</div>
+}
+```
+
+### Error handling
+
+Now, let's say we want to check for a minimum of 3 characters for the person we want to greet. Like this:
+
+```ts
+class NameTooShortError extends Error {
+  constructor(public readonly minimumLength: number) {
+    super()
+  }
+}
+
+async function sayHello(name: string): Promise<HelloMessage> {
+  if (name.length < 3) {
+    throw new NameTooShortError(3)
+  }
+  return {
+    text: `Hello, ${name}`,
+  }
+}
+```
+
+On your client you can now catch this error:
+
+```ts
+import { HelloMessage, NameTooShortError } from "../samen.generated"
+try {
+  const helloMessage: HelloMessage = await samen.exampleService.sayHello(
+    "", // oops!
+  )
+  // TODO insert logic here
+} catch (e) {
+  if (e instanceof NameTooShortError) {
+    alert(`Name too short, should be at least ${e.minimumLength} characters`)
+  } else {
+    throw e
+  }
 }
 ```
 
