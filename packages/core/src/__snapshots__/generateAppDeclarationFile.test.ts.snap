@@ -106,6 +106,36 @@ export declare namespace articleService {
 "
 `;
 
+exports[`generateAppDeclarationFile typeAliases type aliases to native array types 1`] = `
+"export declare namespace domain {
+    namespace v_1_0_0 {
+        type AadReturnType1 = string[];
+    }
+}
+export declare namespace articleService {
+    namespace v_1_0_0 {
+        function getArticle(): Promise<domain.v_1_0_0.AadReturnType1>;
+    }
+}
+"
+`;
+
+exports[`generateAppDeclarationFile typeAliases type aliases to native types 1`] = `
+"export declare namespace domain {
+    namespace v_1_0_0 {
+        type AadReturnType2 = boolean;
+    }
+}
+export declare namespace articleService {
+    namespace v_1_0_0 {
+        function getArticle(): Promise<{
+            aad: domain.v_1_0_0.AadReturnType2;
+        }>;
+    }
+}
+"
+`;
+
 exports[`generateAppDeclarationFile typeAliases type aliases which are aliases of aliases 1`] = `
 "export declare namespace domain {
     namespace v_1_0_0 {

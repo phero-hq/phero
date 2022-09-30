@@ -43,26 +43,34 @@ export default function parseModels(
       // 1. we got a `type X = Y` where Y itself is also a type alias
       // 2. we got a `type X = [A, B]`, X is a tuple
       const typeNameSymbol = typeChecker.getSymbolAtLocation(typeNode.typeName)
-      if (typeNameSymbol?.declarations?.length) {
-        for (const declr of typeNameSymbol.declarations) {
-          doDeclaration(declr)
-        }
-      }
 
-      if (addedSymbols.includes(symbol)) {
+      if (!symbol && !typeNameSymbol) {
         return
       }
 
-      addedSymbols.push(symbol)
-
-      for (const declaration of symbol.declarations ?? []) {
-        // prevent that we include TS lib types
-        if (isExternalDeclaration(declaration)) {
-          declaration
-          continue
+      if (typeNameSymbol) {
+        addedSymbols.includes(typeNameSymbol)
+        if (typeNameSymbol?.declarations?.length) {
+          for (const declr of typeNameSymbol.declarations) {
+            doDeclaration(declr)
+          }
+        }
+      } else if (symbol) {
+        if (addedSymbols.includes(symbol)) {
+          return
         }
 
-        doDeclaration(declaration)
+        addedSymbols.push(symbol)
+
+        for (const declaration of symbol.declarations ?? []) {
+          // prevent that we include TS lib types
+          if (isExternalDeclaration(declaration)) {
+            declaration
+            continue
+          }
+
+          doDeclaration(declaration)
+        }
       }
     } else if (ts.isTypeLiteralNode(typeNode)) {
       doMembers(typeNode.members)
