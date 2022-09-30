@@ -210,5 +210,90 @@ describe("generateAppDeclarationFile", () => {
 
       expect(parsedApp).toMatchSnapshot()
     })
+    test("type aliases to native types", () => {
+      const parsedApp = generate(
+        createTestProgram({
+          aad: `
+          export type AadReturnType2 = boolean
+          export async function Aad2(): Promise<{
+            aad: AadReturnType2
+          }> {
+            return {
+              aad: true,
+            }
+          }
+          `,
+
+          samen: `
+          import {Aad2} from "./aad"
+
+          export const articleService = createService({
+            getArticle: Aad2,
+          })
+        `,
+        }),
+      )
+
+      expect(parsedApp).toMatchSnapshot()
+    })
+    test("type aliases to native array types", () => {
+      const parsedApp = generate(
+        createTestProgram({
+          aad: `
+          export type AadReturnType1 = string[]
+          export async function Aad1(): Promise<AadReturnType1> {
+            return []
+          }
+          `,
+
+          samen: `
+          import {Aad1} from "./aad"
+
+          export const articleService = createService({
+            getArticle: Aad1,
+          })
+        `,
+        }),
+      )
+
+      expect(parsedApp).toMatchSnapshot()
+    })
+    test("jasper", () => {
+      const parsedApp = generate(
+        createTestProgram({
+          other: `
+          export interface X {
+            type: 'x'
+          }
+
+          export interface Y {
+            type: 'y'
+          }
+
+          export type Z = X | Y
+
+          export interface A {
+            b: B
+          }
+
+          export interface B {
+            [key: string]: Z
+          }
+
+          export async function example(a: A): Promise<void> {}
+          `,
+
+          samen: `
+          import {example} from "./other"
+
+          export const articleService = createService({
+            example,
+          })
+        `,
+        }),
+      )
+
+      expect(parsedApp).toMatchSnapshot()
+    })
   })
 })

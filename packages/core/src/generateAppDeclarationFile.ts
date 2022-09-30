@@ -23,7 +23,6 @@ export default function generateAppDeclarationFile(
     app.models,
     typeChecker,
     ts.factory.createQualifiedName(domainIdentifier, versionIdentifier),
-    undefined,
   )
 
   const namespaceDeclrs: ts.ModuleDeclaration[] = []

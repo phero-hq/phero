@@ -4,12 +4,17 @@ import generateParserFromModel from "./code-gen/parsers/generateParserFromModel"
 import generateParserModel from "./code-gen/parsers/generateParserModel"
 import { ParseError } from "./errors"
 import { ParsedError } from "./extractErrors/parseThrowStatement"
+import { isModel } from "./parseAppDeclaration"
 import parseReturnType from "./parseSamenApp/parseReturnType"
 import {
   Model,
   ParsedSamenFunctionDefinition,
 } from "./parseSamenApp/parseSamenApp"
-import { getNameAsString, isExternalType } from "./tsUtils"
+import {
+  getNameAsString,
+  isExternalDeclaration,
+  isExternalType,
+} from "./tsUtils"
 import * as tsx from "./tsx"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
@@ -516,57 +521,52 @@ export class ReferenceMaker {
   constructor(
     private readonly domain: Model[],
     private readonly typeChecker: ts.TypeChecker,
-    private readonly sharedDomainName: ts.EntityName | undefined,
-    private readonly serviceDomainName: ts.EntityName | undefined,
+    private readonly sharedDomainName: ts.EntityName,
   ) {
     this.sharedTypes = this.domain.map((m) => typeChecker.getTypeAtLocation(m))
   }
 
-  fromTypeNode(typeNode: ts.TypeReferenceNode): ts.EntityName {
-    const type = this.typeChecker.getTypeFromTypeNode(typeNode)
-    const result = this.toEntityNames(typeNode.typeName, type)
-    return combineAsEntityName(result.flatMap(unpack))
+  public fromTypeNode(typeNode: ts.TypeReferenceNode): ts.EntityName {
+    if (typeNode.typeName.getText() === "SamenContext") {
+      return ts.factory.createIdentifier("samen.SamenContext")
+    }
+
+    const symbol = this.typeChecker.getSymbolAtLocation(typeNode.typeName)
+
+    const declr = symbol?.declarations?.[0]
+
+    if (declr && isModel(declr) && this.domain.includes(declr)) {
+      return combineAsEntityName(
+        [
+          this.sharedDomainName,
+          cleanTypeName(typeNode.typeName, this.typeChecker),
+        ].flatMap(unpack),
+      )
+    }
+
+    return typeNode.typeName
   }
 
-  fromIdentifier(
+  public fromIdentifier(
     identifier: ts.Identifier,
   ): ts.Identifier | ts.PropertyAccessExpression {
-    const type = this.typeChecker.getTypeAtLocation(identifier)
-    const result = this.toEntityNames(identifier, type)
-    return combineAsExpr(result.flatMap(unpack))
-  }
-
-  toEntityNames(name: ts.EntityName, type: ts.Type): ts.EntityName[] {
-    if (name.getText() === "SamenContext") {
-      return [ts.factory.createIdentifier("samen.SamenContext")]
+    if (identifier.text === "SamenContext") {
+      return ts.factory.createIdentifier("samen.SamenContext")
     }
 
-    const isSharedType = this.sharedTypes.some(
-      (st) =>
-        (st.symbol ?? st.aliasSymbol) === (type.symbol ?? type.aliasSymbol),
-    )
+    const symbol = this.typeChecker.getSymbolAtLocation(identifier)
 
-    const modelName = cleanTypeName(name, this.typeChecker)
+    const declr = symbol?.declarations?.[0]
 
-    if (isExternalType(type)) {
-      return [modelName]
+    if (declr && isModel(declr) && this.domain.includes(declr)) {
+      return combineAsExpr(
+        [
+          this.sharedDomainName,
+          cleanTypeName(identifier, this.typeChecker),
+        ].flatMap(unpack),
+      )
     }
 
-    const withDomainEntity = (name: ts.EntityName): ts.EntityName[] => {
-      return this.sharedDomainName ? [this.sharedDomainName, name] : [name]
-    }
-
-    if (isSharedType) {
-      return withDomainEntity(modelName)
-    }
-
-    if ((type.flags & ts.TypeFlags.EnumLiteral) === ts.TypeFlags.EnumLiteral) {
-      const theEnum = this.typeChecker.getBaseTypeOfLiteralType(type)
-      if (this.sharedTypes.some((st) => st.symbol === theEnum.symbol)) {
-        return withDomainEntity(modelName)
-      }
-    }
-
-    return [modelName]
+    return identifier
   }
 }
