@@ -23,7 +23,7 @@
     "eventsource": "^1.1.0"
   },
   "peerDependencies": {
-    "typescript": "^4.4.4"
+    "typescript": "^4.8.4"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

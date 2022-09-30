@@ -27,7 +27,7 @@
     "@samen/dev": "^0.9.3-rc.1"
   },
   "peerDependencies": {
-    "typescript": "^4.4.4"
+    "typescript": "^4.8.4"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
