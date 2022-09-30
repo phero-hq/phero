@@ -18,7 +18,6 @@ export default function generateClientSource(
     domainModels,
     typeChecker,
     undefined,
-    undefined,
   )
 
   const importsFromClientPackage = tsx.importDeclaration({
@@ -99,7 +98,6 @@ export default function generateClientSource(
         const serviceRefMaker = new ReferenceMaker(
           domainModels,
           typeChecker,
-          undefined,
           undefined,
         )
 
