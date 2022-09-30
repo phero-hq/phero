@@ -65,7 +65,6 @@ export default function parseModels(
         for (const declaration of symbol.declarations ?? []) {
           // prevent that we include TS lib types
           if (isExternalDeclaration(declaration)) {
-            declaration
             continue
           }
 

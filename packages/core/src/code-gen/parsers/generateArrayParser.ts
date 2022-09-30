@@ -1,12 +1,11 @@
 import ts from "typescript"
 import generateParserFromModel from "./generateParserFromModel"
-import Pointer from "./Pointer"
 import {
   assignDataToResult,
-  generateOr,
   generatePushErrorExpressionStatement,
 } from "./generateParserLib"
 import { ArrayParserModel } from "./generateParserModel"
+import Pointer from "./Pointer"
 
 export default function generateArrayParser(
   pointer: Pointer<ArrayParserModel>,

@@ -10,11 +10,7 @@ import {
   Model,
   ParsedSamenFunctionDefinition,
 } from "./parseSamenApp/parseSamenApp"
-import {
-  getNameAsString,
-  isExternalDeclaration,
-  isExternalType,
-} from "./tsUtils"
+import { getNameAsString } from "./tsUtils"
 import * as tsx from "./tsx"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)

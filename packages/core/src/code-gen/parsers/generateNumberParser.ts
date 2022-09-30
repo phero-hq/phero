@@ -1,11 +1,10 @@
 import ts from "typescript"
-import Pointer from "./Pointer"
 import {
   assignDataToResult,
   generatePushErrorExpressionStatement,
-  generateOr,
 } from "./generateParserLib"
 import { NumberParserModel } from "./generateParserModel"
+import Pointer from "./Pointer"
 
 export default function generateNumberParser(
   pointer: Pointer<NumberParserModel>,

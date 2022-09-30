@@ -28,19 +28,6 @@ function expectFunctionExpressionWithName(func: any, name: string | undefined) {
   expect(func?.kind).toBe(ts.SyntaxKind.FunctionExpression)
 }
 
-function expectArrowFunctionWithName(func: any, name: string | undefined) {
-  expect(func?.name?.getText()).toBe(name)
-  expect(func?.kind).toBe(ts.SyntaxKind.ArrowFunction)
-}
-
-function expectFunctionDeclarationWithName(
-  func: any,
-  name: string | undefined,
-) {
-  expect(func?.name?.getText()).toBe(name)
-  expect(func?.kind).toBe(ts.SyntaxKind.FunctionDeclaration)
-}
-
 describe("parseSamenApp", () => {
   describe("parse services & function config", () => {
     test("should parse a simple service/function with no config", () => {

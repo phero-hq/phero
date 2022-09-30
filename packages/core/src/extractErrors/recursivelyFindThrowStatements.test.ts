@@ -1,10 +1,10 @@
 import ts from "typescript"
-import recursivelyFindThrowStatements from "./recursivelyFindThrowStatements"
 import {
   compileProgram,
   compileStatement,
   compileStatements,
 } from "../tsTestUtils"
+import recursivelyFindThrowStatements from "./recursivelyFindThrowStatements"
 
 describe("recursivelyFindThrowStatements", () => {
   describe("statements", () => {
@@ -1120,7 +1120,7 @@ describe("recursivelyFindThrowStatements", () => {
 
     test("external object literal expression", () => {
       const {
-        statements: [obj, funcOne],
+        statements: [, funcOne],
         typeChecker,
       } = compileStatements(
         `
@@ -1149,7 +1149,7 @@ describe("recursivelyFindThrowStatements", () => {
 
     test("external 2 object literal expression", () => {
       const {
-        statements: [obj, funcOne],
+        statements: [, funcOne],
         typeChecker,
       } = compileStatements(
         `
@@ -1181,7 +1181,7 @@ describe("recursivelyFindThrowStatements", () => {
 
     test("external 3 object literal expression", () => {
       const {
-        statements: [obj, funcOne],
+        statements: [, funcOne],
         typeChecker,
       } = compileStatements(
         `
@@ -1211,7 +1211,7 @@ describe("recursivelyFindThrowStatements", () => {
 
     test("external 4 object literal expression", () => {
       const {
-        statements: [obj, funcOne],
+        statements: [, funcOne],
         typeChecker,
       } = compileStatements(
         `
@@ -1510,12 +1510,9 @@ describe("recursivelyFindThrowStatements", () => {
         ts.SyntaxKind.FunctionDeclaration,
       )
 
-      expect(
-        recursivelyFindThrowStatements(
-          funcOne as ts.FunctionDeclaration,
-          typeChecker,
-        ),
-      ).toHaveLength(0)
+      expect(recursivelyFindThrowStatements(funcOne, typeChecker)).toHaveLength(
+        0,
+      )
     })
 
     test("called lambda", () => {
@@ -1653,7 +1650,7 @@ describe("recursivelyFindThrowStatements", () => {
   describe("external imports", () => {
     test("default import", () => {
       const {
-        statements: [importSt, funcOne],
+        statements: [, funcOne],
         typeChecker,
       } = compileStatements(
         `
@@ -1675,7 +1672,7 @@ describe("recursivelyFindThrowStatements", () => {
 
     test("named import", () => {
       const {
-        statements: [importSt, funcOne],
+        statements: [, funcOne],
         typeChecker,
       } = compileStatements(
         `
@@ -1697,7 +1694,7 @@ describe("recursivelyFindThrowStatements", () => {
 
     test("aliased import", () => {
       const {
-        statements: [importSt, funcOne],
+        statements: [, funcOne],
         typeChecker,
       } = compileStatements(
         `
@@ -1721,7 +1718,7 @@ describe("recursivelyFindThrowStatements", () => {
   describe("internal imports", () => {
     test("default import", () => {
       const {
-        statements: [importSt, funcOne],
+        statements: [, funcOne],
         typeChecker,
       } = compileProgram({
         samen: `
@@ -1748,7 +1745,7 @@ describe("recursivelyFindThrowStatements", () => {
 
     test("named import", () => {
       const {
-        statements: [importSt, funcOne],
+        statements: [, funcOne],
         typeChecker,
       } = compileProgram({
         samen: `
@@ -1775,7 +1772,7 @@ describe("recursivelyFindThrowStatements", () => {
 
     test("aliased import", () => {
       const {
-        statements: [importSt, funcOne],
+        statements: [, funcOne],
         typeChecker,
       } = compileProgram({
         samen: `

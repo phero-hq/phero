@@ -13,26 +13,6 @@ function parseProgram(prog: ts.Program): ParsedSamenApp {
   return parseSamenApp(prog.getSourceFile("samen.ts")!, prog.getTypeChecker())
 }
 
-function expectFunctionDeclrWithName(func: any, name: string) {
-  expect(func?.name?.getText()).toBe(name)
-  expect(func?.kind).toBe(ts.SyntaxKind.FunctionDeclaration)
-}
-
-function expectArrowFuncDeclrWithName(func: any, name: string) {
-  expect(func?.name?.getText()).toBeUndefined()
-  expect(func?.kind).toBe(ts.SyntaxKind.ArrowFunction)
-}
-
-function expectFunctionExpressionWithName(func: any, name: string | undefined) {
-  expect(func?.name?.getText()).toBe(name)
-  expect(func?.kind).toBe(ts.SyntaxKind.FunctionExpression)
-}
-
-function expectArrowFunctionWithName(func: any, name: string | undefined) {
-  expect(func?.name?.getText()).toBe(name)
-  expect(func?.kind).toBe(ts.SyntaxKind.ArrowFunction)
-}
-
 function expectFunctionDeclarationWithName(
   func: any,
   name: string | undefined,

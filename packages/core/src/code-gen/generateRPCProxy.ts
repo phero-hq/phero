@@ -1,11 +1,10 @@
 import ts from "typescript"
 import { ParsedSamenApp, ParseError } from ".."
-import parseReturnType from "../parseSamenApp/parseReturnType"
 import {
   ParsedSamenFunctionDefinition,
-  ParsedSamenServiceConfig,
   ParsedSamenServiceDefinition,
 } from "../parseSamenApp"
+import parseReturnType from "../parseSamenApp/parseReturnType"
 import { printCode } from "../tsTestUtils"
 import { VirtualCompilerHost } from "../VirtualCompilerHost"
 import generateModelParser, {

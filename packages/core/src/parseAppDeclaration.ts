@@ -36,14 +36,12 @@ export function parseAppDeclarationFileContent(dts: string): {
   result: ParsedAppDeclaration
   typeChecker: ts.TypeChecker
 } {
-  const t1 = Date.now()
-
   const vHost = new VirtualCompilerHost()
   vHost.addFile("api.d.ts", dts)
 
   const program = vHost.createProgram("api.d.ts")
 
-  const emitResult = program.emit()
+  program.emit()
 
   const sourceFile = program.getSourceFile("api.d.ts")
 
@@ -52,10 +50,6 @@ export function parseAppDeclarationFileContent(dts: string): {
   }
 
   const result = parseAppDeclarationSourceFile(sourceFile)
-
-  const t2 = Date.now()
-
-  // console.debug("parseAppDeclaration in", t2 - t1)
 
   return { result, typeChecker: program.getTypeChecker() }
 }
