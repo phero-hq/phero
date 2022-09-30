@@ -1,6 +1,6 @@
 {
   "name": "@samen/server",
-  "version": "0.9.3-rc.1",
+  "version": "0.9.3-rc.2",
   "main": "dist/index.js",
   "description": "Server library for Samen",
   "homepage": "https://samen.io",
@@ -23,8 +23,8 @@
     "postbuild": "cp package.json ./dist/package.json"
   },
   "dependencies": {
-    "@samen/core": "^0.9.3-rc.1",
-    "@samen/dev": "^0.9.3-rc.1"
+    "@samen/core": "^0.9.3-rc.2",
+    "@samen/dev": "^0.9.3-rc.2"
   },
   "peerDependencies": {
     "typescript": "^4.4.4"
