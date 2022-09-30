@@ -258,5 +258,42 @@ describe("generateAppDeclarationFile", () => {
 
       expect(parsedApp).toMatchSnapshot()
     })
+    test("jasper", () => {
+      const parsedApp = generate(
+        createTestProgram({
+          other: `
+          export interface X {
+            type: 'x'
+          }
+
+          export interface Y {
+            type: 'y'
+          }
+
+          export type Z = X | Y
+
+          export interface A {
+            b: B
+          }
+
+          export interface B {
+            [key: string]: Z
+          }
+
+          export async function example(a: A): Promise<void> {}
+          `,
+
+          samen: `
+          import {example} from "./other"
+
+          export const articleService = createService({
+            example,
+          })
+        `,
+        }),
+      )
+
+      expect(parsedApp).toMatchSnapshot()
+    })
   })
 })

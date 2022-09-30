@@ -106,6 +106,32 @@ export declare namespace articleService {
 "
 `;
 
+exports[`generateAppDeclarationFile typeAliases jasper 1`] = `
+"export declare namespace domain {
+    namespace v_1_0_0 {
+        interface X {
+            type: \\"x\\";
+        }
+        interface Y {
+            type: \\"y\\";
+        }
+        type Z = domain.v_1_0_0.X | domain.v_1_0_0.Y;
+        interface B {
+            [key: string]: domain.v_1_0_0.Z;
+        }
+        interface A {
+            b: domain.v_1_0_0.B;
+        }
+    }
+}
+export declare namespace articleService {
+    namespace v_1_0_0 {
+        function example(a: domain.v_1_0_0.A): Promise<void>;
+    }
+}
+"
+`;
+
 exports[`generateAppDeclarationFile typeAliases type aliases to native array types 1`] = `
 "export declare namespace domain {
     namespace v_1_0_0 {
