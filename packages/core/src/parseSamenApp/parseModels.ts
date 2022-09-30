@@ -96,6 +96,8 @@ export default function parseModels(
       for (const el of typeNode.elements) {
         doType(el)
       }
+    } else if (ts.isParenthesizedTypeNode(typeNode)) {
+      doType(typeNode.type)
     } else if (!IGNORE_SYNTAX_KIND.includes(typeNode.kind)) {
       console.warn("Model extracting not possible for node " + typeNode.kind)
     }

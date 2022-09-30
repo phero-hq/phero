@@ -662,6 +662,43 @@ describe("parseSamenApp", () => {
         undefined,
       )
     })
+    test("should parse parenthesized type", () => {
+      const parsedApp = parseProgram(
+        createTestProgram({
+          other: `
+          interface MyInterface {
+            prop: (string | null)[]
+          }
+
+          export async function myFunction(): Promise<MyInterface> {
+            return {
+              prop: [null],
+            }
+          }
+          `,
+          samen: `
+          import { myFunction } from "./other"
+
+          export const articleService = createService({
+            editArticle: myFunction,
+          })
+          `,
+        }),
+      )
+
+      expect(parsedApp).toMatchObject({
+        services: [
+          expect.objectContaining({
+            name: "articleService",
+            funcs: [
+              expect.objectContaining({
+                name: "editArticle",
+              }),
+            ],
+          }),
+        ],
+      })
+    })
   })
 
   describe("parse errors", () => {
