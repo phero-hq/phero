@@ -521,7 +521,7 @@ export class ReferenceMaker {
   constructor(
     private readonly domain: Model[],
     private readonly typeChecker: ts.TypeChecker,
-    private readonly sharedDomainName: ts.EntityName,
+    private readonly sharedDomainName: ts.EntityName | undefined,
   ) {
     this.sharedTypes = this.domain.map((m) => typeChecker.getTypeAtLocation(m))
   }
@@ -538,7 +538,7 @@ export class ReferenceMaker {
     if (declr && isModel(declr) && this.domain.includes(declr)) {
       return combineAsEntityName(
         [
-          this.sharedDomainName,
+          ...(this.sharedDomainName ? [this.sharedDomainName] : []),
           cleanTypeName(typeNode.typeName, this.typeChecker),
         ].flatMap(unpack),
       )
@@ -561,7 +561,7 @@ export class ReferenceMaker {
     if (declr && isModel(declr) && this.domain.includes(declr)) {
       return combineAsExpr(
         [
-          this.sharedDomainName,
+          ...(this.sharedDomainName ? [this.sharedDomainName] : []),
           cleanTypeName(identifier, this.typeChecker),
         ].flatMap(unpack),
       )
