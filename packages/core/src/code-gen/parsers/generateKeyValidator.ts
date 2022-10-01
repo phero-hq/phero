@@ -35,14 +35,14 @@ export function generateKeyValidator(
   }
 
   if (model.type === ParserModelType.Union) {
-    const literalExprs: ts.LiteralExpression[] = model.oneOf.reduce(
+    const literalExprs: ts.LiteralExpression[] = model.oneOf.reduce<ts.LiteralExpression[]>(
       (result, element) =>
         element.type === ParserModelType.StringLiteral
           ? [...result, ts.factory.createStringLiteral(element.literal)]
           : element.type === ParserModelType.NumberLiteral
-          ? [...result, ts.factory.createNumericLiteral(element.literal)]
-          : result,
-      [] as ts.LiteralExpression[],
+            ? [...result, ts.factory.createNumericLiteral(element.literal)]
+            : result,
+      [],
     )
 
     return ts.factory.createPrefixUnaryExpression(

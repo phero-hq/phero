@@ -24,21 +24,21 @@ export default function generateTypeParameterParser(
       init: tsx.expression.call(
         pointer.model.defaultParser
           ? tsx.expression.parenthesis(
-              tsx.expression.binary(
-                ts.factory.createIdentifier(tParamName),
-                "??",
-                generateInlineTypeParameterParser(
-                  pointer.model.defaultParser.typeName,
-                  generateParserFromModel(pointer.model.defaultParser.parser, [
-                    {
-                      type: ParserModelType.Root,
-                      name: "data",
-                      parser: pointer.model.defaultParser.parser,
-                    },
-                  ]),
-                ),
+            tsx.expression.binary(
+              ts.factory.createIdentifier(tParamName),
+              "??",
+              generateInlineTypeParameterParser(
+                pointer.model.defaultParser.typeName,
+                generateParserFromModel(pointer.model.defaultParser.parser, [
+                  {
+                    type: ParserModelType.Root,
+                    name: "data",
+                    parser: pointer.model.defaultParser.parser,
+                  },
+                ]),
               ),
-            )
+            ),
+          )
           : tsx.expression.identifier(tParamName),
         { args: [pointer.dataVarExpr] },
       ),

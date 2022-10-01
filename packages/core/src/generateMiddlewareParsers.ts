@@ -32,11 +32,11 @@ export default function generateMiddlewareParsers(
 
           middleware.nextType
             ? generateInlineParser({
-                returnType: tsx.type.any,
-                parser: generateParserFromModel(
-                  generateParserModel(typeChecker, middleware.nextType, "data"),
-                ),
-              })
+              returnType: tsx.type.any,
+              parser: generateParserFromModel(
+                generateParserModel(typeChecker, middleware.nextType, "data"),
+              ),
+            })
             : tsx.literal.null,
         ),
       ),

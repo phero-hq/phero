@@ -57,16 +57,16 @@ export default class Pointer<TParserModel extends ParserModel> {
 
     return tail.length
       ? ts.factory.createTemplateExpression(
-          ts.factory.createTemplateHead(`${head}[`),
-          tail.map((span, i) =>
-            ts.factory.createTemplateSpan(
-              ts.factory.createIdentifier(`it_${i}`),
-              i === tail.length - 1
-                ? ts.factory.createTemplateTail(`]${span}`)
-                : ts.factory.createTemplateMiddle(`]${span}[`),
-            ),
+        ts.factory.createTemplateHead(`${head}[`),
+        tail.map((span, i) =>
+          ts.factory.createTemplateSpan(
+            ts.factory.createIdentifier(`it_${i}`),
+            i === tail.length - 1
+              ? ts.factory.createTemplateTail(`]${span}`)
+              : ts.factory.createTemplateMiddle(`]${span}[`),
           ),
-        )
+        ),
+      )
       : ts.factory.createStringLiteral(head)
   }
 }

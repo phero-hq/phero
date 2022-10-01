@@ -66,30 +66,30 @@ function generateParserCall(
           param.parser.type === ParserModelType.TypeParameter
             ? param.parser.defaultParser
               ? ts.factory.createBinaryExpression(
-                  ts.factory.createIdentifier(`t${param.parser.position}`),
-                  ts.factory.createToken(ts.SyntaxKind.QuestionQuestionToken),
-                  generateInlineTypeParameterParser(
-                    param.fullyQualifiedName?.full ?? param.typeName,
-                    generateParserFromModel(param.parser.defaultParser.parser, [
-                      {
-                        type: ParserModelType.Root,
-                        name: "data",
-                        parser: param.parser.defaultParser.parser,
-                      },
-                    ]),
-                  ),
-                )
+                ts.factory.createIdentifier(`t${param.parser.position}`),
+                ts.factory.createToken(ts.SyntaxKind.QuestionQuestionToken),
+                generateInlineTypeParameterParser(
+                  param.fullyQualifiedName?.full ?? param.typeName,
+                  generateParserFromModel(param.parser.defaultParser.parser, [
+                    {
+                      type: ParserModelType.Root,
+                      name: "data",
+                      parser: param.parser.defaultParser.parser,
+                    },
+                  ]),
+                ),
+              )
               : ts.factory.createIdentifier(`t${param.parser.position}`)
             : generateInlineTypeParameterParser(
-                param.fullyQualifiedName?.full ?? param.typeName,
-                generateParserFromModel(param.parser, [
-                  {
-                    type: ParserModelType.Root,
-                    name: "data",
-                    parser: pointer.model,
-                  },
-                ]),
-              ),
+              param.fullyQualifiedName?.full ?? param.typeName,
+              generateParserFromModel(param.parser, [
+                {
+                  type: ParserModelType.Root,
+                  name: "data",
+                  parser: pointer.model,
+                },
+              ]),
+            ),
         ) ?? []),
       ],
     )

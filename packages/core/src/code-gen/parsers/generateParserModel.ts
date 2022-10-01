@@ -60,7 +60,7 @@ export type ParserModel =
   | AnyParserModel
   | TypeParameterParserModel
 
-export type RootParserModel = {
+export interface RootParserModel {
   type: ParserModelType.Root
   rootTypeParser?: {
     typeName: string
@@ -76,73 +76,73 @@ export type RootParserModel = {
   name: string
   parser: ParserModel
 }
-export type StringParserModel = { type: ParserModelType.String }
-export type StringLiteralParserModel = {
+export interface StringParserModel { type: ParserModelType.String }
+export interface StringLiteralParserModel {
   type: ParserModelType.StringLiteral
   literal: string
 }
-export type NumberParserModel = { type: ParserModelType.Number }
-export type NumberLiteralParserModel = {
+export interface NumberParserModel { type: ParserModelType.Number }
+export interface NumberLiteralParserModel {
   type: ParserModelType.NumberLiteral
   literal: number
 }
-export type BooleanParserModel = { type: ParserModelType.Boolean }
-export type BooleanLiteralParserModel = {
+export interface BooleanParserModel { type: ParserModelType.Boolean }
+export interface BooleanLiteralParserModel {
   type: ParserModelType.BooleanLiteral
   literal: boolean
 }
-export type NullParserModel = { type: ParserModelType.Null }
-export type UndefinedParserModel = { type: ParserModelType.Undefined }
-export type VoidParserModel = { type: ParserModelType.Void }
-export type ObjectParserModel = {
+export interface NullParserModel { type: ParserModelType.Null }
+export interface UndefinedParserModel { type: ParserModelType.Undefined }
+export interface VoidParserModel { type: ParserModelType.Void }
+export interface ObjectParserModel {
   type: ParserModelType.Object
   members: (MemberParserModel | IndexMemberParserModel)[]
 }
-export type MemberParserModel = {
+export interface MemberParserModel {
   type: ParserModelType.Member
   name: string
   optional: boolean
   parser: ParserModel
 }
-export type IndexMemberParserModel = {
+export interface IndexMemberParserModel {
   type: ParserModelType.IndexMember
   keyParser: ParserModel
   depth: number
   optional: boolean
   parser: ParserModel
 }
-export type ArrayParserModel = {
+export interface ArrayParserModel {
   type: ParserModelType.Array
   depth: number
   element: ArrayElementParserModel
 }
-export type ArrayElementParserModel = {
+export interface ArrayElementParserModel {
   type: ParserModelType.ArrayElement
   depth: number
   parser: ParserModel
 }
-export type TupleParserModel = {
+export interface TupleParserModel {
   type: ParserModelType.Tuple
   elements: TupleElementParserModel[]
 }
-export type TupleElementParserModel = {
+export interface TupleElementParserModel {
   type: ParserModelType.TupleElement
   position: number
   parser: ParserModel
 }
-export type UnionParserModel = {
+export interface UnionParserModel {
   type: ParserModelType.Union
   oneOf: ParserModel[]
 }
-export type IntersectionParserModel = {
+export interface IntersectionParserModel {
   type: ParserModelType.Intersection
   parsers: ParserModel[]
 }
-export type EnumParserModel = {
+export interface EnumParserModel {
   type: ParserModelType.Enum
   members: (StringLiteralParserModel | NumberLiteralParserModel)[]
 }
-export type ReferenceParserModel = {
+export interface ReferenceParserModel {
   type: ParserModelType.Reference
   typeName: string
   fullyQualifiedName: {
@@ -161,13 +161,13 @@ export type ReferenceParserModel = {
     parser: ParserModel
   }[]
 }
-export type DateParserModel = {
+export interface DateParserModel {
   type: ParserModelType.Date
 }
-export type AnyParserModel = {
+export interface AnyParserModel {
   type: ParserModelType.Any
 }
-export type TypeParameterParserModel = {
+export interface TypeParameterParserModel {
   type: ParserModelType.TypeParameter
   typeName: string
   position: number
@@ -356,10 +356,10 @@ export default function generateParserModel(
     if (ts.isArrayTypeNode(node)) {
       return {
         type: ParserModelType.Array,
-        depth: depth,
+        depth,
         element: {
           type: ParserModelType.ArrayElement,
-          depth: depth,
+          depth,
           parser: generate(node.elementType, depth + 1),
         },
       }
@@ -433,10 +433,10 @@ export default function generateParserModel(
     ) {
       return {
         type: ParserModelType.Array,
-        depth: depth,
+        depth,
         element: {
           type: ParserModelType.ArrayElement,
-          depth: depth,
+          depth,
           parser: generate(node.typeArguments[0], depth + 1),
         },
       }
@@ -593,7 +593,7 @@ export default function generateParserModel(
 
       return {
         type: ParserModelType.Object,
-        members: props.reduce((members, member) => {
+        members: props.reduce<MemberParserModel[]>((members, member) => {
           const memberType = typeChecker.getTypeOfSymbolAtLocation(member, node)
           const actualType = typeChecker.typeToTypeNode(
             memberType,
@@ -614,7 +614,7 @@ export default function generateParserModel(
                 },
               ]
             : members
-        }, [] as MemberParserModel[]),
+        }, []),
       }
     }
     return {

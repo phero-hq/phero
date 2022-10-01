@@ -262,8 +262,8 @@ export function generateModel(model: Model, refMaker: ReferenceMaker): Model {
                 ? refMaker.fromIdentifier(t.expression)
                 : ts.isPropertyAccessExpression(t.expression) &&
                   ts.isIdentifier(t.expression.name)
-                ? refMaker.fromIdentifier(t.expression.name)
-                : t.expression,
+                  ? refMaker.fromIdentifier(t.expression.name)
+                  : t.expression,
               t.typeArguments?.map((t) => generateTypeNode(t, refMaker)),
             )
           }),
@@ -283,8 +283,8 @@ export function generateModel(model: Model, refMaker: ReferenceMaker): Model {
             (ts.isStringLiteral(member.initializer)
               ? ts.factory.createStringLiteral(member.initializer.text)
               : ts.isNumericLiteral(member.initializer)
-              ? ts.factory.createNumericLiteral(member.initializer.text)
-              : undefined),
+                ? ts.factory.createNumericLiteral(member.initializer.text)
+                : undefined),
         )
       }),
     )

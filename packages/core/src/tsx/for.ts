@@ -23,7 +23,7 @@ export function simpleForOver({
       ts.factory.createIdentifier("i"),
       ts.factory.createToken(ts.SyntaxKind.LessThanToken),
       ts.factory.createPropertyAccessExpression(
-        typeof name == "string" ? ts.factory.createIdentifier(name) : name,
+        typeof name === "string" ? ts.factory.createIdentifier(name) : name,
         ts.factory.createIdentifier("length"),
       ),
     ),

@@ -709,7 +709,7 @@ function generateInnerFunction(
                   tsx.const({
                     name: "inputWithContext",
                     init: tsx.literal.object(
-                      ...(!!funcDef.serviceContext?.paramName
+                      ...(funcDef.serviceContext?.paramName
                         ? [
                             tsx.property.spreadAssignment("input"),
                             tsx.property.assignment(

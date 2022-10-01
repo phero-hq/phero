@@ -1530,7 +1530,7 @@ describe("recursivelyFindThrowStatements", () => {
 
       expect(
         recursivelyFindThrowStatements(
-          funcOne as ts.FunctionDeclaration,
+          funcOne,
           typeChecker,
         ),
       ).toHaveLength(1)
@@ -1553,7 +1553,7 @@ describe("recursivelyFindThrowStatements", () => {
 
       expect(
         recursivelyFindThrowStatements(
-          funcOne as ts.FunctionDeclaration,
+          funcOne,
           typeChecker,
         ),
       ).toHaveLength(1)
@@ -1576,7 +1576,7 @@ describe("recursivelyFindThrowStatements", () => {
 
       expect(
         recursivelyFindThrowStatements(
-          funcOne as ts.FunctionDeclaration,
+          funcOne,
           typeChecker,
         ),
       ).toHaveLength(1)
@@ -1599,7 +1599,7 @@ describe("recursivelyFindThrowStatements", () => {
 
       expect(
         recursivelyFindThrowStatements(
-          funcOne as ts.FunctionDeclaration,
+          funcOne,
           typeChecker,
         ),
       ).toHaveLength(1)
@@ -1619,7 +1619,7 @@ describe("recursivelyFindThrowStatements", () => {
 
       expect(
         recursivelyFindThrowStatements(
-          funcOne as ts.FunctionDeclaration,
+          funcOne,
           typeChecker,
         ),
       ).toHaveLength(0)
@@ -1640,7 +1640,7 @@ describe("recursivelyFindThrowStatements", () => {
 
       expect(
         recursivelyFindThrowStatements(
-          funcOne as ts.FunctionDeclaration,
+          funcOne,
           typeChecker,
         ),
       ).toHaveLength(1)

@@ -4,7 +4,7 @@ export function generateModifiers(
   arr: (ts.ModifierSyntaxKind | undefined | boolean)[],
 ): ts.Modifier[] {
   return arr
-    .filter((x): x is ts.ModifierSyntaxKind => typeof x == "number")
+    .filter((x): x is ts.ModifierSyntaxKind => typeof x === "number")
     .map((flag) => ts.factory.createModifier(flag))
 }
 

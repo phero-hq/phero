@@ -205,14 +205,14 @@ export function getChildrenOfKind<TKind extends ts.SyntaxKind>(
     node === undefined
       ? []
       : node instanceof Array
-      ? node.flatMap((n) => n.getChildren())
-      : node.getChildren()
+        ? node.flatMap((n) => n.getChildren())
+        : node.getChildren()
 
-  return children.reduce((result, child) => {
+  return children.reduce<KindToNodeMappings[TKind][]>((result, child) => {
     return child.kind === kind
       ? [...result, child as KindToNodeMappings[TKind]]
       : result
-  }, [] as KindToNodeMappings[TKind][])
+  }, [])
 }
 
 export function hasModifier(node: ts.Node, kind: ts.SyntaxKind): boolean {
@@ -307,10 +307,10 @@ export function getFullyQualifiedName(
   typeNode: ts.TypeReferenceNode,
   typeChecker: ts.TypeChecker,
 ): {
-  base: string
-  typeArgs?: string
-  full: string
-} {
+    base: string
+    typeArgs?: string
+    full: string
+  } {
   const type = typeChecker.getTypeFromTypeNode(typeNode)
   const base = cleanUpTypeName(
     typeChecker.getFullyQualifiedName(type.aliasSymbol ?? type.symbol),
@@ -320,9 +320,9 @@ export function getFullyQualifiedName(
     ts.isTypeReferenceNode(typeArg)
       ? getFullyQualifiedName(typeArg, typeChecker).full
       : typeChecker.typeToString(
-          typeChecker.getTypeFromTypeNode(typeArg),
-          typeArg,
-        ),
+        typeChecker.getTypeFromTypeNode(typeArg),
+        typeArg,
+      ),
   )
 
   const typeArgs = fullyQualifiedTypeArgs

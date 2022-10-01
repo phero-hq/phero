@@ -102,14 +102,14 @@ function parseServiceDeclaration({
   const versionModules = statements.map(parseModule)
   return {
     name,
-    versions: versionModules.reduce(
+    versions: versionModules.reduce<ParsedServiceDeclaration["versions"]>(
       (result, versionModule) => ({
         ...result,
         [versionModule.name]: parseServiceDeclarationVersion(
           versionModule.statements,
         ),
       }),
-      {} as ParsedServiceDeclaration["versions"],
+      {},
     ),
   }
 }
@@ -117,7 +117,7 @@ function parseServiceDeclaration({
 function parseServiceDeclarationVersion(
   statements: ts.Statement[],
 ): ParsedServiceDeclarationVersion {
-  return statements.reduce(
+  return statements.reduce<ParsedServiceDeclarationVersion>(
     ({ models, functions, context, errors }, st) => {
       if (isModel(st)) {
         return { models: [...models, st], functions, context, errors }
@@ -148,7 +148,7 @@ function parseServiceDeclarationVersion(
       functions: [],
       context: undefined,
       errors: [],
-    } as ParsedServiceDeclarationVersion,
+    },
   )
 }
 

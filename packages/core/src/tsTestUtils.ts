@@ -27,12 +27,12 @@ export function printSamenApp(app: ParsedSamenApp): string {
     return func.kind === ts.SyntaxKind.FunctionDeclaration
       ? `[FunctionDeclaration(${func.name?.getText()})]`
       : func.kind === ts.SyntaxKind.VariableDeclaration
-      ? `[VariableDeclaration(${func.name?.getText()})]`
-      : func.kind === ts.SyntaxKind.FunctionExpression
-      ? `[FunctionExpression(${func.name?.getText()})]`
-      : func.kind === ts.SyntaxKind.ArrowFunction
-      ? `[ArrowFunction(${func.name?.getText()})]`
-      : "[UNKNOWN]"
+        ? `[VariableDeclaration(${func.name?.getText()})]`
+        : func.kind === ts.SyntaxKind.FunctionExpression
+          ? `[FunctionExpression(${func.name?.getText()})]`
+          : func.kind === ts.SyntaxKind.ArrowFunction
+            ? `[ArrowFunction(${func.name?.getText()})]`
+            : "[UNKNOWN]"
   }
 }
 

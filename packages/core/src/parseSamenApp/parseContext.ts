@@ -142,13 +142,13 @@ function addFunctionContext(
   }
 }
 
-type ContextIO = {
+interface ContextIO {
   inputContext: ObjectParserModel
   inputContextProps: ts.PropertySignature[]
   accumulatedContext: ObjectParserModel
 }
 
-type MiddlewareContext = {
+interface MiddlewareContext {
   nextType: ts.TypeNode | undefined
   contextType: ts.TypeNode | undefined
 }
@@ -157,7 +157,7 @@ function getContextIO(
   middleware: Array<MiddlewareContext>,
   typeChecker: ts.TypeChecker,
 ): ContextIO {
-  return middleware.reduce(
+  return middleware.reduce<ContextIO>(
     (
       { inputContext, inputContextProps, accumulatedContext },
       { contextType: ctxType, nextType },
@@ -247,7 +247,7 @@ function getContextIO(
         type: ParserModelType.Object,
         members: [],
       },
-    } as ContextIO,
+    },
   )
 }
 

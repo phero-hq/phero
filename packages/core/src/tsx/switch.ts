@@ -19,13 +19,13 @@ export function switchStatement({
   defaultCase?: DefaultClause
 }): ts.SwitchStatement {
   return ts.factory.createSwitchStatement(
-    typeof expression == "string"
+    typeof expression === "string"
       ? ts.factory.createIdentifier(expression)
       : expression,
     ts.factory.createCaseBlock([
       ...cases.map(({ expression, statements }) =>
         ts.factory.createCaseClause(
-          typeof expression == "string"
+          typeof expression === "string"
             ? ts.factory.createStringLiteral(expression)
             : expression,
           statements,

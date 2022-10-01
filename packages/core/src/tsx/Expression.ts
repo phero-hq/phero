@@ -28,7 +28,7 @@ export class Expression {
     return deepProps.reduce(
       create,
       create(
-        typeof obj == "string" ? ts.factory.createIdentifier(obj) : obj,
+        typeof obj === "string" ? ts.factory.createIdentifier(obj) : obj,
         prop,
       ),
     )
@@ -39,9 +39,9 @@ export class Expression {
     index: string | number | ts.Expression,
   ): ts.ElementAccessExpression {
     return ts.factory.createElementAccessChain(
-      typeof arr == "string" ? ts.factory.createIdentifier(arr) : arr,
+      typeof arr === "string" ? ts.factory.createIdentifier(arr) : arr,
       undefined,
-      typeof index == "string" ? ts.factory.createIdentifier(index) : index,
+      typeof index === "string" ? ts.factory.createIdentifier(index) : index,
     )
   }
 
@@ -50,7 +50,7 @@ export class Expression {
     opts?: { args?: (string | ts.Expression)[]; typeArgs?: ts.TypeNode[] },
   ): ts.CallExpression {
     return ts.factory.createCallExpression(
-      typeof name == "string" ? ts.factory.createIdentifier(name) : name,
+      typeof name === "string" ? ts.factory.createIdentifier(name) : name,
       opts?.typeArgs,
       opts?.args?.map((arg) =>
         typeof arg === "string" ? ts.factory.createIdentifier(arg) : arg,
