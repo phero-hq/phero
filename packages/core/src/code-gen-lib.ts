@@ -126,8 +126,12 @@ export function generateClientFunction(
     }
   }
 
+  if (!func.name) {
+    throw new ParseError("Func must have name", func)
+  }
+
   return ts.factory.createPropertyAssignment(
-    func.name!,
+    func.name,
     ts.factory.createArrowFunction(
       [ts.factory.createModifier(ts.SyntaxKind.AsyncKeyword)],
       undefined,
@@ -166,6 +170,10 @@ function generateClientFunctionBlock(
 
   const returnTypeNode = generateTypeNode(returnType, refMaker)
 
+  if (!func.name) {
+    throw new ParseError("Func must have name", func)
+  }
+
   return tsx.block(
     tsx.statement.return(
       tsx.expression.call(
@@ -178,7 +186,7 @@ function generateClientFunctionBlock(
 
           args: [
             tsx.literal.string(serviceName),
-            tsx.literal.string(func.name!.getText()),
+            tsx.literal.string(func.name.getText()),
             tsx.literal.object(
               ...func.parameters.map((p, i) => {
                 if (!ts.isIdentifier(p.name)) {
@@ -262,8 +270,8 @@ export function generateModel(model: Model, refMaker: ReferenceMaker): Model {
                 ? refMaker.fromIdentifier(t.expression)
                 : ts.isPropertyAccessExpression(t.expression) &&
                   ts.isIdentifier(t.expression.name)
-                  ? refMaker.fromIdentifier(t.expression.name)
-                  : t.expression,
+                ? refMaker.fromIdentifier(t.expression.name)
+                : t.expression,
               t.typeArguments?.map((t) => generateTypeNode(t, refMaker)),
             )
           }),
@@ -283,8 +291,8 @@ export function generateModel(model: Model, refMaker: ReferenceMaker): Model {
             (ts.isStringLiteral(member.initializer)
               ? ts.factory.createStringLiteral(member.initializer.text)
               : ts.isNumericLiteral(member.initializer)
-                ? ts.factory.createNumericLiteral(member.initializer.text)
-                : undefined),
+              ? ts.factory.createNumericLiteral(member.initializer.text)
+              : undefined),
         )
       }),
     )

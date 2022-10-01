@@ -9,8 +9,11 @@ function parseProgram(prog: ts.Program): ParsedSamenApp {
   // if (prog.getSemanticDiagnostics().length) {
   //   console.log("OEPS COMPILE ERRORS DETECTED")
   // }
-
-  return parseSamenApp(prog.getSourceFile("samen.ts")!, prog.getTypeChecker())
+  const samenFile = prog.getSourceFile("samen.ts")
+  if (!samenFile) {
+    throw new Error("No samen file")
+  }
+  return parseSamenApp(samenFile, prog.getTypeChecker())
 }
 
 function expectFunctionDeclrWithName(func: any, name: string) {

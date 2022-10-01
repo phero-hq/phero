@@ -47,8 +47,12 @@ export default function parseThrowStatement(
     ),
   ]
 
+  if (!classDeclaration.name) {
+    return undefined
+  }
+
   return {
-    name: classDeclaration.name!.text,
+    name: classDeclaration.name.text,
     sourceFile: classDeclaration.getSourceFile().fileName,
     properties,
     ref: classDeclaration,
