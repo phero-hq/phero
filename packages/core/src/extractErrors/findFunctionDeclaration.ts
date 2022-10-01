@@ -188,7 +188,7 @@ function unpackDeclaration(
     )
 
     const extendedClass = declaration.heritageClauses?.find(
-      (clause) => clause.token == ts.SyntaxKind.ExtendsKeyword,
+      (clause) => clause.token === ts.SyntaxKind.ExtendsKeyword,
     )?.types[0]
 
     return [

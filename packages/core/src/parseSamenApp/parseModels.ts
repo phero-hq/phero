@@ -30,8 +30,10 @@ export default function parseModels(
 
   function doType(typeNode: ts.TypeNode | undefined): void {
     if (!typeNode) {
+      return
+    }
 
-    } else if (ts.isTypeReferenceNode(typeNode)) {
+    if (ts.isTypeReferenceNode(typeNode)) {
       for (const typeArgument of typeNode.typeArguments ?? []) {
         doType(typeArgument)
       }

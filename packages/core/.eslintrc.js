@@ -24,6 +24,9 @@ module.exports = {
     "@typescript-eslint/strict-boolean-expressions": "off",
     "@typescript-eslint/member-delimiter-style": "off",
     "@typescript-eslint/indent": "off",
+    "@typescript-eslint/brace-style": "off",
+    "@typescript-eslint/restrict-plus-operands": "off",
+    "@typescript-eslint/no-extraneous-class": "off",
   },
   plugins: ["deprecation"],
 }

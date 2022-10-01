@@ -198,6 +198,6 @@ function isUserModule(statement: ts.Statement): boolean {
   return (
     !ts.isModuleDeclaration(statement) ||
     // skip the samen namespace
-    statement.name.text != "samen"
+    statement.name.text !== "samen"
   )
 }

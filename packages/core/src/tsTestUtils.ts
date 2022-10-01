@@ -24,15 +24,21 @@ export function printSamenApp(app: ParsedSamenApp): string {
   function printFunctionDeclaration(
     func: FunctionLikeDeclarationBase | VariableDeclaration,
   ): string {
+    const funcName = func.name?.getText()
+
+    if (!funcName) {
+      throw new Error("Func must have name")
+    }
+
     return func.kind === ts.SyntaxKind.FunctionDeclaration
-      ? `[FunctionDeclaration(${func.name?.getText()})]`
+      ? `[FunctionDeclaration(${funcName})]`
       : func.kind === ts.SyntaxKind.VariableDeclaration
-        ? `[VariableDeclaration(${func.name?.getText()})]`
-        : func.kind === ts.SyntaxKind.FunctionExpression
-          ? `[FunctionExpression(${func.name?.getText()})]`
-          : func.kind === ts.SyntaxKind.ArrowFunction
-            ? `[ArrowFunction(${func.name?.getText()})]`
-            : "[UNKNOWN]"
+      ? `[VariableDeclaration(${funcName})]`
+      : func.kind === ts.SyntaxKind.FunctionExpression
+      ? `[FunctionExpression(${funcName})]`
+      : func.kind === ts.SyntaxKind.ArrowFunction
+      ? `[ArrowFunction(${funcName})]`
+      : "[UNKNOWN]"
   }
 }
 

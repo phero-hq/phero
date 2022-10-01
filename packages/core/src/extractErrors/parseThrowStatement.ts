@@ -28,14 +28,14 @@ export default function parseThrowStatement(
     typeChecker,
   )
 
-  if (classDeclaration == undefined) {
+  if (classDeclaration === undefined) {
     // class has no Error super type
     return undefined
   }
 
   const superClasses = getSuperClasses(classDeclaration, [], typeChecker)
 
-  if (superClasses == undefined) {
+  if (superClasses === undefined) {
     // class has no Error super type
     return undefined
   }
@@ -65,7 +65,7 @@ function getSuperClasses(
   typeChecker: ts.TypeChecker,
 ): ts.ClassDeclaration[] | undefined {
   const extendsType = classDeclaration.heritageClauses?.find(
-    (clause) => clause.token == ts.SyntaxKind.ExtendsKeyword,
+    (clause) => clause.token === ts.SyntaxKind.ExtendsKeyword,
   )?.types[0]
 
   if (!extendsType) {
@@ -83,7 +83,7 @@ function getSuperClasses(
 
   const superClass = getClassDeclaration(extendsType, typeChecker)
 
-  if (superClass == undefined) {
+  if (superClass === undefined) {
     return undefined
   }
 
@@ -110,7 +110,7 @@ function findPublicProperties(
   typeChecker: ts.TypeChecker,
 ): ErrorProperty[] {
   const isPublicMember = (member: ts.Node): boolean =>
-    member.modifiers?.some((m) => m.kind == ts.SyntaxKind.PublicKeyword) ??
+    member.modifiers?.some((m) => m.kind === ts.SyntaxKind.PublicKeyword) ??
     false
 
   const result: ErrorProperty[] = []
@@ -119,7 +119,7 @@ function findPublicProperties(
     if (
       (ts.isPropertyDeclaration(member) ||
         ts.isGetAccessorDeclaration(member)) &&
-      (member.modifiers == undefined || isPublicMember(member))
+      (member.modifiers === undefined || isPublicMember(member))
     ) {
       const typeNode = typeChecker.typeToTypeNode(
         typeChecker.getTypeAtLocation(member),
