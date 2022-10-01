@@ -107,7 +107,6 @@ export function generateInlineTypeParameterParser(
       ts.factory.createParameterDeclaration(
         undefined,
         undefined,
-        undefined,
         ts.factory.createIdentifier("data"),
         undefined,
         ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword),

@@ -1,6 +1,6 @@
 import ts from "typescript"
 import * as tsx from "../tsx"
-import { getNameAsString } from "../tsUtils"
+import { getNameAsString, hasModifier } from "../tsUtils"
 
 export interface ParsedError {
   name: string
@@ -109,17 +109,14 @@ function findPublicProperties(
   classDeclaration: ts.ClassDeclaration,
   typeChecker: ts.TypeChecker,
 ): ErrorProperty[] {
-  const isPublicMember = (member: ts.Node): boolean =>
-    member.modifiers?.some((m) => m.kind === ts.SyntaxKind.PublicKeyword) ??
-    false
-
   const result: ErrorProperty[] = []
 
   for (const member of classDeclaration.members) {
     if (
       (ts.isPropertyDeclaration(member) ||
         ts.isGetAccessorDeclaration(member)) &&
-      (member.modifiers === undefined || isPublicMember(member))
+      (member.modifiers === undefined ||
+        hasModifier(member, ts.SyntaxKind.PublicKeyword))
     ) {
       const typeNode = typeChecker.typeToTypeNode(
         typeChecker.getTypeAtLocation(member),
@@ -138,7 +135,7 @@ function findPublicProperties(
     if (ts.isConstructorDeclaration(member)) {
       for (const param of member.parameters) {
         if (
-          isPublicMember(param) &&
+          hasModifier(param, ts.SyntaxKind.PublicKeyword) &&
           !ts.isObjectBindingPattern(param.name) &&
           !ts.isArrayBindingPattern(param.name)
         ) {

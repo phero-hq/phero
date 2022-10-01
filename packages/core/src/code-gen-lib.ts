@@ -21,7 +21,6 @@ export function generateNamespace(
   body: ts.Statement[],
 ): ts.ModuleDeclaration {
   return ts.factory.createModuleDeclaration(
-    undefined,
     [exportModifier],
     name,
     ts.factory.createModuleBlock(body),
@@ -34,7 +33,6 @@ export function generateFunction(
   refMaker: ReferenceMaker,
 ): ts.FunctionDeclaration {
   return ts.factory.createFunctionDeclaration(
-    undefined, // decoraters are prohibited
     [exportModifier, asyncModifier],
     undefined, // asteriks is prohibited
     func.name,
@@ -64,7 +62,6 @@ function generateFunctionParameters(
     }
 
     return ts.factory.createParameterDeclaration(
-      undefined,
       param.modifiers,
       param.dotDotDotToken,
       param.name,
@@ -79,7 +76,6 @@ function generateFunctionParameters(
       // Note: we need to pass the context parameter as the first argument because we can
       // have optional parameters
       ts.factory.createParameterDeclaration(
-        undefined,
         undefined,
         undefined,
         func.serviceContext.paramName ?? "context",
@@ -103,7 +99,6 @@ export function generateClientFunction(
 ): ts.PropertyAssignment {
   let parameters = func.parameters.map((p) =>
     ts.factory.createParameterDeclaration(
-      undefined,
       p.modifiers,
       p.dotDotDotToken,
       p.name,
@@ -237,11 +232,11 @@ function generateClientFunctionBlock(
 export function generateModel(model: Model, refMaker: ReferenceMaker): Model {
   if (ts.isTypeAliasDeclaration(model)) {
     return ts.factory.createTypeAliasDeclaration(
-      undefined,
       [exportModifier],
       model.name,
       model.typeParameters?.map((tp) =>
         ts.factory.createTypeParameterDeclaration(
+          undefined,
           tp.name,
           tp.constraint && generateTypeNode(tp.constraint, refMaker),
           tp.default && generateTypeNode(tp.default, refMaker),
@@ -251,11 +246,11 @@ export function generateModel(model: Model, refMaker: ReferenceMaker): Model {
     )
   } else if (ts.isInterfaceDeclaration(model)) {
     return ts.factory.createInterfaceDeclaration(
-      undefined,
       [exportModifier],
       model.name,
       model.typeParameters?.map((tp) =>
         ts.factory.createTypeParameterDeclaration(
+          undefined,
           tp.name,
           tp.constraint && generateTypeNode(tp.constraint, refMaker),
           tp.default && generateTypeNode(tp.default, refMaker),
@@ -281,7 +276,6 @@ export function generateModel(model: Model, refMaker: ReferenceMaker): Model {
     )
   } else if (ts.isEnumDeclaration(model)) {
     return ts.factory.createEnumDeclaration(
-      undefined,
       [exportModifier],
       model.name,
       model.members.map((member) => {
@@ -357,11 +351,9 @@ function generateTypeElement(
 
   if (ts.isIndexSignatureDeclaration(typeElement)) {
     return ts.factory.createIndexSignature(
-      undefined,
       typeElement.modifiers,
       typeElement.parameters.map((p) =>
         ts.factory.createParameterDeclaration(
-          undefined,
           p.modifiers,
           p.dotDotDotToken,
           p.name,

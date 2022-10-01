@@ -13,10 +13,10 @@ export function exportNamespaceDeclaration(props: Props): ts.ExportDeclaration {
   const exportClause = isExportAll(props.identifier)
     ? undefined
     : ts.factory.createNamespaceExport(
-      typeof props.identifier === "string"
-        ? ts.factory.createIdentifier(props.identifier)
-        : props.identifier,
-    )
+        typeof props.identifier === "string"
+          ? ts.factory.createIdentifier(props.identifier)
+          : props.identifier,
+      )
 
   const module =
     typeof props.module === "string"
@@ -24,7 +24,6 @@ export function exportNamespaceDeclaration(props: Props): ts.ExportDeclaration {
       : props.module
 
   return ts.factory.createExportDeclaration(
-    undefined,
     undefined,
     false,
     exportClause,

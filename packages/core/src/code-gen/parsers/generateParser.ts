@@ -26,24 +26,21 @@ export default function generateModelParser(
   )
 
   return ts.factory.createClassDeclaration(
-    undefined,
     [exportModifier],
     parserName,
     undefined,
     undefined,
     [
       ts.factory.createMethodDeclaration(
-        undefined,
         [staticModifier],
         undefined,
         "parse",
         undefined,
         rootParserModel.rootTypeParser.typeParameters.map((p) =>
-          ts.factory.createTypeParameterDeclaration(p.typeName),
+          ts.factory.createTypeParameterDeclaration(undefined, p.typeName),
         ),
         [
           ts.factory.createParameterDeclaration(
-            undefined,
             undefined,
             undefined,
             "data",
@@ -56,7 +53,6 @@ export default function generateModelParser(
               ts.factory.createParameterDeclaration(
                 undefined,
                 undefined,
-                undefined,
                 ts.factory.createIdentifier(`t${position}`),
                 typeParam.defaultParser
                   ? ts.factory.createToken(ts.SyntaxKind.QuestionToken)
@@ -65,7 +61,6 @@ export default function generateModelParser(
                   undefined,
                   [
                     ts.factory.createParameterDeclaration(
-                      undefined,
                       undefined,
                       undefined,
                       ts.factory.createIdentifier("data"),

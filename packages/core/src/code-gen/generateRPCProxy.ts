@@ -28,7 +28,6 @@ export default function generateRPCProxy(
   tsNodes.push(
     factory.createImportDeclaration(
       undefined,
-      undefined,
       factory.createImportClause(
         false,
         undefined,
@@ -1124,10 +1123,10 @@ const types = [
 
   factory.createTypeAliasDeclaration(
     undefined,
-    undefined,
     factory.createIdentifier("RPCResult"),
     [
       factory.createTypeParameterDeclaration(
+        undefined,
         factory.createIdentifier("T"),
         undefined,
         undefined,
@@ -1152,10 +1151,10 @@ const types = [
   ),
   factory.createInterfaceDeclaration(
     undefined,
-    undefined,
     factory.createIdentifier("RPCOkResult"),
     [
       factory.createTypeParameterDeclaration(
+        undefined,
         factory.createIdentifier("T"),
         undefined,
         undefined,
@@ -1182,7 +1181,6 @@ const types = [
   ),
   factory.createInterfaceDeclaration(
     undefined,
-    undefined,
     factory.createIdentifier("RPCBadRequestResult"),
     undefined,
     undefined,
@@ -1207,7 +1205,6 @@ const types = [
     ],
   ),
   factory.createInterfaceDeclaration(
-    undefined,
     undefined,
     factory.createIdentifier("RPCInternalServerErrorResult"),
     undefined,

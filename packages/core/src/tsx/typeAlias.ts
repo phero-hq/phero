@@ -10,7 +10,6 @@ export interface TypeAliasProps {
 
 export function typeAlias(props: TypeAliasProps): ts.TypeAliasDeclaration {
   return ts.factory.createTypeAliasDeclaration(
-    undefined,
     generateModifiers([props.export && ts.SyntaxKind.ExportKeyword]),
     props.name,
     props.typeParameters,

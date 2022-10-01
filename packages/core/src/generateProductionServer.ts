@@ -15,7 +15,6 @@ export default function generateProductionServer(
     // import http
     factory.createImportDeclaration(
       undefined,
-      undefined,
       factory.createImportClause(
         false,
         undefined,
@@ -32,7 +31,6 @@ export default function generateProductionServer(
     ),
     // import rpc's from samen-execution.js
     factory.createImportDeclaration(
-      undefined,
       undefined,
       factory.createImportClause(
         false,

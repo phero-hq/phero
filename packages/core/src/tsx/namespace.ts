@@ -6,7 +6,6 @@ export function namespace(props: {
   statements: ts.Statement[]
 }): ts.ModuleDeclaration {
   return ts.factory.createModuleDeclaration(
-    undefined,
     props.export
       ? [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)]
       : undefined,

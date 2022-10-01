@@ -173,7 +173,7 @@ export interface KindToNodeMappings {
   [ts.SyntaxKind.VariableDeclaration]: ts.VariableDeclaration
   [ts.SyntaxKind.VariableDeclarationList]: ts.VariableDeclarationList
   [ts.SyntaxKind.VariableStatement]: ts.VariableStatement
-  [ts.SyntaxKind.JSDocComment]: ts.JSDoc
+  [ts.SyntaxKind.JSDoc]: ts.JSDoc
   [ts.SyntaxKind.TypeOfExpression]: ts.TypeOfExpression
   [ts.SyntaxKind.WhileStatement]: ts.WhileStatement
   [ts.SyntaxKind.WithStatement]: ts.WithStatement
@@ -205,8 +205,8 @@ export function getChildrenOfKind<TKind extends ts.SyntaxKind>(
     node === undefined
       ? []
       : node instanceof Array
-        ? node.flatMap((n) => n.getChildren())
-        : node.getChildren()
+      ? node.flatMap((n) => n.getChildren())
+      : node.getChildren()
 
   return children.reduce<KindToNodeMappings[TKind][]>((result, child) => {
     return child.kind === kind
@@ -216,7 +216,10 @@ export function getChildrenOfKind<TKind extends ts.SyntaxKind>(
 }
 
 export function hasModifier(node: ts.Node, kind: ts.SyntaxKind): boolean {
-  return node.modifiers?.some((m) => m.kind === kind) ?? false
+  return !!(
+    ts.canHaveModifiers(node) &&
+    ts.getModifiers(node)?.some((m) => m.kind === kind)
+  )
 }
 
 export function getFirstChildOfKind<TKind extends ts.SyntaxKind>(
@@ -307,10 +310,10 @@ export function getFullyQualifiedName(
   typeNode: ts.TypeReferenceNode,
   typeChecker: ts.TypeChecker,
 ): {
-    base: string
-    typeArgs?: string
-    full: string
-  } {
+  base: string
+  typeArgs?: string
+  full: string
+} {
   const type = typeChecker.getTypeFromTypeNode(typeNode)
   const base = cleanUpTypeName(
     typeChecker.getFullyQualifiedName(type.aliasSymbol ?? type.symbol),
@@ -320,9 +323,9 @@ export function getFullyQualifiedName(
     ts.isTypeReferenceNode(typeArg)
       ? getFullyQualifiedName(typeArg, typeChecker).full
       : typeChecker.typeToString(
-        typeChecker.getTypeFromTypeNode(typeArg),
-        typeArg,
-      ),
+          typeChecker.getTypeFromTypeNode(typeArg),
+          typeArg,
+        ),
   )
 
   const typeArgs = fullyQualifiedTypeArgs
