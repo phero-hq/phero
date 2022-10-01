@@ -18,6 +18,7 @@ module.exports = {
     "@typescript-eslint/space-before-function-paren": ["error", "never"],
     "@typescript-eslint/array-type": "off",
     "@typescript-eslint/strict-boolean-expressions": "off",
+    "@typescript-eslint/member-delimiter-style": "off",
   },
   plugins: ["deprecation"],
 }
