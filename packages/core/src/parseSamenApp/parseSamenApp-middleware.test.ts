@@ -19,7 +19,7 @@ function parseProgram(prog: ts.Program): ParsedSamenApp {
 function expectFunctionDeclarationWithName(
   func: any,
   name: string | undefined,
-) {
+): void {
   expect(func?.name?.getText()).toBe(name)
   expect(func?.kind).toBe(ts.SyntaxKind.FunctionDeclaration)
 }

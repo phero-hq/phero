@@ -22,7 +22,10 @@ export class Expression {
     prop: string,
     ...deepProps: string[]
   ): ts.PropertyAccessExpression {
-    function create(left: ts.Expression, right: string) {
+    function create(
+      left: ts.Expression,
+      right: string,
+    ): ts.PropertyAccessExpression {
       return ts.factory.createPropertyAccessExpression(left, right)
     }
     return deepProps.reduce(

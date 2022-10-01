@@ -16,17 +16,20 @@ function parseProgram(prog: ts.Program): ParsedSamenApp {
   return parseSamenApp(samenFile, prog.getTypeChecker())
 }
 
-function expectFunctionDeclrWithName(func: any, name: string) {
+function expectFunctionDeclrWithName(func: any, name: string): void {
   expect(func?.name?.getText()).toBe(name)
   expect(func?.kind).toBe(ts.SyntaxKind.FunctionDeclaration)
 }
 
-function expectArrowFuncDeclrWithName(func: any, name: string) {
+function expectArrowFuncDeclrWithName(func: any, name: string): void {
   expect(func?.name?.getText()).toBeUndefined()
   expect(func?.kind).toBe(ts.SyntaxKind.ArrowFunction)
 }
 
-function expectFunctionExpressionWithName(func: any, name: string | undefined) {
+function expectFunctionExpressionWithName(
+  func: any,
+  name: string | undefined,
+): void {
   expect(func?.name?.getText()).toBe(name)
   expect(func?.kind).toBe(ts.SyntaxKind.FunctionExpression)
 }

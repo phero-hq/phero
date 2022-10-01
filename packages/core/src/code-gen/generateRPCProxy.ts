@@ -1034,7 +1034,7 @@ function generateIfParseResultNotOkayEarlyReturn({
 }: {
   parseResult: string
   input: string
-}) {
+}): ts.Statement {
   return tsx.statement.if({
     expression: tsx.expression.binary(
       tsx.expression.propertyAccess(parseResult, "ok"),
@@ -1059,7 +1059,7 @@ function generateIfParseResultNotOkayEarlyReturn({
   })
 }
 
-function generateReturnOkay() {
+function generateReturnOkay(): ts.Statement {
   return tsx.statement.expression(
     tsx.expression.call("resolveEXEC", {
       args: [tsx.expression.propertyAccess("outputParseResult", "result")],
