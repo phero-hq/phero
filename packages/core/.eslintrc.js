@@ -23,6 +23,7 @@ module.exports = {
     "@typescript-eslint/array-type": "off",
     "@typescript-eslint/strict-boolean-expressions": "off",
     "@typescript-eslint/member-delimiter-style": "off",
+    "@typescript-eslint/indent": "off",
   },
   plugins: ["deprecation"],
 }
