@@ -14,7 +14,11 @@ module.exports = {
   rules: {
     "deprecation/deprecation": "error",
     "@typescript-eslint/comma-dangle": ["error", "always-multiline"],
-    "@typescript-eslint/quotes": ["error", "double"],
+    "@typescript-eslint/quotes": [
+      "error",
+      "double",
+      { allowTemplateLiterals: true },
+    ],
     "@typescript-eslint/space-before-function-paren": ["error", "never"],
     "@typescript-eslint/array-type": "off",
     "@typescript-eslint/strict-boolean-expressions": "off",
