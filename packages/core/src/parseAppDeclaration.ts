@@ -157,8 +157,7 @@ function parseContextType(
 ): ts.TypeNode | undefined {
   const firstParam = func.parameters[0]
   if (
-    firstParam &&
-    firstParam.type &&
+    firstParam?.type &&
     ts.isTypeReferenceNode(firstParam.type) &&
     getNameAsString(firstParam.type.typeName) === "SamenContext"
   ) {

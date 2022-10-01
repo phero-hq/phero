@@ -51,10 +51,9 @@ function generateFunctionParameters(
   func: ParsedSamenFunctionDefinition,
   refMaker: ReferenceMaker,
 ): ts.ParameterDeclaration[] {
-  const parameters =
-    func.serviceContext && func.serviceContext.paramName
-      ? func.parameters.slice(1)
-      : func.parameters
+  const parameters = func.serviceContext?.paramName
+    ? func.parameters.slice(1)
+    : func.parameters
 
   const result = parameters.map((param) => {
     if (!param.type) {
