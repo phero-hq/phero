@@ -18,9 +18,6 @@
     "eslint": "eslint src",
     "prepublish": "npm run clean && npm run build"
   },
-  "peerDependencies": {
-    "typescript": "^4.8.4"
-  },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
     "@types/jest": "^27.0.2",
