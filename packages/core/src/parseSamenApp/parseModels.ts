@@ -1,5 +1,4 @@
 import ts from "typescript"
-import { printCode } from "../tsTestUtils"
 import { isExternalDeclaration, isExternalSymbol } from "../tsUtils"
 import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
 

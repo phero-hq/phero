@@ -3,7 +3,6 @@ import { ParseError } from "../../errors"
 import { isModel } from "../../parseAppDeclaration"
 import { Model } from "../../parseSamenApp"
 import * as tsx from "../../tsx"
-import { capitalize } from "../../utils"
 import generateParserFromModel from "./../parsers/generateParserFromModel"
 import generateParserModel from "./../parsers/generateParserModel"
 
