@@ -21,9 +21,7 @@ export default function generateModelParser(
 
   const parserStatement: ts.Statement = generateParserFromModel(rootParserModel)
 
-  const parserName = capitalize(
-    `${rootParserModel.rootTypeParser.baseTypeName}Parser`,
-  )
+  const parserName = `${rootParserModel.rootTypeParser.baseTypeName}Parser`
 
   return ts.factory.createClassDeclaration(
     [exportModifier],
