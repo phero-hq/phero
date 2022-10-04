@@ -3,7 +3,6 @@ import { ParseError } from "../../errors"
 import { isModel } from "../../parseAppDeclaration"
 import { Model } from "../../parseSamenApp"
 import * as tsx from "../../tsx"
-import { capitalize } from "../../utils"
 import generateParserFromModel from "./../parsers/generateParserFromModel"
 import generateParserModel from "./../parsers/generateParserModel"
 
@@ -21,29 +20,24 @@ export default function generateModelParser(
 
   const parserStatement: ts.Statement = generateParserFromModel(rootParserModel)
 
-  const parserName = capitalize(
-    `${rootParserModel.rootTypeParser.baseTypeName}Parser`,
-  )
+  const parserName = `${rootParserModel.rootTypeParser.baseTypeName}Parser`
 
   return ts.factory.createClassDeclaration(
-    undefined,
     [exportModifier],
     parserName,
     undefined,
     undefined,
     [
       ts.factory.createMethodDeclaration(
-        undefined,
         [staticModifier],
         undefined,
         "parse",
         undefined,
         rootParserModel.rootTypeParser.typeParameters.map((p) =>
-          ts.factory.createTypeParameterDeclaration(p.typeName),
+          ts.factory.createTypeParameterDeclaration(undefined, p.typeName),
         ),
         [
           ts.factory.createParameterDeclaration(
-            undefined,
             undefined,
             undefined,
             "data",
@@ -56,7 +50,6 @@ export default function generateModelParser(
               ts.factory.createParameterDeclaration(
                 undefined,
                 undefined,
-                undefined,
                 ts.factory.createIdentifier(`t${position}`),
                 typeParam.defaultParser
                   ? ts.factory.createToken(ts.SyntaxKind.QuestionToken)
@@ -65,7 +58,6 @@ export default function generateModelParser(
                   undefined,
                   [
                     ts.factory.createParameterDeclaration(
-                      undefined,
                       undefined,
                       undefined,
                       ts.factory.createIdentifier("data"),

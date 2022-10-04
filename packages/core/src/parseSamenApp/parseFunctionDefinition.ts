@@ -25,13 +25,13 @@ export default function parseFunctionDefinition(
 
 function parseFunctionName(
   functionName:
-    | ts.Identifier
-    | ts.StringLiteral
-    | ts.NumericLiteral
-    | ts.ComputedPropertyName
-    | ts.PrivateIdentifier
-    | ts.ObjectBindingPattern
-    | ts.ArrayBindingPattern,
+  | ts.Identifier
+  | ts.StringLiteral
+  | ts.NumericLiteral
+  | ts.ComputedPropertyName
+  | ts.PrivateIdentifier
+  | ts.ObjectBindingPattern
+  | ts.ArrayBindingPattern,
 ): string {
   if (
     ts.isNumericLiteral(functionName) ||
@@ -55,7 +55,7 @@ function parseActualFunction(
 ): Pick<
   ParsedSamenFunctionDefinition,
   "actualFunction" | "parameters" | "returnType"
-> {
+  > {
   if (ts.isShorthandPropertyAssignment(node)) {
     const symbol = typeChecker.getShorthandAssignmentValueSymbol(node)
 

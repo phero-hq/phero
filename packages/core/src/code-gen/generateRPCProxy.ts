@@ -1,11 +1,10 @@
 import ts from "typescript"
 import { ParsedSamenApp, ParseError } from ".."
-import parseReturnType from "../parseSamenApp/parseReturnType"
 import {
   ParsedSamenFunctionDefinition,
-  ParsedSamenServiceConfig,
   ParsedSamenServiceDefinition,
 } from "../parseSamenApp"
+import parseReturnType from "../parseSamenApp/parseReturnType"
 import { printCode } from "../tsTestUtils"
 import { VirtualCompilerHost } from "../VirtualCompilerHost"
 import generateModelParser, {
@@ -28,7 +27,6 @@ export default function generateRPCProxy(
 
   tsNodes.push(
     factory.createImportDeclaration(
-      undefined,
       undefined,
       factory.createImportClause(
         false,
@@ -710,7 +708,7 @@ function generateInnerFunction(
                   tsx.const({
                     name: "inputWithContext",
                     init: tsx.literal.object(
-                      ...(!!funcDef.serviceContext?.paramName
+                      ...(funcDef.serviceContext?.paramName
                         ? [
                             tsx.property.spreadAssignment("input"),
                             tsx.property.assignment(
@@ -1035,7 +1033,7 @@ function generateIfParseResultNotOkayEarlyReturn({
 }: {
   parseResult: string
   input: string
-}) {
+}): ts.Statement {
   return tsx.statement.if({
     expression: tsx.expression.binary(
       tsx.expression.propertyAccess(parseResult, "ok"),
@@ -1060,7 +1058,7 @@ function generateIfParseResultNotOkayEarlyReturn({
   })
 }
 
-function generateReturnOkay() {
+function generateReturnOkay(): ts.Statement {
   return tsx.statement.expression(
     tsx.expression.call("resolveEXEC", {
       args: [tsx.expression.propertyAccess("outputParseResult", "result")],
@@ -1125,10 +1123,10 @@ const types = [
 
   factory.createTypeAliasDeclaration(
     undefined,
-    undefined,
     factory.createIdentifier("RPCResult"),
     [
       factory.createTypeParameterDeclaration(
+        undefined,
         factory.createIdentifier("T"),
         undefined,
         undefined,
@@ -1153,10 +1151,10 @@ const types = [
   ),
   factory.createInterfaceDeclaration(
     undefined,
-    undefined,
     factory.createIdentifier("RPCOkResult"),
     [
       factory.createTypeParameterDeclaration(
+        undefined,
         factory.createIdentifier("T"),
         undefined,
         undefined,
@@ -1183,7 +1181,6 @@ const types = [
   ),
   factory.createInterfaceDeclaration(
     undefined,
-    undefined,
     factory.createIdentifier("RPCBadRequestResult"),
     undefined,
     undefined,
@@ -1208,7 +1205,6 @@ const types = [
     ],
   ),
   factory.createInterfaceDeclaration(
-    undefined,
     undefined,
     factory.createIdentifier("RPCInternalServerErrorResult"),
     undefined,

@@ -760,7 +760,7 @@ describe("generateParserModel", () => {
     })
     test("type with parameterized generic parameter", () => {
       const {
-        statements: [model, testModel],
+        statements: [model],
         typeChecker,
       } = compileStatements(
         `
@@ -932,7 +932,7 @@ describe("generateParserModel", () => {
     test.skip("mapping readonly keys to mutable keys", () => {
       // Example from https://www.typescriptlang.org/docs/handbook/2/mapped-types.html
       const {
-        statements: [model, model2, model3],
+        statements: [model],
         typeChecker,
       } = compileStatements(
         `

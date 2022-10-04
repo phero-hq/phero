@@ -25,7 +25,6 @@ export function exportDeclaration(props: Props): ts.ExportDeclaration {
 
   return ts.factory.createExportDeclaration(
     undefined,
-    undefined,
     false,
     exportClause,
     module,

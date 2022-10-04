@@ -9,7 +9,6 @@ interface ImportProps {
 export function importDeclaration(props: ImportProps): ts.ImportDeclaration {
   return ts.factory.createImportDeclaration(
     undefined,
-    undefined,
     ts.factory.createImportClause(
       false,
       undefined,

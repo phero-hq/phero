@@ -1,8 +1,8 @@
-import ts, { ClassDeclaration } from "typescript"
+import ts from "typescript"
 import { ParseError } from "../errors"
 import { ParsedError } from "../extractErrors/parseThrowStatement"
-import parseServiceDefinition from "./parseServiceDefinition"
 import { hasModifier } from "../tsUtils"
+import parseServiceDefinition from "./parseServiceDefinition"
 
 export interface ParsedSamenApp {
   models: Model[]
@@ -120,15 +120,4 @@ export function parseSamenApp(
     errors: [...errorMap.values()],
     services,
   }
-}
-
-function removeShared<T>(objs: T[], sharedObjs: T[]): T[] {
-  return objs.filter((m) => !sharedObjs.includes(m))
-}
-
-function deduplicate<T>(objs: T[]): T[] {
-  return objs.reduce(
-    (result, obj) => (result.includes(obj) ? result : [...result, obj]),
-    [] as T[],
-  )
 }

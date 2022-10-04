@@ -33,7 +33,7 @@ export class Property {
     name: string | ts.Expression,
   ): ts.SpreadAssignment {
     return ts.factory.createSpreadAssignment(
-      typeof name == "string" ? ts.factory.createIdentifier(name) : name,
+      typeof name === "string" ? ts.factory.createIdentifier(name) : name,
     )
   }
 }

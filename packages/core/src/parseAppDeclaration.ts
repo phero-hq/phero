@@ -36,14 +36,12 @@ export function parseAppDeclarationFileContent(dts: string): {
   result: ParsedAppDeclaration
   typeChecker: ts.TypeChecker
 } {
-  const t1 = Date.now()
-
   const vHost = new VirtualCompilerHost()
   vHost.addFile("api.d.ts", dts)
 
   const program = vHost.createProgram("api.d.ts")
 
-  const emitResult = program.emit()
+  program.emit()
 
   const sourceFile = program.getSourceFile("api.d.ts")
 
@@ -52,10 +50,6 @@ export function parseAppDeclarationFileContent(dts: string): {
   }
 
   const result = parseAppDeclarationSourceFile(sourceFile)
-
-  const t2 = Date.now()
-
-  // console.debug("parseAppDeclaration in", t2 - t1)
 
   return { result, typeChecker: program.getTypeChecker() }
 }
@@ -108,14 +102,14 @@ function parseServiceDeclaration({
   const versionModules = statements.map(parseModule)
   return {
     name,
-    versions: versionModules.reduce(
+    versions: versionModules.reduce<ParsedServiceDeclaration["versions"]>(
       (result, versionModule) => ({
         ...result,
         [versionModule.name]: parseServiceDeclarationVersion(
           versionModule.statements,
         ),
       }),
-      {} as ParsedServiceDeclaration["versions"],
+      {},
     ),
   }
 }
@@ -123,7 +117,7 @@ function parseServiceDeclaration({
 function parseServiceDeclarationVersion(
   statements: ts.Statement[],
 ): ParsedServiceDeclarationVersion {
-  return statements.reduce(
+  return statements.reduce<ParsedServiceDeclarationVersion>(
     ({ models, functions, context, errors }, st) => {
       if (isModel(st)) {
         return { models: [...models, st], functions, context, errors }
@@ -154,7 +148,7 @@ function parseServiceDeclarationVersion(
       functions: [],
       context: undefined,
       errors: [],
-    } as ParsedServiceDeclarationVersion,
+    },
   )
 }
 
@@ -163,8 +157,7 @@ function parseContextType(
 ): ts.TypeNode | undefined {
   const firstParam = func.parameters[0]
   if (
-    firstParam &&
-    firstParam.type &&
+    firstParam?.type &&
     ts.isTypeReferenceNode(firstParam.type) &&
     getNameAsString(firstParam.type.typeName) === "SamenContext"
   ) {
@@ -205,6 +198,6 @@ function isUserModule(statement: ts.Statement): boolean {
   return (
     !ts.isModuleDeclaration(statement) ||
     // skip the samen namespace
-    statement.name.text != "samen"
+    statement.name.text !== "samen"
   )
 }

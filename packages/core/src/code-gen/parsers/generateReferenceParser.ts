@@ -99,13 +99,12 @@ function generateParserCall(
 export function generateInlineTypeParameterParser(
   returnTypeString: string,
   parser: ts.Statement,
-) {
+): ts.ArrowFunction {
   return ts.factory.createArrowFunction(
     undefined,
     undefined,
     [
       ts.factory.createParameterDeclaration(
-        undefined,
         undefined,
         undefined,
         ts.factory.createIdentifier("data"),

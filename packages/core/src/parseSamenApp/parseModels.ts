@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { isExternalDeclaration } from "../tsUtils"
+import { isExternalDeclaration, isExternalSymbol } from "../tsUtils"
 import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
 
 const IGNORE_SYNTAX_KIND = [
@@ -31,45 +31,34 @@ export default function parseModels(
   function doType(typeNode: ts.TypeNode | undefined): void {
     if (!typeNode) {
       return
-    } else if (ts.isTypeReferenceNode(typeNode)) {
+    }
+
+    if (ts.isTypeReferenceNode(typeNode)) {
       for (const typeArgument of typeNode.typeArguments ?? []) {
         doType(typeArgument)
       }
 
-      const type = typeChecker.getTypeFromTypeNode(typeNode)
-      const symbol = type.aliasSymbol ?? type.symbol
+      // this is the best way to get the actual declaration of a TypeReferenceNode
+      // this works for interfaces and type aliases
+      const symbol = typeChecker.getSymbolAtLocation(typeNode.typeName)
 
-      // NOTE this happens in two occasions:
-      // 1. we got a `type X = Y` where Y itself is also a type alias
-      // 2. we got a `type X = [A, B]`, X is a tuple
-      const typeNameSymbol = typeChecker.getSymbolAtLocation(typeNode.typeName)
-
-      if (!symbol && !typeNameSymbol) {
+      if (!symbol || isExternalSymbol(symbol)) {
         return
       }
 
-      if (typeNameSymbol) {
-        addedSymbols.includes(typeNameSymbol)
-        if (typeNameSymbol?.declarations?.length) {
-          for (const declr of typeNameSymbol.declarations) {
-            doDeclaration(declr)
+      addedSymbols.push(symbol)
+
+      for (const declaration of symbol.declarations ?? []) {
+        doDeclaration(declaration)
+      }
+
+      if ((symbol.flags & ts.SymbolFlags.Alias) === ts.SymbolFlags.Alias) {
+        const aliasSymbol = typeChecker.getAliasedSymbol(symbol)
+        if (aliasSymbol && !addedSymbols.includes(aliasSymbol)) {
+          addedSymbols.push(aliasSymbol)
+          for (const d of aliasSymbol.declarations ?? []) {
+            doDeclaration(d)
           }
-        }
-      } else if (symbol) {
-        if (addedSymbols.includes(symbol)) {
-          return
-        }
-
-        addedSymbols.push(symbol)
-
-        for (const declaration of symbol.declarations ?? []) {
-          // prevent that we include TS lib types
-          if (isExternalDeclaration(declaration)) {
-            declaration
-            continue
-          }
-
-          doDeclaration(declaration)
         }
       }
     } else if (ts.isTypeLiteralNode(typeNode)) {

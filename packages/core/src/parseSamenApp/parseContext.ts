@@ -16,7 +16,7 @@ export function parseContext(
   funcDefinitions: ParsedSamenFunctionDefinition[],
   typeChecker: ts.TypeChecker,
 ): [ParsedSamenServiceConfig, ParsedSamenFunctionDefinition[]] {
-  if (!serviceConfig.middleware || serviceConfig.middleware.length == 0) {
+  if (!serviceConfig.middleware || serviceConfig.middleware.length === 0) {
     return [serviceConfig, funcDefinitions]
   }
 
@@ -95,7 +95,7 @@ function addFunctionContext(
   const funcCtxProps = getPropertySignatures(funcCtx)
 
   for (const funcCtxMemberParser of funcCtxParserModel.members) {
-    if (funcCtxMemberParser.type != ParserModelType.Member) {
+    if (funcCtxMemberParser.type !== ParserModelType.Member) {
       throw new ParseError(
         `S108: Context type can't have index members`,
         funcCtx,
@@ -142,13 +142,13 @@ function addFunctionContext(
   }
 }
 
-type ContextIO = {
+interface ContextIO {
   inputContext: ObjectParserModel
   inputContextProps: ts.PropertySignature[]
   accumulatedContext: ObjectParserModel
 }
 
-type MiddlewareContext = {
+interface MiddlewareContext {
   nextType: ts.TypeNode | undefined
   contextType: ts.TypeNode | undefined
 }
@@ -157,7 +157,7 @@ function getContextIO(
   middleware: Array<MiddlewareContext>,
   typeChecker: ts.TypeChecker,
 ): ContextIO {
-  return middleware.reduce(
+  return middleware.reduce<ContextIO>(
     (
       { inputContext, inputContextProps, accumulatedContext },
       { contextType: ctxType, nextType },
@@ -166,10 +166,10 @@ function getContextIO(
         const ctxParserModel = getRootObjectParserModel(ctxType, typeChecker)
         const ctxProps = getPropertySignatures(ctxType)
         for (const ctxMem of ctxParserModel.members) {
-          if (ctxMem.type == ParserModelType.Member) {
+          if (ctxMem.type === ParserModelType.Member) {
             const accMemIndex = accumulatedContext.members.findIndex(
               (accMem) =>
-                accMem.type == ParserModelType.Member &&
+                accMem.type === ParserModelType.Member &&
                 accMem.name === ctxMem.name,
             )
 
@@ -214,10 +214,10 @@ function getContextIO(
         const nextParserModel = getRootObjectParserModel(nextType, typeChecker)
 
         for (const nxtMem of nextParserModel.members) {
-          if (nxtMem.type == ParserModelType.Member) {
+          if (nxtMem.type === ParserModelType.Member) {
             const accMemIndex = accumulatedContext.members.findIndex(
               (accMem) =>
-                accMem.type == ParserModelType.Member &&
+                accMem.type === ParserModelType.Member &&
                 accMem.name === nxtMem.name,
             )
 
@@ -247,7 +247,7 @@ function getContextIO(
         type: ParserModelType.Object,
         members: [],
       },
-    } as ContextIO,
+    },
   )
 }
 

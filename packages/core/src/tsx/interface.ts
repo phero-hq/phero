@@ -12,7 +12,6 @@ export function interfaceDeclaration(
   props: InterfaceProps,
 ): ts.InterfaceDeclaration {
   return ts.factory.createInterfaceDeclaration(
-    undefined,
     generateModifiers([props.export && ts.SyntaxKind.ExportKeyword]),
     props.name,
     props.typeParameters,

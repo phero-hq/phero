@@ -14,7 +14,6 @@ export function functionDeclaration(
   props: FunctionDeclarationProps,
 ): ts.FunctionDeclaration {
   return ts.factory.createFunctionDeclaration(
-    undefined,
     generateModifiers([
       props.export && ts.SyntaxKind.ExportKeyword,
       props.async && ts.SyntaxKind.AsyncKeyword,

@@ -10,11 +10,7 @@ import {
   Model,
   ParsedSamenFunctionDefinition,
 } from "./parseSamenApp/parseSamenApp"
-import {
-  getNameAsString,
-  isExternalDeclaration,
-  isExternalType,
-} from "./tsUtils"
+import { getNameAsString } from "./tsUtils"
 import * as tsx from "./tsx"
 
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
@@ -25,7 +21,6 @@ export function generateNamespace(
   body: ts.Statement[],
 ): ts.ModuleDeclaration {
   return ts.factory.createModuleDeclaration(
-    undefined,
     [exportModifier],
     name,
     ts.factory.createModuleBlock(body),
@@ -38,7 +33,6 @@ export function generateFunction(
   refMaker: ReferenceMaker,
 ): ts.FunctionDeclaration {
   return ts.factory.createFunctionDeclaration(
-    undefined, // decoraters are prohibited
     [exportModifier, asyncModifier],
     undefined, // asteriks is prohibited
     func.name,
@@ -55,10 +49,9 @@ function generateFunctionParameters(
   func: ParsedSamenFunctionDefinition,
   refMaker: ReferenceMaker,
 ): ts.ParameterDeclaration[] {
-  const parameters =
-    func.serviceContext && func.serviceContext.paramName
-      ? func.parameters.slice(1)
-      : func.parameters
+  const parameters = func.serviceContext?.paramName
+    ? func.parameters.slice(1)
+    : func.parameters
 
   const result = parameters.map((param) => {
     if (!param.type) {
@@ -69,7 +62,6 @@ function generateFunctionParameters(
     }
 
     return ts.factory.createParameterDeclaration(
-      undefined,
       param.modifiers,
       param.dotDotDotToken,
       param.name,
@@ -84,7 +76,6 @@ function generateFunctionParameters(
       // Note: we need to pass the context parameter as the first argument because we can
       // have optional parameters
       ts.factory.createParameterDeclaration(
-        undefined,
         undefined,
         undefined,
         func.serviceContext.paramName ?? "context",
@@ -108,7 +99,6 @@ export function generateClientFunction(
 ): ts.PropertyAssignment {
   let parameters = func.parameters.map((p) =>
     ts.factory.createParameterDeclaration(
-      undefined,
       p.modifiers,
       p.dotDotDotToken,
       p.name,
@@ -131,8 +121,12 @@ export function generateClientFunction(
     }
   }
 
+  if (!func.name) {
+    throw new ParseError("Func must have name", func)
+  }
+
   return ts.factory.createPropertyAssignment(
-    func.name!,
+    func.name,
     ts.factory.createArrowFunction(
       [ts.factory.createModifier(ts.SyntaxKind.AsyncKeyword)],
       undefined,
@@ -171,6 +165,10 @@ function generateClientFunctionBlock(
 
   const returnTypeNode = generateTypeNode(returnType, refMaker)
 
+  if (!func.name) {
+    throw new ParseError("Func must have name", func)
+  }
+
   return tsx.block(
     tsx.statement.return(
       tsx.expression.call(
@@ -183,7 +181,7 @@ function generateClientFunctionBlock(
 
           args: [
             tsx.literal.string(serviceName),
-            tsx.literal.string(func.name!.getText()),
+            tsx.literal.string(func.name.getText()),
             tsx.literal.object(
               ...func.parameters.map((p, i) => {
                 if (!ts.isIdentifier(p.name)) {
@@ -234,11 +232,11 @@ function generateClientFunctionBlock(
 export function generateModel(model: Model, refMaker: ReferenceMaker): Model {
   if (ts.isTypeAliasDeclaration(model)) {
     return ts.factory.createTypeAliasDeclaration(
-      undefined,
       [exportModifier],
       model.name,
       model.typeParameters?.map((tp) =>
         ts.factory.createTypeParameterDeclaration(
+          undefined,
           tp.name,
           tp.constraint && generateTypeNode(tp.constraint, refMaker),
           tp.default && generateTypeNode(tp.default, refMaker),
@@ -248,11 +246,11 @@ export function generateModel(model: Model, refMaker: ReferenceMaker): Model {
     )
   } else if (ts.isInterfaceDeclaration(model)) {
     return ts.factory.createInterfaceDeclaration(
-      undefined,
       [exportModifier],
       model.name,
       model.typeParameters?.map((tp) =>
         ts.factory.createTypeParameterDeclaration(
+          undefined,
           tp.name,
           tp.constraint && generateTypeNode(tp.constraint, refMaker),
           tp.default && generateTypeNode(tp.default, refMaker),
@@ -278,7 +276,6 @@ export function generateModel(model: Model, refMaker: ReferenceMaker): Model {
     )
   } else if (ts.isEnumDeclaration(model)) {
     return ts.factory.createEnumDeclaration(
-      undefined,
       [exportModifier],
       model.name,
       model.members.map((member) => {
@@ -354,11 +351,9 @@ function generateTypeElement(
 
   if (ts.isIndexSignatureDeclaration(typeElement)) {
     return ts.factory.createIndexSignature(
-      undefined,
       typeElement.modifiers,
       typeElement.parameters.map((p) =>
         ts.factory.createParameterDeclaration(
-          undefined,
           p.modifiers,
           p.dotDotDotToken,
           p.name,
@@ -516,15 +511,11 @@ function combineAsExpr(
 }
 
 export class ReferenceMaker {
-  private readonly sharedTypes: ts.Type[]
-
   constructor(
     private readonly domain: Model[],
     private readonly typeChecker: ts.TypeChecker,
     private readonly sharedDomainName: ts.EntityName | undefined,
-  ) {
-    this.sharedTypes = this.domain.map((m) => typeChecker.getTypeAtLocation(m))
-  }
+  ) {}
 
   public fromTypeNode(typeNode: ts.TypeReferenceNode): ts.EntityName {
     if (typeNode.typeName.getText() === "SamenContext") {
@@ -532,16 +523,26 @@ export class ReferenceMaker {
     }
 
     const symbol = this.typeChecker.getSymbolAtLocation(typeNode.typeName)
-
     const declr = symbol?.declarations?.[0]
 
-    if (declr && isModel(declr) && this.domain.includes(declr)) {
-      return combineAsEntityName(
-        [
-          ...(this.sharedDomainName ? [this.sharedDomainName] : []),
-          cleanTypeName(typeNode.typeName, this.typeChecker),
-        ].flatMap(unpack),
-      )
+    if (declr) {
+      if (isModel(declr) && this.domain.includes(declr)) {
+        return combineAsEntityName(
+          [
+            ...(this.sharedDomainName ? [this.sharedDomainName] : []),
+            cleanTypeName(typeNode.typeName, this.typeChecker),
+          ].flatMap(unpack),
+        )
+      }
+
+      if (ts.isImportSpecifier(declr)) {
+        return combineAsEntityName(
+          [
+            ...(this.sharedDomainName ? [this.sharedDomainName] : []),
+            cleanTypeName(declr.name, this.typeChecker),
+          ].flatMap(unpack),
+        )
+      }
     }
 
     return typeNode.typeName
@@ -558,13 +559,23 @@ export class ReferenceMaker {
 
     const declr = symbol?.declarations?.[0]
 
-    if (declr && isModel(declr) && this.domain.includes(declr)) {
-      return combineAsExpr(
-        [
-          ...(this.sharedDomainName ? [this.sharedDomainName] : []),
-          cleanTypeName(identifier, this.typeChecker),
-        ].flatMap(unpack),
-      )
+    if (declr) {
+      if (isModel(declr) && this.domain.includes(declr)) {
+        return combineAsExpr(
+          [
+            ...(this.sharedDomainName ? [this.sharedDomainName] : []),
+            cleanTypeName(identifier, this.typeChecker),
+          ].flatMap(unpack),
+        )
+      }
+      if (ts.isImportSpecifier(declr)) {
+        return combineAsExpr(
+          [
+            ...(this.sharedDomainName ? [this.sharedDomainName] : []),
+            cleanTypeName(declr.name, this.typeChecker),
+          ].flatMap(unpack),
+        )
+      }
     }
 
     return identifier

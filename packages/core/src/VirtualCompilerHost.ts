@@ -28,7 +28,7 @@ export class VirtualCompilerHost {
 
     const host = ts.createCompilerHost(this.compilerOpts)
 
-    host.writeFile = async (fileName: string, contents: string) => {
+    host.writeFile = (fileName: string, contents: string) => {
       this.files[fileName] = contents
     }
 

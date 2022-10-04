@@ -7,15 +7,13 @@ import {
   ReferenceMaker,
 } from "./code-gen-lib"
 import { ParsedSamenApp } from "./parseSamenApp"
-import { VirtualCompilerHost } from "./VirtualCompilerHost"
 import * as tsx from "./tsx"
+import { VirtualCompilerHost } from "./VirtualCompilerHost"
 
 export default function generateAppDeclarationFile(
   app: ParsedSamenApp,
   typeChecker: ts.TypeChecker,
 ): string {
-  const t1 = Date.now()
-
   const domainIdentifier = ts.factory.createIdentifier("domain")
   const versionIdentifier = ts.factory.createIdentifier("v_1_0_0")
 
@@ -87,9 +85,6 @@ export default function generateAppDeclarationFile(
     console.error(generateTS(namespaceDeclrs))
     console.error(emitResult)
   }
-
-  const t2 = Date.now()
-  // console.log("generateAppDeclarationFile in", t2 - t1)
 
   const declrFile = vHost.getFile("api.d.ts")
 

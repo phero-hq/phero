@@ -11,7 +11,11 @@ function generate(prog: ts.Program): string {
   //   throw new Error("Compile error")
   // }
   const typeChecker = prog.getTypeChecker()
-  const parsedApp = parseSamenApp(prog.getSourceFile("samen.ts")!, typeChecker)
+  const samenFile = prog.getSourceFile("samen.ts")
+  if (!samenFile) {
+    throw new Error("No samen file")
+  }
+  const parsedApp = parseSamenApp(samenFile, typeChecker)
   const dts = generateAppDeclarationFile(parsedApp, typeChecker)
   return dts
 }

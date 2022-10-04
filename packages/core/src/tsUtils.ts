@@ -173,7 +173,7 @@ export interface KindToNodeMappings {
   [ts.SyntaxKind.VariableDeclaration]: ts.VariableDeclaration
   [ts.SyntaxKind.VariableDeclarationList]: ts.VariableDeclarationList
   [ts.SyntaxKind.VariableStatement]: ts.VariableStatement
-  [ts.SyntaxKind.JSDocComment]: ts.JSDoc
+  [ts.SyntaxKind.JSDoc]: ts.JSDoc
   [ts.SyntaxKind.TypeOfExpression]: ts.TypeOfExpression
   [ts.SyntaxKind.WhileStatement]: ts.WhileStatement
   [ts.SyntaxKind.WithStatement]: ts.WithStatement
@@ -208,15 +208,18 @@ export function getChildrenOfKind<TKind extends ts.SyntaxKind>(
       ? node.flatMap((n) => n.getChildren())
       : node.getChildren()
 
-  return children.reduce((result, child) => {
+  return children.reduce<KindToNodeMappings[TKind][]>((result, child) => {
     return child.kind === kind
       ? [...result, child as KindToNodeMappings[TKind]]
       : result
-  }, [] as KindToNodeMappings[TKind][])
+  }, [])
 }
 
 export function hasModifier(node: ts.Node, kind: ts.SyntaxKind): boolean {
-  return node.modifiers?.some((m) => m.kind === kind) ?? false
+  return !!(
+    ts.canHaveModifiers(node) &&
+    ts.getModifiers(node)?.some((m) => m.kind === kind)
+  )
 }
 
 export function getFirstChildOfKind<TKind extends ts.SyntaxKind>(

@@ -15,7 +15,6 @@ export default function generateProductionServer(
     // import http
     factory.createImportDeclaration(
       undefined,
-      undefined,
       factory.createImportClause(
         false,
         undefined,
@@ -32,7 +31,6 @@ export default function generateProductionServer(
     ),
     // import rpc's from samen-execution.js
     factory.createImportDeclaration(
-      undefined,
       undefined,
       factory.createImportClause(
         false,
@@ -200,7 +198,7 @@ function generateHelperFunctions(): ts.Node {
   `)
 }
 
-function writeResponseStatement(expression: ts.Expression) {
+function writeResponseStatement(expression: ts.Expression): ts.Statement {
   return tsx.statement.expression(
     tsx.expression.call("writeResponse", {
       args: ["originWhitelist", expression, "res", "req"],
@@ -208,7 +206,7 @@ function writeResponseStatement(expression: ts.Expression) {
   )
 }
 
-function write404ResponseStatement() {
+function write404ResponseStatement(): ts.Statement {
   return writeResponseStatement(
     tsx.literal.object(
       tsx.property.assignment("status", tsx.literal.number(404)),
@@ -238,7 +236,7 @@ function generateRequestListener(app: ParsedSamenApp): ts.Node {
   })
 }
 
-function switchServices(app: ParsedSamenApp) {
+function switchServices(app: ParsedSamenApp): ts.Statement {
   return tsx.statement.switch({
     expression: tsx.expression.propertyAccess(
       "requestedFunction",
@@ -276,7 +274,9 @@ function switchServices(app: ParsedSamenApp) {
   })
 }
 
-function switchHttpMethods(service: ParsedSamenServiceDefinition) {
+function switchHttpMethods(
+  service: ParsedSamenServiceDefinition,
+): ts.Statement {
   return tsx.statement.switch({
     expression: tsx.expression.propertyAccess("req", "method"),
     cases: [
@@ -303,7 +303,7 @@ function switchHttpMethods(service: ParsedSamenServiceDefinition) {
   })
 }
 
-function switchService(service: ParsedSamenServiceDefinition) {
+function switchService(service: ParsedSamenServiceDefinition): ts.Statement {
   return tsx.statement.switch({
     expression: tsx.expression.propertyAccess(
       "requestedFunction",

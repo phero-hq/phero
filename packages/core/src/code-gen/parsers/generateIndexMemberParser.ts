@@ -36,7 +36,7 @@ function generateDynamicMemberLoop(
   pointer: Pointer<IndexMemberParserModel>,
   keyParser: ts.Statement,
   valueParser: ts.Statement,
-) {
+): ts.Statement {
   const depth = pointer.model.depth
   return ts.factory.createForStatement(
     ts.factory.createVariableDeclarationList(

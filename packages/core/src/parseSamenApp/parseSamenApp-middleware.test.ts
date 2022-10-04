@@ -9,34 +9,17 @@ function parseProgram(prog: ts.Program): ParsedSamenApp {
   // if (prog.getSemanticDiagnostics().length) {
   //   console.log("OEPS COMPILE ERRORS DETECTED")
   // }
-
-  return parseSamenApp(prog.getSourceFile("samen.ts")!, prog.getTypeChecker())
-}
-
-function expectFunctionDeclrWithName(func: any, name: string) {
-  expect(func?.name?.getText()).toBe(name)
-  expect(func?.kind).toBe(ts.SyntaxKind.FunctionDeclaration)
-}
-
-function expectArrowFuncDeclrWithName(func: any, name: string) {
-  expect(func?.name?.getText()).toBeUndefined()
-  expect(func?.kind).toBe(ts.SyntaxKind.ArrowFunction)
-}
-
-function expectFunctionExpressionWithName(func: any, name: string | undefined) {
-  expect(func?.name?.getText()).toBe(name)
-  expect(func?.kind).toBe(ts.SyntaxKind.FunctionExpression)
-}
-
-function expectArrowFunctionWithName(func: any, name: string | undefined) {
-  expect(func?.name?.getText()).toBe(name)
-  expect(func?.kind).toBe(ts.SyntaxKind.ArrowFunction)
+  const samenFile = prog.getSourceFile("samen.ts")
+  if (!samenFile) {
+    throw new Error("No samen file")
+  }
+  return parseSamenApp(samenFile, prog.getTypeChecker())
 }
 
 function expectFunctionDeclarationWithName(
   func: any,
   name: string | undefined,
-) {
+): void {
   expect(func?.name?.getText()).toBe(name)
   expect(func?.kind).toBe(ts.SyntaxKind.FunctionDeclaration)
 }

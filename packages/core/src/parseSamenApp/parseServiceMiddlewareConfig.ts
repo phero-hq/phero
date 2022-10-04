@@ -58,7 +58,7 @@ export default function parseServiceMiddlewareConfig(
 function parseMiddlewareConfig(
   middleware: ts.FunctionLikeDeclarationBase,
 ): ParsedMiddlewareConfig {
-  if (middleware.parameters.length != 3) {
+  if (middleware.parameters.length !== 3) {
     throw new ParseError(
       `S129: Middleware should have three parameters "(params: SamenParams<P>, ctx: SamenContext<C>, next: SamenNextFunction<T>)"`,
       middleware,

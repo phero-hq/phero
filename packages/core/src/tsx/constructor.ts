@@ -10,7 +10,6 @@ export function constructor(
 ): ts.ConstructorDeclaration {
   return ts.factory.createConstructorDeclaration(
     undefined,
-    undefined,
     props.params ?? [],
     props.block,
   )

@@ -44,7 +44,7 @@ export default class Pointer<TParserModel extends ParserModel> {
 
   public get resultVarExpr(): ts.Identifier {
     return ts.factory.createIdentifier(
-      this.dataVarExpr.text.replace(/^[^\.\[]+/, "result"),
+      this.dataVarExpr.text.replace(/^[^.[]+/, "result"),
     )
   }
 

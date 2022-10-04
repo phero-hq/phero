@@ -13,7 +13,6 @@ interface ClassProps {
 
 export function classDeclaration(props: ClassProps): ts.ClassDeclaration {
   return ts.factory.createClassDeclaration(
-    undefined,
     generateModifiers([props.export && ts.SyntaxKind.ExportKeyword]),
     props.name,
     props.typeParams,

@@ -22,7 +22,7 @@ export default function generateEnumParser(
 function generateEnumValidator(
   pointer: Pointer<EnumParserModel>,
 ): ts.Expression {
-  const acceptedValues = pointer.model.members.reduce((result, member) => {
+  const acceptedValues = pointer.model.members.reduce<ts.LiteralExpression[]>((result, member) => {
     if (member.type === ParserModelType.StringLiteral) {
       return [...result, ts.factory.createStringLiteral(member.literal)]
     } else if (member.type === ParserModelType.NumberLiteral) {
@@ -30,7 +30,7 @@ function generateEnumValidator(
     } else {
       return result
     }
-  }, [] as ts.LiteralExpression[])
+  }, [])
 
   return ts.factory.createPrefixUnaryExpression(
     ts.SyntaxKind.ExclamationToken,

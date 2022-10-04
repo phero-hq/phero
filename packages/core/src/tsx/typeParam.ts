@@ -8,6 +8,7 @@ interface TypeParamProps {
 
 export function typeParam(props: TypeParamProps): ts.TypeParameterDeclaration {
   return ts.factory.createTypeParameterDeclaration(
+    undefined,
     props.name,
     undefined,
     props.default,

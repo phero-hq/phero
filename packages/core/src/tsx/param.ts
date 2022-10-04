@@ -13,7 +13,6 @@ interface ParamDeclarationProps {
 
 export function param(props: ParamDeclarationProps): ts.ParameterDeclaration {
   return ts.factory.createParameterDeclaration(
-    undefined,
     generateModifiers([
       props.private && ts.SyntaxKind.PrivateKeyword,
       props.public && ts.SyntaxKind.PublicKeyword,

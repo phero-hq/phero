@@ -1,6 +1,6 @@
 import ts from "typescript"
 import * as tsx from "../tsx"
-import { getNameAsString } from "../tsUtils"
+import { getNameAsString, hasModifier } from "../tsUtils"
 
 export interface ParsedError {
   name: string
@@ -28,14 +28,14 @@ export default function parseThrowStatement(
     typeChecker,
   )
 
-  if (classDeclaration == undefined) {
+  if (classDeclaration === undefined) {
     // class has no Error super type
     return undefined
   }
 
   const superClasses = getSuperClasses(classDeclaration, [], typeChecker)
 
-  if (superClasses == undefined) {
+  if (superClasses === undefined) {
     // class has no Error super type
     return undefined
   }
@@ -47,8 +47,12 @@ export default function parseThrowStatement(
     ),
   ]
 
+  if (!classDeclaration.name) {
+    return undefined
+  }
+
   return {
-    name: classDeclaration.name!.text,
+    name: classDeclaration.name.text,
     sourceFile: classDeclaration.getSourceFile().fileName,
     properties,
     ref: classDeclaration,
@@ -61,7 +65,7 @@ function getSuperClasses(
   typeChecker: ts.TypeChecker,
 ): ts.ClassDeclaration[] | undefined {
   const extendsType = classDeclaration.heritageClauses?.find(
-    (clause) => clause.token == ts.SyntaxKind.ExtendsKeyword,
+    (clause) => clause.token === ts.SyntaxKind.ExtendsKeyword,
   )?.types[0]
 
   if (!extendsType) {
@@ -79,7 +83,7 @@ function getSuperClasses(
 
   const superClass = getClassDeclaration(extendsType, typeChecker)
 
-  if (superClass == undefined) {
+  if (superClass === undefined) {
     return undefined
   }
 
@@ -105,17 +109,14 @@ function findPublicProperties(
   classDeclaration: ts.ClassDeclaration,
   typeChecker: ts.TypeChecker,
 ): ErrorProperty[] {
-  const isPublicMember = (member: ts.Node): boolean =>
-    member.modifiers?.some((m) => m.kind == ts.SyntaxKind.PublicKeyword) ??
-    false
-
   const result: ErrorProperty[] = []
 
   for (const member of classDeclaration.members) {
     if (
       (ts.isPropertyDeclaration(member) ||
         ts.isGetAccessorDeclaration(member)) &&
-      (member.modifiers == undefined || isPublicMember(member))
+      (member.modifiers === undefined ||
+        hasModifier(member, ts.SyntaxKind.PublicKeyword))
     ) {
       const typeNode = typeChecker.typeToTypeNode(
         typeChecker.getTypeAtLocation(member),
@@ -134,7 +135,7 @@ function findPublicProperties(
     if (ts.isConstructorDeclaration(member)) {
       for (const param of member.parameters) {
         if (
-          isPublicMember(param) &&
+          hasModifier(param, ts.SyntaxKind.PublicKeyword) &&
           !ts.isObjectBindingPattern(param.name) &&
           !ts.isArrayBindingPattern(param.name)
         ) {

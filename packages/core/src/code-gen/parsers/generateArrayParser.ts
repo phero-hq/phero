@@ -1,17 +1,16 @@
 import ts from "typescript"
 import generateParserFromModel from "./generateParserFromModel"
-import Pointer from "./Pointer"
 import {
   assignDataToResult,
-  generateOr,
   generatePushErrorExpressionStatement,
 } from "./generateParserLib"
 import { ArrayParserModel } from "./generateParserModel"
+import Pointer from "./Pointer"
 
 export default function generateArrayParser(
   pointer: Pointer<ArrayParserModel>,
 ): ts.Statement {
-  const it_name = ts.factory.createIdentifier(`it_${pointer.model.depth}`)
+  const itName = ts.factory.createIdentifier(`it_${pointer.model.depth}`)
 
   return ts.factory.createIfStatement(
     generateIsArrayExpression(pointer),
@@ -25,7 +24,7 @@ export default function generateArrayParser(
         ts.factory.createVariableDeclarationList(
           [
             ts.factory.createVariableDeclaration(
-              it_name,
+              itName,
               undefined,
               undefined,
               ts.factory.createNumericLiteral("0"),
@@ -34,7 +33,7 @@ export default function generateArrayParser(
           ts.NodeFlags.Let,
         ),
         ts.factory.createBinaryExpression(
-          it_name,
+          itName,
           ts.factory.createToken(ts.SyntaxKind.LessThanToken),
           ts.factory.createPropertyAccessExpression(
             pointer.dataVarExpr,
@@ -42,7 +41,7 @@ export default function generateArrayParser(
           ),
         ),
         ts.factory.createPostfixUnaryExpression(
-          it_name,
+          itName,
           ts.SyntaxKind.PlusPlusToken,
         ),
         generateParserFromModel(pointer.model.element, pointer.path),
