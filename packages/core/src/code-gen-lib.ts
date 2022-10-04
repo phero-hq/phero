@@ -511,15 +511,11 @@ function combineAsExpr(
 }
 
 export class ReferenceMaker {
-  private readonly sharedTypes: ts.Type[]
-
   constructor(
     private readonly domain: Model[],
     private readonly typeChecker: ts.TypeChecker,
     private readonly sharedDomainName: ts.EntityName | undefined,
-  ) {
-    this.sharedTypes = this.domain.map((m) => typeChecker.getTypeAtLocation(m))
-  }
+  ) {}
 
   public fromTypeNode(typeNode: ts.TypeReferenceNode): ts.EntityName {
     if (typeNode.typeName.getText() === "SamenContext") {
@@ -527,16 +523,26 @@ export class ReferenceMaker {
     }
 
     const symbol = this.typeChecker.getSymbolAtLocation(typeNode.typeName)
-
     const declr = symbol?.declarations?.[0]
 
-    if (declr && isModel(declr) && this.domain.includes(declr)) {
-      return combineAsEntityName(
-        [
-          ...(this.sharedDomainName ? [this.sharedDomainName] : []),
-          cleanTypeName(typeNode.typeName, this.typeChecker),
-        ].flatMap(unpack),
-      )
+    if (declr) {
+      if (isModel(declr) && this.domain.includes(declr)) {
+        return combineAsEntityName(
+          [
+            ...(this.sharedDomainName ? [this.sharedDomainName] : []),
+            cleanTypeName(typeNode.typeName, this.typeChecker),
+          ].flatMap(unpack),
+        )
+      }
+
+      if (ts.isImportSpecifier(declr)) {
+        return combineAsEntityName(
+          [
+            ...(this.sharedDomainName ? [this.sharedDomainName] : []),
+            cleanTypeName(declr.name, this.typeChecker),
+          ].flatMap(unpack),
+        )
+      }
     }
 
     return typeNode.typeName
@@ -553,13 +559,23 @@ export class ReferenceMaker {
 
     const declr = symbol?.declarations?.[0]
 
-    if (declr && isModel(declr) && this.domain.includes(declr)) {
-      return combineAsExpr(
-        [
-          ...(this.sharedDomainName ? [this.sharedDomainName] : []),
-          cleanTypeName(identifier, this.typeChecker),
-        ].flatMap(unpack),
-      )
+    if (declr) {
+      if (isModel(declr) && this.domain.includes(declr)) {
+        return combineAsExpr(
+          [
+            ...(this.sharedDomainName ? [this.sharedDomainName] : []),
+            cleanTypeName(identifier, this.typeChecker),
+          ].flatMap(unpack),
+        )
+      }
+      if (ts.isImportSpecifier(declr)) {
+        return combineAsExpr(
+          [
+            ...(this.sharedDomainName ? [this.sharedDomainName] : []),
+            cleanTypeName(declr.name, this.typeChecker),
+          ].flatMap(unpack),
+        )
+      }
     }
 
     return identifier
