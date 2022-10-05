@@ -1,6 +1,6 @@
 {
   "name": "samen",
-  "version": "0.9.3-rc.3",
+  "version": "0.9.3",
   "description": "Backend development toolkit for TypeScript",
   "homepage": "https://samen.io",
   "repository": "samen-io/samen",
@@ -21,7 +21,7 @@
     "postbuild": "cp package.json ./dist/package.json"
   },
   "dependencies": {
-    "@samen/dev": "^0.9.3-rc.3",
+    "@samen/dev": "^0.9.3",
     "ink": "^3.2.0",
     "ink-select-input": "^4.2.1",
     "ink-spinner": "^4.0.3",
