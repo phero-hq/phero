@@ -15,7 +15,7 @@
     "clean": "rm -rf dist",
     "build": "tsc",
     "test": "jest src",
-    "prepublish": "npm run clean && npm run build",
+    "prepublish": "npm run clean && npm run build && cp ../../README.md README.md",
     "start": "node ./dist/index.js",
     "prestart": "npm run build",
     "postbuild": "cp package.json ./dist/package.json"
