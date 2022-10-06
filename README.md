@@ -120,10 +120,11 @@ A complete set of documentation could be found at: [docs.samen.io](https://docs.
 
 ## Community & Support
 
-- [GitHub Issues](https://github.com/samen-io/samen/issues). Bugs, errors or feature-requests can be posted here.
-- [Discord](https://discord.gg/t97n6wQfkh). You are very welcome to hang out, ask questions, show what you've build, or whatever!
-- [Twitter](https://twitter.com/SamenHQ). Another place to keep up to date with announcements and news.
-- [YouTube](https://www.youtube.com/channel/UCgHc6KiLud3FAL_Pecb3pnQ). Here we'll be posting our guides in video-form.
+- [GitHub Issues](https://github.com/samen-io/samen/issues): Bugs, errors or feature-requests can be posted here.
+- [GitHub Discussions]() or [Discord](https://discord.gg/t97n6wQfkh): You are very welcome to hang out, ask questions, show what you've build, or whatever!
+- [Twitter](https://twitter.com/SamenHQ): Another place to keep up to date with announcements and news.
+- [YouTube](https://www.youtube.com/channel/UCgHc6KiLud3FAL_Pecb3pnQ): Here we'll be posting our guides in video-form.
+- [Email](mailto:hi@samen.io): If you want to talk business.
 
 ## License
 
