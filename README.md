@@ -9,13 +9,13 @@ Samen is the no-hassle and type-safe glue between your backend and frontend(s). 
 
 **Features**:
 
-✅ code-first, minimal API
-✨ generates a type-safe SDK for your frontends
-🚀 easily share your models between server and client
-📋 parses the input and output based on your models
-🔋 comes with a Terminal UI
-🖖 middleware
-🏛️ only a single dependency: TypeScript
+✅ code-first, minimal API  
+✨ generates a type-safe SDK for your frontends  
+🚀 easily share your models between server and client  
+📋 parses the input and output based on your models  
+🔋 comes with a Terminal UI  
+🖖 middleware  
+🏛️ only a single dependency: TypeScript  
 
 ## Example: Hello World!
 
