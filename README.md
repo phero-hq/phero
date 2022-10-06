@@ -5,7 +5,7 @@
 
 Samen is the no-hassle and type-safe glue between your backend and frontend(s). Our mission is to reduce the amount of boilerplate to create a backend for your apps, and give you end-to-end type-safety in the process. Check out this introduction video to see how the basics work:
 
-[![Introduction video](./doc-assets/thumbnail.jpg)](https://www.youtube.com/watch?v=I13TKes7ylg)
+[![Introduction video](./doc-assets/thumbnail.png)](https://www.youtube.com/watch?v=I13TKes7ylg)
 
 **Features**:
 
