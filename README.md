@@ -1,11 +1,11 @@
 <div align="center">
-  <img src="./logo.png" width="260" />
+  <img src="./doc-assets/logo.png" width="260" />
   <h1>Samen</h1>
 </div>
 
 Samen is the no-hassle and type-safe glue between your backend and frontend(s). Our mission is to reduce the amount of boilerplate to create a backend for your apps, and give you end-to-end type-safety in the process. Check out this introduction video to see how the basics work:
 
-[![Introduction video](https://img.youtube.com/vi/I13TKes7ylg/0.jpg)](https://www.youtube.com/watch?v=I13TKes7ylg)
+[![Introduction video](./doc-assets/thumbnail.jpg)](https://www.youtube.com/watch?v=I13TKes7ylg)
 
 **Features**:
 
