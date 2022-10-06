@@ -9,13 +9,13 @@ Samen is the no-hassle and type-safe glue between your backend and frontend(s). 
 
 **Features**:
 
-✅ code-first, minimal API  
-✨ generates a type-safe SDK for your frontends  
-🚀 easily share your models between server and client  
-📋 parses the input and output based on your models  
-🔋 comes with a Terminal UI  
-🖖 middleware  
-🏛️ only a single dependency: TypeScript  
+✅ code-first, minimal API
+✨ generates a type-safe SDK for your frontends
+🚀 easily share your models between server and client
+📋 parses the input and output based on your models
+🔋 comes with a Terminal UI
+🖖 middleware
+🏛️ only a single dependency: TypeScript
 
 ## Example: Hello World!
 
@@ -117,6 +117,15 @@ try {
 ## Documentation
 
 A complete set of documentation could be found at: [docs.samen.io](https://docs.samen.io/).
+
+## Status
+
+- [x] Alpha: We are developing and using Samen in projects for our own clients. The toolkit is used in production (in a couple of high-profile apps), but the developer experience may not be optimal.
+- [x] Public Alpha: Developer experience is stable and most common TypeScript-types should be supported.
+- [x] Public Beta: Advanced TypeScript-types are supported, but some platform-specific features may be missing.
+- [ ] Public: Feature-complete and running everywhere!
+
+We are currently in Public Beta. Watch "releases" of this repo to get notified of major updates!
 
 ## Community & Support
 
