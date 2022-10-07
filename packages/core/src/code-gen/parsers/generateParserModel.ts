@@ -696,10 +696,15 @@ export default function generateParserModel(
       ? getMemberName(node.typeName)
       : ts.isIdentifier(node.expression)
       ? node.expression.text
+      : ts.isPropertyAccessExpression(node.expression)
+      ? getMemberName(node.expression.name)
       : undefined
 
     if (!baseTypeName) {
-      throw new ParseError("Unexpected node", node)
+      throw new ParseError(
+        `Unexpected expression (${(node as any)?.expression.kind ?? 0})`,
+        node,
+      )
     }
 
     return {

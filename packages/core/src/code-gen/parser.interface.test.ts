@@ -290,4 +290,34 @@ describe("Parsers", () => {
     )
     expect(printCode(parserDeclaration)).toMatchSnapshot()
   })
+  test("extend an intersection of two interfaces in namepsace", () => {
+    // this is for @samen/client
+    const {
+      statements: [model],
+      typeChecker,
+    } = compileStatements(
+      `
+          interface MyModel extends domain.v_1_0_0.C {
+            c: number
+          }
+
+          namespace domain.v_1_0_0 {
+            export type C = A & B
+
+            interface A {
+              a: number
+            }
+            interface B {
+              b: number
+            }
+          }
+        `,
+    )
+
+    const parserDeclaration = generateParser(
+      model as ts.TypeAliasDeclaration,
+      typeChecker,
+    )
+    expect(printCode(parserDeclaration)).toMatchSnapshot()
+  })
 })
