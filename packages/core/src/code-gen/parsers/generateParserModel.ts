@@ -186,6 +186,27 @@ export default function generateParserModel(
   const typeName = typeChecker.typeToString(type, rootNode, undefined)
 
   if (ts.isInterfaceDeclaration(rootNode)) {
+    const heritageReferenceParsers = (rootNode.heritageClauses ?? [])
+      .flatMap((heritageClause) => heritageClause.types)
+      .map((heritageType) => generateReferenceParser(heritageType, 0))
+
+    const objectParser: ObjectParserModel = {
+      type: ParserModelType.Object,
+      members: rootNode.members.reduce((members, member) => {
+        return member.name
+          ? [
+              ...members,
+              {
+                type: ParserModelType.Member,
+                name: getMemberName(member.name),
+                optional: !!member.questionToken,
+                parser: generate(member, 0),
+              },
+            ]
+          : members
+      }, [] as MemberParserModel[]),
+    }
+
     return {
       type: ParserModelType.Root,
       name: rootName,
@@ -205,22 +226,12 @@ export default function generateParserModel(
             },
           })) ?? [],
       },
-      parser: {
-        type: ParserModelType.Object,
-        members: rootNode.members.reduce((members, member) => {
-          return member.name
-            ? [
-                ...members,
-                {
-                  type: ParserModelType.Member,
-                  name: getMemberName(member.name),
-                  optional: !!member.questionToken,
-                  parser: generate(member, 0),
-                },
-              ]
-            : members
-        }, [] as MemberParserModel[]),
-      },
+      parser: heritageReferenceParsers.length
+        ? {
+            type: ParserModelType.Intersection,
+            parsers: [...heritageReferenceParsers, objectParser],
+          }
+        : objectParser,
     }
   } else if (ts.isTypeAliasDeclaration(rootNode)) {
     return {
@@ -504,22 +515,7 @@ export default function generateParserModel(
       } else if ((type.flags & ts.TypeFlags.Object) === ts.TypeFlags.Object) {
         return generateObjectType(type, node, depth)
       } else if (type.isUnionOrIntersection()) {
-        return {
-          type: ParserModelType.Reference,
-          baseTypeName: getMemberName(node.typeName),
-          typeName: typeChecker.typeToString(type, node, undefined),
-          fullyQualifiedName: getFullyQualifiedName(node, typeChecker),
-          typeArguments:
-            node.typeArguments?.map((typeArg) => ({
-              typeName: typeChecker.typeToString(
-                typeChecker.getTypeFromTypeNode(typeArg),
-              ),
-              fullyQualifiedName: ts.isTypeReferenceNode(typeArg)
-                ? getFullyQualifiedName(typeArg, typeChecker)
-                : undefined,
-              parser: generate(typeArg, depth),
-            })) ?? [],
-        }
+        return generateReferenceParser(node, depth)
       }
     }
 
@@ -617,22 +613,7 @@ export default function generateParserModel(
         }, []),
       }
     }
-    return {
-      type: ParserModelType.Reference,
-      baseTypeName: getMemberName(node.typeName),
-      typeName: typeChecker.typeToString(type, node, undefined),
-      fullyQualifiedName: getFullyQualifiedName(node, typeChecker),
-      typeArguments:
-        node.typeArguments?.map((typeArg) => ({
-          typeName: typeChecker.typeToString(
-            typeChecker.getTypeFromTypeNode(typeArg),
-          ),
-          fullyQualifiedName: ts.isTypeReferenceNode(typeArg)
-            ? getFullyQualifiedName(typeArg, typeChecker)
-            : undefined,
-          parser: generate(typeArg, depth),
-        })) ?? [],
-    }
+    return generateReferenceParser(node, depth)
   }
 
   function getMemberName(
@@ -701,6 +682,38 @@ export default function generateParserModel(
           }
         }
       }),
+    }
+  }
+
+  function generateReferenceParser(
+    node: ts.TypeReferenceNode | ts.ExpressionWithTypeArguments,
+    depth: number,
+  ): ReferenceParserModel {
+    const baseTypeName = ts.isTypeReferenceNode(node)
+      ? getMemberName(node.typeName)
+      : ts.isIdentifier(node.expression)
+      ? node.expression.text
+      : undefined
+
+    if (!baseTypeName) {
+      throw new ParseError("Unexpected node", node)
+    }
+
+    return {
+      type: ParserModelType.Reference,
+      baseTypeName,
+      typeName: typeChecker.typeToString(type, node, undefined),
+      fullyQualifiedName: getFullyQualifiedName(node, typeChecker),
+      typeArguments:
+        node.typeArguments?.map((typeArg) => ({
+          typeName: typeChecker.typeToString(
+            typeChecker.getTypeFromTypeNode(typeArg),
+          ),
+          fullyQualifiedName: ts.isTypeReferenceNode(typeArg)
+            ? getFullyQualifiedName(typeArg, typeChecker)
+            : undefined,
+          parser: generate(typeArg, depth),
+        })) ?? [],
     }
   }
 }

@@ -307,7 +307,7 @@ export function getNameAsString(
 }
 
 export function getFullyQualifiedName(
-  typeNode: ts.TypeReferenceNode,
+  typeNode: ts.NodeWithTypeArguments,
   typeChecker: ts.TypeChecker,
 ): {
   base: string
