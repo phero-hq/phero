@@ -188,7 +188,9 @@ export default function generateParserModel(
   if (ts.isInterfaceDeclaration(rootNode)) {
     const heritageReferenceParsers = (rootNode.heritageClauses ?? [])
       .flatMap((heritageClause) => heritageClause.types)
-      .map((heritageType) => generateReferenceParser(heritageType, 0))
+      .map((heritageType) =>
+        generateReferenceParserModel(type, heritageType, 0),
+      )
 
     const objectParser: ObjectParserModel = {
       type: ParserModelType.Object,
@@ -515,7 +517,7 @@ export default function generateParserModel(
       } else if ((type.flags & ts.TypeFlags.Object) === ts.TypeFlags.Object) {
         return generateObjectType(type, node, depth)
       } else if (type.isUnionOrIntersection()) {
-        return generateReferenceParser(node, depth)
+        return generateReferenceParserModel(type, node, depth)
       }
     }
 
@@ -613,7 +615,7 @@ export default function generateParserModel(
         }, []),
       }
     }
-    return generateReferenceParser(node, depth)
+    return generateReferenceParserModel(type, node, depth)
   }
 
   function getMemberName(
@@ -685,7 +687,8 @@ export default function generateParserModel(
     }
   }
 
-  function generateReferenceParser(
+  function generateReferenceParserModel(
+    type: ts.Type,
     node: ts.TypeReferenceNode | ts.ExpressionWithTypeArguments,
     depth: number,
   ): ReferenceParserModel {
