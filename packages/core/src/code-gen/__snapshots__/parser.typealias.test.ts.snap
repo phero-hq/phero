@@ -855,12 +855,120 @@ exports[`Parsers for a type alias index types union string keys 1`] = `
 }"
 `;
 
+exports[`Parsers for a type alias intersection intersection with two interfaces 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        {
+            const intersectionResult: any = {};
+            {
+                const parseResult = AParser.parse(data);
+                if (!parseResult.ok) {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`not a A\`
+                    });
+                }
+                else
+                    result = parseResult.result;
+            }
+            Object.assign(intersectionResult, result);
+            {
+                const parseResult = BParser.parse(data);
+                if (!parseResult.ok) {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`not a B\`
+                    });
+                }
+                else
+                    result = parseResult.result;
+            }
+            Object.assign(intersectionResult, result);
+            result = intersectionResult;
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers for a type alias intersection intersection with two types 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        {
+            const errLength = errors.length;
+            {
+                {
+                    const parseResult = AParser.parse(data);
+                    if (!parseResult.ok) {
+                        errors.push({
+                            path: \\"data\\",
+                            message: \`not a A\`
+                        });
+                    }
+                    else
+                        result = parseResult.result;
+                }
+                if (errors.length !== errLength) {
+                    errors.splice(errLength, errors.length - errLength);
+                    {
+                        {
+                            const parseResult = BParser.parse(data);
+                            if (!parseResult.ok) {
+                                errors.push({
+                                    path: \\"data\\",
+                                    message: \`not a B\`
+                                });
+                            }
+                            else
+                                result = parseResult.result;
+                        }
+                        if (errors.length !== errLength) {
+                            errors.splice(errLength, errors.length - errLength);
+                            {
+                                errors.push({
+                                    path: \\"data\\",
+                                    message: \`is none of the options of union\`
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
 exports[`Parsers for a type alias intersection object literal with complex union 1`] = `
 "export class MyModelParser {
     static parse(data: any): ParseResult<MyModel> {
         const errors: ValidationError[] = [];
         let result: any;
         {
+            const intersectionResult: any = {};
             if (typeof data !== \\"object\\" || data === null) {
                 errors.push({
                     path: \\"data\\",
@@ -878,6 +986,7 @@ exports[`Parsers for a type alias intersection object literal with complex union
                 else
                     result[\\"a\\"] = data[\\"a\\"];
             }
+            Object.assign(intersectionResult, result);
             {
                 const errLength = errors.length;
                 {
@@ -962,6 +1071,8 @@ exports[`Parsers for a type alias intersection object literal with complex union
                     }
                 }
             }
+            Object.assign(intersectionResult, result);
+            result = intersectionResult;
         }
         if (errors.length) {
             return {
@@ -983,6 +1094,7 @@ exports[`Parsers for a type alias intersection object literal with union 1`] = `
         const errors: ValidationError[] = [];
         let result: any;
         {
+            const intersectionResult: any = {};
             if (typeof data !== \\"object\\" || data === null) {
                 errors.push({
                     path: \\"data\\",
@@ -1000,6 +1112,7 @@ exports[`Parsers for a type alias intersection object literal with union 1`] = `
                 else
                     result[\\"a\\"] = data[\\"a\\"];
             }
+            Object.assign(intersectionResult, result);
             {
                 const errLength = errors.length;
                 {
@@ -1059,6 +1172,8 @@ exports[`Parsers for a type alias intersection object literal with union 1`] = `
                     }
                 }
             }
+            Object.assign(intersectionResult, result);
+            result = intersectionResult;
         }
         if (errors.length) {
             return {
@@ -1080,6 +1195,7 @@ exports[`Parsers for a type alias intersection simple 1`] = `
         const errors: ValidationError[] = [];
         let result: any;
         {
+            const intersectionResult: any = {};
             if (typeof data !== \\"object\\" || data === null) {
                 errors.push({
                     path: \\"data\\",
@@ -1097,6 +1213,7 @@ exports[`Parsers for a type alias intersection simple 1`] = `
                 else
                     result[\\"a\\"] = data[\\"a\\"];
             }
+            Object.assign(intersectionResult, result);
             if (typeof data !== \\"object\\" || data === null) {
                 errors.push({
                     path: \\"data\\",
@@ -1114,6 +1231,8 @@ exports[`Parsers for a type alias intersection simple 1`] = `
                 else
                     result[\\"b\\"] = data[\\"b\\"];
             }
+            Object.assign(intersectionResult, result);
+            result = intersectionResult;
         }
         if (errors.length) {
             return {
