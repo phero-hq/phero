@@ -1,6 +1,6 @@
 {
   "name": "samen",
-  "version": "0.9.4-rc.2",
+  "version": "0.9.4",
   "description": "Backend development toolkit for TypeScript",
   "homepage": "https://samen.io",
   "repository": "samen-io/samen",

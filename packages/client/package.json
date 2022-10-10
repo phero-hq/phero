@@ -1,6 +1,6 @@
 {
   "name": "@samen/client",
-  "version": "0.9.4-rc.2",
+  "version": "0.9.4",
   "main": "dist/index.js",
   "description": "Client library for Samen",
   "homepage": "https://samen.io",
@@ -23,7 +23,7 @@
     "postbuild": "cp package.json ./dist/package.json"
   },
   "dependencies": {
-    "@samen/core": "^0.9.4-rc.2",
+    "@samen/core": "^0.9.4",
     "@samen/dev": "^0.9.3"
   },
   "devDependencies": {
