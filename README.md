@@ -3,23 +3,47 @@
   <h1>Samen</h1>
 </div>
 
-Samen is the no-hassle and type-safe glue between your backend and frontend(s). Our mission is to reduce the amount of boilerplate to create a backend for your apps, and give you end-to-end type-safety in the process. Check out this introduction video to see how the basics work:
+Samen is the no-hassle and type-safe glue between your backend and frontend. Our mission is to give you the confidence you deserve, by making it impossible to make stupid mistakes and have as little boilerplate as possible. TypeScript is at the core of it all.
+
+Development with Samen goes in these steps:
+
+1. **Build your backend.** Define your domain models and functions in regular, plain TypeScript.
+2. **Run the CLI.** This runs the server and generates an SDK for your frontend, or multiple frontends at the same time.
+3. **Call your backend-functions from the frontend, as if they were local.** This includes type-safety and error-handling.
+
+This boosts your frontend development, because:
+
+- No more guessing about how the backend works. You can no longer make mistakes with the URL, method, headers or status-codes. Call the function, handle the Promise and get compile errors when things don't line up.
+- Stop assuming data is of the type you’re expecting. You know it is, period.
+- Use the domain models defined on the backend.
+- Handle custom errors thrown by the backend.
+- You're not bound to a data management framework. The backend functions are exposed as regular, local and async functions. It’s up to you how to use them.
+
+Backend development is a breeze as well:
+
+- Use the full power of TypeScript to define your domain models. No need for an additional language to learn and maintain, like with GraphQL and tRPC.
+- Know when you break compatability with the frontend, before even running it: TypeScript has your back.
+- You can stop generating specs or write documentation about the endpoints you expose, and what method and arguments they expect.
+- The server can be deployed anywhere, either on one of the cloud platforms or a regular Node server.
+
+Check out this introduction video to see how the basics work:
 
 [![Introduction video](./doc-assets/thumbnail.png)](https://www.youtube.com/watch?v=I13TKes7ylg)
 
 **Features**:
 
-✅ code-first, minimal API  
-✨ generates a type-safe SDK for your frontends  
-🚀 easily share your models between server and client  
-📋 parses the input and output based on your models  
-🔋 comes with a Terminal UI  
-🖖 middleware  
-🏛️ only a single dependency: TypeScript  
+✅ Code-first, minimal API  
+✨ Generates a type-safe SDK for your frontends  
+🚀 Share your models between server and client  
+🧨 Mind-blowing error-handling  
+📋 Parses the input and output, based on your models  
+🔋 Comes with a CLI  
+🖖 Middleware  
+🏛️ Only a single dependency: TypeScript  
 
 ## Example: Hello World!
 
-All you need is a file called `src/samen.ts` on your backend. Here's an example:
+It all starts with a file called `src/samen.ts` on your backend. Here's an example:
 
 ```ts
 import { createService } from "@samen/server"
@@ -39,9 +63,9 @@ export const exampleService = createService({
 })
 ```
 
-As you can see our function `sayHello` returns an object with the structure of `HelloMessage`. Samen will analyse the function(s) you've exposed with `createService()`. It will gather all models (interfaces, enums and type aliases) your client will need.
+As you can see our function `sayHello` returns an object with the structure of `HelloMessage`. Samen will analyse the functions you've exposed with `createService()`. It will gather all models (interfaces, enums and type aliases) your frontend could need.
 
-Now, when you hit `npx samen` in your project directory, Samen will generate an SDK for your client(s) in a file called `samen.generated.ts`. This includes a `SamenClient` class which you can use to call the functions on your backend.From the generated file you can import your models (coming from your server) as well, which could come in very handy in some cases.
+Now, when you hit `npx samen` in your project directory, Samen will generate an SDK for your client(s) in a file called `samen.generated.ts`. This includes a `SamenClient` class which you can use to call the functions on your backend. From the generated file you can import your models (coming from your server) as well, which could come in very handy in some cases.
 
 Here's an example of how that looks on your frontend:
 
