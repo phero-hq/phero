@@ -1,11 +1,11 @@
 <div align="center">
   <img src="./doc-assets/logo.png" width="260" />
-  <h1>Samen</h1>
+  <h1>Phero</h1>
 </div>
 
-Samen is the no-hassle and type-safe glue between your backend and frontend. Our mission is to give you the confidence you deserve, by making it impossible to make stupid mistakes and have as little boilerplate as possible. TypeScript is at the core of it all.
+Phero is the no-hassle and type-safe glue between your backend and frontend. Our mission is to give you the confidence you deserve, by reducing the risk of silly mistakes and boilerplate. TypeScript is at the core of it all.
 
-Development with Samen goes in these steps:
+Development with Phero goes in these steps:
 
 1. **Build your backend.** Define your domain models and functions in regular, plain TypeScript.
 2. **Run the CLI.** This runs the server and generates an SDK for your frontend, or multiple frontends at the same time.
@@ -39,14 +39,14 @@ Check out this introduction video to see how the basics work:
 📋 Parses the input and output, based on your models  
 🔋 Comes with a CLI  
 🖖 Middleware  
-🏛️ Only a single dependency: TypeScript  
+🏛️ Only a single dependency: TypeScript
 
 ## Example: Hello World!
 
-It all starts with a file called `src/samen.ts` on your backend. Here's an example:
+It all starts with a file called `src/phero.ts` on your backend. Here's an example:
 
 ```ts
-import { createService } from "@samen/server"
+import { createService } from "@phero/server"
 
 interface HelloMessage {
   text: string
@@ -63,9 +63,9 @@ export const exampleService = createService({
 })
 ```
 
-As you can see our function `sayHello` returns an object with the structure of `HelloMessage`. Samen will analyse the functions you've exposed with `createService()`. It will gather all models (interfaces, enums and type aliases) your frontend could need.
+As you can see our function `sayHello` returns an object with the structure of `HelloMessage`. Phero will analyse the functions you've exposed with `createService()`. It will gather all models (interfaces, enums and type aliases) your frontend could need.
 
-Now, when you hit `npx samen` in your project directory, Samen will generate an SDK for your client(s) in a file called `samen.generated.ts`. This includes a `SamenClient` class which you can use to call the functions on your backend. From the generated file you can import your models (coming from your server) as well, which could come in very handy in some cases.
+Now, when you run `npx phero` in your project directory, Phero will generate an SDK for your client(s) in a file called `phero.generated.ts`. This includes a `PheroClient` class which you can use to call the functions on your backend. From the generated file you can import your models (coming from your server) as well, which could come in very handy in some cases.
 
 Here's an example of how that looks on your frontend:
 
@@ -73,19 +73,19 @@ Here's an example of how that looks on your frontend:
 import { useCallback, useState } from "react"
 import unfetch from "isomorphic-unfetch"
 
-// Samen will generate a file 'samen.generated.ts` on your client with a
-// SamenClient and the models you're using in your RPC functions
-import { SamenClient, HelloMessage } from "../samen.generated"
+// Phero will generate a file 'phero.generated.ts` on your client with a
+// PheroClient and the models you're using in your RPC functions
+import { PheroClient, HelloMessage } from "../phero.generated"
 
-// instantiate the generated SamenClient with your favorite fetch lib
-const samen = new SamenClient(unfetch)
+// instantiate the generated PheroClient with your favorite fetch lib
+const phero = new PheroClient(unfetch)
 
 export function HelloMessage() {
   const [message, setMessage] = useState<string | null>(null)
 
   const onPress = useCallback(async () => {
     // call your RPC function on your service
-    const helloMessage: HelloMessage = await samen.exampleService.sayHello(
+    const helloMessage: HelloMessage = await phero.exampleService.sayHello(
       "Steve Jobs",
     )
     setMessage(helloMessage.text)
@@ -123,9 +123,9 @@ async function sayHello(name: string): Promise<HelloMessage> {
 On your client you can now catch this error:
 
 ```ts
-import { HelloMessage, NameTooShortError } from "../samen.generated"
+import { HelloMessage, NameTooShortError } from "../phero.generated"
 try {
-  const helloMessage: HelloMessage = await samen.exampleService.sayHello(
+  const helloMessage: HelloMessage = await phero.exampleService.sayHello(
     "", // oops!
   )
   // TODO insert logic here
@@ -140,11 +140,11 @@ try {
 
 ## Documentation
 
-A complete set of documentation could be found at: [docs.samen.io](https://docs.samen.io/).
+A complete set of documentation could be found at: [docs.phero.dev](https://docs.phero.dev/).
 
 ## Status
 
-- [x] Alpha: We are developing and using Samen in projects for our own clients. The toolkit is used in production (in a couple of high-profile apps), but the developer experience may not be optimal.
+- [x] Alpha: We are developing and using Phero in projects for our own clients. The toolkit is used in production (in a couple of high-profile apps), but the developer experience may not be optimal.
 - [x] Public Alpha: Developer experience is stable and most common TypeScript-types should be supported.
 - [x] Public Beta: Advanced TypeScript-types are supported, but some platform-specific features may be missing.
 - [ ] Public: Feature-complete and running everywhere!
@@ -153,12 +153,12 @@ We are currently in Public Beta. Watch "releases" of this repo to get notified o
 
 ## Community & Support
 
-- [GitHub Issues](https://github.com/samen-io/samen/issues): Bugs, errors or feature-requests can be posted here.
+- [GitHub Issues](https://github.com/phero-hq/phero/issues): Bugs, errors or feature-requests can be posted here.
 - [GitHub Discussions]() or [Discord](https://discord.gg/t97n6wQfkh): You are very welcome to hang out, ask questions, show what you've build, or whatever!
-- [Twitter](https://twitter.com/SamenHQ): Another place to keep up to date with announcements and news.
+- [Twitter](https://twitter.com/PheroHQ): Another place to keep up to date with announcements and news.
 - [YouTube](https://www.youtube.com/channel/UCgHc6KiLud3FAL_Pecb3pnQ): Here we'll be posting our guides in video-form.
-- [Email](mailto:hi@samen.io): If you want to talk business.
+- [Email](mailto:hi@phero.dev): If you want to talk business.
 
 ## License
 
-Samen is [licensed as Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0).
+Phero is [licensed as Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0).
