@@ -3,9 +3,7 @@
   <h1>Phero</h1>
 </div>
 
-Phero is the no-hassle and type-safe glue between your backend and frontend. Our mission is to give you the confidence you deserve, by reducing the risk of silly mistakes and boilerplate. TypeScript is at the core of it all.
-
-Development with Phero goes in these steps:
+Phero is the no-hassle and type-safe glue between your backend and frontend. TypeScript is at the core of it all. Development with Phero goes in these steps:
 
 1. **Build your backend.** Define your domain models and functions in regular, plain TypeScript.
 2. **Run the CLI.** This runs the server and generates an SDK for your frontend, or multiple frontends at the same time.
@@ -15,13 +13,12 @@ This boosts your frontend development, because:
 
 - No more guessing about how the backend works. You can no longer make mistakes with the URL, method, headers or status-codes. Call the function, handle the Promise and get compile errors when things don't line up.
 - Stop assuming data is of the type you’re expecting. You know it is, period.
-- Use the domain models defined on the backend.
-- Handle custom errors thrown by the backend.
-- You're not bound to a data management framework. The backend functions are exposed as regular, local and async functions. It’s up to you how to use them.
+- Use the domain models on the frontend, defined on the backend.
+- Handle custom errors on the frontend, that are thrown by the backend.
 
 Backend development is a breeze as well:
 
-- Use the full power of TypeScript to define your domain models. No need for an additional language to learn and maintain, like with GraphQL and tRPC.
+- Use the full power of TypeScript to define your domain models. No need for an additional language to learn and maintain, like with GraphQL or tRPC.
 - Know when you break compatability with the frontend, before even running it: TypeScript has your back.
 - You can stop generating specs or write documentation about the endpoints you expose, and what method and arguments they expect.
 - The server can be deployed anywhere, either on one of the cloud platforms or a regular Node server.
