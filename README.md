@@ -1,7 +1,12 @@
 <div align="center">
   <img src="./doc-assets/logo.png" width="260" />
-  <h1>Phero</h1>
+  <p>Pronounced like "hero", with the f of function.</p>
+  <p>
+    Short for <a href="https://en.wikipedia.org/wiki/Pheromone">pheromone</a> (that stuff some animals use to act as one).
+  </p>
 </div>
+
+---
 
 Phero is the no-hassle and type-safe glue between your backend and frontend. TypeScript is at the core of it all. Development with Phero goes in these steps:
 
