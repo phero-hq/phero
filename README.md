@@ -104,13 +104,13 @@ To catch it on the frontend, you can import the error and handle it like you wou
 import { HelloMessage, NameTooShortError } from "../phero.generated"
 
 try {
-  const helloMessage: HelloMessage = await phero.exampleService.sayHello(
+  const helloMessage = await phero.exampleService.sayHello(
     "", // oops!
   )
-} catch (e) {
-  if (e instanceof NameTooShortError) {
+} catch (error) {
+  if (error instanceof NameTooShortError) {
     alert(
-      `Name is too short, it should be at least ${e.minimumLength} characters`,
+      `Name is too short, it should be at least ${error.minimumLength} characters`,
     )
   } else {
     alert("Something went wrong")
