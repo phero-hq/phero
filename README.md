@@ -62,14 +62,15 @@ Here's an example of how that could look on your frontend:
 
 ```ts
 import { useCallback, useState } from "react"
+import unfetch from "isomorphic-unfetch"
 
 // Phero will generate a file called 'phero.generated.ts` with
 // the PheroClient and the models you're using in your functions
 // on the backend:
 import { PheroClient, HelloMessage } from "../phero.generated"
 
-// instantiate the PheroClient
-const phero = new PheroClient(window.fetch.bind(this))
+// instantiate the PheroClient with your favorite fetch lib
+const phero = new PheroClient(unfetch)
 
 export function App() {
   const [helloMessage, setHelloMessage] = useState<HelloMessage>()
