@@ -16,33 +16,21 @@ Phero is the no-hassle and type-safe glue between your backend and frontend. Typ
 
 This boosts your frontend development, because:
 
-- Stop assuming data is of the type you’re expecting. You know it is, period.
-- Call functions from the frontend, defined on the backend.
-- Use the domain models on the frontend, defined on the backend.
-- Handle custom errors on the frontend, that are thrown by the backend.
-- No more mistakes with the specs of the API, like path, arguments or headers.
+💪 Use functions and domain models on the frontend, defined on the backend.  
+🧨 Handle errors on the frontend, thrown by the backend.  
+🤝 Stop assuming data is of the type you’re expecting. You know it is, period.  
+✅ No more mistakes with the specs of the API, like path, arguments or headers.  
 
 Backend development becomes a breeze as well:
 
-- Use the full power of TypeScript to define your domain models. No need for an additional language or DSL to learn and maintain, like with GraphQL or tRPC.
-- Know when you break compatability with the frontend, before even running it: TypeScript has your back.
-- You can stop generating specs or write documentation about the endpoints you expose, and what method and arguments they expect.
-- The server can be deployed anywhere, either on one of the cloud platforms or a regular Node server.
+🫶 Use TypeScript to define your domain models. No need for an extra language or DSL to learn and maintain, like with GraphQL or tRPC.  
+📋 Know when you break compatability with the frontend, before even running it: TypeScript has your back.  
+😶‍🌫️ No more outdated specs or documentation about endpoints (and what method, headers or arguments they expect).  
+🚀 The server can be deployed anywhere, either on one of the cloud platforms or a regular Node server.  
 
 Check out this introduction video to see how the basics work:
 
 [![Introduction video](./doc-assets/thumbnail.png)](https://www.youtube.com/watch?v=I13TKes7ylg)
-
-**Features**:
-
-✅ Code-first, minimal API  
-✨ Generates a type-safe SDK for your frontends  
-🚀 Share your models between server and client  
-🧨 Mind-blowing error-handling  
-📋 Parses the input and output, based on your models  
-🔋 Comes with a CLI  
-🖖 Middleware  
-🏛️ Only a single dependency: TypeScript
 
 ## Example: Hello World!
 
