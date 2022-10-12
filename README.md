@@ -61,7 +61,6 @@ Now, run `npx phero` in your project directory. Phero will generate an SDK for y
 Here's an example of how that could look on your frontend:
 
 ```ts
-import { useCallback, useState } from "react"
 import unfetch from "isomorphic-unfetch"
 
 // Phero will generate a file called 'phero.generated.ts` with
@@ -69,24 +68,13 @@ import unfetch from "isomorphic-unfetch"
 // on the backend:
 import { PheroClient, HelloMessage } from "../phero.generated"
 
-// instantiate the PheroClient with your favorite fetch lib
+// instantiate the PheroClient with your favorite fetch lib:
 const phero = new PheroClient(unfetch)
 
-export function App() {
-  const [helloMessage, setHelloMessage] = useState<HelloMessage>()
-
-  async function onPress() {
-    // call your function on the backend. The return type 
-    // of `sayHello` is `Promise<HelloMessage>`, like it 
-    // would be with a regular, local function:
-    const newHelloMessage = await phero.exampleService.sayHello("Steve Jobs")
-    setHelloMessage(newHelloMessage)
-  }
-
-  return message 
-    ? <div>{helloMessage.text}</div>
-    : <button onClick={onPress}>Press to get message</button>
-}
+// call your function on the backend. The return type of `sayHello` 
+// is `Promise<HelloMessage>`, like it would be with a local function:
+const helloMessage = await phero.exampleService.sayHello("Steve Jobs")
+console.log(helloMessage.text)
 ```
 
 ### Error handling
