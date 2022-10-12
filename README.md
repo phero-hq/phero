@@ -16,17 +16,18 @@ Phero is the no-hassle and type-safe glue between your backend and frontend. Typ
 
 This boosts your frontend development, because:
 
-- No more guessing about how the backend works. You can no longer make mistakes with the URL, method, headers or status-codes. Call the function, handle the Promise and get compile errors when things don't line up.  
-- Stop assuming data is of the type you’re expecting. You know it is, period.  
-- Use the domain models on the frontend, defined on the backend.  
-- Handle custom errors on the frontend, that are thrown by the backend.  
+- Stop assuming data is of the type you’re expecting. You know it is, period.
+- Call functions from the frontend, defined on the backend.
+- Use the domain models on the frontend, defined on the backend.
+- Handle custom errors on the frontend, that are thrown by the backend.
+- No more mistakes with the specs of the API, like path, arguments or headers.
 
 Backend development becomes a breeze as well:
 
-- Use the full power of TypeScript to define your domain models. No need for an additional language to learn and maintain, like with GraphQL or tRPC.  
-- Know when you break compatability with the frontend, before even running it: TypeScript has your back.  
-- You can stop generating specs or write documentation about the endpoints you expose, and what method and arguments they expect.  
-- The server can be deployed anywhere, either on one of the cloud platforms or a regular Node server.  
+- Use the full power of TypeScript to define your domain models. No need for an additional language or DSL to learn and maintain, like with GraphQL or tRPC.
+- Know when you break compatability with the frontend, before even running it: TypeScript has your back.
+- You can stop generating specs or write documentation about the endpoints you expose, and what method and arguments they expect.
+- The server can be deployed anywhere, either on one of the cloud platforms or a regular Node server.
 
 Check out this introduction video to see how the basics work:
 
@@ -74,8 +75,8 @@ Here's an example of how that could look on your frontend:
 ```ts
 import { useCallback, useState } from "react"
 
-// Phero will generate a file called 'phero.generated.ts` with 
-// the PheroClient and the models you're using in your functions 
+// Phero will generate a file called 'phero.generated.ts` with
+// the PheroClient and the models you're using in your functions
 // on the backend:
 import { PheroClient, HelloMessage } from "../phero.generated"
 
@@ -86,18 +87,18 @@ export function App() {
   const [helloMessage, setHelloMessage] = useState<HelloMessage>()
 
   const onPress = useCallback(async () => {
-    // call your function on the backend. The return type 
-    // of `sayHello` is `Promise<HelloMessage>`, like it 
+    // call your function on the backend. The return type
+    // of `sayHello` is `Promise<HelloMessage>`, like it
     // would be with a regular, local function:
-    const newHelloMessage = await phero.exampleService.sayHello(
-      "Steve Jobs",
-    )
+    const newHelloMessage = await phero.exampleService.sayHello("Steve Jobs")
     setHelloMessage(newHelloMessage)
   }, [])
 
-  return message
-    ? <div>{helloMessage.text}</div>
-    : <button onClick={onPress}>Press to get message</button>
+  return message ? (
+    <div>{helloMessage.text}</div>
+  ) : (
+    <button onClick={onPress}>Press to get message</button>
+  )
 }
 ```
 
@@ -133,9 +134,11 @@ try {
   )
 } catch (e) {
   if (e instanceof NameTooShortError) {
-    alert(`Name is too short, it should be at least ${e.minimumLength} characters`)
+    alert(
+      `Name is too short, it should be at least ${e.minimumLength} characters`,
+    )
   } else {
-    alert('Something went wrong')
+    alert("Something went wrong")
   }
 }
 ```
