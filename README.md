@@ -75,19 +75,17 @@ const phero = new PheroClient(unfetch)
 export function App() {
   const [helloMessage, setHelloMessage] = useState<HelloMessage>()
 
-  const onPress = useCallback(async () => {
-    // call your function on the backend. The return type
-    // of `sayHello` is `Promise<HelloMessage>`, like it
+  async function onPress() {
+    // call your function on the backend. The return type 
+    // of `sayHello` is `Promise<HelloMessage>`, like it 
     // would be with a regular, local function:
     const newHelloMessage = await phero.exampleService.sayHello("Steve Jobs")
     setHelloMessage(newHelloMessage)
-  }, [])
+  }
 
-  return message ? (
-    <div>{helloMessage.text}</div>
-  ) : (
-    <button onClick={onPress}>Press to get message</button>
-  )
+  return message 
+    ? <div>{helloMessage.text}</div>
+    : <button onClick={onPress}>Press to get message</button>
 }
 ```
 
