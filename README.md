@@ -134,7 +134,7 @@ We are currently in Public Beta. Watch "releases" of this repo to get notified o
 ## Community & Support
 
 - [GitHub Issues](https://github.com/phero-hq/phero/issues): Bugs, errors or feature-requests can be posted here.
-- [GitHub Discussions]() or [Discord](https://discord.gg/t97n6wQfkh): You are very welcome to hang out, ask questions, show what you've build, or whatever!
+- [GitHub Discussions](https://github.com/phero-hq/phero/discussions) or [Discord](https://discord.gg/t97n6wQfkh): You are very welcome to hang out, ask questions, show what you've build, or whatever!
 - [Twitter](https://twitter.com/PheroHQ): Another place to keep up to date with announcements and news.
 - [YouTube](https://www.youtube.com/channel/UCgHc6KiLud3FAL_Pecb3pnQ): Here we'll be posting our guides in video-form.
 
