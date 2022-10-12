@@ -1,7 +1,7 @@
 <div align="center">
   <img src="./doc-assets/logo.png" width="260" />
-  <p>Pronounced like "hero", with the f of function.</p>
   <p>
+    Pronounced like "hero", with the f of function.<br/>
     Short for <a href="https://en.wikipedia.org/wiki/Pheromone">pheromone</a> (that stuff some animals use to act as one).
   </p>
 </div>
@@ -16,17 +16,17 @@ Phero is the no-hassle and type-safe glue between your backend and frontend. Typ
 
 This boosts your frontend development, because:
 
-- No more guessing about how the backend works. You can no longer make mistakes with the URL, method, headers or status-codes. Call the function, handle the Promise and get compile errors when things don't line up.
-- Stop assuming data is of the type you’re expecting. You know it is, period.
-- Use the domain models on the frontend, defined on the backend.
-- Handle custom errors on the frontend, that are thrown by the backend.
+- No more guessing about how the backend works. You can no longer make mistakes with the URL, method, headers or status-codes. Call the function, handle the Promise and get compile errors when things don't line up.  
+- Stop assuming data is of the type you’re expecting. You know it is, period.  
+- Use the domain models on the frontend, defined on the backend.  
+- Handle custom errors on the frontend, that are thrown by the backend.  
 
-Backend development is a breeze as well:
+Backend development becomes a breeze as well:
 
-- Use the full power of TypeScript to define your domain models. No need for an additional language to learn and maintain, like with GraphQL or tRPC.
-- Know when you break compatability with the frontend, before even running it: TypeScript has your back.
-- You can stop generating specs or write documentation about the endpoints you expose, and what method and arguments they expect.
-- The server can be deployed anywhere, either on one of the cloud platforms or a regular Node server.
+- Use the full power of TypeScript to define your domain models. No need for an additional language to learn and maintain, like with GraphQL or tRPC.  
+- Know when you break compatability with the frontend, before even running it: TypeScript has your back.  
+- You can stop generating specs or write documentation about the endpoints you expose, and what method and arguments they expect.  
+- The server can be deployed anywhere, either on one of the cloud platforms or a regular Node server.  
 
 Check out this introduction video to see how the basics work:
 
@@ -65,45 +65,45 @@ export const exampleService = createService({
 })
 ```
 
-As you can see our function `sayHello` returns an object with the structure of `HelloMessage`. Phero will analyse the functions you've exposed with `createService()`. It will gather all models (interfaces, enums and type aliases) your frontend could need.
+You can use any database or library you want, because this is a regular NodeJS environment. You can also structure your project in a way you prefer, as long as the Phero-file exports one or more services. Feel free to use any simple or advanced TypeScript feature to model out your domain and functions. In this example we'll keep it at a single service, exposing a function that returns a plain object.
 
-Now, when you run `npx phero` in your project directory, Phero will generate an SDK for your client(s) in a file called `phero.generated.ts`. This includes a `PheroClient` class which you can use to call the functions on your backend. From the generated file you can import your models (coming from your server) as well, which could come in very handy in some cases.
+Now, run `npx phero` in your project directory. Phero will generate an SDK for your frontend, in a file called `phero.generated.ts`. This includes a `PheroClient` class which you can use to call the functions on your backend. From the generated file you can also import your models, which could come in very handy in some cases.
 
-Here's an example of how that looks on your frontend:
+Here's an example of how that could look on your frontend:
 
 ```ts
 import { useCallback, useState } from "react"
-import unfetch from "isomorphic-unfetch"
 
-// Phero will generate a file 'phero.generated.ts` on your client with a
-// PheroClient and the models you're using in your RPC functions
+// Phero will generate a file called 'phero.generated.ts` with 
+// the PheroClient and the models you're using in your functions 
+// on the backend:
 import { PheroClient, HelloMessage } from "../phero.generated"
 
-// instantiate the generated PheroClient with your favorite fetch lib
-const phero = new PheroClient(unfetch)
+// instantiate the PheroClient
+const phero = new PheroClient(window.fetch.bind(this))
 
-export function HelloMessage() {
-  const [message, setMessage] = useState<string | null>(null)
+export function App() {
+  const [helloMessage, setHelloMessage] = useState<HelloMessage>()
 
   const onPress = useCallback(async () => {
-    // call your RPC function on your service
-    const helloMessage: HelloMessage = await phero.exampleService.sayHello(
+    // call your function on the backend. The return type 
+    // of `sayHello` is `Promise<HelloMessage>`, like it 
+    // would be with a regular, local function:
+    const newHelloMessage = await phero.exampleService.sayHello(
       "Steve Jobs",
     )
-    setMessage(helloMessage.text)
+    setHelloMessage(newHelloMessage)
   }, [])
 
-  if (!message) {
-    return <button onClick={onPress}>Press to get message</button>
-  }
-
-  return <div>{message}</div>
+  return message
+    ? <div>{helloMessage.text}</div>
+    : <button onClick={onPress}>Press to get message</button>
 }
 ```
 
 ### Error handling
 
-Now, let's say we want to check for a minimum of 3 characters for the person we want to greet. Like this:
+If `sayHello` acts like a local function, you'd expect you could throw a custom error on the backend, and catch it on the frontend, right? With Phero, you can. Let's say we want to check for a minimum of 3 characters for the person we want to greet:
 
 ```ts
 class NameTooShortError extends Error {
@@ -122,20 +122,20 @@ async function sayHello(name: string): Promise<HelloMessage> {
 }
 ```
 
-On your client you can now catch this error:
+To catch it on the frontend, you can import the error and handle it like you would with a local function:
 
 ```ts
 import { HelloMessage, NameTooShortError } from "../phero.generated"
+
 try {
   const helloMessage: HelloMessage = await phero.exampleService.sayHello(
     "", // oops!
   )
-  // TODO insert logic here
 } catch (e) {
   if (e instanceof NameTooShortError) {
-    alert(`Name too short, should be at least ${e.minimumLength} characters`)
+    alert(`Name is too short, it should be at least ${e.minimumLength} characters`)
   } else {
-    throw e
+    alert('Something went wrong')
   }
 }
 ```
