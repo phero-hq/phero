@@ -14,7 +14,7 @@ Phero is the no-hassle and type-safe glue between your backend and frontend. Typ
 2. **Run the CLI.** This runs the server and generates an SDK for your frontend, or multiple frontends at the same time.
 3. **Call your backend-functions from the frontend, as if they were local.** This includes type-safety and error-handling.
 
-This boosts your frontend development, because:
+This boosts your frontend development:
 
 💪 Use functions and domain models on the frontend, defined on the backend.  
 🧨 Handle errors on the frontend, thrown by the backend.  
