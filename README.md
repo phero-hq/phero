@@ -1,8 +1,8 @@
 <div align="center">
   <img src="./doc-assets/logo.png" width="260" />
   <p>
-    Pronounced like "hero", with the f of function.<br/>
-    Short for <a href="https://en.wikipedia.org/wiki/Pheromone">pheromone</a> (that stuff some animals use to act as one).
+    <em>fee · row</em>, short for <a href="https://en.wikipedia.org/wiki/Pheromone">pheromone</a><br/>
+    (that stuff some animals use to act as one).
   </p>
 </div>
 
