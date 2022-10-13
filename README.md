@@ -1,8 +1,7 @@
 <div align="center">
   <img src="./doc-assets/logo.png" width="260" />
   <p>
-    <em>fee · row</em>, short for <a href="https://en.wikipedia.org/wiki/Pheromone">pheromone</a><br/>
-    (that stuff some animals use to act as one).
+    Pronounced as <em>fee · row</em>, a play on "hero" and "pheromone" (that stuff some animals use to act as one).
   </p>
 </div>
 
