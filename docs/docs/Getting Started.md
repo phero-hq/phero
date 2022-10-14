@@ -75,7 +75,7 @@ This does the following:
 
 You can do these steps manually as well. It's up to you what you want to do with `src/phero.ts` in this case. It's there to let you know about how to use the client, but that code could be anywhere in your app-project. You're free to check in `phero.generated.ts` into version-control, but we advise not to.
 
-### Step 3: Run the development environment
+## Step 3: Run the development environment
 
 Now would be a great time to run `npx phero` in the root of your project:
 

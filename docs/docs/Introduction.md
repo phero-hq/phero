@@ -1,9 +1,10 @@
 ---
+hide_title: true
 sidebar_position: 1
 ---
 
 <div align="center">
-  <img src="/img/logo.png" width="260" />
+  <img src="/img/readme.svg" width="260" />
   <p>
     Pronounced as <em>fee · row</em>, a play on "hero" and "pheromone"<br/>
     (that stuff some animals use to act as one).
