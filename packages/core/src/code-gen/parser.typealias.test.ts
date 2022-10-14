@@ -357,6 +357,53 @@ describe("Parsers", () => {
         const parserDeclaration = generateParser(model, typeChecker)
         expect(printCode(parserDeclaration)).toMatchSnapshot()
       })
+
+      test("intersection with two types", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+          type MyModel = A | B
+
+          type A = {
+            a: number
+          }
+          type B = {
+            b: number
+          }
+        `,
+        )
+
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
+      test("intersection with two interfaces", () => {
+        const {
+          statements: [model],
+          typeChecker,
+        } = compileStatements(
+          `
+          type MyModel = A & B
+
+          interface A {
+            a: number
+          }
+          interface B {
+            b: number
+          }
+        `,
+        )
+
+        const parserDeclaration = generateParser(
+          model as ts.TypeAliasDeclaration,
+          typeChecker,
+        )
+        expect(printCode(parserDeclaration)).toMatchSnapshot()
+      })
     })
     describe("typescript utility types", () => {
       test("Pick", () => {

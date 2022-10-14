@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { compileStatement, printCode } from "../tsTestUtils"
+import { compileStatement, compileStatements, printCode } from "../tsTestUtils"
 import generateParser from "./parsers/generateParser"
 
 describe("Parsers", () => {
@@ -262,5 +262,62 @@ describe("Parsers", () => {
       const parserDeclaration = generateParser(model, typeChecker)
       expect(printCode(parserDeclaration)).toMatchSnapshot()
     })
+  })
+  test("extend an intersection of two interfaces", () => {
+    const {
+      statements: [model],
+      typeChecker,
+    } = compileStatements(
+      `
+          interface MyModel extends C {
+            c: number
+          }
+
+          type C = A & B
+
+          interface A {
+            a: number
+          }
+          interface B {
+            b: number
+          }
+        `,
+    )
+
+    const parserDeclaration = generateParser(
+      model as ts.TypeAliasDeclaration,
+      typeChecker,
+    )
+    expect(printCode(parserDeclaration)).toMatchSnapshot()
+  })
+  test("extend an intersection of two interfaces in namepsace", () => {
+    // this is for @samen/client
+    const {
+      statements: [model],
+      typeChecker,
+    } = compileStatements(
+      `
+          interface MyModel extends domain.v_1_0_0.C {
+            c: number
+          }
+
+          namespace domain.v_1_0_0 {
+            export type C = A & B
+
+            interface A {
+              a: number
+            }
+            interface B {
+              b: number
+            }
+          }
+        `,
+    )
+
+    const parserDeclaration = generateParser(
+      model as ts.TypeAliasDeclaration,
+      typeChecker,
+    )
+    expect(printCode(parserDeclaration)).toMatchSnapshot()
   })
 })

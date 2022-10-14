@@ -1,5 +1,123 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Parsers extend an intersection of two interfaces 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        {
+            const intersectionResult: any = {};
+            {
+                const parseResult = CParser.parse(data);
+                if (!parseResult.ok) {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`not a MyModel\`
+                    });
+                }
+                else
+                    result = parseResult.result;
+            }
+            Object.assign(intersectionResult, result);
+            if (typeof data !== \\"object\\" || data === null) {
+                errors.push({
+                    path: \\"data\\",
+                    message: \`null or not an object\`
+                });
+            }
+            else {
+                result = {};
+                if (typeof data[\\"c\\"] !== \\"number\\") {
+                    errors.push({
+                        path: \\"data.c\\",
+                        message: \`not a number\`
+                    });
+                }
+                else if (isNaN(data[\\"c\\"])) {
+                    errors.push({
+                        path: \\"data.c\\",
+                        message: \`invalid number\`
+                    });
+                }
+                else
+                    result[\\"c\\"] = data[\\"c\\"];
+            }
+            Object.assign(intersectionResult, result);
+            result = intersectionResult;
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
+exports[`Parsers extend an intersection of two interfaces in namepsace 1`] = `
+"export class MyModelParser {
+    static parse(data: any): ParseResult<MyModel> {
+        const errors: ValidationError[] = [];
+        let result: any;
+        {
+            const intersectionResult: any = {};
+            {
+                const parseResult = CParser.parse(data);
+                if (!parseResult.ok) {
+                    errors.push({
+                        path: \\"data\\",
+                        message: \`not a MyModel\`
+                    });
+                }
+                else
+                    result = parseResult.result;
+            }
+            Object.assign(intersectionResult, result);
+            if (typeof data !== \\"object\\" || data === null) {
+                errors.push({
+                    path: \\"data\\",
+                    message: \`null or not an object\`
+                });
+            }
+            else {
+                result = {};
+                if (typeof data[\\"c\\"] !== \\"number\\") {
+                    errors.push({
+                        path: \\"data.c\\",
+                        message: \`not a number\`
+                    });
+                }
+                else if (isNaN(data[\\"c\\"])) {
+                    errors.push({
+                        path: \\"data.c\\",
+                        message: \`invalid number\`
+                    });
+                }
+                else
+                    result[\\"c\\"] = data[\\"c\\"];
+            }
+            Object.assign(intersectionResult, result);
+            result = intersectionResult;
+        }
+        if (errors.length) {
+            return {
+                ok: false,
+                errors
+            };
+        }
+        return {
+            ok: true,
+            result: result as MyModel
+        };
+    }
+}"
+`;
+
 exports[`Parsers for an interface boolean array member 1`] = `
 "export class MyModelParser {
     static parse(data: any): ParseResult<MyModel> {

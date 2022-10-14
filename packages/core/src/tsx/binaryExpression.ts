@@ -1,6 +1,7 @@
 import ts from "typescript"
 
 type BinaryOperator =
+  | "="
   | "=="
   | "==="
   | "<="
@@ -28,6 +29,8 @@ function generateOperator(
   op: BinaryOperator,
 ): ts.BinaryOperator | ts.BinaryOperatorToken {
   switch (op) {
+    case "=":
+      return ts.factory.createToken(ts.SyntaxKind.EqualsToken)
     case "==":
       return ts.factory.createToken(ts.SyntaxKind.EqualsEqualsToken)
     case "===":
