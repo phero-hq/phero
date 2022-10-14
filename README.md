@@ -1,7 +1,8 @@
 <div align="center">
   <img src="./doc-assets/logo.png" width="260" />
   <p>
-    Pronounced as <em>fee · row</em>, a play on "hero" and "pheromone" (that stuff some animals use to act as one).
+    Pronounced as <em>fee · row</em>, a play on "hero" and "pheromone"<br/>
+    (that stuff some animals use to act as one).
   </p>
 </div>
 
