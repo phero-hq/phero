@@ -1,0 +1,73 @@
+---
+sidebar_position: 1
+---
+
+<div align="center">
+  <img src="/img/logo.png" width="260" />
+  <p>
+    Pronounced as <em>fee · row</em>, a play on "hero" and "pheromone"<br/>
+    (that stuff some animals use to act as one).
+  </p>
+</div>
+
+---
+
+Phero is the no-hassle and type-safe glue between your backend and frontend. TypeScript is at the core of it all. Development with Phero goes in these steps:
+
+1. **Build your backend.** Define your domain models and functions in regular, plain TypeScript.
+2. **Run the CLI.** This runs the server and generates an SDK for your frontend, or multiple frontends at the same time.
+3. **Call your backend-functions from the frontend, as if they were local.** This includes type-safety and error-handling.
+
+This boosts your frontend development:
+
+💪 Use functions and domain models on the frontend, defined on the backend.  
+🧨 Handle errors on the frontend, thrown by the backend.  
+🤝 Stop assuming data is of the type you’re expecting. You know it is, period.  
+✅ No more mistakes with the specs of the API, like path, arguments or headers.
+
+Backend development becomes a breeze as well:
+
+🫶 Use TypeScript to define your domain models. No need for an extra language or DSL to learn and maintain, like with GraphQL or tRPC.  
+📋 Know when you break compatability with the frontend, before even running it: TypeScript has your back.  
+😶‍🌫️ No more outdated specs or documentation about endpoints (and what method, headers or arguments they expect).  
+🚀 The server can be deployed anywhere, either on one of the cloud platforms or a regular Node server.
+
+Check out this introduction video to see how the basics work:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/I13TKes7ylg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+## Quick Example
+
+```ts
+// api/src/phero.ts
+
+import { createService } from "@phero/server"
+
+async function helloWorld(name: string): Promise<string> {
+  return `Hi there, ${name}!`
+}
+
+export const helloWorldService = createService({ helloWorld })
+```
+
+That's enough to create your first service and let Phero generate the client:
+
+```ts
+// app/src/phero.ts
+
+import { PheroClient } from "./phero.generated"
+
+const fetch = window.fetch.bind(this)
+const client = new PheroClient(fetch)
+
+async function main() {
+  const message = await client.helloWorldService.helloWorld("Jim")
+  console.log(message) // `Hi there, Jim!`
+}
+
+main()
+```
+
+From the perspective of the backend-code, `helloWorld` is a regular asynchronous function like any other. It could fetch records from your database, validate the permissions of a user, or do anything that you'd expect from server-code, it's up to you.
+
+On the frontend-side, helloWorld is a function that requires the same arguments and return type as the function on the server. It acts like a local function, because it is! Phero handles the request and validation, so you won't have to.
