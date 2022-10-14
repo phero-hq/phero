@@ -32,6 +32,8 @@ Check out this introduction video to see how the basics work:
 
 [![Introduction video](https://raw.githubusercontent.com/phero-hq/phero/main/docs/static/img/youtube-thumbnail.png)](https://www.youtube.com/watch?v=I13TKes7ylg)
 
+> We'll soon record a new introduction video. Replace everything with `samen` to `phero` and you're good to go 😉
+
 ## Example: Hello World!
 
 It all starts with a file called `src/phero.ts` on your backend. Here's an example:

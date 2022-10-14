@@ -37,6 +37,8 @@ Check out this introduction video to see how the basics work:
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/I13TKes7ylg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
+> We'll soon record a new introduction video. Replace everything with `samen` to `phero` and you're good to go 😉
+
 ## Quick Example
 
 ```ts
