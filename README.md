@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./doc-assets/logo.png" width="260" />
+  <img src="https://raw.githubusercontent.com/phero-hq/phero/main/docs/static/img/readme.svg" width="260" />
   <p>
     Pronounced as <em>fee · row</em>, a play on "hero" and "pheromone"<br/>
     (that stuff some animals use to act as one).
@@ -19,18 +19,18 @@ This boosts your frontend development:
 💪 Use functions and domain models on the frontend, defined on the backend.  
 🧨 Handle errors on the frontend, thrown by the backend.  
 🤝 Stop assuming data is of the type you’re expecting. You know it is, period.  
-✅ No more mistakes with the specs of the API, like path, arguments or headers.  
+✅ No more mistakes with the specs of the API, like path, arguments or headers.
 
 Backend development becomes a breeze as well:
 
 🫶 Use TypeScript to define your domain models. No need for an extra language or DSL to learn and maintain, like with GraphQL or tRPC.  
 📋 Know when you break compatability with the frontend, before even running it: TypeScript has your back.  
 😶‍🌫️ No more outdated specs or documentation about endpoints (and what method, headers or arguments they expect).  
-🚀 The server can be deployed anywhere, either on one of the cloud platforms or a regular Node server.  
+🚀 The server can be deployed anywhere, either on one of the cloud platforms or a regular Node server.
 
 Check out this introduction video to see how the basics work:
 
-[![Introduction video](./doc-assets/thumbnail.png)](https://www.youtube.com/watch?v=I13TKes7ylg)
+[![Introduction video](https://raw.githubusercontent.com/phero-hq/phero/main/docs/static/img/youtube-thumbnail.png)](https://www.youtube.com/watch?v=I13TKes7ylg)
 
 ## Example: Hello World!
 
@@ -71,7 +71,7 @@ import { PheroClient, HelloMessage } from "../phero.generated"
 // instantiate the PheroClient with your favorite fetch lib:
 const phero = new PheroClient(unfetch)
 
-// call your function on the backend. The return type of `sayHello` 
+// call your function on the backend. The return type of `sayHello`
 // is `Promise<HelloMessage>`, like it would be with a local function:
 const helloMessage = await phero.exampleService.sayHello("Steve Jobs")
 console.log(helloMessage.text)
