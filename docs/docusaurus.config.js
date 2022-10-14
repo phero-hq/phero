@@ -61,6 +61,7 @@ const config = {
         logo: {
           alt: "Phero",
           src: "img/logo.svg",
+          href: "/docs/Introduction",
         },
         items: [
           // {
