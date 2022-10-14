@@ -2,7 +2,7 @@ import { spawn } from "child_process"
 import { hasErrorCode } from "./utils/errors"
 
 interface ChildProcess {
-  executable: string // ./node_modules/.bin/samen-*
+  executable: string // ./node_modules/.bin/phero-*
   argv: string[] // ["watch", "--port", "3000"]
   pid: number
   cwd: string

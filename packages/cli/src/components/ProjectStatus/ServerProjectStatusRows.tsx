@@ -1,4 +1,4 @@
-import { ServerDevEventRPC } from "@samen/dev"
+import { ServerDevEventRPC } from "@phero/dev"
 import { Box, Text } from "ink"
 import maxLength from "../../utils/maxLength"
 

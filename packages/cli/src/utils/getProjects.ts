@@ -35,15 +35,15 @@ async function getProject(filePath: string): Promise<Project | undefined> {
   const packageJson = JSON.parse(packageString)
 
   if (
-    packageJson.dependencies?.["@samen/client"] ||
-    packageJson.devDependencies?.["@samen/client"]
+    packageJson.dependencies?.["@phero/client"] ||
+    packageJson.devDependencies?.["@phero/client"]
   ) {
     return { type: "client", path: formatProjectPath(filePath) }
   }
 
   if (
-    packageJson.dependencies?.["@samen/server"] ||
-    packageJson.devDependencies?.["@samen/server"]
+    packageJson.dependencies?.["@phero/server"] ||
+    packageJson.devDependencies?.["@phero/server"]
   ) {
     return { type: "server", path: formatProjectPath(filePath) }
   }

@@ -1,13 +1,13 @@
 import ts from "typescript"
 import { ParseError } from "../errors"
 import parseReturnType from "./parseReturnType"
-import { ParsedSamenFunctionDefinition } from "./parseSamenApp"
+import { ParsedPheroFunctionDefinition } from "./parsePheroApp"
 import { resolveSymbol } from "../tsUtils"
 
 export default function parseFunctionDefinition(
   node: ts.ObjectLiteralElementLike | ts.VariableDeclaration,
   typeChecker: ts.TypeChecker,
-): ParsedSamenFunctionDefinition {
+): ParsedPheroFunctionDefinition {
   if (ts.isSpreadAssignment(node)) {
     throw new ParseError(
       "S116: Sorry, no support for spread assignment (yet)",
@@ -15,23 +15,23 @@ export default function parseFunctionDefinition(
     )
   }
 
-  const parsedSamenFunctionDef: ParsedSamenFunctionDefinition = {
+  const parsedPheroFunctionDef: ParsedPheroFunctionDefinition = {
     name: parseFunctionName(node.name),
     ...parseActualFunction(node, typeChecker),
   }
 
-  return parsedSamenFunctionDef
+  return parsedPheroFunctionDef
 }
 
 function parseFunctionName(
   functionName:
-  | ts.Identifier
-  | ts.StringLiteral
-  | ts.NumericLiteral
-  | ts.ComputedPropertyName
-  | ts.PrivateIdentifier
-  | ts.ObjectBindingPattern
-  | ts.ArrayBindingPattern,
+    | ts.Identifier
+    | ts.StringLiteral
+    | ts.NumericLiteral
+    | ts.ComputedPropertyName
+    | ts.PrivateIdentifier
+    | ts.ObjectBindingPattern
+    | ts.ArrayBindingPattern,
 ): string {
   if (
     ts.isNumericLiteral(functionName) ||
@@ -53,9 +53,9 @@ function parseActualFunction(
   node: ts.Node,
   typeChecker: ts.TypeChecker,
 ): Pick<
-  ParsedSamenFunctionDefinition,
+  ParsedPheroFunctionDefinition,
   "actualFunction" | "parameters" | "returnType"
-  > {
+> {
   if (ts.isShorthandPropertyAssignment(node)) {
     const symbol = typeChecker.getShorthandAssignmentValueSymbol(node)
 

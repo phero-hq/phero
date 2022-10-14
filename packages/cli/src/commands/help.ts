@@ -1,18 +1,18 @@
 import {
-  SamenCommandHelp,
-  SamenCommandName,
-  samenHelp,
-  samenHelpInit,
-} from "@samen/dev"
+  PheroCommandHelp,
+  PheroCommandName,
+  pheroHelp,
+  pheroHelpInit,
+} from "@phero/dev"
 
-export default function help(command: SamenCommandHelp) {
+export default function help(command: PheroCommandHelp) {
   switch (command.command) {
-    case SamenCommandName.Init:
-      console.log(samenHelpInit)
+    case PheroCommandName.Init:
+      console.log(pheroHelpInit)
       break
 
     default:
-      console.log(samenHelp)
+      console.log(pheroHelp)
       break
   }
 

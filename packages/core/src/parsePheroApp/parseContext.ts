@@ -6,16 +6,16 @@ import generateParserModel, {
 } from "../code-gen/parsers/generateParserModel"
 import { ParseError } from "../errors"
 import {
-  ParsedSamenFunctionDefinition,
-  ParsedSamenServiceConfig,
-} from "./parseSamenApp"
+  ParsedPheroFunctionDefinition,
+  ParsedPheroServiceConfig,
+} from "./parsePheroApp"
 import { getNameAsString } from "../tsUtils"
 
 export function parseContext(
-  serviceConfig: ParsedSamenServiceConfig,
-  funcDefinitions: ParsedSamenFunctionDefinition[],
+  serviceConfig: ParsedPheroServiceConfig,
+  funcDefinitions: ParsedPheroFunctionDefinition[],
   typeChecker: ts.TypeChecker,
-): [ParsedSamenServiceConfig, ParsedSamenFunctionDefinition[]] {
+): [ParsedPheroServiceConfig, ParsedPheroFunctionDefinition[]] {
   if (!serviceConfig.middleware || serviceConfig.middleware.length === 0) {
     return [serviceConfig, funcDefinitions]
   }
@@ -23,11 +23,11 @@ export function parseContext(
   const ctxIO = getContextIO(serviceConfig.middleware, typeChecker)
 
   // HACK get the second param from the middleware func, this is always the contextParam
-  const samenContextType: ts.TypeReferenceNode = serviceConfig.middleware[0]
+  const pheroContextType: ts.TypeReferenceNode = serviceConfig.middleware[0]
     .middleware.parameters[1].type as ts.TypeReferenceNode
 
   const contextType = ts.factory.createTypeReferenceNode(
-    samenContextType.typeName,
+    pheroContextType.typeName,
     [ts.factory.createTypeLiteralNode(ctxIO.inputContextProps)],
   )
 
@@ -42,14 +42,14 @@ export function parseContext(
 function addFunctionContext(
   ctxIO: ContextIO,
   contextType: ts.TypeReferenceNode,
-  func: ParsedSamenFunctionDefinition,
+  func: ParsedPheroFunctionDefinition,
   typeChecker: ts.TypeChecker,
-): ParsedSamenFunctionDefinition {
+): ParsedPheroFunctionDefinition {
   const ctxIndex = func.parameters.findIndex(
     (p) =>
       p.type &&
       ts.isTypeReferenceNode(p.type) &&
-      getNameAsString(p.type.typeName) === "SamenContext",
+      getNameAsString(p.type.typeName) === "PheroContext",
   )
 
   if (ctxIndex === -1) {
@@ -65,7 +65,7 @@ function addFunctionContext(
 
   if (ctxIndex !== 0) {
     throw new ParseError(
-      `S105: SamenContext parameter should be the first parameter`,
+      `S105: PheroContext parameter should be the first parameter`,
       ctxParam,
     )
   }
@@ -74,7 +74,7 @@ function addFunctionContext(
 
   if (!ctxParamType) {
     throw new ParseError(
-      `S106: SamenContext parameter should have a type declared`,
+      `S106: PheroContext parameter should have a type declared`,
       ctxParam,
     )
   }
@@ -84,7 +84,7 @@ function addFunctionContext(
     ctxParamType.typeArguments?.length !== 1
   ) {
     throw new ParseError(
-      `S107: SamenContext parameter's type argument has an incorrect type`,
+      `S107: PheroContext parameter's type argument has an incorrect type`,
       ctxParam,
     )
   }

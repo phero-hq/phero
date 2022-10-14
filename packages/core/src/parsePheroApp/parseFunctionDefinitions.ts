@@ -1,18 +1,18 @@
 import ts from "typescript"
 import parseFunctionDefinition from "./parseFunctionDefinition"
-import { ParsedSamenFunctionDefinition } from "./parseSamenApp"
+import { ParsedPheroFunctionDefinition } from "./parsePheroApp"
 import { hasModifier, resolveSymbol } from "../tsUtils"
 
 export default function parseFunctionDefinitions(
   node: ts.Node | undefined,
   typeChecker: ts.TypeChecker,
-): ParsedSamenFunctionDefinition[] {
+): ParsedPheroFunctionDefinition[] {
   if (!node) {
     return []
   }
 
   if (ts.isObjectLiteralExpression(node)) {
-    const result: ParsedSamenFunctionDefinition[] = []
+    const result: ParsedPheroFunctionDefinition[] = []
     const propertyAssignments = node.properties
     for (const propertyAssignment of propertyAssignments) {
       const func = parseFunctionDefinition(propertyAssignment, typeChecker)
@@ -37,7 +37,7 @@ export default function parseFunctionDefinitions(
   }
 
   if (ts.isSourceFile(node)) {
-    const result: ParsedSamenFunctionDefinition[] = []
+    const result: ParsedPheroFunctionDefinition[] = []
     for (const statement of node.statements) {
       if (hasModifier(statement, ts.SyntaxKind.ExportKeyword)) {
         if (ts.isVariableStatement(statement)) {

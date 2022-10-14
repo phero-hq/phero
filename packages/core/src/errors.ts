@@ -7,9 +7,9 @@ export class MissingTSConfigFile extends Error {
     )
   }
 }
-export class MissingSamenFileError extends Error {
+export class MissingPheroFileError extends Error {
   constructor(projectDir: string) {
-    super(`Could not find the samen.ts file on path ${projectDir}`)
+    super(`Could not find the phero.ts file on path ${projectDir}`)
   }
 }
 
@@ -25,7 +25,7 @@ function generateErrorMessage(message: string, node: ts.Node): string {
   return ts.formatDiagnosticsWithColorAndContext(
     [
       {
-        code: "-SamenError" as any as number,
+        code: "-PheroError" as any as number,
         category: ts.DiagnosticCategory.Error,
         file: node.getSourceFile(),
         messageText: `\n\n${message}`,

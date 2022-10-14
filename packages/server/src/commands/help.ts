@@ -5,7 +5,7 @@ import {
   serverHelpExport,
   serverHelpBuild,
   serverHelpServe,
-} from "@samen/dev"
+} from "@phero/dev"
 
 export default function help(command: ServerCommandHelp) {
   switch (command.command) {

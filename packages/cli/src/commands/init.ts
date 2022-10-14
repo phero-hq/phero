@@ -1,10 +1,10 @@
-import { SamenCommandInit } from "@samen/dev"
+import { PheroCommandInit } from "@phero/dev"
 import { render } from "ink"
 import React from "react"
 import Init from "../components/Init"
 import { fatalError, killAll } from "../process"
 
-export default function init(command: SamenCommandInit) {
+export default function init(command: PheroCommandInit) {
   process
     .on("exit", () => killAll("SIGINT"))
     .on("beforeExit", () => killAll("SIGINT"))

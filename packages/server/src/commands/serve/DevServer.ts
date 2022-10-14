@@ -2,12 +2,12 @@ import {
   generateAppDeclarationFile,
   generateRPCProxy,
   hasErrorCode,
-  ParsedSamenApp,
-  parseSamenApp,
+  ParsedPheroApp,
+  parsePheroApp,
   PortInUseError,
   RPCResult,
-} from "@samen/core"
-import { ServerCommandServe, ServerDevEventEmitter } from "@samen/dev"
+} from "@phero/core"
+import { ServerCommandServe, ServerDevEventEmitter } from "@phero/dev"
 import crypto from "crypto"
 import { promises as fs } from "fs"
 import http from "http"
@@ -17,8 +17,8 @@ import WatchProgram from "./WatchProgram"
 
 export interface PrintedClientCode {
   domainSource: string
-  baseSamenClientSource: string
-  samenClientSource: string
+  basePheroClientSource: string
+  pheroClientSource: string
 }
 
 interface Headers {
@@ -61,12 +61,12 @@ export default class DevServer {
   }
 
   private get manifestPath(): string {
-    return path.join(this.projectPath, "samen-manifest.d.ts")
+    return path.join(this.projectPath, "phero-manifest.d.ts")
   }
 
   // TODO should find the output path based on tsconfig
-  private get samenExecutionJS(): string {
-    return path.join(this.projectPath, "dist", "samen-execution.js")
+  private get pheroExecutionJS(): string {
+    return path.join(this.projectPath, "dist", "phero-execution.js")
   }
 
   private startWatch(): WatchProgram {
@@ -97,15 +97,15 @@ export default class DevServer {
   }
 
   private async buildProjectSuccess(
-    samenSourceFile: ts.SourceFile,
+    pheroSourceFile: ts.SourceFile,
     typeChecker: ts.TypeChecker,
   ): Promise<void> {
     this.eventEmitter.emit({ type: "BUILD_PROJECT_SUCCESS" })
 
-    let app: ParsedSamenApp
+    let app: ParsedPheroApp
     try {
       this.eventEmitter.emit({ type: "BUILD_MANIFEST_START" })
-      app = parseSamenApp(samenSourceFile, typeChecker)
+      app = parsePheroApp(pheroSourceFile, typeChecker)
       const dts = generateAppDeclarationFile(app, typeChecker)
       await fs.writeFile(this.manifestPath, dts)
       this.eventEmitter.emit({ type: "BUILD_MANIFEST_SUCCESS" })
@@ -114,7 +114,7 @@ export default class DevServer {
         type: "BUILD_MANIFEST_FAILED",
         errorMessage:
           error instanceof Error
-            ? `${error.message}\nIf you think this is a bug, please submit an issue here: https://github.com/samen-io/samen/issues`
+            ? `${error.message}\nIf you think this is a bug, please submit an issue here: https://github.com/phero-hq/phero/issues`
             : "Unknown error",
       })
       return
@@ -124,7 +124,7 @@ export default class DevServer {
       this.eventEmitter.emit({ type: "BUILD_RPCS_START" })
       this.routes = this.generateRoutes(app)
       const output = generateRPCProxy(app, typeChecker)
-      await fs.writeFile(this.samenExecutionJS, output.js)
+      await fs.writeFile(this.pheroExecutionJS, output.js)
       this.clearRequireCache()
       this.eventEmitter.emit({ type: "BUILD_RPCS_SUCCESS" })
     } catch (error) {
@@ -238,7 +238,7 @@ export default class DevServer {
               throw new Error("Unsupported http status")
             }
           } catch (e) {
-            // Indicates a bug in Samen
+            // Indicates a bug in Phero
             res.statusCode = 500
             res.write(
               JSON.stringify({
@@ -276,12 +276,12 @@ export default class DevServer {
     })
   }
 
-  private generateRoutes(app: ParsedSamenApp): RPCRoutes {
+  private generateRoutes(app: ParsedPheroApp): RPCRoutes {
     const routes: RPCRoutes = {}
     for (const service of app.services) {
       for (const func of service.funcs) {
         routes[`/${service.name}/${func.name}`] = async (input: any) => {
-          const api = require(this.samenExecutionJS)
+          const api = require(this.pheroExecutionJS)
           return api[`rpc_executor_${service.name}__${func.name}`](input.body)
         }
       }

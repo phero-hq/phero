@@ -1,4 +1,4 @@
-import { addDevEventListener, ClientCommandWatch } from "@samen/dev"
+import { addDevEventListener, ClientCommandWatch } from "@phero/dev"
 import ClientWatchServer from "../ClientWatchServer"
 
 export default function watch(command: ClientCommandWatch) {
@@ -11,7 +11,7 @@ export default function watch(command: ClientCommandWatch) {
         console.log(event)
       },
       () => {
-        console.log("Listener to samen-client process connected")
+        console.log("Listener to phero-client process connected")
       },
       (error) => {
         console.error(`Could not connect to event emitter at ${eventUrl}`)

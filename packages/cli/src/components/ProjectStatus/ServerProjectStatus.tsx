@@ -2,7 +2,7 @@ import {
   addDevEventListener,
   ServerCommandServe,
   ServerDevEvent,
-} from "@samen/dev"
+} from "@phero/dev"
 import { Box, Text } from "ink"
 import path from "path"
 import { useCallback, useEffect, useRef, useState } from "react"
@@ -138,7 +138,7 @@ export default function ServerProjectStatus({
       onEvent,
       () => {
         if (command.verbose) {
-          console.log("Listener to samen-server process connected")
+          console.log("Listener to phero-server process connected")
         }
       },
       (error) => {
@@ -148,7 +148,7 @@ export default function ServerProjectStatus({
     )
 
     const childProcess = spawnChildProcess(
-      "samen-server",
+      "phero-server",
       ["serve", "--port", `${command.port}`],
       path.resolve(project.path),
       (log) =>

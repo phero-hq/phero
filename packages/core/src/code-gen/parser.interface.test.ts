@@ -291,7 +291,7 @@ describe("Parsers", () => {
     expect(printCode(parserDeclaration)).toMatchSnapshot()
   })
   test("extend an intersection of two interfaces in namepsace", () => {
-    // this is for @samen/client
+    // this is for @phero/client
     const {
       statements: [model],
       typeChecker,

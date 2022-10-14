@@ -2,18 +2,18 @@
 
 import ts from "typescript"
 
-import { parseSamenApp, ParsedSamenApp } from "./parseSamenApp"
+import { parsePheroApp, ParsedPheroApp } from "./parsePheroApp"
 import { createTestProgram } from "../tsTestUtils"
 
-function parseProgram(prog: ts.Program): ParsedSamenApp {
+function parseProgram(prog: ts.Program): ParsedPheroApp {
   // if (prog.getSemanticDiagnostics().length) {
   //   console.log("OEPS COMPILE ERRORS DETECTED")
   // }
-  const samenFile = prog.getSourceFile("samen.ts")
-  if (!samenFile) {
-    throw new Error("No samen file")
+  const pheroFile = prog.getSourceFile("phero.ts")
+  if (!pheroFile) {
+    throw new Error("No phero file")
   }
-  return parseSamenApp(samenFile, prog.getTypeChecker())
+  return parsePheroApp(pheroFile, prog.getTypeChecker())
 }
 
 function expectFunctionDeclrWithName(func: any, name: string): void {
@@ -34,7 +34,7 @@ function expectFunctionExpressionWithName(
   expect(func?.kind).toBe(ts.SyntaxKind.FunctionExpression)
 }
 
-describe("parseSamenApp", () => {
+describe("parsePheroApp", () => {
   describe("parse services & function config", () => {
     test("should parse a simple service/function with no config", () => {
       const parsedApp = parseProgram(
@@ -145,11 +145,11 @@ describe("parseSamenApp", () => {
     test("should parse middleware config", () => {
       const parsedApp = parseProgram(
         createTestProgram(`
-        type SamenNextFunction<T = void> = T extends void
+        type PheroNextFunction<T = void> = T extends void
           ? () => Promise<void>
           : (ctx: T) => Promise<void>
-        type SamenContext<T = {}> = T
-        type SamenParams<T = {}> = Partial<T>
+        type PheroContext<T = {}> = T
+        type PheroParams<T = {}> = Partial<T>
 
         async function getArticle(): Promise<string> {
           return "ok"
@@ -159,7 +159,7 @@ describe("parseSamenApp", () => {
           return "ok"
         }
         
-        async function requireCMSUser(params: SamenParams, ctx: SamenContext, next: SamenNextFunction): Promise<string> {
+        async function requireCMSUser(params: PheroParams, ctx: PheroContext, next: PheroNextFunction): Promise<string> {
           return "ok"
         }
         
@@ -210,11 +210,11 @@ describe("parseSamenApp", () => {
     test("should parse multiple services", () => {
       const parsedApp = parseProgram(
         createTestProgram(`
-        type SamenNextFunction<T = void> = T extends void
+        type PheroNextFunction<T = void> = T extends void
           ? () => Promise<void>
           : (ctx: T) => Promise<void>
-        type SamenContext<T = {}> = T
-        type SamenParams<T = {}> = Partial<T>
+        type PheroContext<T = {}> = T
+        type PheroParams<T = {}> = Partial<T>
 
         async function getArticle(): Promise<string> {
           return "ok"
@@ -224,7 +224,7 @@ describe("parseSamenApp", () => {
           return "ok"
         }
         
-        async function requireCMSUser(params: SamenParams, ctx: SamenContext, next: SamenNextFunction): Promise<string> {
+        async function requireCMSUser(params: PheroParams, ctx: PheroContext, next: PheroNextFunction): Promise<string> {
           return "ok"
         }
         
@@ -322,7 +322,7 @@ describe("parseSamenApp", () => {
           export function publishArticle(): Promise<string> {
             return "ok"
           }`,
-          samen: `
+          phero: `
           import {getArticle, editArticle, publishArticle as xxx} from './other'       
 
           export const articleService = createService({
@@ -406,7 +406,7 @@ describe("parseSamenApp", () => {
           }
           export const editArticle = _editArticle
           `,
-          samen: `
+          phero: `
           import {editArticle} from './other'          
 
           export const articleService = createService({
@@ -442,7 +442,7 @@ describe("parseSamenApp", () => {
           }
           export const editArticle = _editArticle
           `,
-          samen: `
+          phero: `
           import * as other from './other'          
 
           export const articleService = createService({
@@ -482,7 +482,7 @@ describe("parseSamenApp", () => {
 
           export const editArticle = _editArticle
           `,
-          samen: `
+          phero: `
           import * as articleServiceXXX from './other'          
 
           export const articleService = createService(articleServiceXXX)`,
@@ -520,7 +520,7 @@ describe("parseSamenApp", () => {
             editArticle: editArticle,
           })
           `,
-          samen: `
+          phero: `
           import * as other from './other'          
 
           export const articleService = other.articleService`,
@@ -557,7 +557,7 @@ describe("parseSamenApp", () => {
             editArticle: editArticle,
           }
           `,
-          samen: `
+          phero: `
           import * as other from './other'
 
           export const articleService = createService(other.articleService)`,
@@ -596,7 +596,7 @@ describe("parseSamenApp", () => {
             editArticle: editArticle,
           })
           `,
-          samen: `
+          phero: `
           export {articleService as testService} from './other'
           `,
         }),
@@ -628,7 +628,7 @@ describe("parseSamenApp", () => {
             return "ok"
           }
           `,
-          samen: `
+          phero: `
           import {editArticle} from './other'
 
           export const articleService = createService({
@@ -669,7 +669,7 @@ describe("parseSamenApp", () => {
             }
           }
           `,
-          samen: `
+          phero: `
           import { myFunction } from "./other"
 
           export const articleService = createService({
@@ -706,7 +706,7 @@ describe("parseSamenApp", () => {
               throw new ArticleError()
             }
           `,
-          samen: `
+          phero: `
           import {editArticle} from './other'
 
           export const articleService = createService({
@@ -745,7 +745,7 @@ describe("parseSamenApp", () => {
               throw new ArticleError()
             }
           `,
-          samen: `
+          phero: `
           import {getArticle, editArticle} from './other'
 
           export const articleService = createService({
@@ -788,7 +788,7 @@ describe("parseSamenApp", () => {
               throw new ArticleError()
             }
           `,
-          samen: `
+          phero: `
           import {getArticle} from './otherOne'
           import {editArticle} from './otherTwo'
 

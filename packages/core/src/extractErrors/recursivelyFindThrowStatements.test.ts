@@ -1528,12 +1528,9 @@ describe("recursivelyFindThrowStatements", () => {
         ts.SyntaxKind.FunctionDeclaration,
       )
 
-      expect(
-        recursivelyFindThrowStatements(
-          funcOne,
-          typeChecker,
-        ),
-      ).toHaveLength(1)
+      expect(recursivelyFindThrowStatements(funcOne, typeChecker)).toHaveLength(
+        1,
+      )
     })
     test("called inner lambda", () => {
       const { statement: funcOne, typeChecker } = compileStatement(
@@ -1551,12 +1548,9 @@ describe("recursivelyFindThrowStatements", () => {
         ts.SyntaxKind.FunctionDeclaration,
       )
 
-      expect(
-        recursivelyFindThrowStatements(
-          funcOne,
-          typeChecker,
-        ),
-      ).toHaveLength(1)
+      expect(recursivelyFindThrowStatements(funcOne, typeChecker)).toHaveLength(
+        1,
+      )
     })
     test("called function expressions", () => {
       const { statement: funcOne, typeChecker } = compileStatement(
@@ -1574,12 +1568,9 @@ describe("recursivelyFindThrowStatements", () => {
         ts.SyntaxKind.FunctionDeclaration,
       )
 
-      expect(
-        recursivelyFindThrowStatements(
-          funcOne,
-          typeChecker,
-        ),
-      ).toHaveLength(1)
+      expect(recursivelyFindThrowStatements(funcOne, typeChecker)).toHaveLength(
+        1,
+      )
     })
     test("called inner functions", () => {
       const { statement: funcOne, typeChecker } = compileStatement(
@@ -1597,12 +1588,9 @@ describe("recursivelyFindThrowStatements", () => {
         ts.SyntaxKind.FunctionDeclaration,
       )
 
-      expect(
-        recursivelyFindThrowStatements(
-          funcOne,
-          typeChecker,
-        ),
-      ).toHaveLength(1)
+      expect(recursivelyFindThrowStatements(funcOne, typeChecker)).toHaveLength(
+        1,
+      )
     })
     test("ignore never called function", () => {
       const { statement: funcOne, typeChecker } = compileStatement(
@@ -1617,12 +1605,9 @@ describe("recursivelyFindThrowStatements", () => {
         ts.SyntaxKind.FunctionDeclaration,
       )
 
-      expect(
-        recursivelyFindThrowStatements(
-          funcOne,
-          typeChecker,
-        ),
-      ).toHaveLength(0)
+      expect(recursivelyFindThrowStatements(funcOne, typeChecker)).toHaveLength(
+        0,
+      )
     })
 
     test("called function", () => {
@@ -1638,12 +1623,9 @@ describe("recursivelyFindThrowStatements", () => {
         ts.SyntaxKind.FunctionDeclaration,
       )
 
-      expect(
-        recursivelyFindThrowStatements(
-          funcOne,
-          typeChecker,
-        ),
-      ).toHaveLength(1)
+      expect(recursivelyFindThrowStatements(funcOne, typeChecker)).toHaveLength(
+        1,
+      )
     })
   })
 
@@ -1721,7 +1703,7 @@ describe("recursivelyFindThrowStatements", () => {
         statements: [, funcOne],
         typeChecker,
       } = compileProgram({
-        samen: `
+        phero: `
         import aad from "./aad"
 
           function funcOne(a: string): boolean {
@@ -1748,7 +1730,7 @@ describe("recursivelyFindThrowStatements", () => {
         statements: [, funcOne],
         typeChecker,
       } = compileProgram({
-        samen: `
+        phero: `
         import {aad} from "./aad"
 
           function funcOne(a: string): boolean {
@@ -1775,7 +1757,7 @@ describe("recursivelyFindThrowStatements", () => {
         statements: [, funcOne],
         typeChecker,
       } = compileProgram({
-        samen: `
+        phero: `
         import {aad as noot} from "./aad"
 
           function funcOne(a: string): boolean {

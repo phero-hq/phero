@@ -76,24 +76,36 @@ export interface RootParserModel {
   name: string
   parser: ParserModel
 }
-export interface StringParserModel { type: ParserModelType.String }
+export interface StringParserModel {
+  type: ParserModelType.String
+}
 export interface StringLiteralParserModel {
   type: ParserModelType.StringLiteral
   literal: string
 }
-export interface NumberParserModel { type: ParserModelType.Number }
+export interface NumberParserModel {
+  type: ParserModelType.Number
+}
 export interface NumberLiteralParserModel {
   type: ParserModelType.NumberLiteral
   literal: number
 }
-export interface BooleanParserModel { type: ParserModelType.Boolean }
+export interface BooleanParserModel {
+  type: ParserModelType.Boolean
+}
 export interface BooleanLiteralParserModel {
   type: ParserModelType.BooleanLiteral
   literal: boolean
 }
-export interface NullParserModel { type: ParserModelType.Null }
-export interface UndefinedParserModel { type: ParserModelType.Undefined }
-export interface VoidParserModel { type: ParserModelType.Void }
+export interface NullParserModel {
+  type: ParserModelType.Null
+}
+export interface UndefinedParserModel {
+  type: ParserModelType.Undefined
+}
+export interface VoidParserModel {
+  type: ParserModelType.Void
+}
 export interface ObjectParserModel {
   type: ParserModelType.Object
   members: (MemberParserModel | IndexMemberParserModel)[]
@@ -267,10 +279,10 @@ export default function generateParserModel(
         type: ParserModelType.Object,
         members: rootNode.parameters.map((param) => {
           const paramType =
-            //  if it's of type SamenContext, we actually want the type arg
+            //  if it's of type PheroContext, we actually want the type arg
             param.type &&
             ts.isTypeReferenceNode(param.type) &&
-            getTypeName(param.type) === "SamenContext"
+            getTypeName(param.type) === "PheroContext"
               ? param.type.typeArguments?.[0]
               : param.type
 

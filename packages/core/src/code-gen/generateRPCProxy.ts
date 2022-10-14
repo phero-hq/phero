@@ -1,10 +1,10 @@
 import ts from "typescript"
-import { ParsedSamenApp, ParseError } from ".."
+import { ParsedPheroApp, ParseError } from ".."
 import {
-  ParsedSamenFunctionDefinition,
-  ParsedSamenServiceDefinition,
-} from "../parseSamenApp"
-import parseReturnType from "../parseSamenApp/parseReturnType"
+  ParsedPheroFunctionDefinition,
+  ParsedPheroServiceDefinition,
+} from "../parsePheroApp"
+import parseReturnType from "../parsePheroApp/parseReturnType"
 import { printCode } from "../tsTestUtils"
 import { VirtualCompilerHost } from "../VirtualCompilerHost"
 import generateModelParser, {
@@ -20,7 +20,7 @@ import * as tsx from "../tsx"
 const factory = ts.factory
 
 export default function generateRPCProxy(
-  app: ParsedSamenApp,
+  app: ParsedPheroApp,
   typeChecker: ts.TypeChecker,
 ): { js: string } {
   const tsNodes: ts.Node[] = []
@@ -41,7 +41,7 @@ export default function generateRPCProxy(
           ),
         ),
       ),
-      factory.createStringLiteral("./samen"),
+      factory.createStringLiteral("./phero"),
       undefined,
     ),
   )
@@ -108,14 +108,14 @@ export default function generateRPCProxy(
   })
 
   const file = ts.createSourceFile(
-    "samen-execution.ts",
+    "phero-execution.ts",
     "",
     ts.ScriptTarget.ES2015, // TODO should respect the target of the user
     false,
     ts.ScriptKind.TS,
   )
 
-  const tsSamenExecution = printer.printList(
+  const tsPheroExecution = printer.printList(
     ts.ListFormat.SourceFileStatements,
     ts.factory.createNodeArray(tsNodes),
     file,
@@ -124,15 +124,15 @@ export default function generateRPCProxy(
   const vHost = new VirtualCompilerHost({
     declaration: false,
   })
-  vHost.addFile("samen-execution.ts", tsSamenExecution)
+  vHost.addFile("phero-execution.ts", tsPheroExecution)
 
-  const prog = vHost.createProgram("samen-execution.ts")
+  const prog = vHost.createProgram("phero-execution.ts")
 
   prog.emit()
 
-  // console.log(vHost.getFile("samen-execution.ts"))
+  // console.log(vHost.getFile("phero-execution.ts"))
 
-  const js = vHost.getFile("samen-execution.js")
+  const js = vHost.getFile("phero-execution.js")
 
   if (!js) {
     throw new Error("Some error in generated TS.")
@@ -142,7 +142,7 @@ export default function generateRPCProxy(
 }
 
 function generateCorsConfigFunction(
-  service: ParsedSamenServiceDefinition,
+  service: ParsedPheroServiceDefinition,
 ): ts.FunctionDeclaration {
   return tsx.function({
     export: true,
@@ -162,8 +162,8 @@ function generateCorsConfigFunction(
 }
 
 function generateRPCExecutor(
-  service: ParsedSamenServiceDefinition,
-  funcDef: ParsedSamenFunctionDefinition,
+  service: ParsedPheroServiceDefinition,
+  funcDef: ParsedPheroFunctionDefinition,
   domainErrors: ParsedError[],
   typeChecker: ts.TypeChecker,
 ): ts.FunctionDeclaration {
@@ -203,8 +203,8 @@ function generateRPCExecutor(
 }
 
 function generateInnerFunction(
-  service: ParsedSamenServiceDefinition,
-  funcDef: ParsedSamenFunctionDefinition,
+  service: ParsedPheroServiceDefinition,
+  funcDef: ParsedPheroFunctionDefinition,
   typeChecker: ts.TypeChecker,
 ): ts.FunctionDeclaration {
   return tsx.function({
@@ -781,7 +781,7 @@ function generateInnerFunction(
 }
 
 function wrapWithErrorHandler(
-  service: ParsedSamenServiceDefinition,
+  service: ParsedPheroServiceDefinition,
   domainErrors: ParsedError[],
   ...statements: ts.Statement[]
 ): ts.TryStatement {
@@ -821,8 +821,8 @@ function generateRPCFunctionCall({
   service,
   funcDef,
 }: {
-  service: ParsedSamenServiceDefinition
-  funcDef: ParsedSamenFunctionDefinition
+  service: ParsedPheroServiceDefinition
+  funcDef: ParsedPheroFunctionDefinition
 }): ts.Block {
   return tsx.block(
     tsx.const({

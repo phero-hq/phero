@@ -1,15 +1,15 @@
 {
-  "name": "samen",
-  "description": "Samen builds and deploys serverless backend services and databases",
+  "name": "phero",
+  "description": "Phero is the no-hassle and type-safe glue between your backend and frontend(s)",
   "author": "Press Play Development",
-  "homepage": "https://samen.io",
+  "homepage": "https://phero.dev",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/samen-io/samen/issues"
+    "url": "https://github.com/phero-hq/phero/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/samen-io/samen.git"
+    "url": "git+https://github.com/phero-hq/phero.git"
   },
   "scripts": {
     "bootstrap": "lerna bootstrap"

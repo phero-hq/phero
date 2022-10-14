@@ -3,10 +3,10 @@ import ts, {
   VariableDeclaration,
 } from "typescript"
 import { TSFiles, VirtualCompilerHost } from "./VirtualCompilerHost"
-import { ParsedSamenApp } from "./parseSamenApp"
+import { ParsedPheroApp } from "./parsePheroApp"
 import { KindToNodeMappings } from "./tsUtils"
 
-export function printSamenApp(app: ParsedSamenApp): string {
+export function printPheroApp(app: ParsedPheroApp): string {
   return JSON.stringify(
     {
       services: app.services.map((service) => ({
@@ -46,14 +46,14 @@ export function createTestProgram(input: TSFiles | string): ts.Program {
   const vHost = new VirtualCompilerHost()
 
   if (typeof input === "string") {
-    vHost.addFile(`samen.ts`, input)
+    vHost.addFile(`phero.ts`, input)
   } else {
     for (const [fileName, content] of Object.entries(input)) {
       vHost.addFile(`${fileName}.ts`, content)
     }
   }
 
-  const program = vHost.createProgram("samen.ts")
+  const program = vHost.createProgram("phero.ts")
   return program
 }
 
@@ -62,7 +62,7 @@ export function compileStatement<SK extends ts.SyntaxKind>(
   syntaxKind: SK,
 ): { statement: KindToNodeMappings[SK]; typeChecker: ts.TypeChecker } {
   const prog = createTestProgram(code)
-  const statements = prog.getSourceFile("samen.ts")?.statements
+  const statements = prog.getSourceFile("phero.ts")?.statements
   if (statements?.length !== 1) {
     throw new Error("Should provide exactly 1 statement")
   }
@@ -84,7 +84,7 @@ export function compileStatements(code: string): {
   typeChecker: ts.TypeChecker
 } {
   const prog = createTestProgram(code)
-  const statements = prog.getSourceFile("samen.ts")?.statements
+  const statements = prog.getSourceFile("phero.ts")?.statements
   if (!statements || statements.length < 1) {
     throw new Error("Should provide at least 1 statement")
   }
@@ -100,7 +100,7 @@ export function compileProgram(input: TSFiles): {
   typeChecker: ts.TypeChecker
 } {
   const prog = createTestProgram(input)
-  const statements = prog.getSourceFile("samen.ts")?.statements
+  const statements = prog.getSourceFile("phero.ts")?.statements
   if (!statements || statements.length < 1) {
     throw new Error("Should provide at least 1 statement")
   }

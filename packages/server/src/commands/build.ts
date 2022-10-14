@@ -1,10 +1,10 @@
 import {
   generateAppDeclarationFile,
-  MissingSamenFileError,
+  MissingPheroFileError,
   MissingTSConfigFile,
-  parseSamenApp,
-} from "@samen/core"
-import { ServerCommandBuild } from "@samen/dev"
+  parsePheroApp,
+} from "@phero/core"
+import { ServerCommandBuild } from "@phero/dev"
 import fs from "fs"
 import path from "path"
 import ts, { CompilerOptions } from "typescript"
@@ -65,18 +65,18 @@ export default function buildCommand(command: ServerCommandBuild) {
   const program = ts.createProgram({
     host: compilerHost,
     options: compilerOpts,
-    rootNames: [`${projectPath}/src/samen.ts`],
+    rootNames: [`${projectPath}/src/phero.ts`],
   })
 
-  const samenSourceFile = program.getSourceFile(`${projectPath}/src/samen.ts`)
+  const pheroSourceFile = program.getSourceFile(`${projectPath}/src/phero.ts`)
 
-  if (!samenSourceFile) {
-    throw new MissingSamenFileError(projectPath)
+  if (!pheroSourceFile) {
+    throw new MissingPheroFileError(projectPath)
   }
 
   const typeChecker = program.getTypeChecker()
-  const app = parseSamenApp(samenSourceFile, typeChecker)
+  const app = parsePheroApp(pheroSourceFile, typeChecker)
   const dts = generateAppDeclarationFile(app, typeChecker)
-  const manifestPath = path.join(projectPath, "samen-manifest.d.ts")
+  const manifestPath = path.join(projectPath, "phero-manifest.d.ts")
   fs.writeFileSync(manifestPath, dts)
 }

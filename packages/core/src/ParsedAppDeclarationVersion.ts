@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { ParsedAppDeclaration } from "./parseAppDeclaration"
-import { Model } from "./parseSamenApp"
+import { Model } from "./parsePheroApp"
 
 export interface ParsedAppDeclarationVersion {
   domainModels: Model[]

@@ -5,11 +5,11 @@ import generateParserModel from "./code-gen/parsers/generateParserModel"
 import { ParseError } from "./errors"
 import { ParsedError } from "./extractErrors/parseThrowStatement"
 import { isModel } from "./parseAppDeclaration"
-import parseReturnType from "./parseSamenApp/parseReturnType"
+import parseReturnType from "./parsePheroApp/parseReturnType"
 import {
   Model,
-  ParsedSamenFunctionDefinition,
-} from "./parseSamenApp/parseSamenApp"
+  ParsedPheroFunctionDefinition,
+} from "./parsePheroApp/parsePheroApp"
 import { getNameAsString } from "./tsUtils"
 import * as tsx from "./tsx"
 
@@ -29,7 +29,7 @@ export function generateNamespace(
 }
 
 export function generateFunction(
-  func: ParsedSamenFunctionDefinition,
+  func: ParsedPheroFunctionDefinition,
   refMaker: ReferenceMaker,
 ): ts.FunctionDeclaration {
   return ts.factory.createFunctionDeclaration(
@@ -46,7 +46,7 @@ export function generateFunction(
 }
 
 function generateFunctionParameters(
-  func: ParsedSamenFunctionDefinition,
+  func: ParsedPheroFunctionDefinition,
   refMaker: ReferenceMaker,
 ): ts.ParameterDeclaration[] {
   const parameters = func.serviceContext?.paramName
@@ -111,7 +111,7 @@ export function generateClientFunction(
 
   if (contextType) {
     const firstParam = func.parameters[0]
-    if (isParamSamenContextParam(firstParam)) {
+    if (isParamPheroContextParam(firstParam)) {
       // skip first parameter if we have a context param
       parameters = parameters.slice(1)
       context = {
@@ -144,12 +144,12 @@ export function generateClientFunction(
   )
 }
 
-function isParamSamenContextParam(param: ts.ParameterDeclaration): boolean {
+function isParamPheroContextParam(param: ts.ParameterDeclaration): boolean {
   return (
     !!param &&
     !!param.type &&
     ts.isTypeReferenceNode(param.type) &&
-    getNameAsString(param.type.typeName) === "SamenContext"
+    getNameAsString(param.type.typeName) === "PheroContext"
   )
 }
 
@@ -518,8 +518,8 @@ export class ReferenceMaker {
   ) {}
 
   public fromTypeNode(typeNode: ts.TypeReferenceNode): ts.EntityName {
-    if (typeNode.typeName.getText() === "SamenContext") {
-      return ts.factory.createIdentifier("samen.SamenContext")
+    if (typeNode.typeName.getText() === "PheroContext") {
+      return ts.factory.createIdentifier("phero.PheroContext")
     }
 
     const symbol = this.typeChecker.getSymbolAtLocation(typeNode.typeName)
@@ -551,8 +551,8 @@ export class ReferenceMaker {
   public fromIdentifier(
     identifier: ts.Identifier,
   ): ts.Identifier | ts.PropertyAccessExpression {
-    if (identifier.text === "SamenContext") {
-      return ts.factory.createIdentifier("samen.SamenContext")
+    if (identifier.text === "PheroContext") {
+      return ts.factory.createIdentifier("phero.PheroContext")
     }
 
     const symbol = this.typeChecker.getSymbolAtLocation(identifier)

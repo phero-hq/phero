@@ -1,4 +1,4 @@
-import { addDevEventListener, ServerCommandServe } from "@samen/dev"
+import { addDevEventListener, ServerCommandServe } from "@phero/dev"
 import DevServer from "./DevServer"
 
 export default function serve(command: ServerCommandServe) {
@@ -11,7 +11,7 @@ export default function serve(command: ServerCommandServe) {
         console.log(event)
       },
       () => {
-        console.log("Listener to samen-server process connected")
+        console.log("Listener to phero-server process connected")
       },
       (error) => {
         console.error(`Could not connect to event emitter at ${eventUrl}`)
