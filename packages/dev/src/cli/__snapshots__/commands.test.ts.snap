@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`parseClientCommand build cmd:   'samen-client build --help' 1`] = `
+exports[`parseClientCommand build cmd:   'phero-client build --help' 1`] = `
 Object {
   "command": "build",
   "name": "help",
 }
 `;
 
-exports[`parseClientCommand build cmd:   'samen-client build --verbose' 1`] = `
+exports[`parseClientCommand build cmd:   'phero-client build --verbose' 1`] = `
 Object {
   "name": "build",
   "server": Object {
@@ -17,14 +17,14 @@ Object {
 }
 `;
 
-exports[`parseClientCommand build cmd:   'samen-client build -h' 1`] = `
+exports[`parseClientCommand build cmd:   'phero-client build -h' 1`] = `
 Object {
   "command": "build",
   "name": "help",
 }
 `;
 
-exports[`parseClientCommand build cmd:   'samen-client build http://localhost:1234 --verbose' 1`] = `
+exports[`parseClientCommand build cmd:   'phero-client build http://localhost:1234 --verbose' 1`] = `
 Object {
   "name": "build",
   "server": Object {
@@ -34,7 +34,7 @@ Object {
 }
 `;
 
-exports[`parseClientCommand build cmd:   'samen-client build http://localhost:1234' 1`] = `
+exports[`parseClientCommand build cmd:   'phero-client build http://localhost:1234' 1`] = `
 Object {
   "name": "build",
   "server": Object {
@@ -44,7 +44,7 @@ Object {
 }
 `;
 
-exports[`parseClientCommand build cmd:   'samen-client build' 1`] = `
+exports[`parseClientCommand build cmd:   'phero-client build' 1`] = `
 Object {
   "name": "build",
   "server": Object {
@@ -54,40 +54,40 @@ Object {
 }
 `;
 
-exports[`parseClientCommand common cmd:   'samen-client --help' 1`] = `
+exports[`parseClientCommand common cmd:   'phero-client --help' 1`] = `
 Object {
   "command": undefined,
   "name": "help",
 }
 `;
 
-exports[`parseClientCommand common cmd:   'samen-client --version' 1`] = `
+exports[`parseClientCommand common cmd:   'phero-client --version' 1`] = `
 Object {
   "name": "version",
 }
 `;
 
-exports[`parseClientCommand common cmd:   'samen-client -h' 1`] = `
+exports[`parseClientCommand common cmd:   'phero-client -h' 1`] = `
 Object {
   "command": undefined,
   "name": "help",
 }
 `;
 
-exports[`parseClientCommand common cmd:   'samen-client -v' 1`] = `
+exports[`parseClientCommand common cmd:   'phero-client -v' 1`] = `
 Object {
   "name": "version",
 }
 `;
 
-exports[`parseClientCommand watch cmd:   'samen-client watch --help' 1`] = `
+exports[`parseClientCommand watch cmd:   'phero-client watch --help' 1`] = `
 Object {
   "command": "watch",
   "name": "help",
 }
 `;
 
-exports[`parseClientCommand watch cmd:   'samen-client watch --port 1234' 1`] = `
+exports[`parseClientCommand watch cmd:   'phero-client watch --port 1234' 1`] = `
 Object {
   "name": "watch",
   "port": 1234,
@@ -98,7 +98,7 @@ Object {
 }
 `;
 
-exports[`parseClientCommand watch cmd:   'samen-client watch --verbose' 1`] = `
+exports[`parseClientCommand watch cmd:   'phero-client watch --verbose' 1`] = `
 Object {
   "name": "watch",
   "port": 4040,
@@ -109,14 +109,14 @@ Object {
 }
 `;
 
-exports[`parseClientCommand watch cmd:   'samen-client watch -h' 1`] = `
+exports[`parseClientCommand watch cmd:   'phero-client watch -h' 1`] = `
 Object {
   "command": "watch",
   "name": "help",
 }
 `;
 
-exports[`parseClientCommand watch cmd:   'samen-client watch -p 1234' 1`] = `
+exports[`parseClientCommand watch cmd:   'phero-client watch -p 1234' 1`] = `
 Object {
   "name": "watch",
   "port": 1234,
@@ -127,7 +127,7 @@ Object {
 }
 `;
 
-exports[`parseClientCommand watch cmd:   'samen-client watch http://localhost:1234 --verbose --port 4321' 1`] = `
+exports[`parseClientCommand watch cmd:   'phero-client watch http://localhost:1234 --verbose --port 4321' 1`] = `
 Object {
   "name": "watch",
   "port": 4321,
@@ -138,7 +138,7 @@ Object {
 }
 `;
 
-exports[`parseClientCommand watch cmd:   'samen-client watch http://localhost:1234' 1`] = `
+exports[`parseClientCommand watch cmd:   'phero-client watch http://localhost:1234' 1`] = `
 Object {
   "name": "watch",
   "port": 4040,
@@ -149,7 +149,7 @@ Object {
 }
 `;
 
-exports[`parseClientCommand watch cmd:   'samen-client watch' 1`] = `
+exports[`parseClientCommand watch cmd:   'phero-client watch' 1`] = `
 Object {
   "name": "watch",
   "port": 4040,
@@ -160,7 +160,7 @@ Object {
 }
 `;
 
-exports[`parseSamenCommand client cmd:   'samen client watch --port 1234' 1`] = `
+exports[`parsePheroCommand client cmd:   'phero client watch --port 1234' 1`] = `
 Object {
   "argv": Array [
     "watch",
@@ -171,7 +171,7 @@ Object {
 }
 `;
 
-exports[`parseSamenCommand client cmd:   'samen client watch' 1`] = `
+exports[`parsePheroCommand client cmd:   'phero client watch' 1`] = `
 Object {
   "argv": Array [
     "watch",
@@ -180,40 +180,40 @@ Object {
 }
 `;
 
-exports[`parseSamenCommand common cmd:   'samen --help' 1`] = `
+exports[`parsePheroCommand common cmd:   'phero --help' 1`] = `
 Object {
   "command": undefined,
   "name": "help",
 }
 `;
 
-exports[`parseSamenCommand common cmd:   'samen --version' 1`] = `
+exports[`parsePheroCommand common cmd:   'phero --version' 1`] = `
 Object {
   "name": "version",
 }
 `;
 
-exports[`parseSamenCommand common cmd:   'samen -h' 1`] = `
+exports[`parsePheroCommand common cmd:   'phero -h' 1`] = `
 Object {
   "command": undefined,
   "name": "help",
 }
 `;
 
-exports[`parseSamenCommand common cmd:   'samen -v' 1`] = `
+exports[`parsePheroCommand common cmd:   'phero -v' 1`] = `
 Object {
   "name": "version",
 }
 `;
 
-exports[`parseSamenCommand dev-env cmd:   'samen' 1`] = `
+exports[`parsePheroCommand dev-env cmd:   'phero' 1`] = `
 Object {
   "name": "dev-env",
   "verbose": false,
 }
 `;
 
-exports[`parseSamenCommand server cmd:   'samen server serve --port 1234' 1`] = `
+exports[`parsePheroCommand server cmd:   'phero server serve --port 1234' 1`] = `
 Object {
   "argv": Array [
     "serve",
@@ -224,7 +224,7 @@ Object {
 }
 `;
 
-exports[`parseSamenCommand server cmd:   'samen server serve' 1`] = `
+exports[`parsePheroCommand server cmd:   'phero server serve' 1`] = `
 Object {
   "argv": Array [
     "serve",
@@ -233,96 +233,96 @@ Object {
 }
 `;
 
-exports[`parseServerCommand build cmd:   'samen-server build --help' 1`] = `
+exports[`parseServerCommand build cmd:   'phero-server build --help' 1`] = `
 Object {
   "command": "build",
   "name": "help",
 }
 `;
 
-exports[`parseServerCommand build cmd:   'samen-server build --verbose' 1`] = `
+exports[`parseServerCommand build cmd:   'phero-server build --verbose' 1`] = `
 Object {
   "name": "build",
   "verbose": true,
 }
 `;
 
-exports[`parseServerCommand build cmd:   'samen-server build -h' 1`] = `
+exports[`parseServerCommand build cmd:   'phero-server build -h' 1`] = `
 Object {
   "command": "build",
   "name": "help",
 }
 `;
 
-exports[`parseServerCommand build cmd:   'samen-server build' 1`] = `
+exports[`parseServerCommand build cmd:   'phero-server build' 1`] = `
 Object {
   "name": "build",
   "verbose": false,
 }
 `;
 
-exports[`parseServerCommand common cmd:   'samen-server --help' 1`] = `
+exports[`parseServerCommand common cmd:   'phero-server --help' 1`] = `
 Object {
   "command": undefined,
   "name": "help",
 }
 `;
 
-exports[`parseServerCommand common cmd:   'samen-server --version' 1`] = `
+exports[`parseServerCommand common cmd:   'phero-server --version' 1`] = `
 Object {
   "name": "version",
 }
 `;
 
-exports[`parseServerCommand common cmd:   'samen-server -h' 1`] = `
+exports[`parseServerCommand common cmd:   'phero-server -h' 1`] = `
 Object {
   "command": undefined,
   "name": "help",
 }
 `;
 
-exports[`parseServerCommand common cmd:   'samen-server -v' 1`] = `
+exports[`parseServerCommand common cmd:   'phero-server -v' 1`] = `
 Object {
   "name": "version",
 }
 `;
 
-exports[`parseServerCommand export cmd:   'samen-server export --help' 1`] = `
+exports[`parseServerCommand export cmd:   'phero-server export --help' 1`] = `
 Object {
   "command": "export",
   "name": "help",
 }
 `;
 
-exports[`parseServerCommand export cmd:   'samen-server export --verbose' 1`] = `
+exports[`parseServerCommand export cmd:   'phero-server export --verbose' 1`] = `
 Object {
   "name": "export",
   "verbose": true,
 }
 `;
 
-exports[`parseServerCommand export cmd:   'samen-server export -h' 1`] = `
+exports[`parseServerCommand export cmd:   'phero-server export -h' 1`] = `
 Object {
   "command": "export",
   "name": "help",
 }
 `;
 
-exports[`parseServerCommand export cmd:   'samen-server export' 1`] = `
+exports[`parseServerCommand export cmd:   'phero-server export' 1`] = `
 Object {
   "name": "export",
   "verbose": false,
 }
 `;
 
-exports[`parseServerCommand serve cmd:   'samen-server serve --help' 1`] = `
+exports[`parseServerCommand serve cmd:   'phero-server serve --help' 1`] = `
 Object {
   "command": "serve",
   "name": "help",
 }
 `;
 
-exports[`parseServerCommand serve cmd:   'samen-server serve --port 1234' 1`] = `
+exports[`parseServerCommand serve cmd:   'phero-server serve --port 1234' 1`] = `
 Object {
   "name": "serve",
   "port": 1234,
@@ -330,7 +330,7 @@ Object {
 }
 `;
 
-exports[`parseServerCommand serve cmd:   'samen-server serve --verbose' 1`] = `
+exports[`parseServerCommand serve cmd:   'phero-server serve --verbose' 1`] = `
 Object {
   "name": "serve",
   "port": 3030,
@@ -338,14 +338,14 @@ Object {
 }
 `;
 
-exports[`parseServerCommand serve cmd:   'samen-server serve -h' 1`] = `
+exports[`parseServerCommand serve cmd:   'phero-server serve -h' 1`] = `
 Object {
   "command": "serve",
   "name": "help",
 }
 `;
 
-exports[`parseServerCommand serve cmd:   'samen-server serve -p 1234 --verbose' 1`] = `
+exports[`parseServerCommand serve cmd:   'phero-server serve -p 1234 --verbose' 1`] = `
 Object {
   "name": "serve",
   "port": 1234,
@@ -353,7 +353,7 @@ Object {
 }
 `;
 
-exports[`parseServerCommand serve cmd:   'samen-server serve -p 1234' 1`] = `
+exports[`parseServerCommand serve cmd:   'phero-server serve -p 1234' 1`] = `
 Object {
   "name": "serve",
   "port": 1234,
@@ -361,7 +361,7 @@ Object {
 }
 `;
 
-exports[`parseServerCommand serve cmd:   'samen-server serve' 1`] = `
+exports[`parseServerCommand serve cmd:   'phero-server serve' 1`] = `
 Object {
   "name": "serve",
   "port": 3030,

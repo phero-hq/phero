@@ -35,11 +35,11 @@ async function getLatestFor(packageName: string): Promise<string> {
 }
 
 async function getGlobalItems(): Promise<Item[]> {
-  const current = (await exec("samen --version")).stdout.trim()
-  const latest = await getLatestFor("samen")
+  const current = (await exec("phero --version")).stdout.trim()
+  const latest = await getLatestFor("phero")
 
   if (semver.gt(latest, current)) {
-    return [{ name: "samen", location: "global", current, latest }]
+    return [{ name: "phero", location: "global", current, latest }]
   } else {
     return []
   }
@@ -66,10 +66,10 @@ async function getLocalItem(
 async function getLocalItems(cwd: string): Promise<Item[]> {
   const items: Item[] = []
 
-  const clientItem = await getLocalItem(cwd, "samen-client", "@samen/client")
+  const clientItem = await getLocalItem(cwd, "phero-client", "@phero/client")
   if (clientItem) items.push(clientItem)
 
-  const serverItem = await getLocalItem(cwd, "samen-server", "@samen/server")
+  const serverItem = await getLocalItem(cwd, "phero-server", "@phero/server")
   if (serverItem) items.push(serverItem)
 
   return items

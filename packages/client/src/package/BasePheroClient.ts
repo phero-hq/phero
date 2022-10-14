@@ -1,6 +1,6 @@
 import { ParseResult, ValidationError } from "./ParseResult"
 
-export interface SamenRequest {
+export interface PheroRequest {
   method: "GET" | "POST"
   headers: {
     [header: string]: string
@@ -10,7 +10,7 @@ export interface SamenRequest {
 
 export type Fetch = (
   url: string,
-  request: SamenRequest,
+  request: PheroRequest,
 ) => Promise<{
   ok: boolean
   status: number
@@ -25,7 +25,7 @@ export class ParseError extends Error {
   }
 }
 
-export class BaseSamenClient {
+export class BasePheroClient {
   // TODO: Strip out trailing slash from url:
   constructor(private readonly _fetch: Fetch, private readonly url: string) {}
 

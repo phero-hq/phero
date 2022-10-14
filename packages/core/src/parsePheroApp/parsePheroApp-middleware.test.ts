@@ -2,18 +2,18 @@
 
 import ts from "typescript"
 
-import { parseSamenApp, ParsedSamenApp } from "./parseSamenApp"
+import { parsePheroApp, ParsedPheroApp } from "./parsePheroApp"
 import { createTestProgram } from "../tsTestUtils"
 
-function parseProgram(prog: ts.Program): ParsedSamenApp {
+function parseProgram(prog: ts.Program): ParsedPheroApp {
   // if (prog.getSemanticDiagnostics().length) {
   //   console.log("OEPS COMPILE ERRORS DETECTED")
   // }
-  const samenFile = prog.getSourceFile("samen.ts")
-  if (!samenFile) {
-    throw new Error("No samen file")
+  const pheroFile = prog.getSourceFile("phero.ts")
+  if (!pheroFile) {
+    throw new Error("No phero file")
   }
-  return parseSamenApp(samenFile, prog.getTypeChecker())
+  return parsePheroApp(pheroFile, prog.getTypeChecker())
 }
 
 function expectFunctionDeclarationWithName(
@@ -24,22 +24,22 @@ function expectFunctionDeclarationWithName(
   expect(func?.kind).toBe(ts.SyntaxKind.FunctionDeclaration)
 }
 
-describe("parseSamenApp middleware", () => {
+describe("parsePheroApp middleware", () => {
   test("should parse middleware", () => {
     const parsedApp = parseProgram(
       createTestProgram(`
-        type SamenNextFunction<T = void> = T extends void
+        type PheroNextFunction<T = void> = T extends void
           ? () => Promise<void>
           : (ctx: T) => Promise<void>
 
-        type SamenContext<T = {}> = T
-        type SamenParams<T = {}> = Partial<T>
+        type PheroContext<T = {}> = T
+        type PheroParams<T = {}> = Partial<T>
 
-        async function getArticle(ctx: SamenContext<{ x: number }>, aap: string): Promise<string> {
+        async function getArticle(ctx: PheroContext<{ x: number }>, aap: string): Promise<string> {
           return "ok"
         }
 
-        async function myMiddleware(params: SamenParams, context: SamenContext, next: SamenNextFunction<{ x: number }) {
+        async function myMiddleware(params: PheroParams, context: PheroContext, next: PheroNextFunction<{ x: number }) {
           await next({ x: 123 })
         }
 

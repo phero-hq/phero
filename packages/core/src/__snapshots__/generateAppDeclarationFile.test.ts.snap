@@ -93,12 +93,12 @@ exports[`generateAppDeclarationFile middleware should parse middleware 1`] = `
         }
     }
 }
-export declare namespace samen {
-    type SamenContext<T> = T;
+export declare namespace phero {
+    type PheroContext<T> = T;
 }
 export declare namespace articleService {
     namespace v_1_0_0 {
-        function getArticle(ctx: samen.SamenContext<{
+        function getArticle(ctx: phero.PheroContext<{
             uid: string;
         }>, aap: string): Promise<string>;
     }

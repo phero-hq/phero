@@ -5,13 +5,13 @@ import parseModels from "./parseModels"
 import getCreateServiceCallExpression from "./getCreateServiceCallExpression"
 import { parseContext } from "./parseContext"
 import parseFunctionDefinitions from "./parseFunctionDefinitions"
-import { ParsedSamenServiceDefinition } from "./parseSamenApp"
+import { ParsedPheroServiceDefinition } from "./parsePheroApp"
 import parseServiceConfig from "./parseServiceConfig"
 
 export default function parseServiceDefinition(
   serviceExport: ts.VariableDeclaration | ts.ExportSpecifier,
   typeChecker: ts.TypeChecker,
-): ParsedSamenServiceDefinition {
+): ParsedPheroServiceDefinition {
   const serviceName = serviceExport.name.getText()
 
   // check if the value of the export is a function call to "creatService"

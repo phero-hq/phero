@@ -1,15 +1,15 @@
 {
-  "name": "samen",
+  "name": "phero",
   "version": "0.9.3",
-  "description": "Backend development toolkit for TypeScript",
-  "homepage": "https://samen.io",
-  "repository": "samen-io/samen",
-  "bugs": "https://github.com/samen-io/samen/issues",
+  "description": "Phero is the no-hassle and type-safe glue between your backend and frontend(s).",
+  "homepage": "https://phero.dev",
+  "repository": "phero-hq/phero",
+  "bugs": "https://github.com/phero-hq/phero/issues",
   "engines": {
     "node": ">=12.22.0"
   },
   "bin": {
-    "samen": "dist/index.js"
+    "phero": "dist/index.js"
   },
   "scripts": {
     "clean": "rm -rf dist",
@@ -21,7 +21,7 @@
     "postbuild": "cp package.json ./dist/package.json"
   },
   "dependencies": {
-    "@samen/dev": "^0.9.3",
+    "@phero/dev": "^0.9.3",
     "ink": "^3.2.0",
     "ink-select-input": "^4.2.1",
     "ink-spinner": "^4.0.3",
@@ -48,7 +48,7 @@
   "license": "Apache-2.0",
   "author": {
     "name": "Press Play Development B.V.",
-    "email": "samen@pressplay.dev",
+    "email": "phero@pressplay.dev",
     "url": "https://pressplay.dev"
   }
 }

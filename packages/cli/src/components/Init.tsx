@@ -7,9 +7,9 @@ import { Box, Text } from "ink"
 import SelectInput from "ink-select-input/build"
 import { useCallback, useEffect, useState } from "react"
 import ActivityIndicator from "./ActivityIndicator"
-import { SamenCommandInit } from "@samen/dev"
+import { PheroCommandInit } from "@phero/dev"
 
-const serverSamenFile = `import { createService } from '@samen/server'
+const serverPheroFile = `import { createService } from '@phero/server'
 
 async function helloWorld(name: string): Promise<string> {
   return \`Hi there, \${name}!\`
@@ -20,10 +20,10 @@ export const helloWorldService = createService({
 })
 `
 
-const clientSamenFile = `import { SamenClient } from "./samen.generated";
+const clientPheroFile = `import { PheroClient } from "./phero.generated";
 
 const fetch = window.fetch.bind(this);
-const client = new SamenClient(fetch);
+const client = new PheroClient(fetch);
 
 async function main() {
   const message = await client.helloWorldService.helloWorld('Jim')
@@ -101,20 +101,20 @@ async function addLineToFile(filePath: string, line: string): Promise<void> {
   }
 }
 
-export default function Init({ command }: { command: SamenCommandInit }) {
-  const [env, setEnv] = useState<SamenCommandInit["env"]>(command.env)
+export default function Init({ command }: { command: PheroCommandInit }) {
+  const [env, setEnv] = useState<PheroCommandInit["env"]>(command.env)
   const [isDone, setDone] = useState(false)
 
   const initServer = useCallback(async () => {
-    await installPackage("@samen/server")
-    await createSourceFile("src/samen.ts", serverSamenFile) // TODO: Get src-directory from tsconfig
+    await installPackage("@phero/server")
+    await createSourceFile("src/phero.ts", serverPheroFile) // TODO: Get src-directory from tsconfig
     setDone(true)
   }, [])
 
   const initClient = useCallback(async () => {
-    await installPackage("@samen/client")
-    await createSourceFile("src/samen.ts", clientSamenFile) // TODO: Get src-directory from tsconfig
-    await addLineToFile(".gitignore", "samen.generated.ts")
+    await installPackage("@phero/client")
+    await createSourceFile("src/phero.ts", clientPheroFile) // TODO: Get src-directory from tsconfig
+    await addLineToFile(".gitignore", "phero.generated.ts")
     setDone(true)
   }, [])
 
@@ -156,14 +156,14 @@ export default function Init({ command }: { command: SamenCommandInit }) {
   return (
     <Box flexDirection="column">
       {isDone ? (
-        <Text>Ready to go! Run `npx samen` again to continue.</Text>
+        <Text>Ready to go! Run `npx phero` again to continue.</Text>
       ) : (
         <>
           {!env && (
             <Box flexDirection="column">
               <Box paddingBottom={1}>
                 <Text>
-                  Samen is not installed in this directory. What do you want to
+                  Phero is not installed in this directory. What do you want to
                   do?
                 </Text>
               </Box>
@@ -187,7 +187,7 @@ export default function Init({ command }: { command: SamenCommandInit }) {
                 <Text>
                   <ActivityIndicator />
                   <Text dimColor> Initializing </Text>
-                  <Text>@samen/server</Text>
+                  <Text>@phero/server</Text>
                   <Text dimColor>...</Text>
                 </Text>
               )}
@@ -196,7 +196,7 @@ export default function Init({ command }: { command: SamenCommandInit }) {
                 <Text>
                   <ActivityIndicator />
                   <Text dimColor> Initializing </Text>
-                  <Text>@samen/client</Text>
+                  <Text>@phero/client</Text>
                   <Text dimColor>...</Text>
                 </Text>
               )}

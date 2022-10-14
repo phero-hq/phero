@@ -1,15 +1,15 @@
 import path from "path"
 import fs from "fs"
-import { ServerCommandExport } from "@samen/dev"
+import { ServerCommandExport } from "@phero/dev"
 import ts, { CompilerOptions } from "typescript"
 import {
   generateAppDeclarationFile,
   generateRPCProxy,
   generateProductionServer,
-  MissingSamenFileError,
+  MissingPheroFileError,
   MissingTSConfigFile,
-  parseSamenApp,
-} from "@samen/core"
+  parsePheroApp,
+} from "@phero/core"
 
 export default function exportCommand(command: ServerCommandExport) {
   const projectPath = process.cwd()
@@ -67,30 +67,30 @@ export default function exportCommand(command: ServerCommandExport) {
   const program = ts.createProgram({
     host: compilerHost,
     options: compilerOpts,
-    rootNames: [`${projectPath}/src/samen.ts`],
+    rootNames: [`${projectPath}/src/phero.ts`],
   })
 
   program.emit()
 
-  const samenSourceFile = program.getSourceFile(`${projectPath}/src/samen.ts`)
+  const pheroSourceFile = program.getSourceFile(`${projectPath}/src/phero.ts`)
 
-  if (!samenSourceFile) {
-    throw new MissingSamenFileError(projectPath)
+  if (!pheroSourceFile) {
+    throw new MissingPheroFileError(projectPath)
   }
 
   const typeChecker = program.getTypeChecker()
-  const app = parseSamenApp(samenSourceFile, typeChecker)
+  const app = parsePheroApp(pheroSourceFile, typeChecker)
   const dts = generateAppDeclarationFile(app, typeChecker)
   const output = generateRPCProxy(app, typeChecker)
   const productionServer = generateProductionServer(app, typeChecker)
 
   const buildPath = path.join(projectPath, ".build")
 
-  const manifestPath = path.join(projectPath, "samen-manifest.d.ts")
+  const manifestPath = path.join(projectPath, "phero-manifest.d.ts")
   fs.writeFileSync(manifestPath, dts)
 
-  const samenExecutionJS = path.join(buildPath, "samen-execution.js")
-  fs.writeFileSync(samenExecutionJS, output.js)
+  const pheroExecutionJS = path.join(buildPath, "phero-execution.js")
+  fs.writeFileSync(pheroExecutionJS, output.js)
 
   const indexJS = path.join(buildPath, "index.js")
   fs.writeFileSync(indexJS, productionServer.js)
@@ -104,7 +104,7 @@ export default function exportCommand(command: ServerCommandExport) {
     path.join(buildPath, "package-lock.json"),
   )
   fs.copyFileSync(
-    path.join(projectPath, "samen-manifest.d.ts"),
-    path.join(buildPath, "samen-manifest.d.ts"),
+    path.join(projectPath, "phero-manifest.d.ts"),
+    path.join(buildPath, "phero-manifest.d.ts"),
   )
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { parseSamenCommand, SamenCommandName } from "@samen/dev"
+import { parsePheroCommand, PheroCommandName } from "@phero/dev"
 import devEnv from "./commands/dev-env"
 import help from "./commands/help"
 import init from "./commands/init"
@@ -9,37 +9,37 @@ import version from "./commands/version"
 import { fatalError } from "./process"
 import checkAndWarnForVersions from "./utils/checkAndWarnForVersions"
 
-const command = parseSamenCommand(process.argv.slice(2))
+const command = parsePheroCommand(process.argv.slice(2))
 
 switch (command.name) {
-  case SamenCommandName.Version:
+  case PheroCommandName.Version:
     version()
     break
 
-  case SamenCommandName.Help:
+  case PheroCommandName.Help:
     checkAndWarnForVersions([process.cwd()], console.warn)
       .then(() => help(command))
       .catch(fatalError)
     break
 
-  case SamenCommandName.DevEnv:
+  case PheroCommandName.DevEnv:
     devEnv(command)
     break
 
-  case SamenCommandName.Init:
+  case PheroCommandName.Init:
     init(command)
     break
 
-  case SamenCommandName.Client:
+  case PheroCommandName.Client:
     checkAndWarnForVersions([process.cwd()], console.warn)
-      .then(() => redirect("./node_modules/.bin/samen-client", command.argv))
+      .then(() => redirect("./node_modules/.bin/phero-client", command.argv))
       .catch(fatalError)
 
     break
 
-  case SamenCommandName.Server:
+  case PheroCommandName.Server:
     checkAndWarnForVersions([process.cwd()], console.warn)
-      .then(() => redirect("./node_modules/.bin/samen-server", command.argv))
+      .then(() => redirect("./node_modules/.bin/phero-server", command.argv))
       .catch(fatalError)
     break
 }

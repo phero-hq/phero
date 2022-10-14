@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { isExternalDeclaration, isExternalSymbol } from "../tsUtils"
-import { Model, ParsedSamenFunctionDefinition } from "./parseSamenApp"
+import { Model, ParsedPheroFunctionDefinition } from "./parsePheroApp"
 
 const IGNORE_SYNTAX_KIND = [
   ts.SyntaxKind.StringKeyword,
@@ -14,7 +14,7 @@ const IGNORE_SYNTAX_KIND = [
 ]
 
 export default function parseModels(
-  funcs: ParsedSamenFunctionDefinition[],
+  funcs: ParsedPheroFunctionDefinition[],
   typeChecker: ts.TypeChecker,
 ): Model[] {
   const models: Model[] = []

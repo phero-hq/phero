@@ -1,8 +1,8 @@
 import {
   getDeclarationForVersion,
   parseAppDeclarationFileContent,
-} from "@samen/core"
-import { ClientCommandBuild, ClientServerLocation } from "@samen/dev"
+} from "@phero/core"
+import { ClientCommandBuild, ClientServerLocation } from "@phero/dev"
 import { promises as fs } from "fs"
 import http from "http"
 import https from "https"
@@ -52,7 +52,7 @@ async function getManifestFromUrl(serverUrl: string): Promise<string> {
 }
 
 async function getManifestFromPath(serverPath: string): Promise<string> {
-  const path = `${serverPath}/samen-manifest.d.ts`
+  const path = `${serverPath}/phero-manifest.d.ts`
 
   try {
     await fs.access(path)

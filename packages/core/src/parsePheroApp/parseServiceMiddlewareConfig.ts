@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { ParseError } from "../errors"
-import { ParsedMiddlewareConfig } from "./parseSamenApp"
+import { ParsedMiddlewareConfig } from "./parsePheroApp"
 import {
   getFirstChildOfKind,
   getNameAsString,
@@ -60,7 +60,7 @@ function parseMiddlewareConfig(
 ): ParsedMiddlewareConfig {
   if (middleware.parameters.length !== 3) {
     throw new ParseError(
-      `S129: Middleware should have three parameters "(params: SamenParams<P>, ctx: SamenContext<C>, next: SamenNextFunction<T>)"`,
+      `S129: Middleware should have three parameters "(params: PheroParams<P>, ctx: PheroContext<C>, next: PheroNextFunction<T>)"`,
       middleware,
     )
   }
@@ -81,10 +81,10 @@ function parseParamsType(paramsParam: ts.ParameterDeclaration): ts.TypeNode {
   if (
     !paramsType ||
     !ts.isTypeReferenceNode(paramsType) ||
-    getTypeName(paramsType) !== "SamenParams"
+    getTypeName(paramsType) !== "PheroParams"
   ) {
     throw new ParseError(
-      `S130: Middleware params parameter has no or incorrect type, should be defined like "params: SamenParams<T>"`,
+      `S130: Middleware params parameter has no or incorrect type, should be defined like "params: PheroParams<T>"`,
       paramsParam,
     )
   }
@@ -98,10 +98,10 @@ function parseContextType(contextParam: ts.ParameterDeclaration): ts.TypeNode {
   if (
     !contextType ||
     !ts.isTypeReferenceNode(contextType) ||
-    getTypeName(contextType) !== "SamenContext"
+    getTypeName(contextType) !== "PheroContext"
   ) {
     throw new ParseError(
-      `S131: Middleware ctx parameter has no or incorrect type, should be defined like "ctx: SamenContext<T>"`,
+      `S131: Middleware ctx parameter has no or incorrect type, should be defined like "ctx: PheroContext<T>"`,
       contextParam,
     )
   }
@@ -117,10 +117,10 @@ function parseNextType(
   if (
     !nextType ||
     !ts.isTypeReferenceNode(nextType) ||
-    getTypeName(nextType) !== "SamenNextFunction"
+    getTypeName(nextType) !== "PheroNextFunction"
   ) {
     throw new ParseError(
-      `S132: Middleware next parameter has no or incorrect type, should be defined like "next: SamenNextFunction<T>"`,
+      `S132: Middleware next parameter has no or incorrect type, should be defined like "next: PheroNextFunction<T>"`,
       nextParam,
     )
   }

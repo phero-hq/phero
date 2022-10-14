@@ -1,6 +1,6 @@
 import {
   parseClientCommand,
-  parseSamenCommand,
+  parsePheroCommand,
   parseServerCommand,
 } from "./commands"
 
@@ -14,90 +14,90 @@ describe("parseServerCommand", () => {
   }
 
   describe("common", () => {
-    test("cmd:   'samen-server --version'", () => {
-      expect(run("samen-server --version")).toMatchSnapshot()
+    test("cmd:   'phero-server --version'", () => {
+      expect(run("phero-server --version")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-server -v'", () => {
-      expect(run("samen-server -v")).toMatchSnapshot()
+    test("cmd:   'phero-server -v'", () => {
+      expect(run("phero-server -v")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-server --help'", () => {
-      expect(run("samen-server --help")).toMatchSnapshot()
+    test("cmd:   'phero-server --help'", () => {
+      expect(run("phero-server --help")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-server -h'", () => {
-      expect(run("samen-server -h")).toMatchSnapshot()
+    test("cmd:   'phero-server -h'", () => {
+      expect(run("phero-server -h")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-server nothing'", () => {
-      expect(err("samen-server nothing")).toThrow()
+    test("cmd:   'phero-server nothing'", () => {
+      expect(err("phero-server nothing")).toThrow()
     })
   })
 
   describe("serve", () => {
-    test("cmd:   'samen-server serve --help'", () => {
-      expect(run("samen-server serve --help")).toMatchSnapshot()
+    test("cmd:   'phero-server serve --help'", () => {
+      expect(run("phero-server serve --help")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-server serve -h'", () => {
-      expect(run("samen-server serve -h")).toMatchSnapshot()
+    test("cmd:   'phero-server serve -h'", () => {
+      expect(run("phero-server serve -h")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-server serve'", () => {
-      expect(run("samen-server serve")).toMatchSnapshot()
+    test("cmd:   'phero-server serve'", () => {
+      expect(run("phero-server serve")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-server serve --verbose'", () => {
-      expect(run("samen-server serve --verbose")).toMatchSnapshot()
+    test("cmd:   'phero-server serve --verbose'", () => {
+      expect(run("phero-server serve --verbose")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-server serve --port 1234'", () => {
-      expect(run("samen-server serve --port 1234")).toMatchSnapshot()
+    test("cmd:   'phero-server serve --port 1234'", () => {
+      expect(run("phero-server serve --port 1234")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-server serve -p 1234'", () => {
-      expect(run("samen-server serve -p 1234")).toMatchSnapshot()
+    test("cmd:   'phero-server serve -p 1234'", () => {
+      expect(run("phero-server serve -p 1234")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-server serve -p 1234 --verbose'", () => {
-      expect(run("samen-server serve -p 1234 --verbose")).toMatchSnapshot()
+    test("cmd:   'phero-server serve -p 1234 --verbose'", () => {
+      expect(run("phero-server serve -p 1234 --verbose")).toMatchSnapshot()
     })
   })
 
   describe("build", () => {
-    test("cmd:   'samen-server build --help'", () => {
-      expect(run("samen-server build --help")).toMatchSnapshot()
+    test("cmd:   'phero-server build --help'", () => {
+      expect(run("phero-server build --help")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-server build -h'", () => {
-      expect(run("samen-server build -h")).toMatchSnapshot()
+    test("cmd:   'phero-server build -h'", () => {
+      expect(run("phero-server build -h")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-server build'", () => {
-      expect(run("samen-server build")).toMatchSnapshot()
+    test("cmd:   'phero-server build'", () => {
+      expect(run("phero-server build")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-server build --verbose'", () => {
-      expect(run("samen-server build --verbose")).toMatchSnapshot()
+    test("cmd:   'phero-server build --verbose'", () => {
+      expect(run("phero-server build --verbose")).toMatchSnapshot()
     })
   })
 
   describe("export", () => {
-    test("cmd:   'samen-server export --help'", () => {
-      expect(run("samen-server export --help")).toMatchSnapshot()
+    test("cmd:   'phero-server export --help'", () => {
+      expect(run("phero-server export --help")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-server export -h'", () => {
-      expect(run("samen-server export -h")).toMatchSnapshot()
+    test("cmd:   'phero-server export -h'", () => {
+      expect(run("phero-server export -h")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-server export'", () => {
-      expect(run("samen-server export")).toMatchSnapshot()
+    test("cmd:   'phero-server export'", () => {
+      expect(run("phero-server export")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-server export --verbose'", () => {
-      expect(run("samen-server export --verbose")).toMatchSnapshot()
+    test("cmd:   'phero-server export --verbose'", () => {
+      expect(run("phero-server export --verbose")).toMatchSnapshot()
     })
   })
 })
@@ -112,99 +112,99 @@ describe("parseClientCommand", () => {
   }
 
   describe("common", () => {
-    test("cmd:   'samen-client --version'", () => {
-      expect(run("samen-client --version")).toMatchSnapshot()
+    test("cmd:   'phero-client --version'", () => {
+      expect(run("phero-client --version")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client -v'", () => {
-      expect(run("samen-client -v")).toMatchSnapshot()
+    test("cmd:   'phero-client -v'", () => {
+      expect(run("phero-client -v")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client --help'", () => {
-      expect(run("samen-client --help")).toMatchSnapshot()
+    test("cmd:   'phero-client --help'", () => {
+      expect(run("phero-client --help")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client -h'", () => {
-      expect(run("samen-client -h")).toMatchSnapshot()
+    test("cmd:   'phero-client -h'", () => {
+      expect(run("phero-client -h")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client nothing'", () => {
-      expect(err("samen-client nothing")).toThrow()
+    test("cmd:   'phero-client nothing'", () => {
+      expect(err("phero-client nothing")).toThrow()
     })
   })
 
   describe("watch", () => {
-    test("cmd:   'samen-client watch --help'", () => {
-      expect(run("samen-client watch --help")).toMatchSnapshot()
+    test("cmd:   'phero-client watch --help'", () => {
+      expect(run("phero-client watch --help")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client watch -h'", () => {
-      expect(run("samen-client watch -h")).toMatchSnapshot()
+    test("cmd:   'phero-client watch -h'", () => {
+      expect(run("phero-client watch -h")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client watch'", () => {
-      expect(run("samen-client watch")).toMatchSnapshot()
+    test("cmd:   'phero-client watch'", () => {
+      expect(run("phero-client watch")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client watch http://localhost:1234'", () => {
-      expect(run("samen-client watch http://localhost:1234")).toMatchSnapshot()
+    test("cmd:   'phero-client watch http://localhost:1234'", () => {
+      expect(run("phero-client watch http://localhost:1234")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client watch --verbose'", () => {
-      expect(run("samen-client watch --verbose")).toMatchSnapshot()
+    test("cmd:   'phero-client watch --verbose'", () => {
+      expect(run("phero-client watch --verbose")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client watch --port 1234'", () => {
-      expect(run("samen-client watch --port 1234")).toMatchSnapshot()
+    test("cmd:   'phero-client watch --port 1234'", () => {
+      expect(run("phero-client watch --port 1234")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client watch -p 1234'", () => {
-      expect(run("samen-client watch -p 1234")).toMatchSnapshot()
+    test("cmd:   'phero-client watch -p 1234'", () => {
+      expect(run("phero-client watch -p 1234")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client watch http://localhost:1234 --verbose --port 4321'", () => {
+    test("cmd:   'phero-client watch http://localhost:1234 --verbose --port 4321'", () => {
       expect(
-        run("samen-client watch http://localhost:1234 --verbose --port 4321"),
+        run("phero-client watch http://localhost:1234 --verbose --port 4321"),
       ).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client watch ../api'", () => {
-      expect(err("samen-client watch ../api")).toThrow()
+    test("cmd:   'phero-client watch ../api'", () => {
+      expect(err("phero-client watch ../api")).toThrow()
     })
   })
 
   describe("build", () => {
-    test("cmd:   'samen-client build --help'", () => {
-      expect(run("samen-client build --help")).toMatchSnapshot()
+    test("cmd:   'phero-client build --help'", () => {
+      expect(run("phero-client build --help")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client build -h'", () => {
-      expect(run("samen-client build -h")).toMatchSnapshot()
+    test("cmd:   'phero-client build -h'", () => {
+      expect(run("phero-client build -h")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client build'", () => {
-      expect(run("samen-client build")).toMatchSnapshot()
+    test("cmd:   'phero-client build'", () => {
+      expect(run("phero-client build")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client build http://localhost:1234'", () => {
-      expect(run("samen-client build http://localhost:1234")).toMatchSnapshot()
+    test("cmd:   'phero-client build http://localhost:1234'", () => {
+      expect(run("phero-client build http://localhost:1234")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client build --verbose'", () => {
-      expect(run("samen-client build --verbose")).toMatchSnapshot()
+    test("cmd:   'phero-client build --verbose'", () => {
+      expect(run("phero-client build --verbose")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen-client build http://localhost:1234 --verbose'", () => {
+    test("cmd:   'phero-client build http://localhost:1234 --verbose'", () => {
       expect(
-        run("samen-client build http://localhost:1234 --verbose"),
+        run("phero-client build http://localhost:1234 --verbose"),
       ).toMatchSnapshot()
     })
   })
 })
 
-describe("parseSamenCommand", () => {
+describe("parsePheroCommand", () => {
   function run(cmd: string) {
-    return parseSamenCommand(cmd.split(" ").splice(1))
+    return parsePheroCommand(cmd.split(" ").splice(1))
   }
 
   function err(cmd: string) {
@@ -212,50 +212,50 @@ describe("parseSamenCommand", () => {
   }
 
   describe("common", () => {
-    test("cmd:   'samen --version'", () => {
-      expect(run("samen --version")).toMatchSnapshot()
+    test("cmd:   'phero --version'", () => {
+      expect(run("phero --version")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen -v'", () => {
-      expect(run("samen -v")).toMatchSnapshot()
+    test("cmd:   'phero -v'", () => {
+      expect(run("phero -v")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen --help'", () => {
-      expect(run("samen --help")).toMatchSnapshot()
+    test("cmd:   'phero --help'", () => {
+      expect(run("phero --help")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen -h'", () => {
-      expect(run("samen -h")).toMatchSnapshot()
+    test("cmd:   'phero -h'", () => {
+      expect(run("phero -h")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen nothing'", () => {
-      expect(err("samen nothing")).toThrow()
+    test("cmd:   'phero nothing'", () => {
+      expect(err("phero nothing")).toThrow()
     })
   })
 
   describe("dev-env", () => {
-    test("cmd:   'samen'", () => {
-      expect(run("samen")).toMatchSnapshot()
+    test("cmd:   'phero'", () => {
+      expect(run("phero")).toMatchSnapshot()
     })
   })
 
   describe("client", () => {
-    test("cmd:   'samen client watch'", () => {
-      expect(run("samen client watch")).toMatchSnapshot()
+    test("cmd:   'phero client watch'", () => {
+      expect(run("phero client watch")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen client watch --port 1234'", () => {
-      expect(run("samen client watch --port 1234")).toMatchSnapshot()
+    test("cmd:   'phero client watch --port 1234'", () => {
+      expect(run("phero client watch --port 1234")).toMatchSnapshot()
     })
   })
 
   describe("server", () => {
-    test("cmd:   'samen server serve'", () => {
-      expect(run("samen server serve")).toMatchSnapshot()
+    test("cmd:   'phero server serve'", () => {
+      expect(run("phero server serve")).toMatchSnapshot()
     })
 
-    test("cmd:   'samen server serve --port 1234'", () => {
-      expect(run("samen server serve --port 1234")).toMatchSnapshot()
+    test("cmd:   'phero server serve --port 1234'", () => {
+      expect(run("phero server serve --port 1234")).toMatchSnapshot()
     })
   })
 })

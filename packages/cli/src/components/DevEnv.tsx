@@ -3,9 +3,9 @@ import {
   DEFAULT_CLIENT_PORT,
   DEFAULT_SERVER_PORT,
   DEFAULT_SERVER_URL,
-  SamenCommandDevEnv,
+  PheroCommandDevEnv,
   ServerCommandName,
-} from "@samen/dev"
+} from "@phero/dev"
 import { Box, Spacer, Static, Text } from "ink"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { fatalError } from "../process"
@@ -18,7 +18,7 @@ import ClientProjectStatus from "./ProjectStatus/ClientProjectStatus"
 import ServerProjectStatus from "./ProjectStatus/ServerProjectStatus"
 
 interface Props {
-  command: SamenCommandDevEnv
+  command: PheroCommandDevEnv
 }
 
 interface State {
@@ -50,7 +50,7 @@ export default class DevEnv extends React.Component<Props, State> {
   }
 }
 
-function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
+function DevEnvContent({ command }: { command: PheroCommandDevEnv }) {
   const [projects, setProjects] = useState<Project[]>([])
   const [isLoading, setLoading] = useState(true)
 
@@ -70,7 +70,7 @@ function DevEnvContent({ command }: { command: SamenCommandDevEnv }) {
     const newProjects = await getProjects()
 
     if (newProjects.length === 0) {
-      throw new Error("No Samen project found, run `samen init` to create one.")
+      throw new Error("No Phero project found, run `phero init` to create one.")
     }
 
     await checkAndWarnForVersions(

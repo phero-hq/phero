@@ -2,12 +2,12 @@ import ts from "typescript"
 import { generateInlineParser } from "./code-gen/generateRPCProxy"
 import generateParserFromModel from "./code-gen/parsers/generateParserFromModel"
 import generateParserModel from "./code-gen/parsers/generateParserModel"
-import { ParsedSamenServiceConfig } from "./parseSamenApp/parseSamenApp"
+import { ParsedPheroServiceConfig } from "./parsePheroApp/parsePheroApp"
 import * as tsx from "./tsx"
 
 export default function generateMiddlewareParsers(
   serviceName: string,
-  serviceConfig: ParsedSamenServiceConfig,
+  serviceConfig: ParsedPheroServiceConfig,
   typeChecker: ts.TypeChecker,
 ): ts.VariableStatement {
   const middlewares = serviceConfig.middleware ?? []
@@ -32,11 +32,11 @@ export default function generateMiddlewareParsers(
 
           middleware.nextType
             ? generateInlineParser({
-              returnType: tsx.type.any,
-              parser: generateParserFromModel(
-                generateParserModel(typeChecker, middleware.nextType, "data"),
-              ),
-            })
+                returnType: tsx.type.any,
+                parser: generateParserFromModel(
+                  generateParserModel(typeChecker, middleware.nextType, "data"),
+                ),
+              })
             : tsx.literal.null,
         ),
       ),

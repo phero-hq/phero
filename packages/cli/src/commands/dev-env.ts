@@ -1,10 +1,10 @@
-import { SamenCommandDevEnv } from "@samen/dev"
+import { PheroCommandDevEnv } from "@phero/dev"
 import { render } from "ink"
 import React from "react"
 import DevEnv from "../components/DevEnv"
 import { fatalError, killAll } from "../process"
 
-export default function devEnv(command: SamenCommandDevEnv) {
+export default function devEnv(command: PheroCommandDevEnv) {
   process
     .on("exit", () => killAll("SIGINT"))
     .on("beforeExit", () => killAll("SIGINT"))

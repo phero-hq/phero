@@ -95,9 +95,9 @@ export type ClientCommand =
   | ClientCommandWatch
   | ClientCommandBuild
 
-// Samen
+// Phero
 
-export enum SamenCommandName {
+export enum PheroCommandName {
   Version = "version",
   Help = "help",
   Server = "server",
@@ -106,42 +106,42 @@ export enum SamenCommandName {
   Init = "init",
 }
 
-export interface SamenCommandVersion {
-  name: SamenCommandName.Version
+export interface PheroCommandVersion {
+  name: PheroCommandName.Version
 }
 
-export interface SamenCommandHelp {
-  name: SamenCommandName.Help
-  command?: SamenCommandName
+export interface PheroCommandHelp {
+  name: PheroCommandName.Help
+  command?: PheroCommandName
 }
 
-export interface SamenCommandServer {
-  name: SamenCommandName.Server
+export interface PheroCommandServer {
+  name: PheroCommandName.Server
   argv: string[]
 }
 
-export interface SamenCommandClient {
-  name: SamenCommandName.Client
+export interface PheroCommandClient {
+  name: PheroCommandName.Client
   argv: string[]
 }
 
-export interface SamenCommandDevEnv {
-  name: SamenCommandName.DevEnv
+export interface PheroCommandDevEnv {
+  name: PheroCommandName.DevEnv
   verbose: boolean
 }
 
-export interface SamenCommandInit {
-  name: SamenCommandName.Init
+export interface PheroCommandInit {
+  name: PheroCommandName.Init
   env?: "client" | "server"
 }
 
-export type SamenCommand =
-  | SamenCommandVersion
-  | SamenCommandHelp
-  | SamenCommandServer
-  | SamenCommandClient
-  | SamenCommandDevEnv
-  | SamenCommandInit
+export type PheroCommand =
+  | PheroCommandVersion
+  | PheroCommandHelp
+  | PheroCommandServer
+  | PheroCommandClient
+  | PheroCommandDevEnv
+  | PheroCommandInit
 
 export function parseServerCommand(argv: string[]): ServerCommand {
   const args = arg(
@@ -236,7 +236,7 @@ export function parseClientCommand(argv: string[]): ClientCommand {
   }
 }
 
-export function parseSamenCommand(argv: string[]): SamenCommand {
+export function parsePheroCommand(argv: string[]): PheroCommand {
   const args = arg(
     {
       "--version": Boolean,
@@ -248,22 +248,22 @@ export function parseSamenCommand(argv: string[]): SamenCommand {
     { argv, permissive: true },
   )
 
-  const name = args["_"][0] as SamenCommandName
+  const name = args["_"][0] as PheroCommandName
   const verbose = !!args["--verbose"]
 
-  if (name === SamenCommandName.Client || name === SamenCommandName.Server) {
+  if (name === PheroCommandName.Client || name === PheroCommandName.Server) {
     return { name, argv: argv.slice(1) }
   }
 
   if (args["--help"]) {
-    return { name: SamenCommandName.Help, command: name }
+    return { name: PheroCommandName.Help, command: name }
   }
 
   if (args["--version"]) {
-    return { name: SamenCommandName.Version }
+    return { name: PheroCommandName.Version }
   }
 
-  if (name === SamenCommandName.Init) {
+  if (name === PheroCommandName.Init) {
     if (argv[1] === "client") {
       return { name, env: "client" }
     } else if (argv[1] === "server") {
@@ -275,10 +275,10 @@ export function parseSamenCommand(argv: string[]): SamenCommand {
 
   if (name === undefined) {
     return {
-      name: SamenCommandName.DevEnv,
+      name: PheroCommandName.DevEnv,
       verbose,
     }
   } else {
-    throw new Error(`unknown samen command: ${name}`)
+    throw new Error(`unknown phero command: ${name}`)
   }
 }

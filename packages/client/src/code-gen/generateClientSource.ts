@@ -6,7 +6,7 @@ import {
   ParsedAppDeclarationVersion,
   tsx,
   generateModelParser,
-} from "@samen/core"
+} from "@phero/core"
 
 export default function generateClientSource(
   appDeclarationVersion: ParsedAppDeclarationVersion,
@@ -21,8 +21,8 @@ export default function generateClientSource(
   )
 
   const importsFromClientPackage = tsx.importDeclaration({
-    names: ["Fetch", "BaseSamenClient", "ParseResult", "ValidationError"],
-    module: "@samen/client",
+    names: ["Fetch", "BasePheroClient", "ParseResult", "ValidationError"],
+    module: "@phero/client",
   })
 
   const domainSource = [
@@ -40,7 +40,7 @@ export default function generateClientSource(
     ts.SyntaxKind.ExtendsKeyword,
     [
       ts.factory.createExpressionWithTypeArguments(
-        ts.factory.createIdentifier("BaseSamenClient"),
+        ts.factory.createIdentifier("BasePheroClient"),
         undefined,
       ),
     ],
@@ -51,7 +51,7 @@ export default function generateClientSource(
   const classDeclr: ts.ClassDeclaration = ts.factory.createClassDeclaration(
     undefined,
     [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
-    "SamenClient",
+    "PheroClient",
     undefined,
     [hertitageClause],
     [
@@ -124,7 +124,7 @@ export default function generateClientSource(
     ],
   )
 
-  const samenClientSource = tsx.sourceFile(
+  const pheroClientSource = tsx.sourceFile(
     importsFromClientPackage,
     ...domainSource,
     ...services.map((service) =>
@@ -136,7 +136,7 @@ export default function generateClientSource(
     classDeclr,
   )
 
-  return samenClientSource
+  return pheroClientSource
 }
 
 function generateOptsParam(

@@ -1,12 +1,12 @@
 import ts from "typescript"
 import * as tsx from "./tsx"
-import { ParsedSamenApp, ParsedSamenServiceDefinition } from "./parseSamenApp"
+import { ParsedPheroApp, ParsedPheroServiceDefinition } from "./parsePheroApp"
 import { VirtualCompilerHost } from "./VirtualCompilerHost"
 
 const factory = ts.factory
 
 export default function generateProductionServer(
-  app: ParsedSamenApp,
+  app: ParsedPheroApp,
   typeChecker: ts.TypeChecker,
 ): { js: string } {
   const tsNodes: ts.Node[] = []
@@ -29,7 +29,7 @@ export default function generateProductionServer(
       factory.createStringLiteral("http"),
       undefined,
     ),
-    // import rpc's from samen-execution.js
+    // import rpc's from phero-execution.js
     factory.createImportDeclaration(
       undefined,
       factory.createImportClause(
@@ -52,7 +52,7 @@ export default function generateProductionServer(
           ]),
         ),
       ),
-      factory.createStringLiteral("./samen-execution"),
+      factory.createStringLiteral("./phero-execution"),
       undefined,
     ),
   )
@@ -66,14 +66,14 @@ export default function generateProductionServer(
   })
 
   const file = ts.createSourceFile(
-    "samen-production-server.ts",
+    "phero-production-server.ts",
     "",
     ts.ScriptTarget.ES5,
     false,
     ts.ScriptKind.TS,
   )
 
-  const tsSamenExecution = printer.printList(
+  const tsPheroExecution = printer.printList(
     ts.ListFormat.SourceFileStatements,
     ts.factory.createNodeArray(tsNodes),
     file,
@@ -82,13 +82,13 @@ export default function generateProductionServer(
   const vHost = new VirtualCompilerHost({
     declaration: false,
   })
-  vHost.addFile("samen-production-server.ts", tsSamenExecution)
+  vHost.addFile("phero-production-server.ts", tsPheroExecution)
 
-  const prog = vHost.createProgram("samen-production-server.ts")
+  const prog = vHost.createProgram("phero-production-server.ts")
 
   prog.emit()
 
-  const js = vHost.getFile("samen-production-server.js")
+  const js = vHost.getFile("phero-production-server.js")
 
   if (!js) {
     throw new Error("Some error in generated TS.")
@@ -117,7 +117,7 @@ function generateCreateAndStartServer(): ts.Node {
       createServer(requestListener)
         .listen(PORT)
         .on("listening", () =>
-          console.info(\`Samen started listening on port \${PORT}\`),
+          console.info(\`Phero started listening on port \${PORT}\`),
         )
     `)
 }
@@ -215,7 +215,7 @@ function write404ResponseStatement(): ts.Statement {
   )
 }
 
-function generateRequestListener(app: ParsedSamenApp): ts.Node {
+function generateRequestListener(app: ParsedPheroApp): ts.Node {
   return tsx.function({
     name: "requestListener",
     params: [
@@ -236,7 +236,7 @@ function generateRequestListener(app: ParsedSamenApp): ts.Node {
   })
 }
 
-function switchServices(app: ParsedSamenApp): ts.Statement {
+function switchServices(app: ParsedPheroApp): ts.Statement {
   return tsx.statement.switch({
     expression: tsx.expression.propertyAccess(
       "requestedFunction",
@@ -275,7 +275,7 @@ function switchServices(app: ParsedSamenApp): ts.Statement {
 }
 
 function switchHttpMethods(
-  service: ParsedSamenServiceDefinition,
+  service: ParsedPheroServiceDefinition,
 ): ts.Statement {
   return tsx.statement.switch({
     expression: tsx.expression.propertyAccess("req", "method"),
@@ -303,7 +303,7 @@ function switchHttpMethods(
   })
 }
 
-function switchService(service: ParsedSamenServiceDefinition): ts.Statement {
+function switchService(service: ParsedPheroServiceDefinition): ts.Statement {
   return tsx.statement.switch({
     expression: tsx.expression.propertyAccess(
       "requestedFunction",

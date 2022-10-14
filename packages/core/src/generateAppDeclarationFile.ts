@@ -6,12 +6,12 @@ import {
   generateNamespace,
   ReferenceMaker,
 } from "./code-gen-lib"
-import { ParsedSamenApp } from "./parseSamenApp"
+import { ParsedPheroApp } from "./parsePheroApp"
 import * as tsx from "./tsx"
 import { VirtualCompilerHost } from "./VirtualCompilerHost"
 
 export default function generateAppDeclarationFile(
-  app: ParsedSamenApp,
+  app: ParsedPheroApp,
   typeChecker: ts.TypeChecker,
 ): string {
   const domainIdentifier = ts.factory.createIdentifier("domain")
@@ -44,13 +44,13 @@ export default function generateAppDeclarationFile(
     )
   }
 
-  const isUsingSamenContext = app.services.some((s) => !!s.config.contextType)
-  if (isUsingSamenContext) {
+  const isUsingPheroContext = app.services.some((s) => !!s.config.contextType)
+  if (isUsingPheroContext) {
     namespaceDeclrs.push(
-      generateNamespace(ts.factory.createIdentifier("samen"), [
+      generateNamespace(ts.factory.createIdentifier("phero"), [
         tsx.typeAlias({
           export: true,
-          name: "SamenContext",
+          name: "PheroContext",
           typeParameters: [tsx.typeParam({ name: "T" })],
           type: tsx.type.reference({ name: "T" }),
         }),

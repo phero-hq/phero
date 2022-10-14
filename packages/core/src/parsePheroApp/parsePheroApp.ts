@@ -4,18 +4,18 @@ import { ParsedError } from "../extractErrors/parseThrowStatement"
 import { hasModifier } from "../tsUtils"
 import parseServiceDefinition from "./parseServiceDefinition"
 
-export interface ParsedSamenApp {
+export interface ParsedPheroApp {
   models: Model[]
   errors: ParsedError[]
-  services: ParsedSamenServiceDefinition[]
+  services: ParsedPheroServiceDefinition[]
 }
 
-export interface ParsedSamenServiceDefinition {
+export interface ParsedPheroServiceDefinition {
   name: string
   models: Model[]
   errors: ParsedError[]
-  funcs: ParsedSamenFunctionDefinition[]
-  config: ParsedSamenServiceConfig
+  funcs: ParsedPheroFunctionDefinition[]
+  config: ParsedPheroServiceConfig
 }
 
 export type Model =
@@ -23,7 +23,7 @@ export type Model =
   | ts.TypeAliasDeclaration
   | ts.EnumDeclaration
 
-export interface ParsedSamenFunctionDefinition {
+export interface ParsedPheroFunctionDefinition {
   name: string
   actualFunction: ts.FunctionLikeDeclarationBase
   parameters: ts.ParameterDeclaration[]
@@ -34,7 +34,7 @@ export interface ParsedSamenFunctionDefinition {
   }
 }
 
-export interface ParsedSamenServiceConfig {
+export interface ParsedPheroServiceConfig {
   middleware?: ParsedMiddlewareConfig[]
   contextType?: ts.TypeNode
 }
@@ -46,16 +46,16 @@ export interface ParsedMiddlewareConfig {
   middleware: ts.FunctionLikeDeclarationBase
 }
 
-export function parseSamenApp(
-  samenSourceFile: ts.SourceFile,
+export function parsePheroApp(
+  pheroSourceFile: ts.SourceFile,
   typeChecker: ts.TypeChecker,
-): ParsedSamenApp {
-  const exportStatements = samenSourceFile.statements.filter(
+): ParsedPheroApp {
+  const exportStatements = pheroSourceFile.statements.filter(
     (s) =>
       hasModifier(s, ts.SyntaxKind.ExportKeyword) || ts.isExportDeclaration(s),
   )
 
-  const services: ParsedSamenServiceDefinition[] = []
+  const services: ParsedPheroServiceDefinition[] = []
 
   for (const statement of exportStatements) {
     if (ts.isVariableStatement(statement)) {
@@ -89,7 +89,7 @@ export function parseSamenApp(
     for (const model of service.models) {
       const modelName = model.name.text
 
-      if (modelName === "SamenContext") {
+      if (modelName === "PheroContext") {
         continue
       }
 

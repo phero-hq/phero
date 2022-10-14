@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { MissingSamenFileError, MissingTSConfigFile } from "@samen/core"
+import { MissingPheroFileError, MissingTSConfigFile } from "@phero/core"
 
 const formatHost: ts.FormatDiagnosticsHost = {
   getCanonicalFileName: (path) => path,
@@ -9,7 +9,7 @@ const formatHost: ts.FormatDiagnosticsHost = {
 
 type BuildStartCallback = () => void
 type BuildSuccessCallback = (
-  samenSourceFile: ts.SourceFile,
+  pheroSourceFile: ts.SourceFile,
   typeChecker: ts.TypeChecker,
 ) => void
 type BuildFailedCallback = (errorMessage: string) => void
@@ -49,7 +49,7 @@ export default class WatchProgram {
       this.reportDiagnostic.bind(this),
       this.reportWatchStatus.bind(this),
       {
-        excludeFiles: ["samen-manifest.d.ts"],
+        excludeFiles: ["phero-manifest.d.ts"],
       },
     )
     this.watchProgram = ts.createWatchProgram(host)
@@ -105,11 +105,11 @@ export default class WatchProgram {
 
     const program = this.watchProgram.getProgram()
 
-    // TODO check all root dirs for samen.ts
-    const sourceFile = program.getSourceFile(`${this.projectDir}/src/samen.ts`)
+    // TODO check all root dirs for phero.ts
+    const sourceFile = program.getSourceFile(`${this.projectDir}/src/phero.ts`)
 
     if (!sourceFile) {
-      throw new MissingSamenFileError(this.projectDir)
+      throw new MissingPheroFileError(this.projectDir)
     }
 
     this.buildSuccessCallback(

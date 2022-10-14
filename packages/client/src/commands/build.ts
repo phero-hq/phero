@@ -1,4 +1,4 @@
-import { ClientCommandBuild } from "@samen/dev"
+import { ClientCommandBuild } from "@phero/dev"
 import buildClient from "../utils/buildClient"
 
 export default function build(command: ClientCommandBuild) {

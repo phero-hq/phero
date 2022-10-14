@@ -1,28 +1,42 @@
 <div align="center">
   <img src="./doc-assets/logo.png" width="260" />
-  <h1>Samen</h1>
+  <p>
+    Pronounced as <em>fee · row</em>, a play on "hero" and "pheromone" (that stuff some animals use to act as one).
+  </p>
 </div>
 
-Samen is the no-hassle and type-safe glue between your backend and frontend(s). Our mission is to reduce the amount of boilerplate to create a backend for your apps, and give you end-to-end type-safety in the process. Check out this introduction video to see how the basics work:
+---
+
+Phero is the no-hassle and type-safe glue between your backend and frontend. TypeScript is at the core of it all. Development with Phero goes in these steps:
+
+1. **Build your backend.** Define your domain models and functions in regular, plain TypeScript.
+2. **Run the CLI.** This runs the server and generates an SDK for your frontend, or multiple frontends at the same time.
+3. **Call your backend-functions from the frontend, as if they were local.** This includes type-safety and error-handling.
+
+This boosts your frontend development:
+
+💪 Use functions and domain models on the frontend, defined on the backend.  
+🧨 Handle errors on the frontend, thrown by the backend.  
+🤝 Stop assuming data is of the type you’re expecting. You know it is, period.  
+✅ No more mistakes with the specs of the API, like path, arguments or headers.  
+
+Backend development becomes a breeze as well:
+
+🫶 Use TypeScript to define your domain models. No need for an extra language or DSL to learn and maintain, like with GraphQL or tRPC.  
+📋 Know when you break compatability with the frontend, before even running it: TypeScript has your back.  
+😶‍🌫️ No more outdated specs or documentation about endpoints (and what method, headers or arguments they expect).  
+🚀 The server can be deployed anywhere, either on one of the cloud platforms or a regular Node server.  
+
+Check out this introduction video to see how the basics work:
 
 [![Introduction video](./doc-assets/thumbnail.png)](https://www.youtube.com/watch?v=I13TKes7ylg)
 
-**Features**:
-
-✅ code-first, minimal API  
-✨ generates a type-safe SDK for your frontends  
-🚀 easily share your models between server and client  
-📋 parses the input and output based on your models  
-🔋 comes with a Terminal UI  
-🖖 middleware  
-🏛️ only a single dependency: TypeScript  
-
 ## Example: Hello World!
 
-All you need is a file called `src/samen.ts` on your backend. Here's an example:
+It all starts with a file called `src/phero.ts` on your backend. Here's an example:
 
 ```ts
-import { createService } from "@samen/server"
+import { createService } from "@phero/server"
 
 interface HelloMessage {
   text: string
@@ -39,45 +53,32 @@ export const exampleService = createService({
 })
 ```
 
-As you can see our function `sayHello` returns an object with the structure of `HelloMessage`. Samen will analyse the function(s) you've exposed with `createService()`. It will gather all models (interfaces, enums and type aliases) your client will need.
+You can use any database or library you want, because this is a regular NodeJS environment. You can also structure your project in a way you prefer, as long as the Phero-file exports one or more services. Feel free to use any simple or advanced TypeScript feature to model out your domain and functions. In this example we'll keep it at a single service, exposing a function that returns a plain object.
 
-Now, when you hit `npx samen` in your project directory, Samen will generate an SDK for your client(s) in a file called `samen.generated.ts`. This includes a `SamenClient` class which you can use to call the functions on your backend.From the generated file you can import your models (coming from your server) as well, which could come in very handy in some cases.
+Now, run `npx phero` in your project directory. Phero will generate an SDK for your frontend, in a file called `phero.generated.ts`. This includes a `PheroClient` class which you can use to call the functions on your backend. From the generated file you can also import your models, which could come in very handy in some cases.
 
-Here's an example of how that looks on your frontend:
+Here's an example of how that could look on your frontend:
 
 ```ts
-import { useCallback, useState } from "react"
 import unfetch from "isomorphic-unfetch"
 
-// Samen will generate a file 'samen.generated.ts` on your client with a
-// SamenClient and the models you're using in your RPC functions
-import { SamenClient, HelloMessage } from "../samen.generated"
+// Phero will generate a file called 'phero.generated.ts` with
+// the PheroClient and the models you're using in your functions
+// on the backend:
+import { PheroClient, HelloMessage } from "../phero.generated"
 
-// instantiate the generated SamenClient with your favorite fetch lib
-const samen = new SamenClient(unfetch)
+// instantiate the PheroClient with your favorite fetch lib:
+const phero = new PheroClient(unfetch)
 
-export function HelloMessage() {
-  const [message, setMessage] = useState<string | null>(null)
-
-  const onPress = useCallback(async () => {
-    // call your RPC function on your service
-    const helloMessage: HelloMessage = await samen.exampleService.sayHello(
-      "Steve Jobs",
-    )
-    setMessage(helloMessage.text)
-  }, [])
-
-  if (!message) {
-    return <button onClick={onPress}>Press to get message</button>
-  }
-
-  return <div>{message}</div>
-}
+// call your function on the backend. The return type of `sayHello` 
+// is `Promise<HelloMessage>`, like it would be with a local function:
+const helloMessage = await phero.exampleService.sayHello("Steve Jobs")
+console.log(helloMessage.text)
 ```
 
 ### Error handling
 
-Now, let's say we want to check for a minimum of 3 characters for the person we want to greet. Like this:
+If `sayHello` acts like a local function, you'd expect you could throw a custom error on the backend, and catch it on the frontend, right? With Phero, you can. Let's say we want to check for a minimum of 3 characters for the person we want to greet:
 
 ```ts
 class NameTooShortError extends Error {
@@ -96,31 +97,33 @@ async function sayHello(name: string): Promise<HelloMessage> {
 }
 ```
 
-On your client you can now catch this error:
+To catch it on the frontend, you can import the error and handle it like you would with a local function:
 
 ```ts
-import { HelloMessage, NameTooShortError } from "../samen.generated"
+import { HelloMessage, NameTooShortError } from "../phero.generated"
+
 try {
-  const helloMessage: HelloMessage = await samen.exampleService.sayHello(
+  const helloMessage = await phero.exampleService.sayHello(
     "", // oops!
   )
-  // TODO insert logic here
-} catch (e) {
-  if (e instanceof NameTooShortError) {
-    alert(`Name too short, should be at least ${e.minimumLength} characters`)
+} catch (error) {
+  if (error instanceof NameTooShortError) {
+    alert(
+      `Name is too short, it should be at least ${error.minimumLength} characters`,
+    )
   } else {
-    throw e
+    alert("Something went wrong")
   }
 }
 ```
 
 ## Documentation
 
-A complete set of documentation could be found at: [docs.samen.io](https://docs.samen.io/).
+A complete set of documentation could be found at: [docs.phero.dev](https://docs.phero.dev/).
 
 ## Status
 
-- [x] Alpha: We are developing and using Samen in projects for our own clients. The toolkit is used in production (in a couple of high-profile apps), but the developer experience may not be optimal.
+- [x] Alpha: We are developing and using Phero in projects for our own clients. The toolkit is used in production (in a couple of high-profile apps), but the developer experience may not be optimal.
 - [x] Public Alpha: Developer experience is stable and most common TypeScript-types should be supported.
 - [x] Public Beta: Advanced TypeScript-types are supported, but some platform-specific features may be missing.
 - [ ] Public: Feature-complete and running everywhere!
@@ -129,12 +132,11 @@ We are currently in Public Beta. Watch "releases" of this repo to get notified o
 
 ## Community & Support
 
-- [GitHub Issues](https://github.com/samen-io/samen/issues): Bugs, errors or feature-requests can be posted here.
-- [GitHub Discussions]() or [Discord](https://discord.gg/t97n6wQfkh): You are very welcome to hang out, ask questions, show what you've build, or whatever!
-- [Twitter](https://twitter.com/SamenHQ): Another place to keep up to date with announcements and news.
+- [GitHub Issues](https://github.com/phero-hq/phero/issues): Bugs, errors or feature-requests can be posted here.
+- [GitHub Discussions](https://github.com/phero-hq/phero/discussions) or [Discord](https://discord.gg/t97n6wQfkh): You are very welcome to hang out, ask questions, show what you've build, or whatever!
+- [Twitter](https://twitter.com/PheroHQ): Another place to keep up to date with announcements and news.
 - [YouTube](https://www.youtube.com/channel/UCgHc6KiLud3FAL_Pecb3pnQ): Here we'll be posting our guides in video-form.
-- [Email](mailto:hi@samen.io): If you want to talk business.
 
 ## License
 
-Samen is [licensed as Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0).
+Phero is [licensed as Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0).

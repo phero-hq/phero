@@ -1,7 +1,7 @@
 import ts from "typescript"
 import generateAppDeclarationFile from "./generateAppDeclarationFile"
 
-import { parseSamenApp } from "./parseSamenApp"
+import { parsePheroApp } from "./parsePheroApp"
 import { createTestProgram } from "./tsTestUtils"
 
 function generate(prog: ts.Program): string {
@@ -11,11 +11,11 @@ function generate(prog: ts.Program): string {
   //   throw new Error("Compile error")
   // }
   const typeChecker = prog.getTypeChecker()
-  const samenFile = prog.getSourceFile("samen.ts")
-  if (!samenFile) {
-    throw new Error("No samen file")
+  const pheroFile = prog.getSourceFile("phero.ts")
+  if (!pheroFile) {
+    throw new Error("No phero file")
   }
-  const parsedApp = parseSamenApp(samenFile, typeChecker)
+  const parsedApp = parsePheroApp(pheroFile, typeChecker)
   const dts = generateAppDeclarationFile(parsedApp, typeChecker)
   return dts
 }
@@ -25,24 +25,24 @@ describe("generateAppDeclarationFile", () => {
     test("should parse middleware", () => {
       const parsedApp = generate(
         createTestProgram(`
-        type SamenNextFunction<T = void> = T extends void
+        type PheroNextFunction<T = void> = T extends void
           ? () => Promise<void>
           : (ctx: T) => Promise<void>
-        type SamenContext<T = {}> = T
-        type SamenParams<T = {}> = Partial<T>
+        type PheroContext<T = {}> = T
+        type PheroParams<T = {}> = Partial<T>
 
-        async function getArticle(ctx: SamenContext<{ user: User }>, aap: string): Promise<string> {
+        async function getArticle(ctx: PheroContext<{ user: User }>, aap: string): Promise<string> {
           return "ok"
         }
 
         interface User { uid: string }
 
-        async function requireUID(params: SamenParams, ctx: SamenContext<{ uid: string }>, next: SamenNextFunction<{ uid: string, x: string }>) {
+        async function requireUID(params: PheroParams, ctx: PheroContext<{ uid: string }>, next: PheroNextFunction<{ uid: string, x: string }>) {
           // valideer id token
           await next({ uid, x })
         }
         
-        async function requireCmsUser(params: SamenParams, ctx: SamenContext<{ uid: string, x: string }>, next: SamenNextFunction<{ user: User }>) {
+        async function requireCmsUser(params: PheroParams, ctx: PheroContext<{ uid: string, x: string }>, next: PheroNextFunction<{ user: User }>) {
           // zet om naar user, of het cms user is
           await next({ user: { uid } })
         }
@@ -202,7 +202,7 @@ describe("generateAppDeclarationFile", () => {
           export type TypeReal = {x: number}
           `,
 
-          samen: `
+          phero: `
           import {getRoutine} from './routine'
           
           export const workoutRoutineService = createService({
@@ -228,7 +228,7 @@ describe("generateAppDeclarationFile", () => {
           }
           `,
 
-          samen: `
+          phero: `
           import {Aad2} from "./aad"
 
           export const articleService = createService({
@@ -250,7 +250,7 @@ describe("generateAppDeclarationFile", () => {
           }
           `,
 
-          samen: `
+          phero: `
           import {Aad1} from "./aad"
 
           export const articleService = createService({
@@ -287,7 +287,7 @@ describe("generateAppDeclarationFile", () => {
           export async function example(a: A): Promise<void> {}
           `,
 
-          samen: `
+          phero: `
           import {example} from "./other"
 
           export const articleService = createService({

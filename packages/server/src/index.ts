@@ -1,37 +1,37 @@
-export type SamenServiceFunctions = Record<string, Function>
+export type PheroServiceFunctions = Record<string, Function>
 
-export interface SamenServiceDefinition {
-  functions: SamenServiceFunctions
-  config: SamenServiceConfig
+export interface PheroServiceDefinition {
+  functions: PheroServiceFunctions
+  config: PheroServiceConfig
 }
 
-export type SamenParams<T = {}> = Partial<T>
+export type PheroParams<T = {}> = Partial<T>
 
-export type SamenContext<T = {}> = T
+export type PheroContext<T = {}> = T
 
-export type SamenNextFunction<T = void> = T extends void
+export type PheroNextFunction<T = void> = T extends void
   ? () => Promise<void>
   : (ctx: T) => Promise<void>
 
-export type SamenMiddlewareFunction<P, C, N> = (
-  params: SamenParams<P>,
-  ctx: SamenContext<C>,
-  next: SamenNextFunction<N>,
+export type PheroMiddlewareFunction<P, C, N> = (
+  params: PheroParams<P>,
+  ctx: PheroContext<C>,
+  next: PheroNextFunction<N>,
 ) => Promise<void>
 
-export interface SamenServiceConfig {
-  middleware?: SamenMiddlewareFunction<any, any, void>[]
-  cors?: SamenCORSConfig
+export interface PheroServiceConfig {
+  middleware?: PheroMiddlewareFunction<any, any, void>[]
+  cors?: PheroCORSConfig
 }
 
-export interface SamenCORSConfig {
+export interface PheroCORSConfig {
   originWhitelist: string[]
 }
 
 export function createService(
-  functions: SamenServiceFunctions,
-  config?: SamenServiceConfig,
-): SamenServiceDefinition {
+  functions: PheroServiceFunctions,
+  config?: PheroServiceConfig,
+): PheroServiceDefinition {
   return {
     config: config ?? {},
     functions,

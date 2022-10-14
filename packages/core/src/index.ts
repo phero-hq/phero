@@ -16,7 +16,7 @@ export {
   default as generateModelParser,
   generateNonModelParser,
 } from "./code-gen/parsers/generateParser"
-export { parseSamenApp, ParsedSamenApp } from "./parseSamenApp"
+export { parsePheroApp, ParsedPheroApp } from "./parsePheroApp"
 export * from "./errors"
 export * from "./RPCResult"
 export * as tsx from "./tsx"

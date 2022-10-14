@@ -1,10 +1,10 @@
-import { hasErrorCode, PortInUseError } from "@samen/core"
+import { hasErrorCode, PortInUseError } from "@phero/core"
 import {
   addDevEventListener,
   ClientCommandWatch,
   ClientDevEventEmitter,
   ServerDevEvent,
-} from "@samen/dev"
+} from "@phero/dev"
 import http from "http"
 import buildClient from "./utils/buildClient"
 

@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { ParseError } from "./errors"
-import { Model } from "./parseSamenApp"
+import { Model } from "./parsePheroApp"
 import { getNameAsString } from "./tsUtils"
 import { VirtualCompilerHost } from "./VirtualCompilerHost"
 
@@ -159,7 +159,7 @@ function parseContextType(
   if (
     firstParam?.type &&
     ts.isTypeReferenceNode(firstParam.type) &&
-    getNameAsString(firstParam.type.typeName) === "SamenContext"
+    getNameAsString(firstParam.type.typeName) === "PheroContext"
   ) {
     return firstParam.type.typeArguments?.[0]
   }
@@ -197,7 +197,7 @@ function parseModule(statement: ts.Statement): ParsedModule {
 function isUserModule(statement: ts.Statement): boolean {
   return (
     !ts.isModuleDeclaration(statement) ||
-    // skip the samen namespace
-    statement.name.text !== "samen"
+    // skip the phero namespace
+    statement.name.text !== "phero"
   )
 }

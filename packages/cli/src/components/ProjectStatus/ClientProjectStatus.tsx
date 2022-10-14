@@ -2,7 +2,7 @@ import {
   addDevEventListener,
   ClientCommandWatch,
   ClientDevEvent,
-} from "@samen/dev"
+} from "@phero/dev"
 import { Box, Text } from "ink"
 import path from "path"
 import { useCallback, useEffect, useRef, useState } from "react"
@@ -43,7 +43,7 @@ export default function ClientProjectStatus({
         break
 
       case "SERVER_NOT_FOUND":
-        setEvent(["error", "Could not find any samen server to connect too."])
+        setEvent(["error", "Could not find any phero server to connect too."])
         setError(event.errorMessage)
         break
 
@@ -84,7 +84,7 @@ export default function ClientProjectStatus({
       onEvent,
       () => {
         if (command.verbose) {
-          console.log("Listener to samen-client process connected")
+          console.log("Listener to phero-client process connected")
         }
       },
       (error) => {
@@ -93,7 +93,7 @@ export default function ClientProjectStatus({
     )
 
     const childProcess = spawnChildProcess(
-      "samen-client",
+      "phero-client",
       ["watch", "--port", `${command.port}`],
       path.resolve(project.path),
     )
