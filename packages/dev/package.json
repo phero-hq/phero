@@ -1,6 +1,6 @@
 {
   "name": "@phero/dev",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "main": "dist/index.js",
   "homepage": "https://phero.dev",
   "repository": "phero-hq/phero",
