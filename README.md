@@ -1,7 +1,6 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/phero-hq/phero/main/docs/static/img/readme.svg" width="260" alt="Phero" />
   <h3>Full-stack type-safety with pure TypeScript</h3>
-  <p>Phero is a play on "pheromone", the stuff some species use to act as one (and there's a hero in it).</p>
 </div>
 
 ---

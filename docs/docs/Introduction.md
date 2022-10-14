@@ -4,11 +4,8 @@ sidebar_position: 1
 ---
 
 <div align="center">
-  <img src="/img/readme.svg" width="260" />
-  <p>
-    Pronounced as <em>fee · row</em>, a play on "hero" and "pheromone"<br/>
-    (that stuff some animals use to act as one).
-  </p>
+  <img src="/img/readme.svg" width="260" alt="Phero" />
+  <h3>Full-stack type-safety with pure TypeScript</h3>
 </div>
 
 ---
