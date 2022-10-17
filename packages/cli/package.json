@@ -1,6 +1,6 @@
 {
   "name": "phero",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "Phero is the no-hassle and type-safe glue between your backend and frontend(s).",
   "homepage": "https://phero.dev",
   "repository": "phero-hq/phero",
