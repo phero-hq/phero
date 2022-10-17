@@ -27,9 +27,7 @@ Backend development becomes a breeze as well:
 
 Check out this introduction video to see how the basics work:
 
-[![Introduction video](https://raw.githubusercontent.com/phero-hq/phero/main/docs/static/img/youtube-thumbnail.png)](https://www.youtube.com/watch?v=I13TKes7ylg)
-
-> We'll soon record a new introduction video. Replace everything with `samen` to `phero` and you're good to go 😉
+[![Introduction video](https://raw.githubusercontent.com/phero-hq/phero/main/docs/static/img/youtube-thumbnail.png)](https://www.youtube.com/watch?v=BS8nRuszlqo)
 
 ## Example: Hello World!
 
@@ -135,7 +133,7 @@ We are currently in Public Beta. Watch "releases" of this repo to get notified o
 - [GitHub Issues](https://github.com/phero-hq/phero/issues): Bugs, errors or feature-requests can be posted here.
 - [GitHub Discussions](https://github.com/phero-hq/phero/discussions) or [Discord](https://discord.gg/t97n6wQfkh): You are very welcome to hang out, ask questions, show what you've build, or whatever!
 - [Twitter](https://twitter.com/PheroHQ): Another place to keep up to date with announcements and news.
-- [YouTube](https://www.youtube.com/channel/UCgHc6KiLud3FAL_Pecb3pnQ): Here we'll be posting our guides in video-form.
+- [YouTube](https://www.youtube.com/channel/UCflq1gYzftJcPcIMYLA49hA): Here we'll be posting our guides in video-form.
 
 ## License
 

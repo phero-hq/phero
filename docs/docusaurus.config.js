@@ -34,10 +34,6 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
           sidebarCollapsible: false,
         },
         // blog: {
@@ -72,6 +68,16 @@ const config = {
           //   label: "Docs",
           // },
           // {to: '/blog', label: 'Blog', position: 'left'},
+          {
+            href: "https://www.youtube.com/channel/UCflq1gYzftJcPcIMYLA49hA",
+            label: "YouTube",
+            position: "right",
+          },
+          {
+            href: "https://discord.gg/t97n6wQfkh",
+            label: "Discord",
+            position: "right",
+          },
           {
             href: "https://github.com/phero-hq/phero",
             label: "GitHub",
