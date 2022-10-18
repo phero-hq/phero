@@ -5,7 +5,7 @@ import ts, { CompilerOptions } from "typescript"
 import {
   generateAppDeclarationFile,
   generateRPCProxy,
-  generateProductionServer,
+  generateExport,
   MissingPheroFileError,
   MissingTSConfigFile,
   parsePheroApp,
@@ -57,7 +57,7 @@ export default function exportCommand(command: ServerCommandExport) {
       // support for Pick, Omit, and other TS utilities
       ...(hasES5 ? [] : ["lib.es5.d.ts"]),
     ],
-    outDir: path.join(projectPath, ".build"),
+    outDir: path.join(projectPath, "build"),
     // target: ts.ScriptTarget.ES5,
     // module: ts.ModuleKind.CommonJS,
   }
@@ -82,9 +82,9 @@ export default function exportCommand(command: ServerCommandExport) {
   const app = parsePheroApp(pheroSourceFile, typeChecker)
   const dts = generateAppDeclarationFile(app, typeChecker)
   const output = generateRPCProxy(app, typeChecker)
-  const productionServer = generateProductionServer(app, typeChecker)
+  const exportedFiles = generateExport(app)
 
-  const buildPath = path.join(projectPath, ".build")
+  const buildPath = path.join(projectPath, "build")
 
   const manifestPath = path.join(projectPath, "phero-manifest.d.ts")
   fs.writeFileSync(manifestPath, dts)
@@ -92,8 +92,11 @@ export default function exportCommand(command: ServerCommandExport) {
   const pheroExecutionJS = path.join(buildPath, "phero-execution.js")
   fs.writeFileSync(pheroExecutionJS, output.js)
 
-  const indexJS = path.join(buildPath, "index.js")
-  fs.writeFileSync(indexJS, productionServer.js)
+  for (const exportFile of exportedFiles) {
+    const exportFilePath = path.join(buildPath, exportFile.name)
+    fs.mkdirSync(path.dirname(exportFilePath), { recursive: true })
+    fs.writeFileSync(exportFilePath, exportFile.js)
+  }
 
   fs.copyFileSync(
     path.join(projectPath, "package.json"),
@@ -106,5 +109,11 @@ export default function exportCommand(command: ServerCommandExport) {
   fs.copyFileSync(
     path.join(projectPath, "phero-manifest.d.ts"),
     path.join(buildPath, "phero-manifest.d.ts"),
+  )
+  console.log("Done exporting to ./build, to run all your services:")
+  console.log("(cd ./build && npm i && node ./index.js)")
+  console.log(`To run one specific services, e.g. "${app.services[0].name}":`)
+  console.log(
+    `(cd ./build && npm i && node ./${app.services[0].name}/index.js)`,
   )
 }

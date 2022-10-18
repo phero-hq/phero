@@ -11,7 +11,7 @@ export {
 } from "./code-gen-lib"
 export { default as generateAppDeclarationFile } from "./generateAppDeclarationFile"
 export { default as generateRPCProxy } from "./code-gen/generateRPCProxy"
-export { default as generateProductionServer } from "./generateProductionServer"
+export { default as generateExport } from "./generateExport"
 export {
   default as generateModelParser,
   generateNonModelParser,
