@@ -1,6 +1,6 @@
 {
   "name": "phero",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "description": "Phero is the no-hassle and type-safe glue between your backend and frontend(s).",
   "homepage": "https://phero.dev",
   "repository": "phero-hq/phero",
@@ -21,7 +21,7 @@
     "postbuild": "cp package.json ./dist/package.json && cp ../../README.md README.md"
   },
   "dependencies": {
-    "@phero/dev": "^0.9.6",
+    "@phero/dev": "^0.9.9",
     "ink": "^3.2.0",
     "ink-select-input": "^4.2.1",
     "ink-spinner": "^4.0.3",
