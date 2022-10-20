@@ -83,6 +83,11 @@ const config = {
             position: "right",
           },
           {
+            href: "https://twitter.com/PheroHQ",
+            label: "Twitter",
+            position: "right",
+          },
+          {
             href: "https://github.com/phero-hq/phero",
             label: "GitHub",
             position: "right",
