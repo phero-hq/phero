@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/phero-hq/phero/main/docs/static/img/readme.svg" width="260" alt="Phero" />
+  <img src="https://phero.dev/img/readme.svg" width="260" alt="Phero" />
   <h3>Full-stack type-safety with pure TypeScript</h3>
 </div>
 
@@ -27,7 +27,7 @@ Backend development becomes a breeze as well:
 
 Check out this introduction video to see how the basics work:
 
-[![Introduction video](https://raw.githubusercontent.com/phero-hq/phero/main/docs/static/img/youtube-thumbnail.png)](https://www.youtube.com/watch?v=BS8nRuszlqo)
+[![Introduction video](https://phero.dev/img/youtube-thumbnail.png)](https://www.youtube.com/watch?v=BS8nRuszlqo)
 
 ## Example: Hello World!
 
