@@ -1,6 +1,6 @@
 {
   "name": "phero",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "description": "Full-stack type-safety with pure TypeScript",
   "homepage": "https://phero.dev",
   "repository": "phero-hq/phero",
