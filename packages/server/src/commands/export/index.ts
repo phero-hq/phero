@@ -72,6 +72,10 @@ export default function exportCommand(command: ServerCommandExport) {
     rootNames: [`${projectPath}/src/phero.ts`],
   })
 
+  const exportPath = path.join(projectPath, "export")
+
+  rimRafExport(exportPath)
+
   program.emit()
 
   const pheroSourceFile = program.getSourceFile(`${projectPath}/src/phero.ts`)
@@ -85,7 +89,10 @@ export default function exportCommand(command: ServerCommandExport) {
   const dts = generateAppDeclarationFile(app, typeChecker)
   const pheroExecution = generateRPCProxy(app, typeChecker)
 
-  const exportPath = path.join(projectPath, "export")
+  copyExport(
+    exportPath,
+    app.services.map((s) => s.name),
+  )
 
   const readFile = (filePath: string): string =>
     fs.readFileSync(filePath, {
@@ -138,5 +145,68 @@ function writeToDisk(exportPath: string, bundle: ExportBundle): void {
   for (const exportFile of bundle.files) {
     const exportFilePath = path.join(bundlePath, exportFile.name)
     fs.writeFileSync(exportFilePath, exportFile.content)
+  }
+}
+
+function rimRafExport(exportPath: string): void {
+  if (!fs.existsSync(exportPath)) {
+    return
+  }
+
+  rimRafDir(exportPath)
+
+  function rimRafDir(dirPath: string): void {
+    const fileNames = fs.readdirSync(dirPath)
+    for (const fileName of fileNames) {
+      const subPath = path.join(dirPath, fileName)
+      const lstat = fs.lstatSync(subPath)
+      if (lstat.isDirectory()) {
+        rimRafDir(subPath)
+      } else if (lstat.isFile()) {
+        fs.unlinkSync(subPath)
+      } else if (lstat.isSymbolicLink()) {
+        fs.unlinkSync(subPath)
+      }
+    }
+    fs.rmdirSync(dirPath)
+  }
+}
+
+function copyExport(exportPath: string, serviceNames: string[]) {
+  if (!fs.existsSync(exportPath)) {
+    return
+  }
+
+  recursiveCopy("")
+
+  function copyFile(relativeFilePath: string): void {
+    const srcPath = path.join(exportPath, relativeFilePath)
+    for (const serviceName of serviceNames) {
+      const destPath = path.join(exportPath, serviceName, relativeFilePath)
+      fs.copyFileSync(srcPath, destPath)
+    }
+  }
+
+  function copyDir(relativeDirPath: string): void {
+    for (const serviceName of serviceNames) {
+      const destPath = path.join(exportPath, serviceName, relativeDirPath)
+      fs.mkdirSync(destPath, { recursive: true })
+    }
+  }
+
+  function recursiveCopy(relativeDirPath: string): void {
+    const fileNames = fs.readdirSync(path.join(exportPath, relativeDirPath))
+    copyDir(relativeDirPath)
+    for (const fileName of fileNames) {
+      const relativeFilePath = path.join(relativeDirPath, fileName)
+      const lstat = fs.lstatSync(path.join(exportPath, relativeFilePath))
+      if (lstat.isDirectory()) {
+        recursiveCopy(relativeFilePath)
+      } else if (lstat.isFile()) {
+        copyFile(relativeFilePath)
+      } else if (lstat.isSymbolicLink()) {
+        copyFile(relativeFilePath)
+      }
+    }
   }
 }
