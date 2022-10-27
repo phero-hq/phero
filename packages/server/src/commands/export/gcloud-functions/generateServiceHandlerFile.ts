@@ -1,13 +1,13 @@
-import ts from "typescript"
+import { tsx } from "@phero/core"
 import {
   ParsedPheroFunctionDefinition,
   ParsedPheroServiceDefinition,
-} from "../parsePheroApp"
-import * as tsx from "../tsx"
+} from "@phero/core/dist/parsePheroApp"
+import ts from "typescript"
 import {
   write404ResponseStatement,
   writeResponseStatement,
-} from "./generateExportHelpers"
+} from "../generateExportHelpers"
 
 export function generateServiceHandlerFile(
   service: ParsedPheroServiceDefinition,
@@ -15,14 +15,14 @@ export function generateServiceHandlerFile(
   return [
     tsx.importDeclaration({
       names: ["writeResponse", "parseServiceAndFunction", "readBody"],
-      module: "../lib",
+      module: "./lib",
     }),
     tsx.importDeclaration({
       names: [
         serviceCorsConfig(service),
         ...service.funcs.map((func) => functionExecutor(service, func)),
       ],
-      module: "../phero-execution",
+      module: "./phero-execution",
     }),
     tsx.function({
       name: "requestListener",
@@ -136,23 +136,18 @@ function switchService(service: ParsedPheroServiceDefinition): ts.Statement {
     cases: service.funcs.map((func) => ({
       expression: func.name,
       statements: [
+        tsx.const({
+          name: `${func.name}Data`,
+          init: tsx.expression.await(
+            tsx.expression.call("readBody", {
+              args: ["req"],
+            }),
+          ),
+        }),
         writeResponseStatement(
           tsx.expression.await(
             tsx.expression.call(functionExecutor(service, func), {
-              args: [
-                tsx.expression.call(
-                  tsx.expression.propertyAccess("JSON", "parse"),
-                  {
-                    args: [
-                      tsx.expression.await(
-                        tsx.expression.call("readBody", {
-                          args: ["req"],
-                        }),
-                      ),
-                    ],
-                  },
-                ),
-              ],
+              args: [`${func.name}Data`],
             }),
           ),
         ),

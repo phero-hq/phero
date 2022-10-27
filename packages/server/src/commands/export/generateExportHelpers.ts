@@ -1,5 +1,5 @@
+import { tsx } from "@phero/core"
 import ts from "typescript"
-import * as tsx from "../tsx"
 
 export function write404ResponseStatement(): ts.Statement {
   return writeResponseStatement(

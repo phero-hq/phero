@@ -1,10 +1,10 @@
+import { ParsedPheroApp, tsx } from "@phero/core"
 import ts from "typescript"
-import * as tsx from "../tsx"
-import { ParsedPheroApp } from "../parsePheroApp"
+
 import {
   write404ResponseStatement,
   generateCreateAndStartServer,
-} from "./generateExportHelpers"
+} from "../generateExportHelpers"
 
 const factory = ts.factory
 

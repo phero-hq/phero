@@ -1,9 +1,9 @@
+import { tsx } from "@phero/core"
 import ts from "typescript"
-import { tsx } from ".."
 
-export default function generateLibFile(): ts.Node {
-  return tsx.verbatim(`import { IncomingMessage, ServerResponse } from 'http';
-export function parseServiceAndFunction(url: string) {
+export default function generateLibFile(): ts.Node[] {
+  return [
+    tsx.verbatim(`export function parseServiceAndFunction(url: string) {
     const { pathname } = new URL(\`http://host\${url}\`);
     const sanitizedPathname = pathname.endsWith('/') ? pathname.slice(0, pathname.length - 1) : pathname;
 
@@ -11,27 +11,27 @@ export function parseServiceAndFunction(url: string) {
     return { serviceName, functionName };
 }
 
-export function readBody(request: IncomingMessage) {
+export async function readBody(request: any) {
     return new Promise((resolve, reject) => {
-        const chunks: any[] = [];
+        const chunks = []
         request
-            .on('data', (chunk: any) => {
-                chunks.push(chunk);
+            .on("data", (chunk) => {
+            chunks.push(chunk)
             })
-            .on('end', () => {
-                resolve(Buffer.concat(chunks).toString());
+            .on("end", () => {
+            resolve(JSON.parse(Buffer.concat(chunks).toString()))
             })
-            .on('error', (err) => {
-                reject(err);
-            });
-    });
+            .on("error", (err) => {
+            reject(err)
+            })
+        })
 }
 
 export async function writeResponse(
     originWhitelist: string[] | undefined,
     responseOrLazyResponse: any,
-    res: ServerResponse,
-    req: IncomingMessage
+    res: any,
+    req: any
 ) {
     res.setHeader('Content-Type', 'application/json');
 
@@ -75,5 +75,6 @@ export async function writeResponse(
             break;
     }
 }
-`)
+`),
+  ]
 }
