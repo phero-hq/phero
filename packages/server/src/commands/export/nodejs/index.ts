@@ -1,7 +1,7 @@
 import { ParsedPheroApp } from "@phero/core"
 import compileExportToJS from "../compileExportToJS"
 import { ExportBundle, MetaExportFiles } from "../domain"
-import { generateServiceHandlerFile } from "../gcloud-functions/generateServiceHandlerFile"
+import { generateServiceHandlerFile } from "./generateServiceHandlerFile"
 import generateLibFile from "./generateLibFile"
 import generateServiceIndexFile from "./generateServiceIndexFile"
 
