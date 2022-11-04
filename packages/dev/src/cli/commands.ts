@@ -31,7 +31,7 @@ export interface ServerCommandServe {
 
 export interface ServerCommandExport {
   name: ServerCommandName.Export
-  flavor: string
+  flavor: ServerExportFlavor
   verbose: boolean
 }
 
@@ -183,17 +183,6 @@ export function parseServerCommand(argv: string[]): ServerCommand {
 
     case ServerCommandName.Export:
       const flavor = parseServerExportFlavor(args["--flavor"])
-
-      if (!flavor) {
-        throw new Error(
-          `Required flavor parameter, must be one of: ${[
-            ServerExportFlavor.NodeJS,
-            ServerExportFlavor.GCloudFunctions,
-            ServerExportFlavor.Vercel,
-          ].join(", ")}`,
-        )
-      }
-
       return { name, flavor, verbose }
 
     case ServerCommandName.Build:
@@ -305,7 +294,7 @@ export function parsePheroCommand(argv: string[]): PheroCommand {
 
 function parseServerExportFlavor(
   flavor: string | undefined,
-): ServerExportFlavor | undefined {
+): ServerExportFlavor {
   switch (flavor) {
     case ServerExportFlavor.NodeJS:
       return ServerExportFlavor.NodeJS
@@ -314,6 +303,12 @@ function parseServerExportFlavor(
     case ServerExportFlavor.Vercel:
       return ServerExportFlavor.Vercel
     default:
-      return undefined
+      throw new Error(
+        `Required flavor parameter, must be one of: ${[
+          ServerExportFlavor.NodeJS,
+          ServerExportFlavor.GCloudFunctions,
+          ServerExportFlavor.Vercel,
+        ].join(", ")}`,
+      )
   }
 }
