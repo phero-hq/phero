@@ -31,7 +31,14 @@ export interface ServerCommandServe {
 
 export interface ServerCommandExport {
   name: ServerCommandName.Export
+  flavor: ServerExportFlavor
   verbose: boolean
+}
+
+export enum ServerExportFlavor {
+  NodeJS = "nodejs",
+  GCloudFunctions = "gcloud-functions",
+  Vercel = "vercel",
 }
 
 export interface ServerCommandBuild {
@@ -150,6 +157,7 @@ export function parseServerCommand(argv: string[]): ServerCommand {
       "--help": Boolean,
       "--verbose": Boolean,
       "--port": Number,
+      "--flavor": String,
       "-v": "--version",
       "-h": "--help",
       "-p": "--port",
@@ -174,13 +182,14 @@ export function parseServerCommand(argv: string[]): ServerCommand {
       return { name, verbose, port }
 
     case ServerCommandName.Export:
-      return { name, verbose }
+      const flavor = parseServerExportFlavor(args["--flavor"])
+      return { name, flavor, verbose }
 
     case ServerCommandName.Build:
       return { name, verbose }
 
     default:
-      throw new Error(`unknown server command: ${name}`)
+      throw new Error(`Unknown server command: ${name}`)
   }
 }
 
@@ -280,5 +289,26 @@ export function parsePheroCommand(argv: string[]): PheroCommand {
     }
   } else {
     throw new Error(`unknown phero command: ${name}`)
+  }
+}
+
+function parseServerExportFlavor(
+  flavor: string | undefined,
+): ServerExportFlavor {
+  switch (flavor) {
+    case ServerExportFlavor.NodeJS:
+      return ServerExportFlavor.NodeJS
+    case ServerExportFlavor.GCloudFunctions:
+      return ServerExportFlavor.GCloudFunctions
+    case ServerExportFlavor.Vercel:
+      return ServerExportFlavor.Vercel
+    default:
+      throw new Error(
+        `Required flavor parameter, must be one of: ${[
+          ServerExportFlavor.NodeJS,
+          ServerExportFlavor.GCloudFunctions,
+          ServerExportFlavor.Vercel,
+        ].join(", ")}`,
+      )
   }
 }

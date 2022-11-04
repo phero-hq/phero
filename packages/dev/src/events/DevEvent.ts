@@ -1,4 +1,4 @@
-import http, { Server } from "http"
+import http from "http"
 import EventSource from "eventsource"
 
 const SSE_RESPONSE_HEADER = {

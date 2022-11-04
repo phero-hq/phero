@@ -11,12 +11,17 @@ export {
 } from "./code-gen-lib"
 export { default as generateAppDeclarationFile } from "./generateAppDeclarationFile"
 export { default as generateRPCProxy } from "./code-gen/generateRPCProxy"
-export { default as generateProductionServer } from "./generateProductionServer"
 export {
   default as generateModelParser,
   generateNonModelParser,
 } from "./code-gen/parsers/generateParser"
-export { parsePheroApp, ParsedPheroApp } from "./parsePheroApp"
+export {
+  parsePheroApp,
+  ParsedPheroApp,
+  ParsedPheroFunctionDefinition,
+  ParsedPheroServiceDefinition,
+} from "./parsePheroApp"
 export * from "./errors"
 export * from "./RPCResult"
 export * as tsx from "./tsx"
+export { VirtualCompilerHost } from "./VirtualCompilerHost"
