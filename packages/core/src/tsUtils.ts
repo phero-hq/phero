@@ -318,7 +318,18 @@ export function getFullyQualifiedName(
   const base = cleanUpTypeName(
     typeChecker.getFullyQualifiedName(type.aliasSymbol ?? type.symbol),
   )
+  return getFullyQualifiedNameWithBase(base, typeNode, typeChecker)
+}
 
+export function getFullyQualifiedNameWithBase(
+  base: string,
+  typeNode: ts.NodeWithTypeArguments,
+  typeChecker: ts.TypeChecker,
+): {
+  base: string
+  typeArgs?: string
+  full: string
+} {
   const fullyQualifiedTypeArgs = typeNode.typeArguments?.map((typeArg) =>
     ts.isTypeReferenceNode(typeArg)
       ? getFullyQualifiedName(typeArg, typeChecker).full
