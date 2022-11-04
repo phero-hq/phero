@@ -6,6 +6,11 @@ export interface RawExportFile {
   isRoot?: boolean
 }
 
+export interface Export {
+  bundles: ExportBundle[]
+  otherFiles?: ExportFile[]
+}
+
 export interface ExportBundle {
   name: string
   files: ExportFile[]

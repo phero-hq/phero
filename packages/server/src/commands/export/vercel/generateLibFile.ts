@@ -7,8 +7,8 @@ export default function generateLibFile(): ts.Node[] {
     const { pathname } = new URL(req.url, 'http://host');
     const sanitizedPathname = pathname.endsWith('/') ? pathname.slice(0, pathname.length - 1) : pathname;
 
-    const [functionName] = sanitizedPathname.split('/').slice(1);
-    return { functionName };
+    const [serviceName, functionName] = sanitizedPathname.split('/').slice(1);
+    return { serviceName, functionName };
 }
 
 export async function readBody(request: any) {

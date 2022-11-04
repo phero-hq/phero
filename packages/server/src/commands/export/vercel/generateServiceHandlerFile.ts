@@ -136,16 +136,18 @@ function switchService(service: ParsedPheroServiceDefinition): ts.Statement {
     cases: service.funcs.map((func) => ({
       expression: func.name,
       statements: [
+        tsx.const({
+          name: `${func.name}Data`,
+          init: tsx.expression.await(
+            tsx.expression.call("readBody", {
+              args: ["req"],
+            }),
+          ),
+        }),
         writeResponseStatement(
           tsx.expression.await(
             tsx.expression.call(functionExecutor(service, func), {
-              args: [
-                tsx.expression.await(
-                  tsx.expression.call("readBody", {
-                    args: ["req"],
-                  }),
-                ),
-              ],
+              args: [`${func.name}Data`],
             }),
           ),
         ),

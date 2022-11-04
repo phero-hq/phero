@@ -87,6 +87,7 @@ export const serverHelpExport = chalk`
 {dim Options}
   -h, --help        Output usage information
   --verbose         Output debug information
+  --flavor          Provide the export flavor, must be either "nodejs", "gcloud-functions" or "vercel"
 `
 
 export const serverHelpBuild = chalk`
