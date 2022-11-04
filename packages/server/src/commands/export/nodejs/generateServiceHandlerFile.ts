@@ -140,12 +140,10 @@ function switchService(service: ParsedPheroServiceDefinition): ts.Statement {
           tsx.expression.await(
             tsx.expression.call(functionExecutor(service, func), {
               args: [
-                tsx.expression.call(
-                  tsx.expression.await(
-                    tsx.expression.call("readBody", {
-                      args: ["req"],
-                    }),
-                  ),
+                tsx.expression.await(
+                  tsx.expression.call("readBody", {
+                    args: ["req"],
+                  }),
                 ),
               ],
             }),
