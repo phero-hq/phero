@@ -3,6 +3,7 @@ import { ParseError } from "../../errors"
 import { printCode } from "../../tsTestUtils"
 import {
   getFullyQualifiedName,
+  getFullyQualifiedNameWithBase,
   getTypeName,
   isExternalType,
 } from "../../tsUtils"
@@ -530,6 +531,32 @@ export default function generateParserModel(
         return generateObjectType(type, node, depth)
       } else if (type.isUnionOrIntersection()) {
         return generateReferenceParserModel(type, node, depth)
+      } else {
+        // These are TypeReferenceNode's which have no declaration
+        // for instance: Partial<Something>
+        // When Something has a TypeReference it has no declaration, no symbol, no type.
+
+        const baseTypeName = getMemberName(node.typeName)
+        return {
+          type: ParserModelType.Reference,
+          baseTypeName: baseTypeName,
+          typeName: baseTypeName,
+          fullyQualifiedName: getFullyQualifiedNameWithBase(
+            baseTypeName,
+            node,
+            typeChecker,
+          ),
+          typeArguments:
+            node.typeArguments?.map((typeArg) => ({
+              typeName: typeChecker.typeToString(
+                typeChecker.getTypeFromTypeNode(typeArg),
+              ),
+              fullyQualifiedName: ts.isTypeReferenceNode(typeArg)
+                ? getFullyQualifiedName(typeArg, typeChecker)
+                : undefined,
+              parser: generate(typeArg, depth),
+            })) ?? [],
+        }
       }
     }
 
