@@ -40,7 +40,7 @@ export function generateServiceHandlerFile(
         tsx.const({
           name: "requestedFunction",
           init: tsx.expression.call("parseServiceAndFunction", {
-            args: [tsx.expression.propertyAccess("req", "url")],
+            args: ["req"],
           }),
         }),
         handleService(service),
