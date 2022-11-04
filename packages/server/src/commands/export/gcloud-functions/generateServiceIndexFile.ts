@@ -1,5 +1,5 @@
 import { tsx } from "@phero/core"
-import { ParsedPheroServiceDefinition } from "@phero/core/dist/parsePheroApp"
+import { ParsedPheroServiceDefinition } from "@phero/core"
 import ts from "typescript"
 
 export default function generateServiceIndexFile(

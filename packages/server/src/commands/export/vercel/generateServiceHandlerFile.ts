@@ -2,7 +2,7 @@ import { tsx } from "@phero/core"
 import {
   ParsedPheroFunctionDefinition,
   ParsedPheroServiceDefinition,
-} from "@phero/core/dist/parsePheroApp"
+} from "@phero/core"
 import ts from "typescript"
 import {
   write404ResponseStatement,

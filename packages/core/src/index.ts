@@ -15,7 +15,12 @@ export {
   default as generateModelParser,
   generateNonModelParser,
 } from "./code-gen/parsers/generateParser"
-export { parsePheroApp, ParsedPheroApp } from "./parsePheroApp"
+export {
+  parsePheroApp,
+  ParsedPheroApp,
+  ParsedPheroFunctionDefinition,
+  ParsedPheroServiceDefinition,
+} from "./parsePheroApp"
 export * from "./errors"
 export * from "./RPCResult"
 export * as tsx from "./tsx"
