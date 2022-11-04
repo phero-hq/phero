@@ -43,7 +43,7 @@ export function generateServiceHandlerFile(
             args: ["req"],
           }),
         }),
-        ...handleService(service),
+        handleService(service),
       ],
     }),
   ]
@@ -60,25 +60,42 @@ function functionExecutor(
   return `rpc_executor_${service.name}__${func.name}`
 }
 
-function handleService(service: ParsedPheroServiceDefinition): ts.Statement[] {
-  return [
-    tsx.const({
-      name: "serviceCorsConfig",
-      init: tsx.expression.await(
-        tsx.expression.call(serviceCorsConfig(service)),
-      ),
-    }),
-    tsx.const({
-      name: "originWhitelist",
-      init: tsx.expression.ternary(
-        tsx.expression.identifier("serviceCorsConfig"),
-        tsx.expression.propertyAccess("serviceCorsConfig", "originWhitelist"),
-        tsx.literal.undefined,
-      ),
-    }),
-    switchHttpMethods(service),
-    tsx.statement.return(),
-  ]
+function handleService(service: ParsedPheroServiceDefinition): ts.Statement {
+  return tsx.statement.switch({
+    expression: tsx.expression.propertyAccess(
+      "requestedFunction",
+      "serviceName",
+    ),
+    cases: [
+      {
+        expression: service.name,
+        statements: [
+          tsx.const({
+            name: "serviceCorsConfig",
+            init: tsx.expression.await(
+              tsx.expression.call(serviceCorsConfig(service)),
+            ),
+          }),
+          tsx.const({
+            name: "originWhitelist",
+            init: tsx.expression.ternary(
+              tsx.expression.identifier("serviceCorsConfig"),
+              tsx.expression.propertyAccess(
+                "serviceCorsConfig",
+                "originWhitelist",
+              ),
+              tsx.literal.undefined,
+            ),
+          }),
+          switchHttpMethods(service),
+          tsx.statement.return(),
+        ],
+      },
+    ],
+    defaultCase: {
+      statements: [write404ResponseStatement(), tsx.statement.break],
+    },
+  })
 }
 
 function switchHttpMethods(

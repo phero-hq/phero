@@ -1,6 +1,6 @@
 import { ParsedPheroApp } from "@phero/core"
 import compileExportToJS from "../compileExportToJS"
-import { ExportBundle, MetaExportFiles } from "../domain"
+import { Export, ExportBundle, MetaExportFiles } from "../domain"
 import generateLibFile from "./generateLibFile"
 import { generateServiceHandlerFile } from "./generateServiceHandlerFile"
 import generateServiceIndexFile from "./generateServiceIndexFile"
@@ -8,7 +8,7 @@ import generateServiceIndexFile from "./generateServiceIndexFile"
 export default function generateGCloudFunctionsExport(
   app: ParsedPheroApp,
   metaExportFiles: MetaExportFiles,
-): ExportBundle[] {
+): Export {
   const packageJson = JSON.parse(metaExportFiles["package.json"])
 
   if (
@@ -20,7 +20,7 @@ export default function generateGCloudFunctionsExport(
     )
   }
 
-  const exportBundles: ExportBundle[] = app.services.map((service) => ({
+  const bundles: ExportBundle[] = app.services.map((service) => ({
     name: service.name,
     files: [
       ...compileExportToJS([
@@ -36,7 +36,7 @@ export default function generateGCloudFunctionsExport(
         },
         {
           name: "index.ts",
-          nodes: generateServiceIndexFile(),
+          nodes: generateServiceIndexFile(service),
           isRoot: true,
         },
       ]),
@@ -46,5 +46,5 @@ export default function generateGCloudFunctionsExport(
     ],
   }))
 
-  return exportBundles
+  return { bundles }
 }

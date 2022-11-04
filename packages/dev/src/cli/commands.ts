@@ -38,6 +38,7 @@ export interface ServerCommandExport {
 export enum ServerExportFlavor {
   NodeJS = "nodejs",
   GCloudFunctions = "gcloud-functions",
+  Vercel = "vercel",
 }
 
 export interface ServerCommandBuild {
@@ -188,6 +189,7 @@ export function parseServerCommand(argv: string[]): ServerCommand {
           `Required flavor parameter, must be one of: ${[
             ServerExportFlavor.NodeJS,
             ServerExportFlavor.GCloudFunctions,
+            ServerExportFlavor.Vercel,
           ].join(", ")}`,
         )
       }
@@ -309,8 +311,9 @@ function parseServerExportFlavor(
       return ServerExportFlavor.NodeJS
     case ServerExportFlavor.GCloudFunctions:
       return ServerExportFlavor.GCloudFunctions
+    case ServerExportFlavor.Vercel:
+      return ServerExportFlavor.Vercel
     default:
-      console.log(`GOT |${flavor}|`)
       return undefined
   }
 }

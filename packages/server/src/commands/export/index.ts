@@ -7,11 +7,13 @@ import {
 } from "@phero/core"
 import { ServerCommandExport, ServerExportFlavor } from "@phero/dev"
 import fs from "fs"
+import child_process from "child_process"
 import path from "path"
 import ts, { CompilerOptions } from "typescript"
-import { ExportBundle, MetaExportFiles } from "./domain"
+import { Export, ExportBundle, MetaExportFiles } from "./domain"
 import generateGCloudFunctionsExport from "./gcloud-functions"
 import generateNodeJSExport from "./nodejs"
+import generateVercelExport from "./vercel"
 
 export default function exportCommand(command: ServerCommandExport) {
   const projectPath = process.cwd()
@@ -89,11 +91,6 @@ export default function exportCommand(command: ServerCommandExport) {
   const dts = generateAppDeclarationFile(app, typeChecker)
   const pheroExecution = generateRPCProxy(app, typeChecker)
 
-  copyExport(
-    exportPath,
-    app.services.map((s) => s.name),
-  )
-
   const readFile = (filePath: string): string =>
     fs.readFileSync(filePath, {
       encoding: "utf-8",
@@ -109,10 +106,14 @@ export default function exportCommand(command: ServerCommandExport) {
 
   switch (command.flavor) {
     case ServerExportFlavor.NodeJS: {
-      const bundles = generateNodeJSExport(app, metaExportFiles)
-      for (const bundle of bundles) {
-        writeToDisk(exportPath, bundle)
-      }
+      const nodejsExport = generateNodeJSExport(app, metaExportFiles)
+
+      writeToDisk(exportPath, nodejsExport)
+
+      copyExport(
+        exportPath,
+        nodejsExport.bundles.map((b) => path.join(exportPath, b.name)),
+      )
       console.log("Done exporting to ./export, to run all your services:")
       console.log("(cd ./export && npm i && node ./index.js)")
       console.log(
@@ -124,27 +125,76 @@ export default function exportCommand(command: ServerCommandExport) {
       break
     }
     case ServerExportFlavor.GCloudFunctions: {
-      const bundles = generateGCloudFunctionsExport(app, metaExportFiles)
-      for (const bundle of bundles) {
-        writeToDisk(exportPath, bundle)
-      }
+      const gcloudFunctionsExport = generateGCloudFunctionsExport(
+        app,
+        metaExportFiles,
+      )
+
+      writeToDisk(exportPath, gcloudFunctionsExport)
+
+      copyExport(
+        exportPath,
+        gcloudFunctionsExport.bundles.map((b) => path.join(exportPath, b.name)),
+      )
       console.log(
         `Done exporting ${
-          bundles.length === 1 ? "1 service" : `${bundles.length} services`
+          gcloudFunctionsExport.bundles.length === 1
+            ? "1 service"
+            : `${gcloudFunctionsExport.bundles.length} services`
         } to ./export`,
       )
+      break
+    }
+    case ServerExportFlavor.Vercel: {
+      const vercelPath = path.join(projectPath, ".vercel")
+
+      rimRafExport(path.join(vercelPath, "output"))
+
+      const vercelExport = generateVercelExport(app, metaExportFiles)
+
+      copyExport(
+        exportPath,
+        vercelExport.bundles.map((b) => path.join(projectPath, b.name)),
+      )
+
+      writeToDisk(projectPath, vercelExport)
+
+      for (const bundle of vercelExport.bundles) {
+        child_process.execSync(`npm ci`, {
+          cwd: path.join(projectPath, bundle.name),
+        })
+      }
+
+      console.log(
+        `Done exporting ${
+          vercelExport.bundles.length === 1
+            ? "1 service"
+            : `${vercelExport.bundles.length} services`
+        } to ./.vercel`,
+      )
+      console.log(`Now deploy with "npx vercel@latest deploy --prebuilt"`)
       break
     }
   }
 }
 
-function writeToDisk(exportPath: string, bundle: ExportBundle): void {
-  const bundlePath = path.join(exportPath, bundle.name)
-  fs.mkdirSync(bundlePath, { recursive: true })
+function writeToDisk(
+  exportPath: string,
+  { bundles, otherFiles }: Export,
+): void {
+  for (const bundle of bundles) {
+    const bundlePath = path.join(exportPath, bundle.name)
+    fs.mkdirSync(bundlePath, { recursive: true })
 
-  for (const exportFile of bundle.files) {
-    const exportFilePath = path.join(bundlePath, exportFile.name)
-    fs.writeFileSync(exportFilePath, exportFile.content)
+    for (const exportFile of bundle.files) {
+      const exportFilePath = path.join(bundlePath, exportFile.name)
+      fs.writeFileSync(exportFilePath, exportFile.content)
+    }
+  }
+
+  for (const otherFile of otherFiles ?? []) {
+    const exportFilePath = path.join(exportPath, otherFile.name)
+    fs.writeFileSync(exportFilePath, otherFile.content)
   }
 }
 
@@ -172,7 +222,7 @@ function rimRafExport(exportPath: string): void {
   }
 }
 
-function copyExport(exportPath: string, serviceNames: string[]) {
+function copyExport(exportPath: string, bundlePaths: string[]) {
   if (!fs.existsSync(exportPath)) {
     return
   }
@@ -181,15 +231,15 @@ function copyExport(exportPath: string, serviceNames: string[]) {
 
   function copyFile(relativeFilePath: string): void {
     const srcPath = path.join(exportPath, relativeFilePath)
-    for (const serviceName of serviceNames) {
-      const destPath = path.join(exportPath, serviceName, relativeFilePath)
+    for (const bundlePath of bundlePaths) {
+      const destPath = path.join(bundlePath, relativeFilePath)
       fs.copyFileSync(srcPath, destPath)
     }
   }
 
   function copyDir(relativeDirPath: string): void {
-    for (const serviceName of serviceNames) {
-      const destPath = path.join(exportPath, serviceName, relativeDirPath)
+    for (const bundlePath of bundlePaths) {
+      const destPath = path.join(bundlePath, relativeDirPath)
       fs.mkdirSync(destPath, { recursive: true })
     }
   }
