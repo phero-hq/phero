@@ -3,7 +3,7 @@ import ts from "typescript"
 
 export default function generateLibFile(): ts.Node[] {
   return [
-    tsx.verbatim(`export function parseServiceAndFunction(req: any) {
+    tsx.verbatim(`export function parseServiceAndFunction(req: { url: string }) {
     const { pathname } = new URL(req.url, 'http://host');
     const sanitizedPathname = pathname.endsWith('/') ? pathname.slice(0, pathname.length - 1) : pathname;
 
