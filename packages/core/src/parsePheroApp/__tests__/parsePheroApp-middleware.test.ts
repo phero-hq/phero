@@ -2,8 +2,8 @@
 
 import ts from "typescript"
 
-import { parsePheroApp, ParsedPheroApp } from "./parsePheroApp"
-import { createTestProgram } from "../tsTestUtils"
+import { parsePheroApp, ParsedPheroApp } from "../parsePheroApp"
+import { createTestProgram } from "../../tsTestUtils"
 
 function parseProgram(prog: ts.Program): ParsedPheroApp {
   // if (prog.getSemanticDiagnostics().length) {
