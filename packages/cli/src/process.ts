@@ -61,7 +61,11 @@ export function spawnChildProcess(
   stdout.on("data", (data) => onLog?.(data.toString().trim()))
   stderr.on("data", (data) => onLog?.(data.toString().trim()))
 
-  const childProcess = {
+  if (pid === undefined) {
+    throw new Error(`Can't create process for ${executableName}.`)
+  }
+
+  const childProcess: ChildProcess = {
     executable,
     argv,
     cwd,
