@@ -3,8 +3,10 @@ import { resolveSymbol } from "../tsUtils"
 
 export default function getCreateServiceCallExpression(
   node: ts.Node | undefined,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): ts.CallExpression | undefined {
+  const typeChecker = prog.getTypeChecker()
+
   if (!node) {
     return
   }
@@ -18,32 +20,26 @@ export default function getCreateServiceCallExpression(
   }
 
   if (ts.isPropertyAssignment(node)) {
-    return getCreateServiceCallExpression(node.initializer, typeChecker)
+    return getCreateServiceCallExpression(node.initializer, prog)
   }
 
   if (ts.isIdentifier(node)) {
     const symbol = resolveSymbol(node, typeChecker)
     if (symbol) {
-      return getCreateServiceCallExpression(
-        symbol.valueDeclaration,
-        typeChecker,
-      )
+      return getCreateServiceCallExpression(symbol.valueDeclaration, prog)
     }
   }
 
   if (ts.isVariableDeclaration(node)) {
-    return getCreateServiceCallExpression(node.initializer, typeChecker)
+    return getCreateServiceCallExpression(node.initializer, prog)
   }
 
   if (ts.isPropertyAccessExpression(node)) {
-    return getCreateServiceCallExpression(node.getLastToken(), typeChecker)
+    return getCreateServiceCallExpression(node.getLastToken(), prog)
   }
 
   if (ts.isExportSpecifier(node)) {
-    return getCreateServiceCallExpression(
-      node.propertyName ?? node.name,
-      typeChecker,
-    )
+    return getCreateServiceCallExpression(node.propertyName ?? node.name, prog)
   }
 
   if (ts.isShorthandPropertyAssignment(node)) {
@@ -51,6 +47,6 @@ export default function getCreateServiceCallExpression(
     if (!symbol || !symbol.valueDeclaration) {
       return undefined
     }
-    return getCreateServiceCallExpression(symbol.valueDeclaration, typeChecker)
+    return getCreateServiceCallExpression(symbol.valueDeclaration, prog)
   }
 }

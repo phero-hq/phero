@@ -16,24 +16,21 @@ export interface PheroErrorProperty {
 
 export default function parseThrowStatement(
   throwStatement: ts.ThrowStatement,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): PheroError | undefined {
   if (!ts.isNewExpression(throwStatement.expression)) {
     // TODO Maybe emit a warning here?
     return undefined
   }
 
-  const classDeclaration = getClassDeclaration(
-    throwStatement.expression,
-    typeChecker,
-  )
+  const classDeclaration = getClassDeclaration(throwStatement.expression, prog)
 
   if (classDeclaration === undefined) {
     // class has no Error super type
     return undefined
   }
 
-  const superClasses = getSuperClasses(classDeclaration, [], typeChecker)
+  const superClasses = getSuperClasses(classDeclaration, [], prog)
 
   if (superClasses === undefined) {
     // class has no Error super type
@@ -43,7 +40,7 @@ export default function parseThrowStatement(
   const properties: PheroErrorProperty[] = [
     { name: "message", type: tsx.type.string },
     ...[classDeclaration, ...superClasses].flatMap((classDeclaration) =>
-      findPublicProperties(classDeclaration, typeChecker),
+      findPublicProperties(classDeclaration, prog),
     ),
   ]
 
@@ -62,7 +59,7 @@ export default function parseThrowStatement(
 function getSuperClasses(
   classDeclaration: ts.ClassDeclaration,
   accum: ts.ClassDeclaration[],
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): ts.ClassDeclaration[] | undefined {
   const extendsType = classDeclaration.heritageClauses?.find(
     (clause) => clause.token === ts.SyntaxKind.ExtendsKeyword,
@@ -74,27 +71,27 @@ function getSuperClasses(
     return
   }
 
-  const typeNode = typeChecker.getTypeFromTypeNode(extendsType)
+  const typeNode = prog.getTypeChecker().getTypeFromTypeNode(extendsType)
   const refSymbol = typeNode.aliasSymbol ?? typeNode.symbol
 
   if (refSymbol.name === "Error") {
     return accum
   }
 
-  const superClass = getClassDeclaration(extendsType, typeChecker)
+  const superClass = getClassDeclaration(extendsType, prog)
 
   if (superClass === undefined) {
     return undefined
   }
 
-  return getSuperClasses(superClass, [...accum, superClass], typeChecker)
+  return getSuperClasses(superClass, [...accum, superClass], prog)
 }
 
 function getClassDeclaration(
   node: ts.Node,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): ts.ClassDeclaration | undefined {
-  const type = typeChecker.getTypeAtLocation(node)
+  const type = prog.getTypeChecker().getTypeAtLocation(node)
   const symbol = type.aliasSymbol ?? type.symbol
   const classDeclaration = symbol.valueDeclaration
 
@@ -107,8 +104,9 @@ function getClassDeclaration(
 
 function findPublicProperties(
   classDeclaration: ts.ClassDeclaration,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): PheroErrorProperty[] {
+  const typeChecker = prog.getTypeChecker()
   const result: PheroErrorProperty[] = []
 
   for (const member of classDeclaration.members) {

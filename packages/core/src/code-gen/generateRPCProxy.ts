@@ -18,7 +18,7 @@ const factory = ts.factory
 
 export default function generateRPCProxy(
   app: PheroApp,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): { js: string } {
   const tsNodes: ts.Node[] = []
 
@@ -75,7 +75,7 @@ export default function generateRPCProxy(
 
   for (const domainModel of app.models) {
     tsNodes.push(domainModel.ref)
-    tsNodes.push(generateModelParser(domainModel.ref, typeChecker))
+    tsNodes.push(generateModelParser(domainModel.ref, prog))
   }
 
   for (const service of app.services) {
@@ -83,7 +83,7 @@ export default function generateRPCProxy(
 
     if (service.config.middleware?.length) {
       tsNodes.push(
-        generateMiddlewareParsers(service.name, service.config, typeChecker),
+        generateMiddlewareParsers(service.name, service.config, prog),
       )
     }
 
@@ -97,8 +97,8 @@ export default function generateRPCProxy(
 
     for (const serviceFunction of service.funcs) {
       tsNodes.push(
-        generateRPCExecutor(service, serviceFunction, app.errors, typeChecker),
-        generateInnerFunction(service, serviceFunction, typeChecker),
+        generateRPCExecutor(service, serviceFunction, app.errors, prog),
+        generateInnerFunction(service, serviceFunction, prog),
       )
     }
   }
@@ -127,9 +127,9 @@ export default function generateRPCProxy(
   })
   vHost.addFile("phero-execution.ts", tsPheroExecution)
 
-  const prog = vHost.createProgram("phero-execution.ts")
+  const progExecution = vHost.createProgram("phero-execution.ts")
 
-  prog.emit()
+  progExecution.emit()
 
   // console.log(vHost.getFile("phero-execution.ts"))
 
@@ -166,7 +166,7 @@ function generateRPCExecutor(
   service: PheroService,
   funcDef: PheroFunction,
   domainErrors: PheroError[],
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): ts.FunctionDeclaration {
   return tsx.function({
     export: true,
@@ -204,7 +204,7 @@ function generateRPCExecutor(
 function generateInnerFunction(
   service: PheroService,
   funcDef: PheroFunction,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): ts.FunctionDeclaration {
   return tsx.function({
     name: `rpc_executor_${service.name}__${funcDef.name}__inner`,
@@ -239,7 +239,7 @@ function generateInnerFunction(
               init: generateInlineParser({
                 returnType: tsx.type.any,
                 parser: generateParserFromModel(
-                  generateParserModel(typeChecker, funcDef.ref, "data"),
+                  generateParserModel(funcDef.ref, "data", prog),
                 ),
               }),
             }),
@@ -250,9 +250,9 @@ function generateInnerFunction(
                 returnType: tsx.type.any,
                 parser: generateParserFromModel(
                   generateParserModel(
-                    typeChecker,
                     parseReturnType(funcDef.ref),
                     "data",
+                    prog,
                   ),
                 ),
               }),

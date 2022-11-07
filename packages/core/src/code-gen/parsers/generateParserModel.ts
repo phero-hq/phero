@@ -5,6 +5,7 @@ import {
   getFullyQualifiedName,
   getFullyQualifiedNameWithBase,
   getTypeName,
+  isExternal,
   isExternalType,
 } from "../../tsUtils"
 
@@ -191,10 +192,11 @@ export interface TypeParameterParserModel {
 }
 
 export default function generateParserModel(
-  typeChecker: ts.TypeChecker,
   rootNode: ts.Node,
   rootName: string,
+  prog: ts.Program,
 ): RootParserModel {
+  const typeChecker = prog.getTypeChecker()
   const type = typeChecker.getTypeAtLocation(rootNode)
   const typeName = typeChecker.typeToString(type, rootNode, undefined)
 
@@ -476,7 +478,7 @@ export default function generateParserModel(
       const type = typeChecker.getTypeAtLocation(node)
       const declr = type.symbol?.valueDeclaration
       if (declr) {
-        if (isExternalType(type) && type.symbol.name === "Date") {
+        if (isExternal(declr, prog) && type.symbol.name === "Date") {
           return {
             type: ParserModelType.Date,
           }
@@ -539,7 +541,7 @@ export default function generateParserModel(
         const baseTypeName = getMemberName(node.typeName)
         return {
           type: ParserModelType.Reference,
-          baseTypeName: baseTypeName,
+          baseTypeName,
           typeName: baseTypeName,
           fullyQualifiedName: getFullyQualifiedNameWithBase(
             baseTypeName,
@@ -625,7 +627,7 @@ export default function generateParserModel(
     node: ts.TypeReferenceNode,
     depth: number,
   ): ParserModel {
-    if (isExternalType(type)) {
+    if (isExternalType(type, prog)) {
       const props = typeChecker.getAugmentedPropertiesOfType(type)
 
       return {
@@ -740,10 +742,7 @@ export default function generateParserModel(
       : undefined
 
     if (!baseTypeName) {
-      throw new ParseError(
-        `Unexpected expression (${(node as any)?.expression.kind ?? 0})`,
-        node,
-      )
+      throw new ParseError(`Unexpected expression (${node.kind})`, node)
     }
 
     return {

@@ -8,14 +8,15 @@ import parseServiceConfig from "./parseServiceConfig"
 
 export default function parseServiceDefinition(
   serviceExport: ts.VariableDeclaration | ts.ExportSpecifier,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): PheroService {
+  const typeChecker = prog.getTypeChecker()
   const serviceName = serviceExport.name.getText()
 
   // check if the value of the export is a function call to "creatService"
   const createServiceCallExpr = getCreateServiceCallExpression(
     serviceExport,
-    typeChecker,
+    prog,
   )
 
   if (!createServiceCallExpr) {
@@ -31,7 +32,7 @@ export default function parseServiceDefinition(
   ] = parseContext(
     parseServiceConfig(serviceConfigArg, typeChecker),
     parseFunctionDefinitions(functionDefsArg, typeChecker),
-    typeChecker,
+    prog,
   )
 
   if (pheroFunctions.length === 0) {

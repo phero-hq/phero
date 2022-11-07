@@ -1,9 +1,5 @@
 import ts from "typescript"
-import {
-  getNameAsString,
-  isExternalDeclaration,
-  isExternalSymbol,
-} from "../tsUtils"
+import { getNameAsString, isExternal, isExternalSymbol } from "../tsUtils"
 import { Model, PheroFunction, PheroModel } from "./domain"
 
 const IGNORE_SYNTAX_KIND = [
@@ -19,8 +15,9 @@ const IGNORE_SYNTAX_KIND = [
 
 export default function parseModels(
   func: PheroFunction,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): PheroModel[] {
+  const typeChecker = prog.getTypeChecker()
   const models: Model[] = []
   const addedSymbols: ts.Symbol[] = []
 
@@ -44,7 +41,7 @@ export default function parseModels(
       // this works for interfaces and type aliases
       const symbol = typeChecker.getSymbolAtLocation(typeNode.typeName)
 
-      if (!symbol || isExternalSymbol(symbol)) {
+      if (!symbol || isExternalSymbol(symbol, prog)) {
         return
       }
 
@@ -98,7 +95,7 @@ export default function parseModels(
     if (!declaration) {
       return
     }
-    if (isExternalDeclaration(declaration)) {
+    if (isExternal(declaration, prog)) {
       return
     }
 

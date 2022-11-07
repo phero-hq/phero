@@ -15,7 +15,7 @@ function generate(prog: ts.Program): string {
   if (!pheroFile) {
     throw new Error("No phero file")
   }
-  const parsedApp = parsePheroApp(pheroFile, typeChecker)
+  const parsedApp = parsePheroApp(pheroFile, prog)
   const dts = generateAppDeclarationFile(parsedApp, typeChecker)
   return dts
 }

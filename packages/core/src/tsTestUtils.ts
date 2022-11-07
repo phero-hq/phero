@@ -60,7 +60,7 @@ export function createTestProgram(input: TSFiles | string): ts.Program {
 export function compileStatement<SK extends ts.SyntaxKind>(
   code: string,
   syntaxKind: SK,
-): { statement: KindToNodeMappings[SK]; typeChecker: ts.TypeChecker } {
+): { statement: KindToNodeMappings[SK]; prog: ts.Program } {
   const prog = createTestProgram(code)
   const statements = prog.getSourceFile("phero.ts")?.statements
   if (statements?.length !== 1) {
@@ -74,14 +74,14 @@ export function compileStatement<SK extends ts.SyntaxKind>(
   }
 
   return {
-    typeChecker: prog.getTypeChecker(),
+    prog,
     statement: statement as KindToNodeMappings[SK],
   }
 }
 
 export function compileStatements(code: string): {
   statements: ts.Statement[]
-  typeChecker: ts.TypeChecker
+  prog: ts.Program
 } {
   const prog = createTestProgram(code)
   const statements = prog.getSourceFile("phero.ts")?.statements
@@ -90,14 +90,14 @@ export function compileStatements(code: string): {
   }
 
   return {
-    typeChecker: prog.getTypeChecker(),
+    prog,
     statements: statements.map((s) => s),
   }
 }
 
 export function compileProgram(input: TSFiles): {
   statements: ts.Statement[]
-  typeChecker: ts.TypeChecker
+  prog: ts.Program
 } {
   const prog = createTestProgram(input)
   const statements = prog.getSourceFile("phero.ts")?.statements
@@ -106,7 +106,7 @@ export function compileProgram(input: TSFiles): {
   }
 
   return {
-    typeChecker: prog.getTypeChecker(),
+    prog,
     statements: statements.map((s) => s),
   }
 }

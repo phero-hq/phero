@@ -11,9 +11,9 @@ const staticModifier = ts.factory.createModifier(ts.SyntaxKind.StaticKeyword)
 
 export default function generateModelParser(
   model: Model,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): ts.ClassDeclaration {
-  const rootParserModel = generateParserModel(typeChecker, model, "data")
+  const rootParserModel = generateParserModel(model, "data", prog)
   if (!rootParserModel.rootTypeParser) {
     throw new ParseError("S141: Expected rootTypeParser", model)
   }
@@ -211,14 +211,14 @@ export function getFunctionName(name?: ts.PropertyName): string {
 export function generateNonModelParser(
   type: ts.TypeNode,
   model: ts.Node,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
   parserName: string,
 ): ts.FunctionDeclaration {
   if (isModel(model)) {
     throw new ParseError("S143: Should not be model", model)
   }
 
-  const rootParserModel = generateParserModel(typeChecker, model, "data")
+  const rootParserModel = generateParserModel(model, "data", prog)
   const parserStatement: ts.Statement = generateParserFromModel(rootParserModel)
 
   return tsx.function({

@@ -9,7 +9,7 @@ import parseServiceDefinition from "./parseServiceDefinition"
 
 export function parsePheroApp(
   pheroSourceFile: ts.SourceFile,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): PheroApp {
   const exportStatements = pheroSourceFile.statements.filter(
     (s) =>
@@ -21,7 +21,7 @@ export function parsePheroApp(
   for (const statement of exportStatements) {
     if (ts.isVariableStatement(statement)) {
       for (const varDeclr of statement.declarationList.declarations) {
-        const service = parseServiceDefinition(varDeclr, typeChecker)
+        const service = parseServiceDefinition(varDeclr, prog)
         services.push(service)
       }
     } else if (ts.isExportDeclaration(statement)) {
@@ -35,7 +35,7 @@ export function parsePheroApp(
       }
 
       for (const specifier of statement.exportClause.elements) {
-        const service = parseServiceDefinition(specifier, typeChecker)
+        const service = parseServiceDefinition(specifier, prog)
         services.push(service)
       }
     } else {
@@ -48,7 +48,7 @@ export function parsePheroApp(
 
   for (const service of services) {
     for (const func of service.funcs) {
-      for (const model of parseModels(func, typeChecker)) {
+      for (const model of parseModels(func, prog)) {
         const modelName = model.name
 
         if (modelName === "PheroContext") {
@@ -74,7 +74,7 @@ export function parsePheroApp(
         ...(service.config.middleware?.map((m) => m.middleware) ?? []),
       ]),
     ],
-    typeChecker,
+    prog,
   )
 
   for (const parsedError of allErrors) {

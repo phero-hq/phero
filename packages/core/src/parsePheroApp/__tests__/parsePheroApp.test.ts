@@ -14,7 +14,7 @@ function parseProgram(prog: ts.Program): PheroApp {
   if (!pheroFile) {
     throw new Error("No phero file")
   }
-  return parsePheroApp(pheroFile, prog.getTypeChecker())
+  return parsePheroApp(pheroFile, prog)
 }
 
 function expectFunctionDeclrWithName(func: any, name: string): void {

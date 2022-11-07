@@ -11,13 +11,13 @@ import { getNameAsString } from "../tsUtils"
 export function parseContext(
   serviceConfig: PheroServiceConfig,
   funcDefinitions: PheroFunction[],
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): [PheroServiceConfig, PheroFunction[]] {
   if (!serviceConfig.middleware || serviceConfig.middleware.length === 0) {
     return [serviceConfig, funcDefinitions]
   }
 
-  const ctxIO = getContextIO(serviceConfig.middleware, typeChecker)
+  const ctxIO = getContextIO(serviceConfig.middleware, prog)
 
   // HACK get the second param from the middleware func, this is always the contextParam
   const pheroContextType: ts.TypeReferenceNode = serviceConfig.middleware[0]
@@ -31,7 +31,7 @@ export function parseContext(
   return [
     { ...serviceConfig, contextType },
     funcDefinitions.map((func) =>
-      addFunctionContext(ctxIO, contextType, func, typeChecker),
+      addFunctionContext(ctxIO, contextType, func, prog),
     ),
   ]
 }
@@ -40,7 +40,7 @@ function addFunctionContext(
   ctxIO: ContextIO,
   contextType: ts.TypeReferenceNode,
   func: PheroFunction,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): PheroFunction {
   const ctxIndex = func.parameters.findIndex(
     (p) =>
@@ -88,7 +88,7 @@ function addFunctionContext(
 
   const funcCtx = ctxParamType.typeArguments[0]
 
-  const funcCtxParserModel = getRootObjectParserModel(funcCtx, typeChecker)
+  const funcCtxParserModel = getRootObjectParserModel(funcCtx, prog)
   const funcCtxProps = getPropertySignatures(funcCtx)
 
   for (const funcCtxMemberParser of funcCtxParserModel.members) {
@@ -152,7 +152,7 @@ interface MiddlewareContext {
 
 function getContextIO(
   middleware: Array<MiddlewareContext>,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): ContextIO {
   return middleware.reduce<ContextIO>(
     (
@@ -160,7 +160,7 @@ function getContextIO(
       { contextType: ctxType, nextType },
     ) => {
       if (ctxType) {
-        const ctxParserModel = getRootObjectParserModel(ctxType, typeChecker)
+        const ctxParserModel = getRootObjectParserModel(ctxType, prog)
         const ctxProps = getPropertySignatures(ctxType)
         for (const ctxMem of ctxParserModel.members) {
           if (ctxMem.type === ParserModelType.Member) {
@@ -208,7 +208,7 @@ function getContextIO(
       }
 
       if (nextType) {
-        const nextParserModel = getRootObjectParserModel(nextType, typeChecker)
+        const nextParserModel = getRootObjectParserModel(nextType, prog)
 
         for (const nxtMem of nextParserModel.members) {
           if (nxtMem.type === ParserModelType.Member) {
@@ -250,12 +250,12 @@ function getContextIO(
 
 function getRootObjectParserModel(
   typeNode: ts.TypeNode,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): ObjectParserModel {
   const nextParserModel = generateParserModel(
-    typeChecker,
-    getDeclaredNode(typeNode, typeChecker),
+    getDeclaredNode(typeNode, prog),
     "root",
+    prog,
   )
 
   if (nextParserModel.parser.type !== ParserModelType.Object) {
@@ -265,12 +265,9 @@ function getRootObjectParserModel(
   return nextParserModel.parser
 }
 
-function getDeclaredNode(
-  typeNode: ts.TypeNode,
-  typeChecker: ts.TypeChecker,
-): ts.Node {
+function getDeclaredNode(typeNode: ts.TypeNode, prog: ts.Program): ts.Node {
   if (ts.isTypeReferenceNode(typeNode)) {
-    const type = typeChecker.getTypeFromTypeNode(typeNode)
+    const type = prog.getTypeChecker().getTypeFromTypeNode(typeNode)
     const symbol = type.aliasSymbol ?? type.symbol
     if (symbol.declarations?.length) {
       return symbol.declarations[0]

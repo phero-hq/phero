@@ -4,11 +4,11 @@ import recursivelyFindThrowStatements from "./recursivelyFindThrowStatements"
 
 export default function extractErrors(
   functions: ts.FunctionLikeDeclarationBase[],
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): PheroError[] {
-  const throwStatements = recursivelyFindThrowStatements(functions, typeChecker)
+  const throwStatements = recursivelyFindThrowStatements(functions, prog)
   const parsedErrors = throwStatements
-    .map((st) => parseThrowStatement(st, typeChecker))
+    .map((st) => parseThrowStatement(st, prog))
     .filter((x): x is PheroError => !!x)
   return deduplicateErrors(parsedErrors)
 }

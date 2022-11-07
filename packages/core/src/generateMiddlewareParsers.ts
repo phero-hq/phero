@@ -8,7 +8,7 @@ import * as tsx from "./tsx"
 export default function generateMiddlewareParsers(
   serviceName: string,
   serviceConfig: PheroServiceConfig,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): ts.VariableStatement {
   const middlewares = serviceConfig.middleware ?? []
   return tsx.const({
@@ -19,14 +19,14 @@ export default function generateMiddlewareParsers(
           generateInlineParser({
             returnType: tsx.type.any,
             parser: generateParserFromModel(
-              generateParserModel(typeChecker, middleware.paramsType, "data"),
+              generateParserModel(middleware.paramsType, "data", prog),
             ),
           }),
 
           generateInlineParser({
             returnType: tsx.type.any,
             parser: generateParserFromModel(
-              generateParserModel(typeChecker, middleware.contextType, "data"),
+              generateParserModel(middleware.contextType, "data", prog),
             ),
           }),
 
@@ -34,7 +34,7 @@ export default function generateMiddlewareParsers(
             ? generateInlineParser({
                 returnType: tsx.type.any,
                 parser: generateParserFromModel(
-                  generateParserModel(typeChecker, middleware.nextType, "data"),
+                  generateParserModel(middleware.nextType, "data", prog),
                 ),
               })
             : tsx.literal.null,

@@ -5,7 +5,7 @@ import generateParserModel from "../parsers/generateParserModel"
 describe("generateParserModel", () => {
   describe("for an interface", () => {
     test("with no members", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
           }
@@ -13,12 +13,12 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
 
       expect(parserModel).toMatchSnapshot()
     })
     test("number member", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a: number
@@ -27,11 +27,11 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("string member", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a: string
@@ -40,12 +40,12 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
 
       expect(parserModel).toMatchSnapshot()
     })
     test("boolean member", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a: boolean
@@ -54,12 +54,12 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
 
       expect(parserModel).toMatchSnapshot()
     })
     test("null member", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a: null
@@ -68,12 +68,12 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
 
       expect(parserModel).toMatchSnapshot()
     })
     test("optional member", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a?: string
@@ -82,12 +82,12 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
 
       expect(parserModel).toMatchSnapshot()
     })
     test("string literal member", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a: "aap"
@@ -96,12 +96,12 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
 
       expect(parserModel).toMatchSnapshot()
     })
     test("number literal member", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a: 123
@@ -110,11 +110,11 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("true literal member", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a: true
@@ -123,12 +123,12 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
 
       expect(parserModel).toMatchSnapshot()
     })
     test("string array member", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a: string[]
@@ -137,11 +137,11 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("optional string array member", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a?: string[]
@@ -150,11 +150,11 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("number array member", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a: number[]
@@ -163,11 +163,11 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("boolean array member", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a: boolean[]
@@ -176,11 +176,11 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("object literal member", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a: {
@@ -191,11 +191,11 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("object literal array member", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a: {
@@ -206,11 +206,11 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("optional object literal member", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a?: {
@@ -221,11 +221,11 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("optional object literal with optional member", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a?: {
@@ -236,11 +236,11 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("deep nested object", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           interface MyModel {
             a: {
@@ -259,25 +259,25 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.InterfaceDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
   })
   describe("for a type alias", () => {
     describe("object literal", () => {
       test("with no members", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {}
         `,
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("number member", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {
             a: number
@@ -286,22 +286,22 @@ describe("generateParserModel", () => {
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("number model", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = number
         `,
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("string member", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {
             a: string
@@ -310,12 +310,12 @@ describe("generateParserModel", () => {
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
 
       test("boolean member", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {
             a: boolean
@@ -324,11 +324,11 @@ describe("generateParserModel", () => {
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("null member", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {
             a: null
@@ -337,11 +337,11 @@ describe("generateParserModel", () => {
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("optional member", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {
             a?: string
@@ -350,11 +350,11 @@ describe("generateParserModel", () => {
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("string literal member", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {
             a: "xxx"
@@ -363,11 +363,11 @@ describe("generateParserModel", () => {
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("number literal member", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {
             a: 123
@@ -376,11 +376,11 @@ describe("generateParserModel", () => {
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("true literal member", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {
             a: true
@@ -389,11 +389,11 @@ describe("generateParserModel", () => {
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("string array member", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {
             a: string[]
@@ -402,11 +402,11 @@ describe("generateParserModel", () => {
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("optional string array member", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {
             a?: string[]
@@ -415,11 +415,11 @@ describe("generateParserModel", () => {
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("number array member", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {
             a: number[]
@@ -428,11 +428,11 @@ describe("generateParserModel", () => {
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("boolean array member", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {
             a: boolean[]
@@ -441,11 +441,11 @@ describe("generateParserModel", () => {
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("object literal member", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {
             a: {b: number}[]
@@ -454,11 +454,11 @@ describe("generateParserModel", () => {
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("optional object literal member", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {
             a?: {b: number}[]
@@ -467,11 +467,11 @@ describe("generateParserModel", () => {
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("optional object literal with optional member", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {
             a?: {
@@ -482,11 +482,11 @@ describe("generateParserModel", () => {
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("deep nested object", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {
             a: {
@@ -497,102 +497,102 @@ describe("generateParserModel", () => {
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
     })
     describe("tuple", () => {
       test("simple", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = [string, number]
         `,
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("tuple with typealias", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = [string, {a: number}]
         `,
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("tuple within tuple", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = [string, [{a: number}, boolean]]
         `,
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
     })
     describe("union", () => {
       test("simple", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = string | number
         `,
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("with type literal", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = string | {a: number}
         `,
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("with tuple", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = string | [{a: number}, string]
         `,
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
       test("with tuple", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {a: string, b: number} | {a: number, b: string}
         `,
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
     })
 
     describe("intersection", () => {
       test("simple", () => {
-        const { statement: model, typeChecker } = compileStatement(
+        const { statement: model, prog } = compileStatement(
           `
           type MyModel = {a: string} & ({b: number} | {c?: boolean})
         `,
           ts.SyntaxKind.TypeAliasDeclaration,
         )
 
-        const parserModel = generateParserModel(typeChecker, model, "data")
+        const parserModel = generateParserModel(model, "data", prog)
         expect(parserModel).toMatchSnapshot()
       })
     })
@@ -601,7 +601,7 @@ describe("generateParserModel", () => {
     test("enum with string enum members", () => {
       const {
         statements: [model],
-        typeChecker,
+        prog,
       } = compileStatements(
         `
           type MyModel = {
@@ -614,13 +614,13 @@ describe("generateParserModel", () => {
         `,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("enum with number enum members", () => {
       const {
         statements: [model],
-        typeChecker,
+        prog,
       } = compileStatements(
         `
           type MyModel = {
@@ -633,13 +633,13 @@ describe("generateParserModel", () => {
         `,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("enum with auto number enum members", () => {
       const {
         statements: [model],
-        typeChecker,
+        prog,
       } = compileStatements(
         `
           type MyModel = {
@@ -653,13 +653,13 @@ describe("generateParserModel", () => {
         `,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("enum member", () => {
       const {
         statements: [model],
-        typeChecker,
+        prog,
       } = compileStatements(
         `
           type MyModel = {
@@ -673,13 +673,13 @@ describe("generateParserModel", () => {
         `,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("enum model", () => {
       const {
         statements: [model],
-        typeChecker,
+        prog,
       } = compileStatements(
         `
           type MyModel = MyEnum
@@ -691,13 +691,13 @@ describe("generateParserModel", () => {
         `,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("enum member model", () => {
       const {
         statements: [model],
-        typeChecker,
+        prog,
       } = compileStatements(
         `
           type MyModel = MyEnum.B
@@ -709,14 +709,14 @@ describe("generateParserModel", () => {
         `,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
 
     test("enum root model", () => {
       const {
         statements: [enumModel],
-        typeChecker,
+        prog,
       } = compileStatements(
         `
       export enum MyEnum {
@@ -727,13 +727,13 @@ describe("generateParserModel", () => {
       `,
       )
 
-      const parserModel = generateParserModel(typeChecker, enumModel, "data")
+      const parserModel = generateParserModel(enumModel, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
   })
   describe("for generics", () => {
     test("type with generic parameter", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           type MyModel<T> = {
             prop: T
@@ -742,11 +742,11 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.TypeAliasDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("type with default generic parameter", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           type MyModel<T = number> = {
             prop: T
@@ -755,13 +755,13 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.TypeAliasDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("type with parameterized generic parameter", () => {
       const {
         statements: [model],
-        typeChecker,
+        prog,
       } = compileStatements(
         `
           type MyModel = {
@@ -774,7 +774,7 @@ describe("generateParserModel", () => {
         `,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
   })
@@ -782,7 +782,7 @@ describe("generateParserModel", () => {
     test("to another interface", () => {
       const {
         statements: [model],
-        typeChecker,
+        prog,
       } = compileStatements(
         `
           type MyModel = {
@@ -795,13 +795,13 @@ describe("generateParserModel", () => {
         `,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("insde a type literal", () => {
       const {
         statements: [model],
-        typeChecker,
+        prog,
       } = compileStatements(
         `
           type MyModel = {
@@ -816,13 +816,13 @@ describe("generateParserModel", () => {
         `,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
   })
   describe("other types", () => {
     test("any / unknown", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           type MyModel = {
             a: any
@@ -832,11 +832,11 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.TypeAliasDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("date", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           type MyModel = {
             a: Date
@@ -845,13 +845,13 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.TypeAliasDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("Partial<Record<X, number>>", () => {
       const {
         statements: [model],
-        typeChecker,
+        prog,
       } = compileStatements(
         `
         type Noot = Partial<Record<X, number>>;
@@ -863,13 +863,13 @@ describe("generateParserModel", () => {
       `,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("Partial<Record<X, string>>", () => {
       const {
         statements: [model],
-        typeChecker,
+        prog,
       } = compileStatements(
         `
         type Noot = Partial<Record<X, string>>;
@@ -881,11 +881,11 @@ describe("generateParserModel", () => {
       `,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("index type", () => {
-      const { statement: model, typeChecker } = compileStatement(
+      const { statement: model, prog } = compileStatement(
         `
           type MyModel = {
             [name: string]: {
@@ -903,7 +903,7 @@ describe("generateParserModel", () => {
         ts.SyntaxKind.TypeAliasDeclaration,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
   })
@@ -912,7 +912,7 @@ describe("generateParserModel", () => {
     test("simple", () => {
       const {
         statements: [model],
-        typeChecker,
+        prog,
       } = compileStatements(
         `
           interface MyModel {
@@ -925,7 +925,7 @@ describe("generateParserModel", () => {
         `,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
 
       expect(parserModel).toMatchSnapshot()
     })
@@ -933,7 +933,7 @@ describe("generateParserModel", () => {
       // Example from https://www.typescriptlang.org/docs/handbook/2/mapped-types.html
       const {
         statements: [model],
-        typeChecker,
+        prog,
       } = compileStatements(
         `
         type UnlockedAccount = CreateMutable<LockedAccount>;
@@ -952,14 +952,14 @@ describe("generateParserModel", () => {
       // TODO because the type CreateMutable has computed properties we can't
       // generate a parser for it. The result of `keyof` depends on the Type parameter.
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
     test("mapping props to booleans", () => {
       // Example from https://www.typescriptlang.org/docs/handbook/2/mapped-types.html
       const {
         statements: [model],
-        typeChecker,
+        prog,
       } = compileStatements(
         `
       type FeatureOptions = Partial<OptionsFlags<FeatureFlags>>;
@@ -975,7 +975,7 @@ describe("generateParserModel", () => {
         `,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
   })
@@ -984,7 +984,7 @@ describe("generateParserModel", () => {
     test("keyof an interface", () => {
       const {
         statements: [model],
-        typeChecker,
+        prog,
       } = compileStatements(
         `
           interface MyModel {
@@ -1000,7 +1000,7 @@ describe("generateParserModel", () => {
         `,
       )
 
-      const parserModel = generateParserModel(typeChecker, model, "data")
+      const parserModel = generateParserModel(model, "data", prog)
       expect(parserModel).toMatchSnapshot()
     })
   })

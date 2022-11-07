@@ -7,7 +7,7 @@ describe("parseThrowStatement", () => {
     test("direct error descendant", () => {
       const {
         statements: [, throwStatement],
-        typeChecker,
+        prog,
       } = compileStatements(`
         class SomethingError extends Error {
         }
@@ -16,7 +16,7 @@ describe("parseThrowStatement", () => {
       `)
 
       expect(
-        parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
+        parseThrowStatement(throwStatement as ts.ThrowStatement, prog),
       ).toMatchObject({
         name: "SomethingError",
         properties: expect.arrayContaining([
@@ -32,7 +32,7 @@ describe("parseThrowStatement", () => {
     test("parent is error descendant", () => {
       const {
         statements: [, , throwStatement],
-        typeChecker,
+        prog,
       } = compileStatements(`
         class ParentError extends Error {
         }
@@ -43,7 +43,7 @@ describe("parseThrowStatement", () => {
       `)
 
       expect(
-        parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
+        parseThrowStatement(throwStatement as ts.ThrowStatement, prog),
       ).toMatchObject({
         name: "SomethingError",
         properties: expect.arrayContaining([
@@ -59,7 +59,7 @@ describe("parseThrowStatement", () => {
     test("grandparent is error descendant", () => {
       const {
         statements: [, , , throwStatement],
-        typeChecker,
+        prog,
       } = compileStatements(`
         class GrantParentError extends Error {
         }
@@ -72,7 +72,7 @@ describe("parseThrowStatement", () => {
       `)
 
       expect(
-        parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
+        parseThrowStatement(throwStatement as ts.ThrowStatement, prog),
       ).toMatchObject({
         name: "SomethingError",
         properties: expect.arrayContaining([
@@ -88,7 +88,7 @@ describe("parseThrowStatement", () => {
     test("grandparent is no error descendant", () => {
       const {
         statements: [, , , throwStatement],
-        typeChecker,
+        prog,
       } = compileStatements(`
         class GrantParentError  {
         }
@@ -101,19 +101,19 @@ describe("parseThrowStatement", () => {
       `)
 
       expect(
-        parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
+        parseThrowStatement(throwStatement as ts.ThrowStatement, prog),
       ).toBeUndefined()
     })
     test("is Error itself", () => {
       const {
         statements: [throwStatement],
-        typeChecker,
+        prog,
       } = compileStatements(`
         throw new Error("error")
       `)
 
       expect(
-        parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
+        parseThrowStatement(throwStatement as ts.ThrowStatement, prog),
       ).toBeUndefined()
     })
   })
@@ -122,7 +122,7 @@ describe("parseThrowStatement", () => {
     test("finds all public properties, and ignores private properties", () => {
       const {
         statements: [, throwStatement],
-        typeChecker,
+        prog,
       } = compileStatements(`
         class SomethingError extends Error {
           public aap = 1
@@ -134,7 +134,7 @@ describe("parseThrowStatement", () => {
       `)
 
       expect(
-        parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
+        parseThrowStatement(throwStatement as ts.ThrowStatement, prog),
       ).toMatchObject({
         name: "SomethingError",
         properties: expect.arrayContaining([
@@ -163,7 +163,7 @@ describe("parseThrowStatement", () => {
     test("finds all public constructor properties", () => {
       const {
         statements: [, throwStatement],
-        typeChecker,
+        prog,
       } = compileStatements(`
         class SomethingError extends Error {
           constructor(aap: string, public noot: boolean, private mies: number, public kaas: string) {
@@ -175,7 +175,7 @@ describe("parseThrowStatement", () => {
       `)
 
       expect(
-        parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
+        parseThrowStatement(throwStatement as ts.ThrowStatement, prog),
       ).toMatchObject({
         name: "SomethingError",
         properties: expect.arrayContaining([
@@ -204,7 +204,7 @@ describe("parseThrowStatement", () => {
     test("finds properties on super classes", () => {
       const {
         statements: [, , throwStatement],
-        typeChecker,
+        prog,
       } = compileStatements(`
         class ParentError extends Error {
           public one = 1
@@ -222,7 +222,7 @@ describe("parseThrowStatement", () => {
       `)
 
       expect(
-        parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
+        parseThrowStatement(throwStatement as ts.ThrowStatement, prog),
       ).toMatchObject({
         name: "SomethingError",
         properties: expect.arrayContaining([
@@ -257,7 +257,7 @@ describe("parseThrowStatement", () => {
     test("finds get accessors", () => {
       const {
         statements: [, , throwStatement],
-        typeChecker,
+        prog,
       } = compileStatements(`
         class ParentError extends Error {
           get aap(): string {
@@ -274,7 +274,7 @@ describe("parseThrowStatement", () => {
       `)
 
       expect(
-        parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
+        parseThrowStatement(throwStatement as ts.ThrowStatement, prog),
       ).toMatchObject({
         name: "SomethingError",
         properties: expect.arrayContaining([
@@ -302,7 +302,7 @@ describe("parseThrowStatement", () => {
     test("always has at least message prop", () => {
       const {
         statements: [, , throwStatement],
-        typeChecker,
+        prog,
       } = compileStatements(`
         class ParentError extends Error {
         }
@@ -313,7 +313,7 @@ describe("parseThrowStatement", () => {
       `)
 
       expect(
-        parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
+        parseThrowStatement(throwStatement as ts.ThrowStatement, prog),
       ).toMatchObject({
         name: "SomethingError",
         properties: expect.arrayContaining([
@@ -329,7 +329,7 @@ describe("parseThrowStatement", () => {
     test("correct type for complex properties", () => {
       const {
         statements: [, , throwStatement],
-        typeChecker,
+        prog,
       } = compileStatements(`
         class ParentError extends Error {
           public test: {
@@ -343,7 +343,7 @@ describe("parseThrowStatement", () => {
       `)
 
       expect(
-        parseThrowStatement(throwStatement as ts.ThrowStatement, typeChecker),
+        parseThrowStatement(throwStatement as ts.ThrowStatement, prog),
       ).toMatchObject({
         name: "SomethingError",
         properties: expect.arrayContaining([

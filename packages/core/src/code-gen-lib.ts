@@ -92,7 +92,7 @@ export function generateClientFunction(
   contextType: ts.TypeNode | undefined,
   func: ts.FunctionLikeDeclarationBase,
   refMaker: ReferenceMaker,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): ts.PropertyAssignment {
   let parameters = func.parameters.map((p) =>
     ts.factory.createParameterDeclaration(
@@ -130,13 +130,7 @@ export function generateClientFunction(
       parameters,
       func.type && generateTypeNode(func.type, refMaker),
       undefined,
-      generateClientFunctionBlock(
-        serviceName,
-        context,
-        func,
-        refMaker,
-        typeChecker,
-      ),
+      generateClientFunctionBlock(serviceName, context, func, refMaker, prog),
     ),
   )
 }
@@ -155,7 +149,7 @@ function generateClientFunctionBlock(
   context: { name: string; type: ts.TypeNode } | undefined,
   func: ts.FunctionLikeDeclarationBase,
   refMaker: ReferenceMaker,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): ts.Block {
   const returnType = parseReturnType(func)
   const isVoid = returnType.kind === ts.SyntaxKind.VoidKeyword
@@ -216,7 +210,7 @@ function generateClientFunctionBlock(
                     returnType,
                     returnTypeNode,
                     refMaker,
-                    typeChecker,
+                    prog,
                   ),
                 ]),
           ],
@@ -373,7 +367,7 @@ function makeReferenceToParserFunction(
   typeNode: ts.TypeNode,
   returnTypeNode: ts.TypeNode,
   refMaker: ReferenceMaker,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): ts.Expression {
   return tsx.arrowFunction({
     params: [tsx.param({ name: "data", type: tsx.type.any })],
@@ -383,9 +377,7 @@ function makeReferenceToParserFunction(
     }),
     body: generateParserBody(
       returnTypeNode,
-      generateParserFromModel(
-        generateParserModel(typeChecker, typeNode, "data"),
-      ),
+      generateParserFromModel(generateParserModel(typeNode, "data", prog)),
     ),
   })
 }
