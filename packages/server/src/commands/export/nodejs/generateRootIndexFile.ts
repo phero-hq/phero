@@ -1,4 +1,4 @@
-import { ParsedPheroApp, tsx } from "@phero/core"
+import { PheroApp, tsx } from "@phero/core"
 import ts from "typescript"
 
 import {
@@ -8,7 +8,7 @@ import {
 
 const factory = ts.factory
 
-export default function generateRootIndexFile(app: ParsedPheroApp): ts.Node[] {
+export default function generateRootIndexFile(app: PheroApp): ts.Node[] {
   return [
     // import http
     tsx.importDeclaration({
@@ -44,7 +44,7 @@ export default function generateRootIndexFile(app: ParsedPheroApp): ts.Node[] {
   ]
 }
 
-function generateRequestListener(app: ParsedPheroApp): ts.Node {
+function generateRequestListener(app: PheroApp): ts.Node {
   return tsx.function({
     name: "requestListener",
     async: true,
@@ -68,7 +68,7 @@ function generateRequestListener(app: ParsedPheroApp): ts.Node {
   })
 }
 
-function switchServices(app: ParsedPheroApp): ts.Statement {
+function switchServices(app: PheroApp): ts.Statement {
   return tsx.statement.switch({
     expression: tsx.expression.propertyAccess(
       "requestedFunction",

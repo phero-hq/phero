@@ -3,17 +3,17 @@ import ts, {
   VariableDeclaration,
 } from "typescript"
 import { TSFiles, VirtualCompilerHost } from "./VirtualCompilerHost"
-import { ParsedPheroApp } from "./parsePheroApp"
+import { PheroApp } from "./parsePheroApp/domain"
 import { KindToNodeMappings } from "./tsUtils"
 
-export function printPheroApp(app: ParsedPheroApp): string {
+export function printPheroApp(app: PheroApp): string {
   return JSON.stringify(
     {
       services: app.services.map((service) => ({
         name: service.name,
         funcs: service.funcs.map((func) => ({
           name: func.name,
-          func: printFunctionDeclaration(func.actualFunction),
+          func: printFunctionDeclaration(func.ref),
         })),
       })),
     },

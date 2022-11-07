@@ -6,19 +6,19 @@ import {
   generateNamespace,
   ReferenceMaker,
 } from "./code-gen-lib"
-import { ParsedPheroApp } from "./parsePheroApp"
+import { PheroApp } from "./parsePheroApp/domain"
 import * as tsx from "./tsx"
 import { VirtualCompilerHost } from "./VirtualCompilerHost"
 
 export default function generateAppDeclarationFile(
-  app: ParsedPheroApp,
+  app: PheroApp,
   typeChecker: ts.TypeChecker,
 ): string {
   const domainIdentifier = ts.factory.createIdentifier("domain")
   const versionIdentifier = ts.factory.createIdentifier("v_1_0_0")
 
   const refMaker = new ReferenceMaker(
-    app.models,
+    app.models.map((m) => m.ref),
     typeChecker,
     ts.factory.createQualifiedName(domainIdentifier, versionIdentifier),
   )
@@ -33,7 +33,7 @@ export default function generateAppDeclarationFile(
         generateNamespace(versionIdentifier, [
           ...app.models.map((m) =>
             // export interface MyModel {
-            generateModel(m, refMaker),
+            generateModel(m.ref, refMaker),
           ),
           ...app.errors.map((e) =>
             // export class Error {

@@ -2,12 +2,12 @@ import ts from "typescript"
 import { generateInlineParser } from "./code-gen/generateRPCProxy"
 import generateParserFromModel from "./code-gen/parsers/generateParserFromModel"
 import generateParserModel from "./code-gen/parsers/generateParserModel"
-import { ParsedPheroServiceConfig } from "./parsePheroApp/parsePheroApp"
+import { PheroServiceConfig } from "./parsePheroApp/domain"
 import * as tsx from "./tsx"
 
 export default function generateMiddlewareParsers(
   serviceName: string,
-  serviceConfig: ParsedPheroServiceConfig,
+  serviceConfig: PheroServiceConfig,
   typeChecker: ts.TypeChecker,
 ): ts.VariableStatement {
   const middlewares = serviceConfig.middleware ?? []

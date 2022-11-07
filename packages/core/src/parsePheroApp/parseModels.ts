@@ -1,6 +1,10 @@
 import ts from "typescript"
-import { isExternalDeclaration, isExternalSymbol } from "../tsUtils"
-import { Model, ParsedPheroFunctionDefinition } from "./parsePheroApp"
+import {
+  getNameAsString,
+  isExternalDeclaration,
+  isExternalSymbol,
+} from "../tsUtils"
+import { Model, PheroFunction, PheroModel } from "./domain"
 
 const IGNORE_SYNTAX_KIND = [
   ts.SyntaxKind.StringKeyword,
@@ -14,19 +18,17 @@ const IGNORE_SYNTAX_KIND = [
 ]
 
 export default function parseModels(
-  funcs: ParsedPheroFunctionDefinition[],
+  func: PheroFunction,
   typeChecker: ts.TypeChecker,
-): Model[] {
+): PheroModel[] {
   const models: Model[] = []
   const addedSymbols: ts.Symbol[] = []
 
-  for (const param of funcs.flatMap((func) => func.parameters)) {
+  for (const param of func.parameters) {
     doType(param.type)
   }
 
-  for (const returnType of funcs.flatMap((func) => func.returnType)) {
-    doType(returnType)
-  }
+  doType(func.returnType)
 
   function doType(typeNode: ts.TypeNode | undefined): void {
     if (!typeNode) {
@@ -147,5 +149,8 @@ export default function parseModels(
     }
   }
 
-  return models
+  return models.map((m) => ({
+    name: getNameAsString(m.name),
+    ref: m,
+  }))
 }

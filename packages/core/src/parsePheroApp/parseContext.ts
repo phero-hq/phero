@@ -5,17 +5,14 @@ import generateParserModel, {
   ParserModelType,
 } from "../code-gen/parsers/generateParserModel"
 import { ParseError } from "../errors"
-import {
-  ParsedPheroFunctionDefinition,
-  ParsedPheroServiceConfig,
-} from "./parsePheroApp"
+import { PheroFunction, PheroServiceConfig } from "./domain"
 import { getNameAsString } from "../tsUtils"
 
 export function parseContext(
-  serviceConfig: ParsedPheroServiceConfig,
-  funcDefinitions: ParsedPheroFunctionDefinition[],
+  serviceConfig: PheroServiceConfig,
+  funcDefinitions: PheroFunction[],
   typeChecker: ts.TypeChecker,
-): [ParsedPheroServiceConfig, ParsedPheroFunctionDefinition[]] {
+): [PheroServiceConfig, PheroFunction[]] {
   if (!serviceConfig.middleware || serviceConfig.middleware.length === 0) {
     return [serviceConfig, funcDefinitions]
   }
@@ -42,9 +39,9 @@ export function parseContext(
 function addFunctionContext(
   ctxIO: ContextIO,
   contextType: ts.TypeReferenceNode,
-  func: ParsedPheroFunctionDefinition,
+  func: PheroFunction,
   typeChecker: ts.TypeChecker,
-): ParsedPheroFunctionDefinition {
+): PheroFunction {
   const ctxIndex = func.parameters.findIndex(
     (p) =>
       p.type &&

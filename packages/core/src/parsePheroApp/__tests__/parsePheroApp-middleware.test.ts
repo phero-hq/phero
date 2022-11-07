@@ -2,10 +2,11 @@
 
 import ts from "typescript"
 
-import { parsePheroApp, ParsedPheroApp } from "../parsePheroApp"
+import { parsePheroApp } from "../parsePheroApp"
+import { PheroApp } from "../domain"
 import { createTestProgram } from "../../tsTestUtils"
 
-function parseProgram(prog: ts.Program): ParsedPheroApp {
+function parseProgram(prog: ts.Program): PheroApp {
   // if (prog.getSemanticDiagnostics().length) {
   //   console.log("OEPS COMPILE ERRORS DETECTED")
   // }
@@ -65,7 +66,7 @@ describe("parsePheroApp middleware", () => {
     })
 
     expectFunctionDeclarationWithName(
-      parsedApp.services[0].funcs[0].actualFunction,
+      parsedApp.services[0].funcs[0].ref,
       "getArticle",
     )
   })

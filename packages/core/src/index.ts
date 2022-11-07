@@ -15,12 +15,8 @@ export {
   default as generateModelParser,
   generateNonModelParser,
 } from "./code-gen/parsers/generateParser"
-export {
-  parsePheroApp,
-  ParsedPheroApp,
-  ParsedPheroFunctionDefinition,
-  ParsedPheroServiceDefinition,
-} from "./parsePheroApp"
+export { parsePheroApp } from "./parsePheroApp"
+export { PheroApp, PheroFunction, PheroService } from "./parsePheroApp/domain"
 export {
   MissingTSConfigFileError,
   MissingPheroFileError,

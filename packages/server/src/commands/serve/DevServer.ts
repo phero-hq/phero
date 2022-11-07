@@ -2,7 +2,7 @@ import {
   generateAppDeclarationFile,
   generateRPCProxy,
   hasErrorCode,
-  ParsedPheroApp,
+  PheroApp,
   parsePheroApp,
   PortInUseError,
   RPCResult,
@@ -102,7 +102,7 @@ export default class DevServer {
   ): Promise<void> {
     this.eventEmitter.emit({ type: "BUILD_PROJECT_SUCCESS" })
 
-    let app: ParsedPheroApp
+    let app: PheroApp
     try {
       this.eventEmitter.emit({ type: "BUILD_MANIFEST_START" })
       app = parsePheroApp(pheroSourceFile, typeChecker)
@@ -276,7 +276,7 @@ export default class DevServer {
     })
   }
 
-  private generateRoutes(app: ParsedPheroApp): RPCRoutes {
+  private generateRoutes(app: PheroApp): RPCRoutes {
     const routes: RPCRoutes = {}
     for (const service of app.services) {
       for (const func of service.funcs) {

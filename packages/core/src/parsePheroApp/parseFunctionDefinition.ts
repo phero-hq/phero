@@ -1,13 +1,13 @@
 import ts from "typescript"
 import { ParseError } from "../errors"
 import parseReturnType from "./parseReturnType"
-import { ParsedPheroFunctionDefinition } from "./parsePheroApp"
+import { PheroFunction } from "./domain"
 import { resolveSymbol } from "../tsUtils"
 
 export default function parseFunctionDefinition(
   node: ts.ObjectLiteralElementLike | ts.VariableDeclaration,
   typeChecker: ts.TypeChecker,
-): ParsedPheroFunctionDefinition {
+): PheroFunction {
   if (ts.isSpreadAssignment(node)) {
     throw new ParseError(
       "S116: Sorry, no support for spread assignment (yet)",
@@ -15,7 +15,7 @@ export default function parseFunctionDefinition(
     )
   }
 
-  const parsedPheroFunctionDef: ParsedPheroFunctionDefinition = {
+  const parsedPheroFunctionDef: PheroFunction = {
     name: parseFunctionName(node.name),
     ...parseActualFunction(node, typeChecker),
   }
@@ -52,10 +52,7 @@ function parseFunctionName(
 function parseActualFunction(
   node: ts.Node,
   typeChecker: ts.TypeChecker,
-): Pick<
-  ParsedPheroFunctionDefinition,
-  "actualFunction" | "parameters" | "returnType"
-> {
+): Pick<PheroFunction, "ref" | "parameters" | "returnType"> {
   if (ts.isShorthandPropertyAssignment(node)) {
     const symbol = typeChecker.getShorthandAssignmentValueSymbol(node)
 
@@ -76,7 +73,7 @@ function parseActualFunction(
 
   if (ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
     return {
-      actualFunction: node,
+      ref: node,
       parameters: node.parameters.map((p) => p),
       returnType: parseReturnType(node),
     }
@@ -84,7 +81,7 @@ function parseActualFunction(
 
   if (ts.isFunctionDeclaration(node)) {
     return {
-      actualFunction: node,
+      ref: node,
       parameters: node.parameters.map((p) => p),
       returnType: parseReturnType(node),
     }
@@ -93,7 +90,7 @@ function parseActualFunction(
   if (ts.isVariableDeclaration(node) && node.initializer) {
     if (ts.isArrowFunction(node.initializer)) {
       return {
-        actualFunction: node.initializer,
+        ref: node.initializer,
         parameters: node.initializer.parameters.map((p) => p),
         returnType: parseReturnType(node.initializer),
       }

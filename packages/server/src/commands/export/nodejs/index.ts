@@ -1,4 +1,4 @@
-import { ParsedPheroApp } from "@phero/core"
+import { PheroApp } from "@phero/core"
 import compileExportToJS from "../compileExportToJS"
 import { Export, ExportBundle, MetaExportFiles } from "../domain"
 import { generateServiceHandlerFile } from "./generateServiceHandlerFile"
@@ -6,7 +6,7 @@ import generateLibFile from "./generateLibFile"
 import generateServiceIndexFile from "./generateServiceIndexFile"
 
 export default function generateNodeJSExport(
-  app: ParsedPheroApp,
+  app: PheroApp,
   metaExportFiles: MetaExportFiles,
 ): Export {
   const bundles: ExportBundle[] = app.services.map((service) => ({

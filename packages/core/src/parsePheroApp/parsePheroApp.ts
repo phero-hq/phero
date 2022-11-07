@@ -1,61 +1,22 @@
 import ts from "typescript"
 import { ParseError } from "../errors"
-import { ParsedError } from "../extractErrors/parseThrowStatement"
+import extractErrors from "../extractErrors/extractErrors"
+import { PheroError } from "../extractErrors/parseThrowStatement"
 import { hasModifier } from "../tsUtils"
+import { PheroApp, PheroModel, PheroService } from "./domain"
+import parseModels from "./parseModels"
 import parseServiceDefinition from "./parseServiceDefinition"
-
-export interface ParsedPheroApp {
-  models: Model[]
-  errors: ParsedError[]
-  services: ParsedPheroServiceDefinition[]
-}
-
-export interface ParsedPheroServiceDefinition {
-  name: string
-  models: Model[]
-  errors: ParsedError[]
-  funcs: ParsedPheroFunctionDefinition[]
-  config: ParsedPheroServiceConfig
-}
-
-export type Model =
-  | ts.InterfaceDeclaration
-  | ts.TypeAliasDeclaration
-  | ts.EnumDeclaration
-
-export interface ParsedPheroFunctionDefinition {
-  name: string
-  actualFunction: ts.FunctionLikeDeclarationBase
-  parameters: ts.ParameterDeclaration[]
-  returnType: ts.TypeNode
-  serviceContext?: {
-    type: ts.TypeNode
-    paramName?: string
-  }
-}
-
-export interface ParsedPheroServiceConfig {
-  middleware?: ParsedMiddlewareConfig[]
-  contextType?: ts.TypeNode
-}
-
-export interface ParsedMiddlewareConfig {
-  paramsType: ts.TypeNode
-  nextType: ts.TypeNode | undefined
-  contextType: ts.TypeNode
-  middleware: ts.FunctionLikeDeclarationBase
-}
 
 export function parsePheroApp(
   pheroSourceFile: ts.SourceFile,
   typeChecker: ts.TypeChecker,
-): ParsedPheroApp {
+): PheroApp {
   const exportStatements = pheroSourceFile.statements.filter(
     (s) =>
       hasModifier(s, ts.SyntaxKind.ExportKeyword) || ts.isExportDeclaration(s),
   )
 
-  const services: ParsedPheroServiceDefinition[] = []
+  const services: PheroService[] = []
 
   for (const statement of exportStatements) {
     if (ts.isVariableStatement(statement)) {
@@ -82,36 +43,49 @@ export function parsePheroApp(
     }
   }
 
-  const modelMap: Map<string, Model> = new Map<string, Model>()
-  const errorMap: Map<string, ParsedError> = new Map<string, ParsedError>()
+  const modelMap: Map<string, PheroModel> = new Map<string, PheroModel>()
+  const errorMap: Map<string, PheroError> = new Map<string, PheroError>()
 
   for (const service of services) {
-    for (const model of service.models) {
-      const modelName = model.name.text
+    for (const func of service.funcs) {
+      for (const model of parseModels(func, typeChecker)) {
+        const modelName = model.name
 
-      if (modelName === "PheroContext") {
-        continue
-      }
+        if (modelName === "PheroContext") {
+          continue
+        }
 
-      if (!modelMap.has(modelName)) {
-        modelMap.set(modelName, model)
-      } else if (modelMap.get(modelName) !== model) {
-        throw new ParseError(
-          "You already have a different model with the same name, currently this is not possible. We intent to implement namespaces soon, stay tuned.",
-          model,
-        )
+        if (!modelMap.has(modelName)) {
+          modelMap.set(modelName, model)
+        } else if (modelMap.get(modelName) !== model) {
+          throw new ParseError(
+            "You already have a different model with the same name, currently this is not possible. We intent to implement namespaces soon, stay tuned.",
+            model.ref,
+          )
+        }
       }
     }
-    for (const parsedError of service.errors) {
-      const errorName = parsedError.name
-      if (!errorMap.has(errorName)) {
-        errorMap.set(errorName, parsedError)
-      } else if (errorMap.get(errorName)?.ref !== parsedError.ref) {
-        throw new ParseError(
-          "You already have a different error class with the same name, currently this is not possible. We intent to implement namespaces soon, stay tuned.",
-          parsedError.ref,
-        )
-      }
+  }
+
+  const allErrors = extractErrors(
+    [
+      ...services.flatMap((service) => [
+        ...service.funcs.map((func) => func.ref),
+        ...(service.config.middleware?.map((m) => m.middleware) ?? []),
+      ]),
+    ],
+    typeChecker,
+  )
+
+  for (const parsedError of allErrors) {
+    const errorName = parsedError.name
+    if (!errorMap.has(errorName)) {
+      errorMap.set(errorName, parsedError)
+    } else if (errorMap.get(errorName)?.ref !== parsedError.ref) {
+      throw new ParseError(
+        "You already have a different error class with the same name, currently this is not possible. We intent to implement namespaces soon, stay tuned.",
+        parsedError.ref,
+      )
     }
   }
 

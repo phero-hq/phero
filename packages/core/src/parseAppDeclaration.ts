@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { ParseError } from "./errors"
-import { Model } from "./parsePheroApp"
+import { Model } from "./parsePheroApp/domain"
 import { getNameAsString } from "./tsUtils"
 import { VirtualCompilerHost } from "./VirtualCompilerHost"
 

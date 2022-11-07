@@ -1,7 +1,7 @@
 import ts from "typescript"
 import { ParseError } from "../../errors"
 import { isModel } from "../../parseAppDeclaration"
-import { Model } from "../../parsePheroApp"
+import { Model } from "../../parsePheroApp/domain"
 import * as tsx from "../../tsx"
 import generateParserFromModel from "./../parsers/generateParserFromModel"
 import generateParserModel from "./../parsers/generateParserModel"

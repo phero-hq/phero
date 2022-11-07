@@ -1,13 +1,13 @@
 import ts from "typescript"
 import { ParseError } from "../errors"
 import parseServiceMiddlewareConfig from "./parseServiceMiddlewareConfig"
-import { ParsedPheroServiceConfig } from "./parsePheroApp"
+import { PheroServiceConfig } from "./domain"
 import { resolveSymbol } from "../tsUtils"
 
 export default function parseServiceConfig(
   node: ts.Node | undefined,
   typeChecker: ts.TypeChecker,
-): ParsedPheroServiceConfig {
+): PheroServiceConfig {
   if (!node) {
     return {}
   }

@@ -191,7 +191,7 @@ function generateContextParam(
   )
 }
 
-function generateError(parsedError: ParsedError): ts.ClassDeclaration {
+function generateError(parsedError: PheroError): ts.ClassDeclaration {
   return tsx.classDeclaration({
     name: parsedError.name,
     extendsType: ts.factory.createExpressionWithTypeArguments(
@@ -220,7 +220,7 @@ function generateError(parsedError: ParsedError): ts.ClassDeclaration {
 }
 
 // function generate
-interface ParsedError {
+interface PheroError {
   name: string
   props: Array<{
     name: string
@@ -228,7 +228,7 @@ interface ParsedError {
   }>
 }
 
-function parseError(errorClass: ts.ClassDeclaration): ParsedError {
+function parseError(errorClass: ts.ClassDeclaration): PheroError {
   return {
     name: errorClass.name!.text,
     props: errorClass.members
@@ -242,7 +242,7 @@ function parseError(errorClass: ts.ClassDeclaration): ParsedError {
 
 function generateErrorParser(
   serviceName: string,
-  parsedErrors: ParsedError[],
+  parsedErrors: PheroError[],
 ): ts.FunctionDeclaration {
   const fallbackSt = tsx.statement.if({
     expression: tsx.expression.binary(

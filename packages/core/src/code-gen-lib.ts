@@ -3,13 +3,10 @@ import { generateParserBody } from "./code-gen/parsers/generateParser"
 import generateParserFromModel from "./code-gen/parsers/generateParserFromModel"
 import generateParserModel from "./code-gen/parsers/generateParserModel"
 import { ParseError } from "./errors"
-import { ParsedError } from "./extractErrors/parseThrowStatement"
+import { PheroError } from "./extractErrors/parseThrowStatement"
 import { isModel } from "./parseAppDeclaration"
 import parseReturnType from "./parsePheroApp/parseReturnType"
-import {
-  Model,
-  ParsedPheroFunctionDefinition,
-} from "./parsePheroApp/parsePheroApp"
+import { Model, PheroFunction } from "./parsePheroApp/domain"
 import { getNameAsString } from "./tsUtils"
 import * as tsx from "./tsx"
 
@@ -29,7 +26,7 @@ export function generateNamespace(
 }
 
 export function generateFunction(
-  func: ParsedPheroFunctionDefinition,
+  func: PheroFunction,
   refMaker: ReferenceMaker,
 ): ts.FunctionDeclaration {
   return ts.factory.createFunctionDeclaration(
@@ -46,7 +43,7 @@ export function generateFunction(
 }
 
 function generateFunctionParameters(
-  func: ParsedPheroFunctionDefinition,
+  func: PheroFunction,
   refMaker: ReferenceMaker,
 ): ts.ParameterDeclaration[] {
   const parameters = func.serviceContext?.paramName
@@ -296,7 +293,7 @@ export function generateModel(model: Model, refMaker: ReferenceMaker): Model {
 }
 
 export function generateErrorClass(
-  error: ParsedError,
+  error: PheroError,
   refMaker: ReferenceMaker,
 ): ts.ClassDeclaration {
   return tsx.classDeclaration({

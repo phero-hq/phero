@@ -2,10 +2,11 @@
 
 import ts from "typescript"
 
-import { parsePheroApp, ParsedPheroApp } from "../parsePheroApp"
+import { parsePheroApp } from "../parsePheroApp"
+import { PheroApp } from "../domain"
 import { createTestProgram } from "../../tsTestUtils"
 
-function parseProgram(prog: ts.Program): ParsedPheroApp {
+function parseProgram(prog: ts.Program): PheroApp {
   // if (prog.getSemanticDiagnostics().length) {
   //   console.log("OEPS COMPILE ERRORS DETECTED")
   // }
@@ -63,7 +64,7 @@ describe("parsePheroApp", () => {
       })
 
       expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
+        parsedApp.services[0].funcs[0].ref,
         "getArticle",
       )
     })
@@ -94,7 +95,7 @@ describe("parsePheroApp", () => {
         ],
       })
       expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
+        parsedApp.services[0].funcs[0].ref,
         "getArticle",
       )
     })
@@ -133,11 +134,11 @@ describe("parsePheroApp", () => {
         ],
       })
       expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
+        parsedApp.services[0].funcs[0].ref,
         "getArticle",
       )
       expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[1].actualFunction,
+        parsedApp.services[0].funcs[1].ref,
         "editArticle",
       )
     })
@@ -188,11 +189,11 @@ describe("parsePheroApp", () => {
         ],
       })
       expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
+        parsedApp.services[0].funcs[0].ref,
         "getArticle",
       )
       expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[1].actualFunction,
+        parsedApp.services[0].funcs[1].ref,
         "editArticle",
       )
       expect(parsedApp.services[0].config.middleware).toHaveLength(1)
@@ -261,11 +262,11 @@ describe("parsePheroApp", () => {
         ],
       })
       expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
+        parsedApp.services[0].funcs[0].ref,
         "getArticle",
       )
       expectFunctionDeclrWithName(
-        parsedApp.services[1].funcs[0].actualFunction,
+        parsedApp.services[1].funcs[0].ref,
         "editArticle",
       )
       expect(parsedApp.services[1].config.middleware).toHaveLength(1)
@@ -304,7 +305,7 @@ describe("parsePheroApp", () => {
       })
 
       expectArrowFuncDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
+        parsedApp.services[0].funcs[0].ref,
         "getArticle",
       )
     })
@@ -352,15 +353,15 @@ describe("parsePheroApp", () => {
         ],
       })
       expectArrowFuncDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
+        parsedApp.services[0].funcs[0].ref,
         "getArticle",
       )
       expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[1].actualFunction,
+        parsedApp.services[0].funcs[1].ref,
         "editArticle",
       )
       expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[2].actualFunction,
+        parsedApp.services[0].funcs[2].ref,
         "publishArticle",
       )
     })
@@ -392,7 +393,7 @@ describe("parsePheroApp", () => {
         ],
       })
       expectFunctionDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
+        parsedApp.services[0].funcs[0].ref,
         "_editArticle",
       )
     })
@@ -428,7 +429,7 @@ describe("parsePheroApp", () => {
         ],
       })
       expectArrowFuncDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
+        parsedApp.services[0].funcs[0].ref,
         "_editArticle",
       )
     })
@@ -464,7 +465,7 @@ describe("parsePheroApp", () => {
         ],
       })
       expectArrowFuncDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
+        parsedApp.services[0].funcs[0].ref,
         "_editArticle",
       )
     })
@@ -502,7 +503,7 @@ describe("parsePheroApp", () => {
         ],
       })
       expectArrowFuncDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
+        parsedApp.services[0].funcs[0].ref,
         "_editArticle",
       )
     })
@@ -540,7 +541,7 @@ describe("parsePheroApp", () => {
         ],
       })
       expectArrowFuncDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
+        parsedApp.services[0].funcs[0].ref,
         "_editArticle",
       )
     })
@@ -577,7 +578,7 @@ describe("parsePheroApp", () => {
         ],
       })
       expectArrowFuncDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
+        parsedApp.services[0].funcs[0].ref,
         "_editArticle",
       )
     })
@@ -615,7 +616,7 @@ describe("parsePheroApp", () => {
         ],
       })
       expectArrowFuncDeclrWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
+        parsedApp.services[0].funcs[0].ref,
         "_editArticle",
       )
     })
@@ -651,7 +652,7 @@ describe("parsePheroApp", () => {
         ],
       })
       expectFunctionExpressionWithName(
-        parsedApp.services[0].funcs[0].actualFunction,
+        parsedApp.services[0].funcs[0].ref,
         undefined,
       )
     })
@@ -720,11 +721,11 @@ describe("parsePheroApp", () => {
         services: [
           expect.objectContaining({
             name: "articleService",
-            errors: [
-              expect.objectContaining({
-                name: "ArticleError",
-              }),
-            ],
+          }),
+        ],
+        errors: [
+          expect.objectContaining({
+            name: "ArticleError",
           }),
         ],
       })
@@ -760,11 +761,11 @@ describe("parsePheroApp", () => {
         services: [
           expect.objectContaining({
             name: "articleService",
-            errors: [
-              expect.objectContaining({
-                name: "ArticleError",
-              }),
-            ],
+          }),
+        ],
+        errors: [
+          expect.objectContaining({
+            name: "ArticleError",
           }),
         ],
       })
@@ -804,12 +805,12 @@ describe("parsePheroApp", () => {
         services: [
           expect.objectContaining({
             name: "articleService",
-            errors: [
-              expect.objectContaining({
-                name: "ArticleError",
-                sourceFile: "otherOne.ts",
-              }),
-            ],
+          }),
+        ],
+        errors: [
+          expect.objectContaining({
+            name: "ArticleError",
+            sourceFile: "otherOne.ts",
           }),
         ],
       })

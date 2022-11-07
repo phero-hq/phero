@@ -1,9 +1,6 @@
 import ts from "typescript"
-import { ParsedPheroApp, ParseError } from ".."
-import {
-  ParsedPheroFunctionDefinition,
-  ParsedPheroServiceDefinition,
-} from "../parsePheroApp"
+import { PheroApp, ParseError } from ".."
+import { PheroFunction, PheroService } from "../parsePheroApp/domain"
 import parseReturnType from "../parsePheroApp/parseReturnType"
 import { printCode } from "../tsTestUtils"
 import { VirtualCompilerHost } from "../VirtualCompilerHost"
@@ -13,14 +10,14 @@ import generateModelParser, {
 import generateParserFromModel from "./parsers/generateParserFromModel"
 import generateParserModel from "./parsers/generateParserModel"
 
-import { ParsedError } from "../extractErrors/parseThrowStatement"
+import { PheroError } from "../extractErrors/parseThrowStatement"
 import generateMiddlewareParsers from "../generateMiddlewareParsers"
 import * as tsx from "../tsx"
 
 const factory = ts.factory
 
 export default function generateRPCProxy(
-  app: ParsedPheroApp,
+  app: PheroApp,
   typeChecker: ts.TypeChecker,
 ): { js: string } {
   const tsNodes: ts.Node[] = []
@@ -77,8 +74,8 @@ export default function generateRPCProxy(
   )
 
   for (const domainModel of app.models) {
-    tsNodes.push(domainModel)
-    tsNodes.push(generateModelParser(domainModel, typeChecker))
+    tsNodes.push(domainModel.ref)
+    tsNodes.push(generateModelParser(domainModel.ref, typeChecker))
   }
 
   for (const service of app.services) {
@@ -90,9 +87,13 @@ export default function generateRPCProxy(
       )
     }
 
-    for (const serviceModel of service.models) {
-      tsNodes.push(serviceModel, generateModelParser(serviceModel, typeChecker))
-    }
+    // TODO
+    // for (const serviceModel of service.models) {
+    //   tsNodes.push(
+    //     serviceModel,
+    //     generateModelParser(serviceModel.ref, typeChecker),
+    //   )
+    // }
 
     for (const serviceFunction of service.funcs) {
       tsNodes.push(
@@ -142,7 +143,7 @@ export default function generateRPCProxy(
 }
 
 function generateCorsConfigFunction(
-  service: ParsedPheroServiceDefinition,
+  service: PheroService,
 ): ts.FunctionDeclaration {
   return tsx.function({
     export: true,
@@ -162,9 +163,9 @@ function generateCorsConfigFunction(
 }
 
 function generateRPCExecutor(
-  service: ParsedPheroServiceDefinition,
-  funcDef: ParsedPheroFunctionDefinition,
-  domainErrors: ParsedError[],
+  service: PheroService,
+  funcDef: PheroFunction,
+  domainErrors: PheroError[],
   typeChecker: ts.TypeChecker,
 ): ts.FunctionDeclaration {
   return tsx.function({
@@ -178,9 +179,7 @@ function generateRPCExecutor(
     }),
     body: tsx.block(
       wrapWithErrorHandler(
-        service,
         domainErrors,
-
         tsx.const({
           name: "result",
           init: tsx.expression.await(
@@ -203,8 +202,8 @@ function generateRPCExecutor(
 }
 
 function generateInnerFunction(
-  service: ParsedPheroServiceDefinition,
-  funcDef: ParsedPheroFunctionDefinition,
+  service: PheroService,
+  funcDef: PheroFunction,
   typeChecker: ts.TypeChecker,
 ): ts.FunctionDeclaration {
   return tsx.function({
@@ -240,11 +239,7 @@ function generateInnerFunction(
               init: generateInlineParser({
                 returnType: tsx.type.any,
                 parser: generateParserFromModel(
-                  generateParserModel(
-                    typeChecker,
-                    funcDef.actualFunction,
-                    "data",
-                  ),
+                  generateParserModel(typeChecker, funcDef.ref, "data"),
                 ),
               }),
             }),
@@ -256,7 +251,7 @@ function generateInnerFunction(
                 parser: generateParserFromModel(
                   generateParserModel(
                     typeChecker,
-                    parseReturnType(funcDef.actualFunction),
+                    parseReturnType(funcDef.ref),
                     "data",
                   ),
                 ),
@@ -781,21 +776,14 @@ function generateInnerFunction(
 }
 
 function wrapWithErrorHandler(
-  service: ParsedPheroServiceDefinition,
-  domainErrors: ParsedError[],
+  domainErrors: PheroError[],
   ...statements: ts.Statement[]
 ): ts.TryStatement {
   return tsx.statement.try({
     block: statements,
     catch: {
       error: "error",
-      block: [
-        generateErrorParsingFunction(
-          service.name,
-          domainErrors,
-          service.errors,
-        ),
-      ],
+      block: [generateErrorParsingFunction(domainErrors)],
     },
   })
 }
@@ -821,8 +809,8 @@ function generateRPCFunctionCall({
   service,
   funcDef,
 }: {
-  service: ParsedPheroServiceDefinition
-  funcDef: ParsedPheroFunctionDefinition
+  service: PheroService
+  funcDef: PheroFunction
 }): ts.Block {
   return tsx.block(
     tsx.const({
@@ -891,9 +879,7 @@ function generateRPCFunctionCall({
 }
 
 function generateErrorParsingFunction(
-  serviceName: string,
-  domainErrors: ParsedError[],
-  serviceErrors: ParsedError[],
+  domainErrors: PheroError[],
 ): ts.IfStatement {
   function wrapErrorWithStatusObject(
     errorObj: ts.ObjectLiteralExpression,
@@ -973,16 +959,11 @@ function generateErrorParsingFunction(
     }),
   })
 
-  const errors: Array<{ clientName: ts.StringLiteral; error: ParsedError }> = [
-    ...domainErrors.map((error) => ({
+  const errors: Array<{ clientName: ts.StringLiteral; error: PheroError }> =
+    domainErrors.map((error) => ({
       clientName: tsx.literal.string(error.name),
       error,
-    })),
-    ...serviceErrors.map((error) => ({
-      clientName: tsx.literal.string(`${serviceName}.${error.name}`),
-      error,
-    })),
-  ]
+    }))
 
   return errors.reduceRight((elseSt, { clientName, error }) => {
     return tsx.statement.if({

@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { ParseError } from "../errors"
-import { ParsedMiddlewareConfig } from "./parsePheroApp"
+import { PheroMiddlewareConfig } from "./domain"
 import {
   getFirstChildOfKind,
   getNameAsString,
@@ -13,7 +13,7 @@ export default function parseServiceMiddlewareConfig(
   configObject: ts.ObjectLiteralExpression,
   name: string,
   typeChecker: ts.TypeChecker,
-): ParsedMiddlewareConfig[] | undefined {
+): PheroMiddlewareConfig[] | undefined {
   const prop = configObject.properties.find(
     (p) => p.name && getNameAsString(p.name) === name,
   )
@@ -34,7 +34,7 @@ export default function parseServiceMiddlewareConfig(
     return undefined
   }
 
-  const functionDeclrs: ParsedMiddlewareConfig[] = []
+  const functionDeclrs: PheroMiddlewareConfig[] = []
   for (const middlewareArrayElement of middlewareArrayLiteralExpr.elements) {
     // we need getAliasedSymbol to resolve imports
     const symbol = resolveSymbol(middlewareArrayElement, typeChecker)
@@ -57,7 +57,7 @@ export default function parseServiceMiddlewareConfig(
 
 function parseMiddlewareConfig(
   middleware: ts.FunctionLikeDeclarationBase,
-): ParsedMiddlewareConfig {
+): PheroMiddlewareConfig {
   if (middleware.parameters.length !== 3) {
     throw new ParseError(
       `S129: Middleware should have three parameters "(params: PheroParams<P>, ctx: PheroContext<C>, next: PheroNextFunction<T>)"`,

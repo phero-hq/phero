@@ -2,14 +2,14 @@ import ts from "typescript"
 import * as tsx from "../tsx"
 import { getNameAsString, hasModifier } from "../tsUtils"
 
-export interface ParsedError {
+export interface PheroError {
   name: string
   sourceFile: string
-  properties: ErrorProperty[]
+  properties: PheroErrorProperty[]
   ref: ts.ClassDeclaration
 }
 
-export interface ErrorProperty {
+export interface PheroErrorProperty {
   name: string
   type: ts.TypeNode
 }
@@ -17,7 +17,7 @@ export interface ErrorProperty {
 export default function parseThrowStatement(
   throwStatement: ts.ThrowStatement,
   typeChecker: ts.TypeChecker,
-): ParsedError | undefined {
+): PheroError | undefined {
   if (!ts.isNewExpression(throwStatement.expression)) {
     // TODO Maybe emit a warning here?
     return undefined
@@ -40,7 +40,7 @@ export default function parseThrowStatement(
     return undefined
   }
 
-  const properties: ErrorProperty[] = [
+  const properties: PheroErrorProperty[] = [
     { name: "message", type: tsx.type.string },
     ...[classDeclaration, ...superClasses].flatMap((classDeclaration) =>
       findPublicProperties(classDeclaration, typeChecker),
@@ -108,8 +108,8 @@ function getClassDeclaration(
 function findPublicProperties(
   classDeclaration: ts.ClassDeclaration,
   typeChecker: ts.TypeChecker,
-): ErrorProperty[] {
-  const result: ErrorProperty[] = []
+): PheroErrorProperty[] {
+  const result: PheroErrorProperty[] = []
 
   for (const member of classDeclaration.members) {
     if (
