@@ -21,7 +21,18 @@ export {
   ParsedPheroFunctionDefinition,
   ParsedPheroServiceDefinition,
 } from "./parsePheroApp"
-export * from "./errors"
-export * from "./RPCResult"
+export {
+  MissingTSConfigFileError,
+  MissingPheroFileError,
+  ParseError,
+  PortInUseError,
+  hasErrorCode,
+} from "./errors"
+export {
+  RPCResult,
+  RPCOkResult,
+  RPCBadRequestResult,
+  RPCInternalServerErrorResult,
+} from "./RPCResult"
 export * as tsx from "./tsx"
 export { VirtualCompilerHost } from "./VirtualCompilerHost"

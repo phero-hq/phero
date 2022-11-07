@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { MissingPheroFileError, MissingTSConfigFile } from "@phero/core"
+import { MissingPheroFileError, MissingTSConfigFileError } from "@phero/core"
 
 const formatHost: ts.FormatDiagnosticsHost = {
   getCanonicalFileName: (path) => path,
@@ -34,7 +34,7 @@ export default class WatchProgram {
     )
 
     if (!tsConfigFilePath) {
-      throw new MissingTSConfigFile(absoluteProjectDir)
+      throw new MissingTSConfigFileError(absoluteProjectDir)
     }
 
     this.tsConfigFilePath = tsConfigFilePath

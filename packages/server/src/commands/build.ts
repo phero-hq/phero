@@ -1,7 +1,7 @@
 import {
   generateAppDeclarationFile,
   MissingPheroFileError,
-  MissingTSConfigFile,
+  MissingTSConfigFileError,
   parsePheroApp,
 } from "@phero/core"
 import { ServerCommandBuild } from "@phero/dev"
@@ -19,7 +19,7 @@ export default function buildCommand(command: ServerCommandBuild) {
   )
 
   if (!tsConfigFilePath) {
-    throw new MissingTSConfigFile(projectPath)
+    throw new MissingTSConfigFileError(projectPath)
   }
 
   const tsConfig: ts.ParsedCommandLine | undefined =

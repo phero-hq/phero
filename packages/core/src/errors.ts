@@ -1,6 +1,6 @@
 import ts from "typescript"
 
-export class MissingTSConfigFile extends Error {
+export class MissingTSConfigFileError extends Error {
   constructor(projectDir: string) {
     super(
       `Could not find a valid tsconfig.json on path ${projectDir}/tsconfig.json`,

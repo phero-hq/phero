@@ -2,7 +2,7 @@ import {
   generateAppDeclarationFile,
   generateRPCProxy,
   MissingPheroFileError,
-  MissingTSConfigFile,
+  MissingTSConfigFileError,
   parsePheroApp,
 } from "@phero/core"
 import { ServerCommandExport, ServerExportFlavor } from "@phero/dev"
@@ -25,7 +25,7 @@ export default function exportCommand(command: ServerCommandExport) {
   )
 
   if (!tsConfigFilePath) {
-    throw new MissingTSConfigFile(projectPath)
+    throw new MissingTSConfigFileError(projectPath)
   }
 
   const tsConfig: ts.ParsedCommandLine | undefined =
