@@ -1,6 +1,6 @@
 import ts from "typescript"
-import { compileStatements } from "../tsTestUtils"
-import parseThrowStatement from "./parseThrowStatement"
+import { compileStatements } from "../../tsTestUtils"
+import parseThrowStatement from "../parseThrowStatement"
 
 describe("parseThrowStatement", () => {
   describe("validate if throw statement throws a descendant of Error", () => {

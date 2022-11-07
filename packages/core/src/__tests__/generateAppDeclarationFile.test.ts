@@ -1,8 +1,8 @@
 import ts from "typescript"
-import generateAppDeclarationFile from "./generateAppDeclarationFile"
+import generateAppDeclarationFile from "../generateAppDeclarationFile"
 
-import { parsePheroApp } from "./parsePheroApp"
-import { createTestProgram } from "./tsTestUtils"
+import { parsePheroApp } from "../parsePheroApp"
+import { createTestProgram } from "../tsTestUtils"
 
 function generate(prog: ts.Program): string {
   // if (prog.getSemanticDiagnostics().length) {

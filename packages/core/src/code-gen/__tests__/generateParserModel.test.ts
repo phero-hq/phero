@@ -1,6 +1,6 @@
 import ts from "typescript"
-import { compileStatement, compileStatements } from "../tsTestUtils"
-import generateParserModel from "./parsers/generateParserModel"
+import { compileStatement, compileStatements } from "../../tsTestUtils"
+import generateParserModel from "../parsers/generateParserModel"
 
 describe("generateParserModel", () => {
   describe("for an interface", () => {

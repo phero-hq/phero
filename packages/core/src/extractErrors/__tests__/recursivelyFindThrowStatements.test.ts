@@ -3,8 +3,8 @@ import {
   compileProgram,
   compileStatement,
   compileStatements,
-} from "../tsTestUtils"
-import recursivelyFindThrowStatements from "./recursivelyFindThrowStatements"
+} from "../../tsTestUtils"
+import recursivelyFindThrowStatements from "../recursivelyFindThrowStatements"
 
 describe("recursivelyFindThrowStatements", () => {
   describe("statements", () => {
