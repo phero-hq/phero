@@ -197,24 +197,6 @@ export interface KindToNodeMappings {
   [ts.SyntaxKind.VoidExpression]: ts.VoidExpression
 }
 
-export function getChildrenOfKind<TKind extends ts.SyntaxKind>(
-  node: ts.Node[] | ts.Node | undefined,
-  kind: TKind,
-): KindToNodeMappings[TKind][] {
-  const children =
-    node === undefined
-      ? []
-      : node instanceof Array
-      ? node.flatMap((n) => n.getChildren())
-      : node.getChildren()
-
-  return children.reduce<KindToNodeMappings[TKind][]>((result, child) => {
-    return child.kind === kind
-      ? [...result, child as KindToNodeMappings[TKind]]
-      : result
-  }, [])
-}
-
 export function hasModifier(node: ts.Node, kind: ts.SyntaxKind): boolean {
   return !!(
     ts.canHaveModifiers(node) &&
