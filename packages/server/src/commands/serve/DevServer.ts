@@ -96,17 +96,14 @@ export default class DevServer {
     this.eventEmitter.emit({ type: "BUILD_PROJECT_START" })
   }
 
-  private async buildProjectSuccess(
-    pheroSourceFile: ts.SourceFile,
-    typeChecker: ts.TypeChecker,
-  ): Promise<void> {
+  private async buildProjectSuccess(prog: ts.Program): Promise<void> {
     this.eventEmitter.emit({ type: "BUILD_PROJECT_SUCCESS" })
 
     let app: PheroApp
     try {
       this.eventEmitter.emit({ type: "BUILD_MANIFEST_START" })
-      app = parsePheroApp(pheroSourceFile, typeChecker)
-      const dts = generateAppDeclarationFile(app, typeChecker)
+      app = parsePheroApp(prog)
+      const dts = generateAppDeclarationFile(app, prog.getTypeChecker())
       await fs.writeFile(this.manifestPath, dts)
       this.eventEmitter.emit({ type: "BUILD_MANIFEST_SUCCESS" })
     } catch (error) {
@@ -123,7 +120,7 @@ export default class DevServer {
     try {
       this.eventEmitter.emit({ type: "BUILD_RPCS_START" })
       this.routes = this.generateRoutes(app)
-      const output = generateRPCProxy(app, typeChecker)
+      const output = generateRPCProxy(app, prog)
       await fs.writeFile(this.pheroExecutionJS, output.js)
       this.clearRequireCache()
       this.eventEmitter.emit({ type: "BUILD_RPCS_SUCCESS" })

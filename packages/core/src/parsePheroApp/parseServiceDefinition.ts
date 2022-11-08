@@ -46,5 +46,6 @@ export default function parseServiceDefinition(
     name: serviceName,
     funcs: pheroFunctions,
     config: pheroServiceConfig,
+    ref: serviceExport,
   }
 }

@@ -10,11 +10,8 @@ function parseProgram(prog: ts.Program): PheroApp {
   // if (prog.getSemanticDiagnostics().length) {
   //   console.log("OEPS COMPILE ERRORS DETECTED")
   // }
-  const pheroFile = prog.getSourceFile("phero.ts")
-  if (!pheroFile) {
-    throw new Error("No phero file")
-  }
-  return parsePheroApp(pheroFile, prog)
+
+  return parsePheroApp(prog)
 }
 
 function expectFunctionDeclarationWithName(

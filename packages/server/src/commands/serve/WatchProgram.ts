@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { MissingPheroFileError, MissingTSConfigFileError } from "@phero/core"
+import { MissingTSConfigFileError } from "@phero/core"
 
 const formatHost: ts.FormatDiagnosticsHost = {
   getCanonicalFileName: (path) => path,
@@ -8,10 +8,7 @@ const formatHost: ts.FormatDiagnosticsHost = {
 }
 
 type BuildStartCallback = () => void
-type BuildSuccessCallback = (
-  pheroSourceFile: ts.SourceFile,
-  typeChecker: ts.TypeChecker,
-) => void
+type BuildSuccessCallback = (prog: ts.Program) => void
 type BuildFailedCallback = (errorMessage: string) => void
 
 export default class WatchProgram {
@@ -103,19 +100,9 @@ export default class WatchProgram {
       throw new Error("WatchProgram not ready")
     }
 
-    const program = this.watchProgram.getProgram()
+    const prog = this.watchProgram.getProgram().getProgram()
 
-    // TODO check all root dirs for phero.ts
-    const sourceFile = program.getSourceFile(`${this.projectDir}/src/phero.ts`)
-
-    if (!sourceFile) {
-      throw new MissingPheroFileError(this.projectDir)
-    }
-
-    this.buildSuccessCallback(
-      sourceFile.getSourceFile(),
-      this.watchProgram.getProgram().getProgram().getTypeChecker(),
-    )
+    this.buildSuccessCallback(prog)
   }
 
   private onBuildFailed(diagnostics: readonly ts.Diagnostic[]) {

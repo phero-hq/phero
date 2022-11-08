@@ -10,13 +10,13 @@ import {
 
 export default function generateClientSource(
   appDeclarationVersion: ParsedAppDeclarationVersion,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): ts.SourceFile {
   const { domainModels, services } = appDeclarationVersion
   const parsedDomainErrors = appDeclarationVersion.errors.map(parseError)
   const domainRefMaker = new ReferenceMaker(
     domainModels,
-    typeChecker,
+    prog.getTypeChecker(),
     undefined,
   )
 
@@ -27,11 +27,11 @@ export default function generateClientSource(
 
   const domainSource = [
     ...domainModels.map((model) => generateModel(model, domainRefMaker)),
-    ...domainModels.map((model) => generateModelParser(model, typeChecker)),
+    ...domainModels.map((model) => generateModelParser(model, prog)),
     ...parsedDomainErrors.map(generateError),
     ...services.flatMap((service) => [
       ...service.models.map((model) => generateModel(model, domainRefMaker)),
-      ...service.models.map((model) => generateModelParser(model, typeChecker)),
+      ...service.models.map((model) => generateModelParser(model, prog)),
       ...service.errors.map(parseError).map(generateError),
     ]),
   ]
@@ -97,7 +97,7 @@ export default function generateClientSource(
 
         const serviceRefMaker = new ReferenceMaker(
           domainModels,
-          typeChecker,
+          prog.getTypeChecker(),
           undefined,
         )
 
@@ -114,7 +114,7 @@ export default function generateClientSource(
                 context,
                 func,
                 serviceRefMaker,
-                typeChecker,
+                prog,
               ),
             ),
             true,

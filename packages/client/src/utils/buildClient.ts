@@ -17,7 +17,7 @@ export default async function buildClient(
   const declarationVersion = getDeclarationForVersion(declaration.result)
   const clientSource = generateClientSource(
     declarationVersion,
-    declaration.typeChecker,
+    declaration.program,
   )
 
   await writeClientSource(clientSource)

@@ -34,7 +34,7 @@ export interface ParsedServiceDeclarationVersion {
 
 export function parseAppDeclarationFileContent(dts: string): {
   result: ParsedAppDeclaration
-  typeChecker: ts.TypeChecker
+  program: ts.Program
 } {
   const vHost = new VirtualCompilerHost()
   vHost.addFile("api.d.ts", dts)
@@ -51,7 +51,7 @@ export function parseAppDeclarationFileContent(dts: string): {
 
   const result = parseAppDeclarationSourceFile(sourceFile)
 
-  return { result, typeChecker: program.getTypeChecker() }
+  return { result, program }
 }
 
 function parseAppDeclarationSourceFile(

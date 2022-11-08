@@ -80,16 +80,10 @@ export default function exportCommand(command: ServerCommandExport) {
 
   program.emit()
 
-  const pheroSourceFile = program.getSourceFile(`${projectPath}/src/phero.ts`)
-
-  if (!pheroSourceFile) {
-    throw new MissingPheroFileError(projectPath)
-  }
-
   const typeChecker = program.getTypeChecker()
-  const app = parsePheroApp(pheroSourceFile, typeChecker)
+  const app = parsePheroApp(program)
   const dts = generateAppDeclarationFile(app, typeChecker)
-  const pheroExecution = generateRPCProxy(app, typeChecker)
+  const pheroExecution = generateRPCProxy(app, program)
 
   const readFile = (filePath: string): string =>
     fs.readFileSync(filePath, {

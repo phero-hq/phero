@@ -68,14 +68,8 @@ export default function buildCommand(command: ServerCommandBuild) {
     rootNames: [`${projectPath}/src/phero.ts`],
   })
 
-  const pheroSourceFile = program.getSourceFile(`${projectPath}/src/phero.ts`)
-
-  if (!pheroSourceFile) {
-    throw new MissingPheroFileError(projectPath)
-  }
-
   const typeChecker = program.getTypeChecker()
-  const app = parsePheroApp(pheroSourceFile, typeChecker)
+  const app = parsePheroApp(program)
   const dts = generateAppDeclarationFile(app, typeChecker)
   const manifestPath = path.join(projectPath, "phero-manifest.d.ts")
   fs.writeFileSync(manifestPath, dts)

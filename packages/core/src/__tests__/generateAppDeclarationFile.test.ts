@@ -11,11 +11,7 @@ function generate(prog: ts.Program): string {
   //   throw new Error("Compile error")
   // }
   const typeChecker = prog.getTypeChecker()
-  const pheroFile = prog.getSourceFile("phero.ts")
-  if (!pheroFile) {
-    throw new Error("No phero file")
-  }
-  const parsedApp = parsePheroApp(pheroFile, prog)
+  const parsedApp = parsePheroApp(prog)
   const dts = generateAppDeclarationFile(parsedApp, typeChecker)
   return dts
 }

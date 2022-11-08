@@ -32,6 +32,7 @@ export interface PheroService {
   name: string
   funcs: PheroFunction[]
   config: PheroServiceConfig
+  ref: ts.Node
 }
 
 export interface PheroFunction {
