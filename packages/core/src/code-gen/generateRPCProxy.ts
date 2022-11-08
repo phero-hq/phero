@@ -22,26 +22,48 @@ export default function generateRPCProxy(
 ): { js: string } {
   const tsNodes: ts.Node[] = []
 
-  tsNodes.push(
-    factory.createImportDeclaration(
-      undefined,
-      factory.createImportClause(
-        false,
+  const serviceSourceFiles = app.services.reduce<Map<ts.SourceFile, string[]>>(
+    (map, service) => {
+      const serviceSourceFile = service.ref.getSourceFile()
+      if (map.has(serviceSourceFile)) {
+        map.get(serviceSourceFile)?.push(service.name)
+      } else {
+        map.set(serviceSourceFile, [service.name])
+      }
+      return map
+    },
+    new Map<ts.SourceFile, string[]>(),
+  )
+
+  console.log(prog.getCompilerOptions().sourceRoot)
+  for (const [sourceFile, serviceNames] of serviceSourceFiles.entries()) {
+    tsNodes.push(
+      factory.createImportDeclaration(
         undefined,
-        factory.createNamedImports(
-          app.services.map((service) =>
-            factory.createImportSpecifier(
-              false,
-              undefined,
-              factory.createIdentifier(service.name),
+        factory.createImportClause(
+          false,
+          undefined,
+          factory.createNamedImports(
+            serviceNames.map((serviceName) =>
+              factory.createImportSpecifier(
+                false,
+                undefined,
+                factory.createIdentifier(serviceName),
+              ),
             ),
           ),
         ),
+        // TODO cleanup
+        factory.createStringLiteral(
+          "." +
+            sourceFile.fileName
+              .substring(sourceFile.fileName.indexOf("src") + 3)
+              .replace(".ts", ""),
+        ),
+        undefined,
       ),
-      factory.createStringLiteral("./phero"),
-      undefined,
-    ),
-  )
+    )
+  }
 
   tsNodes.push(...types)
 
