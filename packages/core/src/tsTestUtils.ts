@@ -118,14 +118,20 @@ const printer = ts.createPrinter({
   omitTrailingSemicolon: false,
 })
 
-export function printCode(node: ts.Node): string {
+export function printCode(code: ts.Node | ts.Node[]): string {
   const sf = ts.createSourceFile(
-    "a.ts",
+    "phero-manifest.d.ts",
     "",
     ts.ScriptTarget.ESNext,
     undefined,
     ts.ScriptKind.TS,
   )
 
-  return printer.printNode(ts.EmitHint.Unspecified, node, sf)
+  return Array.isArray(code)
+    ? printer.printList(
+        ts.ListFormat.SourceFileStatements,
+        ts.factory.createNodeArray(code),
+        sf,
+      )
+    : printer.printNode(ts.EmitHint.Unspecified, code, sf)
 }

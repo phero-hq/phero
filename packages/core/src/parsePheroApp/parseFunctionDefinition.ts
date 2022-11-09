@@ -1,8 +1,8 @@
 import ts from "typescript"
 import { ParseError } from "../errors"
 import parseReturnType from "./parseReturnType"
-import { PheroFunction } from "./domain"
-import { resolveSymbol } from "../tsUtils"
+import { PheroFunction, PheroFunctionParameter } from "./domain"
+import { getNameAsString, resolveSymbol } from "../tsUtils"
 
 export default function parseFunctionDefinition(
   node: ts.ObjectLiteralElementLike | ts.VariableDeclaration,
@@ -52,7 +52,7 @@ function parseFunctionName(
 function parseActualFunction(
   node: ts.Node,
   typeChecker: ts.TypeChecker,
-): Pick<PheroFunction, "ref" | "parameters" | "returnType"> {
+): Pick<PheroFunction, "ref" | "parameters" | "parameters2" | "returnType"> {
   if (ts.isShorthandPropertyAssignment(node)) {
     const symbol = typeChecker.getShorthandAssignmentValueSymbol(node)
 
@@ -75,6 +75,7 @@ function parseActualFunction(
     return {
       ref: node,
       parameters: node.parameters.map((p) => p),
+      parameters2: makeParams(node.parameters),
       returnType: parseReturnType(node),
     }
   }
@@ -83,6 +84,7 @@ function parseActualFunction(
     return {
       ref: node,
       parameters: node.parameters.map((p) => p),
+      parameters2: makeParams(node.parameters),
       returnType: parseReturnType(node),
     }
   }
@@ -92,6 +94,7 @@ function parseActualFunction(
       return {
         ref: node.initializer,
         parameters: node.initializer.parameters.map((p) => p),
+        parameters2: makeParams(node.initializer.parameters),
         returnType: parseReturnType(node.initializer),
       }
     }
@@ -114,4 +117,34 @@ function parseActualFunction(
   }
 
   throw new ParseError(`S120: Unsupported syntax (${node.kind})`, node)
+}
+
+function makeParams(
+  params: ts.NodeArray<ts.ParameterDeclaration>,
+): PheroFunctionParameter[] {
+  return params.reduce<PheroFunctionParameter[]>(
+    (result, param, paramIndex) => {
+      if (!param.type) {
+        throw new ParseError(`Parameter should have a type`, param)
+      }
+
+      if (
+        paramIndex === 0 &&
+        ts.isTypeReferenceNode(param.type) &&
+        getNameAsString(param.type.typeName) === "PheroContext"
+      ) {
+        return result
+      }
+
+      return [
+        ...result,
+        {
+          name: getNameAsString(param.name),
+          questionToken: !!param.questionToken,
+          type: param.type,
+        },
+      ]
+    },
+    [],
+  )
 }

@@ -1,13 +1,15 @@
 import ts from "typescript"
 
 interface TypeReferenceProps {
-  name: string
+  name: string | ts.EntityName
   args?: ts.TypeNode[]
 }
 
 export function typeReference(props: TypeReferenceProps): ts.TypeReferenceNode {
   return ts.factory.createTypeReferenceNode(
-    ts.factory.createIdentifier(props.name),
+    typeof props.name === "string"
+      ? ts.factory.createIdentifier(props.name)
+      : props.name,
     props.args,
   )
 }

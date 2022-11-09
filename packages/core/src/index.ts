@@ -9,7 +9,7 @@ export {
   generateNamespace,
   ReferenceMaker,
 } from "./code-gen-lib"
-export { default as generateAppDeclarationFile } from "./generateAppDeclarationFile"
+export { default as generateManifest } from "./generateManifest/generateManifest"
 export { default as generateRPCProxy } from "./code-gen/generateRPCProxy"
 export {
   default as generateModelParser,

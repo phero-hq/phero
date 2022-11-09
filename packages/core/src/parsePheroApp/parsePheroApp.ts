@@ -10,7 +10,11 @@ import parseServiceDefinition from "./parseServiceDefinition"
 export function parsePheroApp(prog: ts.Program): PheroApp {
   const pheroSourceFiles = prog
     .getSourceFiles()
-    .filter((sourceFile) => sourceFile.fileName.endsWith("/phero.ts"))
+    .filter(
+      (sourceFile) =>
+        sourceFile.fileName === "phero.ts" ||
+        sourceFile.fileName.endsWith("/phero.ts"),
+    )
 
   if (pheroSourceFiles.length === 0) {
     throw new MissingPheroFileError(prog.getCurrentDirectory())

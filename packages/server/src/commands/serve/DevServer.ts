@@ -1,5 +1,5 @@
 import {
-  generateAppDeclarationFile,
+  generateManifest,
   generateRPCProxy,
   hasErrorCode,
   PheroApp,
@@ -103,7 +103,7 @@ export default class DevServer {
     try {
       this.eventEmitter.emit({ type: "BUILD_MANIFEST_START" })
       app = parsePheroApp(prog)
-      const dts = generateAppDeclarationFile(app, prog.getTypeChecker())
+      const { content: dts } = generateManifest(app)
       await fs.writeFile(this.manifestPath, dts)
       this.eventEmitter.emit({ type: "BUILD_MANIFEST_SUCCESS" })
     } catch (error) {

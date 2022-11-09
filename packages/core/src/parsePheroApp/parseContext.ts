@@ -55,6 +55,7 @@ function addFunctionContext(
       serviceContext: {
         type: contextType,
       },
+      contextParameterType: contextType.typeArguments?.[0],
     }
   }
 
@@ -136,6 +137,7 @@ function addFunctionContext(
       paramName: getNameAsString(ctxParam.name),
       type: contextType,
     },
+    contextParameterType: contextType.typeArguments?.[0],
   }
 }
 

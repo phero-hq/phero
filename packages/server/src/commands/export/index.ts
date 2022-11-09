@@ -1,7 +1,6 @@
 import {
-  generateAppDeclarationFile,
+  generateManifest,
   generateRPCProxy,
-  MissingPheroFileError,
   MissingTSConfigFileError,
   parsePheroApp,
 } from "@phero/core"
@@ -80,9 +79,8 @@ export default function exportCommand(command: ServerCommandExport) {
 
   program.emit()
 
-  const typeChecker = program.getTypeChecker()
   const app = parsePheroApp(program)
-  const dts = generateAppDeclarationFile(app, typeChecker)
+  const { content: dts } = generateManifest(app)
   const pheroExecution = generateRPCProxy(app, program)
 
   const readFile = (filePath: string): string =>

@@ -1,5 +1,5 @@
 import ts from "typescript"
-import generateAppDeclarationFile from "../generateAppDeclarationFile"
+import generateManifest from "../generateManifest/generateManifest"
 
 import { parsePheroApp } from "../parsePheroApp"
 import { createTestProgram } from "../tsTestUtils"
@@ -10,13 +10,13 @@ function generate(prog: ts.Program): string {
   //   console.error(prog.getSemanticDiagnostics())
   //   throw new Error("Compile error")
   // }
-  const typeChecker = prog.getTypeChecker()
+
   const parsedApp = parsePheroApp(prog)
-  const dts = generateAppDeclarationFile(parsedApp, typeChecker)
-  return dts
+
+  return generateManifest(parsedApp).content
 }
 
-describe("generateAppDeclarationFile", () => {
+describe("generateManifest", () => {
   describe("middleware", () => {
     test("should parse middleware", () => {
       const parsedApp = generate(

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`generateAppDeclarationFile errors should generate common errors in domain 1`] = `
+exports[`generateManifest errors should generate common errors in domain 1`] = `
 "export declare namespace domain {
     namespace v_1_0_0 {
         class HamburgerError extends Error {
@@ -25,11 +25,10 @@ export declare namespace articleService {
         function getArticle(): Promise<string>;
         function setArticle(): Promise<string>;
     }
-}
-"
+}"
 `;
 
-exports[`generateAppDeclarationFile errors should generate multi-service multi-error 1`] = `
+exports[`generateManifest errors should generate multi-service multi-error 1`] = `
 "export declare namespace domain {
     namespace v_1_0_0 {
         class HamburgerError extends Error {
@@ -49,11 +48,10 @@ export declare namespace articleService {
     namespace v_1_0_0 {
         function getArticle(): Promise<string>;
     }
-}
-"
+}"
 `;
 
-exports[`generateAppDeclarationFile errors should generate properties on generated error classes 1`] = `
+exports[`generateManifest errors should generate properties on generated error classes 1`] = `
 "export declare namespace domain {
     namespace v_1_0_0 {
         class ArticleError extends Error {
@@ -65,11 +63,10 @@ export declare namespace articleService {
     namespace v_1_0_0 {
         function getArticle(): Promise<string>;
     }
-}
-"
+}"
 `;
 
-exports[`generateAppDeclarationFile errors should generate service error 1`] = `
+exports[`generateManifest errors should generate service error 1`] = `
 "export declare namespace domain {
     namespace v_1_0_0 {
         class ArticleError extends Error {
@@ -81,11 +78,10 @@ export declare namespace articleService {
     namespace v_1_0_0 {
         function getArticle(): Promise<string>;
     }
-}
-"
+}"
 `;
 
-exports[`generateAppDeclarationFile middleware should parse middleware 1`] = `
+exports[`generateManifest middleware should parse middleware 1`] = `
 "export declare namespace domain {
     namespace v_1_0_0 {
         interface User {
@@ -102,11 +98,10 @@ export declare namespace articleService {
             uid: string;
         }>, aap: string): Promise<string>;
     }
-}
-"
+}"
 `;
 
-exports[`generateAppDeclarationFile typeAliases jasper 1`] = `
+exports[`generateManifest typeAliases jasper 1`] = `
 "export declare namespace domain {
     namespace v_1_0_0 {
         interface X {
@@ -115,12 +110,12 @@ exports[`generateAppDeclarationFile typeAliases jasper 1`] = `
         interface Y {
             type: \\"y\\";
         }
-        type Z = domain.v_1_0_0.X | domain.v_1_0_0.Y;
+        type Z = X | Y;
         interface B {
-            [key: string]: domain.v_1_0_0.Z;
+            [key: string]: Z;
         }
         interface A {
-            b: domain.v_1_0_0.B;
+            b: B;
         }
     }
 }
@@ -128,11 +123,10 @@ export declare namespace articleService {
     namespace v_1_0_0 {
         function example(a: domain.v_1_0_0.A): Promise<void>;
     }
-}
-"
+}"
 `;
 
-exports[`generateAppDeclarationFile typeAliases type aliases to native array types 1`] = `
+exports[`generateManifest typeAliases type aliases to native array types 1`] = `
 "export declare namespace domain {
     namespace v_1_0_0 {
         type AadReturnType1 = string[];
@@ -142,11 +136,10 @@ export declare namespace articleService {
     namespace v_1_0_0 {
         function getArticle(): Promise<domain.v_1_0_0.AadReturnType1>;
     }
-}
-"
+}"
 `;
 
-exports[`generateAppDeclarationFile typeAliases type aliases to native types 1`] = `
+exports[`generateManifest typeAliases type aliases to native types 1`] = `
 "export declare namespace domain {
     namespace v_1_0_0 {
         type AadReturnType2 = boolean;
@@ -158,24 +151,22 @@ export declare namespace articleService {
             aad: domain.v_1_0_0.AadReturnType2;
         }>;
     }
-}
-"
+}"
 `;
 
-exports[`generateAppDeclarationFile typeAliases type aliases which are aliases of aliases 1`] = `
+exports[`generateManifest typeAliases type aliases which are aliases of aliases 1`] = `
 "export declare namespace domain {
     namespace v_1_0_0 {
         type TypeReal = {
             x: number;
         };
-        type TypeRef = domain.v_1_0_0.TypeReal;
-        type Result = domain.v_1_0_0.TypeRef;
+        type TypeRef = TypeReal;
+        type Result = TypeRef;
     }
 }
 export declare namespace workoutRoutineService {
     namespace v_1_0_0 {
         function getRoutine(versionId: string): Promise<domain.v_1_0_0.Result>;
     }
-}
-"
+}"
 `;
