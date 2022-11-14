@@ -1,6 +1,6 @@
 {
   "name": "phero",
-  "version": "0.9.12",
+  "version": "0.9.13",
   "description": "Full-stack type-safety with pure TypeScript",
   "homepage": "https://phero.dev",
   "repository": "phero-hq/phero",
@@ -21,7 +21,7 @@
     "postbuild": "cp package.json ./dist/package.json && cp ../../README.md README.md"
   },
   "dependencies": {
-    "@phero/dev": "^0.9.12",
+    "@phero/dev": "^0.9.13",
     "@types/node": "^18.11.9",
     "ink": "^3.2.0",
     "ink-select-input": "^4.2.1",
