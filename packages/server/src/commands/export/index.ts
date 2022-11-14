@@ -61,7 +61,6 @@ export default function exportCommand(command: ServerCommandExport) {
       // support for Pick, Omit, and other TS utilities
       ...(hasES5 ? [] : ["lib.es5.d.ts"]),
     ],
-    outDir: path.join(projectPath, "export"),
     // target: ts.ScriptTarget.ES5,
     // module: ts.ModuleKind.CommonJS,
   }
@@ -74,9 +73,18 @@ export default function exportCommand(command: ServerCommandExport) {
     rootNames: [`${projectPath}/src/phero.ts`],
   })
 
-  const exportPath = path.join(projectPath, "export")
+  const tsOutDir = program.getCompilerOptions().outDir
+
+  if (!tsOutDir) {
+    throw new Error(
+      'Please provide a "outDir" option in your tsconfig.json file.',
+    )
+  }
+
+  const exportPath = path.join(projectPath, ".phero")
 
   rimRafExport(exportPath)
+  rimRafExport(tsOutDir)
 
   program.emit()
 
@@ -99,7 +107,7 @@ export default function exportCommand(command: ServerCommandExport) {
   const metaExportFiles: MetaExportFiles = {
     "phero-manifest.d.ts": dts,
     "phero-execution.js": pheroExecution.js,
-    "phero.js": readFile(path.join(exportPath, "phero.js")),
+    "phero.js": readFile(path.join(tsOutDir, "phero.js")),
     "package.json": readFile(path.join(projectPath, "package.json")),
     "package-lock.json": readFile(path.join(projectPath, "package-lock.json")),
   }
@@ -108,19 +116,19 @@ export default function exportCommand(command: ServerCommandExport) {
     case ServerExportFlavor.NodeJS: {
       const nodejsExport = generateNodeJSExport(app, metaExportFiles)
 
-      writeToDisk(exportPath, nodejsExport)
-
-      copyExport(
-        exportPath,
+      copyTsOutToBundles(
+        tsOutDir,
         nodejsExport.bundles.map((b) => path.join(exportPath, b.name)),
       )
-      console.log("Done exporting to ./export, to run all your services:")
-      console.log("(cd ./export && npm i && node ./index.js)")
+      writeToDisk(exportPath, nodejsExport)
+
+      console.log("Done exporting to .phero, to run all your services:")
+      console.log("(cd .phero && npm i && node ./index.js)")
       console.log(
         `To run one specific services, e.g. "${app.services[0].name}":`,
       )
       console.log(
-        `(cd ./export && npm i && node ./${app.services[0].name}/index.js)`,
+        `(cd .phero && npm i && node ./${app.services[0].name}/index.js)`,
       )
       break
     }
@@ -130,18 +138,18 @@ export default function exportCommand(command: ServerCommandExport) {
         metaExportFiles,
       )
 
-      writeToDisk(exportPath, gcloudFunctionsExport)
-
-      copyExport(
-        exportPath,
+      copyTsOutToBundles(
+        tsOutDir,
         gcloudFunctionsExport.bundles.map((b) => path.join(exportPath, b.name)),
       )
+      writeToDisk(exportPath, gcloudFunctionsExport)
+
       console.log(
         `Done exporting ${
           gcloudFunctionsExport.bundles.length === 1
             ? "1 service"
             : `${gcloudFunctionsExport.bundles.length} services`
-        } to ./export`,
+        } to .phero`,
       )
       break
     }
@@ -152,8 +160,8 @@ export default function exportCommand(command: ServerCommandExport) {
 
       const vercelExport = generateVercelExport(app, metaExportFiles)
 
-      copyExport(
-        exportPath,
+      copyTsOutToBundles(
+        tsOutDir,
         vercelExport.bundles.map((b) => path.join(projectPath, b.name)),
       )
 
@@ -170,7 +178,7 @@ export default function exportCommand(command: ServerCommandExport) {
           vercelExport.bundles.length === 1
             ? "1 service"
             : `${vercelExport.bundles.length} services`
-        } to ./.vercel`,
+        } to .vercel`,
       )
       console.log(`Now deploy with "npx vercel@latest deploy --prebuilt"`)
       break
@@ -222,7 +230,7 @@ function rimRafExport(exportPath: string): void {
   }
 }
 
-function copyExport(exportPath: string, bundlePaths: string[]) {
+function copyTsOutToBundles(exportPath: string, bundlePaths: string[]) {
   if (!fs.existsSync(exportPath)) {
     return
   }
