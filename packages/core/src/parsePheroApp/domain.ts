@@ -59,6 +59,8 @@ export interface PheroFunctionParameter {
 }
 
 export interface PheroServiceConfig {
+  // these are models which are not used inside functions, but we need them to generate parsers on the server side
+  models?: PheroModel[]
   middleware?: PheroMiddlewareConfig[]
   contextType?: ts.TypeNode
 }

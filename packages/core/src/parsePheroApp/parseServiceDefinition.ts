@@ -30,7 +30,7 @@ export default function parseServiceDefinition(
     PheroServiceConfig,
     PheroFunction[],
   ] = parseContext(
-    parseServiceConfig(serviceConfigArg, typeChecker),
+    parseServiceConfig(serviceConfigArg, prog),
     parseFunctionDefinitions(functionDefsArg, typeChecker),
     prog,
   )

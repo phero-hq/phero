@@ -1,6 +1,5 @@
 import ts from "typescript"
 import { ParseError } from "../../errors"
-import { isModel } from "../../parseAppDeclaration"
 import { Model } from "../../parsePheroApp/domain"
 import * as tsx from "../../tsx"
 import generateParserFromModel from "./../parsers/generateParserFromModel"
@@ -210,15 +209,10 @@ export function getFunctionName(name?: ts.PropertyName): string {
 
 export function generateNonModelParser(
   type: ts.TypeNode,
-  model: ts.Node,
   prog: ts.Program,
   parserName: string,
 ): ts.FunctionDeclaration {
-  if (isModel(model)) {
-    throw new ParseError("S143: Should not be model", model)
-  }
-
-  const rootParserModel = generateParserModel(model, "data", prog)
+  const rootParserModel = generateParserModel(type, "data", prog)
   const parserStatement: ts.Statement = generateParserFromModel(rootParserModel)
 
   return tsx.function({

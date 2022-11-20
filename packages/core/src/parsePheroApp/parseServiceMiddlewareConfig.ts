@@ -12,8 +12,9 @@ import * as tsx from "../tsx"
 export default function parseServiceMiddlewareConfig(
   configObject: ts.ObjectLiteralExpression,
   name: string,
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): PheroMiddlewareConfig[] | undefined {
+  const typeChecker = prog.getTypeChecker()
   const prop = configObject.properties.find(
     (p) => p.name && getNameAsString(p.name) === name,
   )

@@ -3,6 +3,7 @@ export {
   ParsedAppDeclarationVersion,
   getDeclarationForVersion,
 } from "./ParsedAppDeclarationVersion"
+export { default as parseManifest } from "./parseManifest/parseManifest"
 export {
   generateClientFunction,
   generateModel,
@@ -16,7 +17,12 @@ export {
   generateNonModelParser,
 } from "./code-gen/parsers/generateParser"
 export { parsePheroApp } from "./parsePheroApp"
-export { PheroApp, PheroFunction, PheroService } from "./parsePheroApp/domain"
+export {
+  PheroApp,
+  PheroError,
+  PheroFunction,
+  PheroService,
+} from "./parsePheroApp/domain"
 export {
   MissingTSConfigFileError,
   MissingPheroFileError,
@@ -32,3 +38,4 @@ export {
 } from "./RPCResult"
 export * as tsx from "./tsx"
 export { VirtualCompilerHost } from "./VirtualCompilerHost"
+export { generateTypeNode, generateTypeElement } from "./generateTypeNode"

@@ -4,7 +4,7 @@ import extractErrors from "../extractErrors/extractErrors"
 import { PheroError } from "../extractErrors/parseThrowStatement"
 import { hasModifier } from "../tsUtils"
 import { PheroApp, PheroModel, PheroService } from "./domain"
-import parseModels from "./parseModels"
+import { parseFunctionModels } from "./parseModels"
 import parseServiceDefinition from "./parseServiceDefinition"
 
 export function parsePheroApp(prog: ts.Program): PheroApp {
@@ -40,7 +40,7 @@ export function parsePheroApp(prog: ts.Program): PheroApp {
     }
 
     for (const func of service.funcs) {
-      for (const model of parseModels(func, prog)) {
+      for (const model of parseFunctionModels(func, prog)) {
         const modelName = model.name
 
         if (modelName === "PheroContext") {

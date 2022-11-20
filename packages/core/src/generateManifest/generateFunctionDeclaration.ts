@@ -11,7 +11,7 @@ export default function generateFunctionDeclaration(
       ...(func.contextParameterType
         ? [
             tsx.param({
-              name: "ctx",
+              name: "context",
               type: tsx.type.reference({
                 name: "phero.PheroContext",
                 args: [withDomainVersionRef(func.contextParameterType)],

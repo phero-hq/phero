@@ -1,6 +1,11 @@
 import ts from "typescript"
 import { getNameAsString, isExternal, isExternalSymbol } from "../tsUtils"
-import { Model, PheroFunction, PheroModel } from "./domain"
+import {
+  Model,
+  PheroFunction,
+  PheroMiddlewareConfig,
+  PheroModel,
+} from "./domain"
 
 const IGNORE_SYNTAX_KIND = [
   ts.SyntaxKind.StringKeyword,
@@ -13,121 +18,152 @@ const IGNORE_SYNTAX_KIND = [
   ts.SyntaxKind.UndefinedKeyword,
 ]
 
-export default function parseModels(
+export function parseMiddlewareModels(
+  middlewareConfigs: PheroMiddlewareConfig[],
+  prog: ts.Program,
+): PheroModel[] {
+  const modelParser = new ModelParser(prog)
+
+  for (const config of middlewareConfigs) {
+    modelParser.doType(config.contextType)
+    modelParser.doType(config.nextType)
+    modelParser.doType(config.paramsType)
+  }
+
+  return modelParser.models.map((m) => ({
+    name: getNameAsString(m.name),
+    ref: m,
+  }))
+}
+
+export function parseFunctionModels(
   func: PheroFunction,
   prog: ts.Program,
 ): PheroModel[] {
-  const typeChecker = prog.getTypeChecker()
-  const models: Model[] = []
-  const addedSymbols: ts.Symbol[] = []
+  const modelParser = new ModelParser(prog)
 
   for (const param of func.parameters) {
-    doType(param.type)
+    modelParser.doType(param.type)
   }
 
-  doType(func.returnType)
+  modelParser.doType(func.returnType)
 
-  function doType(typeNode: ts.TypeNode | undefined): void {
+  return modelParser.models.map((m) => ({
+    name: getNameAsString(m.name),
+    ref: m,
+  }))
+}
+
+class ModelParser {
+  public readonly models: Model[] = []
+  private readonly addedSymbols: ts.Symbol[] = []
+  private readonly typeChecker: ts.TypeChecker
+
+  constructor(private readonly prog: ts.Program) {
+    this.typeChecker = prog.getTypeChecker()
+  }
+
+  doType(typeNode: ts.TypeNode | undefined): void {
     if (!typeNode) {
       return
     }
 
     if (ts.isTypeReferenceNode(typeNode)) {
       for (const typeArgument of typeNode.typeArguments ?? []) {
-        doType(typeArgument)
+        this.doType(typeArgument)
       }
 
       // this is the best way to get the actual declaration of a TypeReferenceNode
       // this works for interfaces and type aliases
-      const symbol = typeChecker.getSymbolAtLocation(typeNode.typeName)
+      const symbol = this.typeChecker.getSymbolAtLocation(typeNode.typeName)
 
-      if (!symbol || isExternalSymbol(symbol, prog)) {
+      if (!symbol || isExternalSymbol(symbol, this.prog)) {
         return
       }
 
-      addedSymbols.push(symbol)
+      this.addedSymbols.push(symbol)
 
       for (const declaration of symbol.declarations ?? []) {
-        doDeclaration(declaration)
+        this.doDeclaration(declaration)
       }
 
       if ((symbol.flags & ts.SymbolFlags.Alias) === ts.SymbolFlags.Alias) {
-        const aliasSymbol = typeChecker.getAliasedSymbol(symbol)
-        if (aliasSymbol && !addedSymbols.includes(aliasSymbol)) {
-          addedSymbols.push(aliasSymbol)
+        const aliasSymbol = this.typeChecker.getAliasedSymbol(symbol)
+        if (aliasSymbol && !this.addedSymbols.includes(aliasSymbol)) {
+          this.addedSymbols.push(aliasSymbol)
           for (const d of aliasSymbol.declarations ?? []) {
-            doDeclaration(d)
+            this.doDeclaration(d)
           }
         }
       }
     } else if (ts.isTypeLiteralNode(typeNode)) {
-      doMembers(typeNode.members)
+      this.doMembers(typeNode.members)
     } else if (ts.isUnionTypeNode(typeNode)) {
       for (const unionElementType of typeNode.types) {
-        doType(unionElementType)
+        this.doType(unionElementType)
       }
     } else if (ts.isIntersectionTypeNode(typeNode)) {
       for (const intersectionElementType of typeNode.types) {
-        doType(intersectionElementType)
+        this.doType(intersectionElementType)
       }
     } else if (ts.isArrayTypeNode(typeNode)) {
-      doType(typeNode.elementType)
+      this.doType(typeNode.elementType)
     } else if (ts.isExpressionWithTypeArguments(typeNode)) {
-      const extendedType = typeChecker.getTypeFromTypeNode(typeNode)
+      const extendedType = this.typeChecker.getTypeFromTypeNode(typeNode)
       for (const declr of extendedType.symbol.declarations ?? []) {
-        doDeclaration(declr)
+        this.doDeclaration(declr)
       }
     } else if (ts.isIndexedAccessTypeNode(typeNode)) {
-      doType(typeNode.objectType)
-      doType(typeNode.indexType)
+      this.doType(typeNode.objectType)
+      this.doType(typeNode.indexType)
     } else if (ts.isTupleTypeNode(typeNode)) {
       for (const el of typeNode.elements) {
-        doType(el)
+        this.doType(el)
       }
     } else if (ts.isParenthesizedTypeNode(typeNode)) {
-      doType(typeNode.type)
+      this.doType(typeNode.type)
     } else if (!IGNORE_SYNTAX_KIND.includes(typeNode.kind)) {
       console.warn("Model extracting not possible for node " + typeNode.kind)
     }
   }
 
-  function doDeclaration(declaration: ts.Declaration | undefined): void {
+  doDeclaration(declaration: ts.Declaration | undefined): void {
     if (!declaration) {
       return
     }
-    if (isExternal(declaration, prog)) {
+    if (isExternal(declaration, this.prog)) {
       return
     }
 
     if (ts.isInterfaceDeclaration(declaration)) {
-      doMembers(declaration.members)
+      this.doMembers(declaration.members)
       for (const heritageClause of declaration.heritageClauses ?? []) {
         for (const type of heritageClause.types) {
-          doType(type)
+          this.doType(type)
         }
       }
       for (const typeParam of declaration.typeParameters ?? []) {
-        doDeclaration(typeParam)
+        this.doDeclaration(typeParam)
       }
 
-      models.push(declaration)
+      this.models.push(declaration)
     } else if (ts.isTypeAliasDeclaration(declaration)) {
-      doType(declaration.type)
+      this.doType(declaration.type)
 
       for (const typeParam of declaration.typeParameters ?? []) {
-        doDeclaration(typeParam)
+        this.doDeclaration(typeParam)
       }
 
-      models.push(declaration)
+      this.models.push(declaration)
     } else if (ts.isEnumDeclaration(declaration)) {
-      models.push(declaration)
+      this.models.push(declaration)
     } else if (ts.isEnumMember(declaration)) {
-      doDeclaration(declaration.parent)
+      this.doDeclaration(declaration.parent)
     } else if (ts.isTypeParameterDeclaration(declaration)) {
-      doType(declaration.constraint)
-      doType(declaration.default)
+      this.doType(declaration.constraint)
+      this.doType(declaration.default)
     } else if (ts.isTypeLiteralNode(declaration)) {
-      doMembers(declaration.members)
+      this.doMembers(declaration.members)
     } else if (!IGNORE_SYNTAX_KIND.includes(declaration.kind)) {
       console.warn(
         "Model extracting not possible for declaration " + declaration.kind,
@@ -135,19 +171,14 @@ export default function parseModels(
     }
   }
 
-  function doMembers(members: ts.NodeArray<ts.TypeElement>): void {
+  doMembers(members: ts.NodeArray<ts.TypeElement>): void {
     for (const member of members) {
       if (ts.isPropertySignature(member)) {
-        doType(member.type)
+        this.doType(member.type)
       } else if (ts.isIndexSignatureDeclaration(member)) {
         // TODO name, but could be computed property
-        doType(member.type)
+        this.doType(member.type)
       }
     }
   }
-
-  return models.map((m) => ({
-    name: getNameAsString(m.name),
-    ref: m,
-  }))
 }

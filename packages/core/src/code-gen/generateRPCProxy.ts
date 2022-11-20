@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { PheroApp, ParseError } from ".."
-import { PheroFunction, PheroService } from "../parsePheroApp/domain"
+import { Model, PheroFunction, PheroService } from "../parsePheroApp/domain"
 import parseReturnType from "../parsePheroApp/parseReturnType"
 import { printCode } from "../tsTestUtils"
 import { VirtualCompilerHost } from "../VirtualCompilerHost"
@@ -98,6 +98,16 @@ export default function generateRPCProxy(
   for (const domainModel of app.models) {
     tsNodes.push(domainModel.ref)
     tsNodes.push(generateModelParser(domainModel.ref, prog))
+  }
+
+  const middlewareModelSet = new Set<Model>()
+  for (const middlewareModel of app.services.flatMap(
+    (s) => s.config.models ?? [],
+  )) {
+    if (!middlewareModelSet.has(middlewareModel.ref)) {
+      middlewareModelSet.add(middlewareModel.ref)
+      tsNodes.push(generateModelParser(middlewareModel.ref, prog))
+    }
   }
 
   for (const service of app.services) {
