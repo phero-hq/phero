@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { ParseError } from "../domain/errors"
-import getCreateServiceCallExpression from "./getCreateServiceCallExpression"
+import parseCreateServiceCallExpression from "./parseCreateServiceCallExpression"
 import { parseContext } from "./parseContext"
 import parseFunctionDefinitions from "./parseFunctionDefinitions"
 import {
@@ -18,7 +18,7 @@ export default function parseServiceDefinition(
   const serviceName = serviceExport.name.getText()
 
   // check if the value of the export is a function call to "creatService"
-  const createServiceCallExpr = getCreateServiceCallExpression(
+  const createServiceCallExpr = parseCreateServiceCallExpression(
     serviceExport,
     prog,
   )
