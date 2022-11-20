@@ -94,7 +94,7 @@ export declare namespace phero {
 }
 export declare namespace articleService {
     namespace v_1_0_0 {
-        function getArticle(ctx: phero.PheroContext<{
+        function getArticle(context: phero.PheroContext<{
             uid: string;
         }>, aap: string): Promise<string>;
     }
