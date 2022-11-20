@@ -3,7 +3,7 @@ import ts, {
   VariableDeclaration,
 } from "typescript"
 import { TSFiles, VirtualCompilerHost } from "./VirtualCompilerHost"
-import { PheroApp } from "../parsePheroApp/domain"
+import { PheroApp } from "../domain/PheroApp"
 import { KindToNodeMappings } from "./tsUtils"
 
 export function printPheroApp(app: PheroApp): string {

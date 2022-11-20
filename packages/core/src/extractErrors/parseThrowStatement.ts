@@ -1,18 +1,7 @@
 import ts from "typescript"
 import * as tsx from "../tsx"
 import { getNameAsString, hasModifier } from "../lib/tsUtils"
-
-export interface PheroError {
-  name: string
-  sourceFile: string
-  properties: PheroErrorProperty[]
-  ref: ts.ClassDeclaration
-}
-
-export interface PheroErrorProperty {
-  name: string
-  type: ts.TypeNode
-}
+import { PheroError, PheroErrorProperty } from "../domain/PheroApp"
 
 export default function parseThrowStatement(
   throwStatement: ts.ThrowStatement,

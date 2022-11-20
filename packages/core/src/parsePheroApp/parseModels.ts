@@ -5,7 +5,7 @@ import {
   PheroFunction,
   PheroMiddlewareConfig,
   PheroModel,
-} from "./domain"
+} from "../domain/PheroApp"
 
 const IGNORE_SYNTAX_KIND = [
   ts.SyntaxKind.StringKeyword,

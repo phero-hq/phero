@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { ParseError } from "../../domain/errors"
-import { Model } from "../../parsePheroApp/domain"
+import { Model } from "../../domain/PheroApp"
 import * as tsx from "../../tsx"
 import generateParserFromModel from "./../parsers/generateParserFromModel"
 import generateParserModel from "./../parsers/generateParserModel"

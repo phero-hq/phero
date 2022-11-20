@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { PheroFunction } from "../parsePheroApp/domain"
+import { PheroFunction } from "../domain/PheroApp"
 import * as tsx from "../tsx"
 
 export default function generateFunctionDeclaration(

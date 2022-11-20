@@ -1,7 +1,7 @@
 import ts from "typescript"
 import { ParseError } from "../domain/errors"
 import parseReturnType from "./parseReturnType"
-import { PheroFunction, PheroFunctionParameter } from "./domain"
+import { PheroFunction, PheroFunctionParameter } from "../domain/PheroApp"
 import { getNameAsString, resolveSymbol } from "../lib/tsUtils"
 
 export default function parseFunctionDefinition(

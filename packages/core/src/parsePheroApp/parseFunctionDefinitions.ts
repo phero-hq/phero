@@ -1,6 +1,6 @@
 import ts from "typescript"
 import parseFunctionDefinition from "./parseFunctionDefinition"
-import { PheroFunction } from "./domain"
+import { PheroFunction } from "../domain/PheroApp"
 import { hasModifier, resolveSymbol } from "../lib/tsUtils"
 
 export default function parseFunctionDefinitions(

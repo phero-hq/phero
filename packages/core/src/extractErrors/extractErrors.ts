@@ -1,5 +1,6 @@
 import ts from "typescript"
-import parseThrowStatement, { PheroError } from "./parseThrowStatement"
+import { PheroError } from "../domain/PheroApp"
+import parseThrowStatement from "./parseThrowStatement"
 import recursivelyFindThrowStatements from "./recursivelyFindThrowStatements"
 
 export default function extractErrors(

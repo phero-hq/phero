@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { ParseError } from "../domain/errors"
-import { PheroMiddlewareConfig } from "./domain"
+import { PheroMiddlewareConfig } from "../domain/PheroApp"
 import {
   getFirstChildOfKind,
   getNameAsString,

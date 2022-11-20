@@ -5,7 +5,7 @@ import generateParserModel, {
   ParserModelType,
 } from "../code-gen/parsers/generateParserModel"
 import { ParseError } from "../domain/errors"
-import { PheroFunction, PheroServiceConfig } from "./domain"
+import { PheroFunction, PheroServiceConfig } from "../domain/PheroApp"
 import { getNameAsString } from "../lib/tsUtils"
 
 export function parseContext(

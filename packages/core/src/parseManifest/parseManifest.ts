@@ -7,7 +7,7 @@ import {
   PheroFunction,
   PheroModel,
   PheroService,
-} from "../parsePheroApp/domain"
+} from "../domain/PheroApp"
 import parseReturnType from "../parsePheroApp/parseReturnType"
 import { getNameAsString } from "../lib/tsUtils"
 import { VirtualCompilerHost } from "../lib/VirtualCompilerHost"

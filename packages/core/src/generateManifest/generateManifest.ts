@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { PheroApp, PheroService } from "../parsePheroApp/domain"
+import { PheroApp, PheroService } from "../domain/PheroApp"
 import { printCode } from "../lib/tsTestUtils"
 import * as tsx from "../tsx"
 import generateErrorDeclaration from "./generateErrorDeclaration"

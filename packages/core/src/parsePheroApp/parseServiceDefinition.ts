@@ -3,7 +3,11 @@ import { ParseError } from "../domain/errors"
 import getCreateServiceCallExpression from "./getCreateServiceCallExpression"
 import { parseContext } from "./parseContext"
 import parseFunctionDefinitions from "./parseFunctionDefinitions"
-import { PheroFunction, PheroService, PheroServiceConfig } from "./domain"
+import {
+  PheroFunction,
+  PheroService,
+  PheroServiceConfig,
+} from "../domain/PheroApp"
 import parseServiceConfig from "./parseServiceConfig"
 
 export default function parseServiceDefinition(

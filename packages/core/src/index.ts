@@ -4,7 +4,7 @@ export {
   PheroFunction,
   PheroService,
   PheroServiceConfig,
-} from "./parsePheroApp/domain"
+} from "./domain/PheroApp"
 export {
   MissingTSConfigFileError,
   MissingPheroFileError,

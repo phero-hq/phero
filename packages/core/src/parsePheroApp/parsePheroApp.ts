@@ -1,9 +1,13 @@
 import ts from "typescript"
 import { MissingPheroFileError, ParseError } from "../domain/errors"
 import extractErrors from "../extractErrors/extractErrors"
-import { PheroError } from "../extractErrors/parseThrowStatement"
 import { hasModifier } from "../lib/tsUtils"
-import { PheroApp, PheroModel, PheroService } from "./domain"
+import {
+  PheroApp,
+  PheroError,
+  PheroModel,
+  PheroService,
+} from "../domain/PheroApp"
 import { parseFunctionModels } from "./parseModels"
 import parseServiceDefinition from "./parseServiceDefinition"
 
