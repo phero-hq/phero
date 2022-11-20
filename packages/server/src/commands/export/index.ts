@@ -1,6 +1,5 @@
 import {
   generateManifest,
-  generateRPCProxy,
   MissingTSConfigFileError,
   parsePheroApp,
 } from "@phero/core"
@@ -13,6 +12,7 @@ import { Export, ExportBundle, MetaExportFiles } from "./domain"
 import generateGCloudFunctionsExport from "./gcloud-functions"
 import generateNodeJSExport from "./nodejs"
 import generateVercelExport from "./vercel"
+import generateRPCProxy from "../../code-gen/generateRPCProxy"
 
 export default function exportCommand(command: ServerCommandExport) {
   const projectPath = process.cwd()

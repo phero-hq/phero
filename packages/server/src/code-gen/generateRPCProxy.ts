@@ -1,18 +1,17 @@
 import ts from "typescript"
-import { PheroApp, ParseError } from ".."
-import { Model, PheroFunction, PheroService } from "../parsePheroApp/domain"
-import parseReturnType from "../parsePheroApp/parseReturnType"
-import { printCode } from "../tsTestUtils"
-import { VirtualCompilerHost } from "../VirtualCompilerHost"
-import generateModelParser, {
-  generateParserBody,
-} from "./parsers/generateParser"
-import generateParserFromModel from "./parsers/generateParserFromModel"
-import generateParserModel from "./parsers/generateParserModel"
+import {
+  PheroApp,
+  ParseError,
+  PheroFunction,
+  PheroService,
+  VirtualCompilerHost,
+  tsx,
+  generateModelParser,
+  PheroError,
+  generateInlineParser,
+} from "@phero/core"
 
-import { PheroError } from "../extractErrors/parseThrowStatement"
-import generateMiddlewareParsers from "../generateMiddlewareParsers"
-import * as tsx from "../tsx"
+import generateMiddlewareParsers from "./generateMiddlewareParsers"
 
 const factory = ts.factory
 
@@ -100,7 +99,7 @@ export default function generateRPCProxy(
     tsNodes.push(generateModelParser(domainModel.ref, prog))
   }
 
-  const middlewareModelSet = new Set<Model>()
+  const middlewareModelSet = new Set<ts.Node>()
   for (const middlewareModel of app.services.flatMap(
     (s) => s.config.models ?? [],
   )) {
@@ -118,14 +117,6 @@ export default function generateRPCProxy(
         generateMiddlewareParsers(service.name, service.config, prog),
       )
     }
-
-    // TODO
-    // for (const serviceModel of service.models) {
-    //   tsNodes.push(
-    //     serviceModel,
-    //     generateModelParser(serviceModel.ref, typeChecker),
-    //   )
-    // }
 
     for (const serviceFunction of service.funcs) {
       tsNodes.push(
@@ -162,8 +153,6 @@ export default function generateRPCProxy(
   const progExecution = vHost.createProgram("phero-execution.ts")
 
   progExecution.emit()
-
-  // console.log(vHost.getFile("phero-execution.ts"))
 
   const js = vHost.getFile("phero-execution.js")
 
@@ -268,26 +257,16 @@ function generateInnerFunction(
           body: tsx.block(
             tsx.const({
               name: "inputParser",
-              init: generateInlineParser({
-                returnType: tsx.type.any,
-                parser: generateParserFromModel(
-                  generateParserModel(funcDef.ref, "data", prog),
-                ),
-              }),
+              init: generateInlineParser(tsx.type.any, funcDef.ref, prog),
             }),
 
             tsx.const({
               name: "outputParser",
-              init: generateInlineParser({
-                returnType: tsx.type.any,
-                parser: generateParserFromModel(
-                  generateParserModel(
-                    parseReturnType(funcDef.ref),
-                    "data",
-                    prog,
-                  ),
-                ),
-              }),
+              init: generateInlineParser(
+                tsx.type.any,
+                funcDef.returnType,
+                prog,
+              ),
             }),
 
             ...(service.config.middleware
@@ -820,23 +799,6 @@ function wrapWithErrorHandler(
   })
 }
 
-export function generateInlineParser({
-  returnType,
-  parser,
-}: {
-  returnType: ts.TypeNode
-  parser: ts.Statement
-}): ts.ArrowFunction {
-  return tsx.arrowFunction({
-    params: [tsx.param({ name: "data", type: tsx.type.any })],
-    returnType: tsx.type.reference({
-      name: "ParseResult",
-      args: [returnType],
-    }),
-    body: generateParserBody(returnType, parser),
-  })
-}
-
 function generateRPCFunctionCall({
   service,
   funcDef,
@@ -1084,7 +1046,7 @@ function getParameterName(name: ts.BindingName): string {
     return name.text
   } else if (ts.isBindingName(name)) {
     throw new ParseError(
-      `S138: No support for binding names ${printCode(name)}`,
+      `S138: No support for binding names ${name?.kind}`,
       name,
     )
   }

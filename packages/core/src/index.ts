@@ -1,9 +1,9 @@
 export { default as parseManifest } from "./parseManifest/parseManifest"
 export { default as generateManifest } from "./generateManifest/generateManifest"
-export { default as generateRPCProxy } from "./code-gen/generateRPCProxy"
 export {
-  default as generateModelParser,
+  generateModelParser,
   generateNonModelParser,
+  generateInlineParser,
 } from "./code-gen/parsers/generateParser"
 export { parsePheroApp } from "./parsePheroApp"
 export {
@@ -11,6 +11,7 @@ export {
   PheroError,
   PheroFunction,
   PheroService,
+  PheroServiceConfig,
 } from "./parsePheroApp/domain"
 export {
   MissingTSConfigFileError,

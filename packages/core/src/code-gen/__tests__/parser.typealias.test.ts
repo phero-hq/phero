@@ -4,7 +4,7 @@ import {
   compileStatements,
   printCode,
 } from "../../tsTestUtils"
-import generateParser from "../parsers/generateParser"
+import { generateModelParser as generateParser } from "../parsers/generateParser"
 
 describe("Parsers", () => {
   describe("for a type alias", () => {

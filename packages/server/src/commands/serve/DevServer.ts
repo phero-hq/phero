@@ -1,6 +1,5 @@
 import {
   generateManifest,
-  generateRPCProxy,
   hasErrorCode,
   PheroApp,
   parsePheroApp,
@@ -13,6 +12,7 @@ import { promises as fs } from "fs"
 import http from "http"
 import path from "path"
 import ts from "typescript"
+import generateRPCProxy from "../../code-gen/generateRPCProxy"
 import WatchProgram from "./WatchProgram"
 
 export interface PrintedClientCode {

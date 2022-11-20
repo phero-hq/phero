@@ -8,7 +8,7 @@ import generateParserModel from "./../parsers/generateParserModel"
 const exportModifier = ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)
 const staticModifier = ts.factory.createModifier(ts.SyntaxKind.StaticKeyword)
 
-export default function generateModelParser(
+export function generateModelParser(
   model: Model,
   prog: ts.Program,
 ): ts.ClassDeclaration {
@@ -223,5 +223,23 @@ export function generateNonModelParser(
       args: [type],
     }),
     body: generateParserBody(type, parserStatement),
+  })
+}
+
+export function generateInlineParser(
+  returnType: ts.TypeNode,
+  model: ts.Node,
+  prog: ts.Program,
+): ts.ArrowFunction {
+  const parser = generateParserFromModel(
+    generateParserModel(model, "data", prog),
+  )
+  return tsx.arrowFunction({
+    params: [tsx.param({ name: "data", type: tsx.type.any })],
+    returnType: tsx.type.reference({
+      name: "ParseResult",
+      args: [returnType],
+    }),
+    body: generateParserBody(returnType, parser),
   })
 }
