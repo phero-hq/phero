@@ -12,7 +12,7 @@ import { Export, ExportBundle, MetaExportFiles } from "./domain"
 import generateGCloudFunctionsExport from "./gcloud-functions"
 import generateNodeJSExport from "./nodejs"
 import generateVercelExport from "./vercel"
-import generateRPCProxy from "../../code-gen/generateRPCProxy"
+import generatePheroExecutionFile from "../../code-gen/generatePheroExecutionFile"
 
 export default function exportCommand(command: ServerCommandExport) {
   const projectPath = process.cwd()
@@ -81,7 +81,7 @@ export default function exportCommand(command: ServerCommandExport) {
 
   const app = parsePheroApp(program)
   const { content: dts } = generateManifest(app)
-  const pheroExecution = generateRPCProxy(app, program)
+  const pheroExecution = generatePheroExecutionFile(app, program)
 
   const readFile = (filePath: string): string =>
     fs.readFileSync(filePath, {

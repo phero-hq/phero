@@ -12,7 +12,7 @@ import { promises as fs } from "fs"
 import http from "http"
 import path from "path"
 import ts from "typescript"
-import generateRPCProxy from "../../code-gen/generateRPCProxy"
+import generatePheroExecutionFile from "../../code-gen/generatePheroExecutionFile"
 import WatchProgram from "./WatchProgram"
 
 export interface PrintedClientCode {
@@ -120,7 +120,7 @@ export default class DevServer {
     try {
       this.eventEmitter.emit({ type: "BUILD_RPCS_START" })
       this.routes = this.generateRoutes(app)
-      const output = generateRPCProxy(app, prog)
+      const output = generatePheroExecutionFile(app, prog)
       await fs.writeFile(this.pheroExecutionJS, output.js)
       this.clearRequireCache()
       this.eventEmitter.emit({ type: "BUILD_RPCS_SUCCESS" })

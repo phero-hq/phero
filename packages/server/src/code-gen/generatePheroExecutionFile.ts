@@ -9,13 +9,12 @@ import {
   generateModelParser,
   PheroError,
   generateInlineParser,
+  PheroServiceConfig,
 } from "@phero/core"
-
-import generateMiddlewareParsers from "./generateMiddlewareParsers"
 
 const factory = ts.factory
 
-export default function generateRPCProxy(
+export default function generatePheroExecutionFile(
   app: PheroApp,
   prog: ts.Program,
 ): { js: string } {
@@ -1203,3 +1202,27 @@ const types = [
     ],
   ),
 ]
+
+function generateMiddlewareParsers(
+  serviceName: string,
+  serviceConfig: PheroServiceConfig,
+  prog: ts.Program,
+): ts.VariableStatement {
+  const middlewares = serviceConfig.middleware ?? []
+  return tsx.const({
+    name: `service_middlewares_${serviceName}`,
+    init: tsx.literal.array(
+      ...middlewares.map((middleware) =>
+        tsx.literal.array(
+          generateInlineParser(tsx.type.any, middleware.paramsType, prog),
+
+          generateInlineParser(tsx.type.any, middleware.contextType, prog),
+
+          middleware.nextType
+            ? generateInlineParser(tsx.type.any, middleware.nextType, prog)
+            : tsx.literal.null,
+        ),
+      ),
+    ),
+  })
+}
