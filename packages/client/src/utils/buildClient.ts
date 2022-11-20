@@ -1,25 +1,17 @@
-import {
-  getDeclarationForVersion,
-  parseAppDeclarationFileContent,
-} from "@phero/core"
+import { parseManifest } from "@phero/core"
 import { ClientCommandBuild, ClientServerLocation } from "@phero/dev"
 import { promises as fs } from "fs"
 import http from "http"
 import https from "https"
-import generateClientSource from "../code-gen/generateClientSource"
+import generateClientSource from "../code-gen/generateClientSource2"
 import writeClientSource from "./writeClientSource"
 
 export default async function buildClient(
   server: ClientServerLocation,
 ): Promise<void> {
-  const manifest = await getManifestSource(server)
-  const declaration = parseAppDeclarationFileContent(manifest)
-  const declarationVersion = getDeclarationForVersion(declaration.result)
-  const clientSource = generateClientSource(
-    declarationVersion,
-    declaration.program,
-  )
-
+  const manifestSource = await getManifestSource(server)
+  const manifest = parseManifest(manifestSource)
+  const clientSource = generateClientSource(manifest.result, manifest.program)
   await writeClientSource(clientSource)
 }
 
