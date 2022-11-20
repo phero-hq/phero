@@ -4,9 +4,9 @@ import generateParserModel, {
   ObjectParserModel,
   ParserModelType,
 } from "../code-gen/parsers/generateParserModel"
-import { ParseError } from "../errors"
+import { ParseError } from "../domain/errors"
 import { PheroFunction, PheroServiceConfig } from "./domain"
-import { getNameAsString } from "../tsUtils"
+import { getNameAsString } from "../lib/tsUtils"
 
 export function parseContext(
   serviceConfig: PheroServiceConfig,

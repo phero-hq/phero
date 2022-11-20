@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { compileStatement, compileStatements } from "../../tsTestUtils"
+import { compileStatement, compileStatements } from "../../lib/tsTestUtils"
 import generateParserModel from "../parsers/generateParserModel"
 
 describe("generateParserModel", () => {

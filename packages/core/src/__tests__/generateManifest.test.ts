@@ -2,7 +2,7 @@ import ts from "typescript"
 import generateManifest from "../generateManifest/generateManifest"
 
 import { parsePheroApp } from "../parsePheroApp"
-import { createTestProgram } from "../tsTestUtils"
+import { createTestProgram } from "../lib/tsTestUtils"
 
 function generate(prog: ts.Program): string {
   // if (prog.getSemanticDiagnostics().length) {

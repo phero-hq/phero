@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { PheroApp, PheroService } from "../parsePheroApp/domain"
-import { printCode } from "../tsTestUtils"
+import { printCode } from "../lib/tsTestUtils"
 import * as tsx from "../tsx"
 import generateErrorDeclaration from "./generateErrorDeclaration"
 import generateFunctionDeclaration from "./generateFunctionDeclaration"

@@ -1,12 +1,12 @@
 import ts from "typescript"
-import { ParseError } from "../errors"
+import { ParseError } from "../domain/errors"
 import { PheroMiddlewareConfig } from "./domain"
 import {
   getFirstChildOfKind,
   getNameAsString,
   getTypeName,
   resolveSymbol,
-} from "../tsUtils"
+} from "../lib/tsUtils"
 import * as tsx from "../tsx"
 
 export default function parseServiceMiddlewareConfig(

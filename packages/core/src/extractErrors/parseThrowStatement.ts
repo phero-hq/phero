@@ -1,6 +1,6 @@
 import ts from "typescript"
 import * as tsx from "../tsx"
-import { getNameAsString, hasModifier } from "../tsUtils"
+import { getNameAsString, hasModifier } from "../lib/tsUtils"
 
 export interface PheroError {
   name: string

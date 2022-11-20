@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { isExternal } from "../tsUtils"
+import { isExternal } from "../lib/tsUtils"
 
 export default function findFunctionDeclaration(
   callExpression: ts.CallExpression | ts.NewExpression,

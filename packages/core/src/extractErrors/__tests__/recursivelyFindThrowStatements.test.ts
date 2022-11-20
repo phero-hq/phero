@@ -3,7 +3,7 @@ import {
   compileProgram,
   compileStatement,
   compileStatements,
-} from "../../tsTestUtils"
+} from "../../lib/tsTestUtils"
 import recursivelyFindThrowStatements from "../recursivelyFindThrowStatements"
 
 describe("recursivelyFindThrowStatements", () => {

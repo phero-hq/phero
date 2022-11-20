@@ -1,13 +1,13 @@
 import ts from "typescript"
-import { ParseError } from "../../errors"
-import { printCode } from "../../tsTestUtils"
+import { ParseError } from "../../domain/errors"
+import { printCode } from "../../lib/tsTestUtils"
 import {
   getFullyQualifiedName,
   getFullyQualifiedNameWithBase,
   getTypeName,
   isExternal,
   isExternalType,
-} from "../../tsUtils"
+} from "../../lib/tsUtils"
 
 export enum ParserModelType {
   Root = "root",

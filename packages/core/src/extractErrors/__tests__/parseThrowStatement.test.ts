@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { compileStatements } from "../../tsTestUtils"
+import { compileStatements } from "../../lib/tsTestUtils"
 import parseThrowStatement from "../parseThrowStatement"
 
 describe("parseThrowStatement", () => {

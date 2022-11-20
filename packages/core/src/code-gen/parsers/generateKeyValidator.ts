@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { ParseError } from "../../errors"
+import { ParseError } from "../../domain/errors"
 import { ParserModel, ParserModelType } from "./generateParserModel"
 import { generateStringValidator } from "./generateStringParser"
 import Pointer from "./Pointer"
@@ -35,13 +35,15 @@ export function generateKeyValidator(
   }
 
   if (model.type === ParserModelType.Union) {
-    const literalExprs: ts.LiteralExpression[] = model.oneOf.reduce<ts.LiteralExpression[]>(
+    const literalExprs: ts.LiteralExpression[] = model.oneOf.reduce<
+      ts.LiteralExpression[]
+    >(
       (result, element) =>
         element.type === ParserModelType.StringLiteral
           ? [...result, ts.factory.createStringLiteral(element.literal)]
           : element.type === ParserModelType.NumberLiteral
-            ? [...result, ts.factory.createNumericLiteral(element.literal)]
-            : result,
+          ? [...result, ts.factory.createNumericLiteral(element.literal)]
+          : result,
       [],
     )
 

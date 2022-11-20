@@ -1,4 +1,4 @@
-import { ValidationError } from "./code-gen/ParseResult"
+import { ValidationError } from "../code-gen/ParseResult"
 
 export type RPCResult<T> =
   | RPCOkResult<T>

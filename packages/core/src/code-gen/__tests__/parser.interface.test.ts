@@ -3,7 +3,7 @@ import {
   compileStatement,
   compileStatements,
   printCode,
-} from "../../tsTestUtils"
+} from "../../lib/tsTestUtils"
 import { generateModelParser as generateParser } from "../parsers/generateParser"
 
 describe("Parsers", () => {

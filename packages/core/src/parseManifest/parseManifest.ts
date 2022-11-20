@@ -9,8 +9,8 @@ import {
   PheroService,
 } from "../parsePheroApp/domain"
 import parseReturnType from "../parsePheroApp/parseReturnType"
-import { getNameAsString } from "../tsUtils"
-import { VirtualCompilerHost } from "../VirtualCompilerHost"
+import { getNameAsString } from "../lib/tsUtils"
+import { VirtualCompilerHost } from "../lib/VirtualCompilerHost"
 
 export default function parseManifest(dts: string): {
   result: PheroApp

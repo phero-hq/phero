@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { ParseError } from "../errors"
+import { ParseError } from "../domain/errors"
 import getCreateServiceCallExpression from "./getCreateServiceCallExpression"
 import { parseContext } from "./parseContext"
 import parseFunctionDefinitions from "./parseFunctionDefinitions"

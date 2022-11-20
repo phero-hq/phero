@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { getNameAsString, isExternal, isExternalSymbol } from "../tsUtils"
+import { getNameAsString, isExternal, isExternalSymbol } from "../lib/tsUtils"
 import {
   Model,
   PheroFunction,

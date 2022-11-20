@@ -1,11 +1,3 @@
-export { default as parseManifest } from "./parseManifest/parseManifest"
-export { default as generateManifest } from "./generateManifest/generateManifest"
-export {
-  generateModelParser,
-  generateNonModelParser,
-  generateInlineParser,
-} from "./code-gen/parsers/generateParser"
-export { parsePheroApp } from "./parsePheroApp"
 export {
   PheroApp,
   PheroError,
@@ -19,13 +11,25 @@ export {
   ParseError,
   PortInUseError,
   hasErrorCode,
-} from "./errors"
+} from "./domain/errors"
 export {
   RPCResult,
   RPCOkResult,
   RPCBadRequestResult,
   RPCInternalServerErrorResult,
-} from "./RPCResult"
+} from "./domain/RPCResult"
+
+export { parsePheroApp } from "./parsePheroApp"
+export { default as parseManifest } from "./parseManifest/parseManifest"
+export { default as generateManifest } from "./generateManifest/generateManifest"
+
+export {
+  generateModelParser,
+  generateNonModelParser,
+  generateInlineParser,
+} from "./code-gen/parsers/generateParser"
+
 export * as tsx from "./tsx"
-export { VirtualCompilerHost } from "./VirtualCompilerHost"
-export { generateTypeNode, generateTypeElement } from "./generateTypeNode"
+
+export { VirtualCompilerHost } from "./lib/VirtualCompilerHost"
+export { generateTypeNode, generateTypeElement } from "./lib/generateTypeNode"

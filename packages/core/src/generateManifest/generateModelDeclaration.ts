@@ -1,6 +1,6 @@
 import ts from "typescript"
-import { ParseError } from "../errors"
-import { generateTypeNode, generateTypeElement } from "../generateTypeNode"
+import { ParseError } from "../domain/errors"
+import { generateTypeNode, generateTypeElement } from "../lib/generateTypeNode"
 import { Model, PheroModel } from "../parsePheroApp/domain"
 
 export default function generateModelDeclaration(

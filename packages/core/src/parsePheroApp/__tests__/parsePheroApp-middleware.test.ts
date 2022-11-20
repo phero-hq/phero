@@ -4,7 +4,7 @@ import ts from "typescript"
 
 import { parsePheroApp } from "../parsePheroApp"
 import { PheroApp } from "../domain"
-import { createTestProgram } from "../../tsTestUtils"
+import { createTestProgram } from "../../lib/tsTestUtils"
 
 function parseProgram(prog: ts.Program): PheroApp {
   // if (prog.getSemanticDiagnostics().length) {

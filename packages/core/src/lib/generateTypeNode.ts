@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { ParseError } from "./errors"
+import { ParseError } from "../domain/errors"
 
 export function generateTypeNode(type: ts.TypeNode): ts.TypeNode {
   if (ts.isTypeReferenceNode(type)) {
