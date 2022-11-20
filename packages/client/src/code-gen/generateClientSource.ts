@@ -1,40 +1,23 @@
-import ts from "typescript"
 import {
-  generateClientFunction,
-  generateModel,
-  ReferenceMaker,
-  ParsedAppDeclarationVersion,
-  tsx,
   generateModelParser,
+  generateNonModelParser,
+  generateTypeNode,
+  PheroApp,
+  PheroError,
+  PheroFunction,
+  PheroService,
+  tsx,
 } from "@phero/core"
+import ts from "typescript"
 
-export default function generateClientSource(
-  appDeclarationVersion: ParsedAppDeclarationVersion,
+export default function generateClientSource2(
+  app: PheroApp,
   prog: ts.Program,
 ): ts.SourceFile {
-  const { domainModels, services } = appDeclarationVersion
-  const parsedDomainErrors = appDeclarationVersion.errors.map(parseError)
-  const domainRefMaker = new ReferenceMaker(
-    domainModels,
-    prog.getTypeChecker(),
-    undefined,
-  )
-
   const importsFromClientPackage = tsx.importDeclaration({
     names: ["Fetch", "BasePheroClient", "ParseResult", "ValidationError"],
     module: "@phero/client",
   })
-
-  const domainSource = [
-    ...domainModels.map((model) => generateModel(model, domainRefMaker)),
-    ...domainModels.map((model) => generateModelParser(model, prog)),
-    ...parsedDomainErrors.map(generateError),
-    ...services.flatMap((service) => [
-      ...service.models.map((model) => generateModel(model, domainRefMaker)),
-      ...service.models.map((model) => generateModelParser(model, prog)),
-      ...service.errors.map(parseError).map(generateError),
-    ]),
-  ]
 
   const hertitageClause: ts.HeritageClause = ts.factory.createHeritageClause(
     ts.SyntaxKind.ExtendsKeyword,
@@ -46,10 +29,9 @@ export default function generateClientSource(
     ],
   )
 
-  const optsParam = generateOptsParam(appDeclarationVersion)
+  const optsParam = generateOptsParam(app)
 
   const classDeclr: ts.ClassDeclaration = ts.factory.createClassDeclaration(
-    undefined,
     [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
     "PheroClient",
     undefined,
@@ -57,10 +39,8 @@ export default function generateClientSource(
     [
       ts.factory.createConstructorDeclaration(
         undefined,
-        undefined,
         [
           ts.factory.createParameterDeclaration(
-            undefined,
             [],
             undefined,
             "fetch",
@@ -69,7 +49,6 @@ export default function generateClientSource(
             undefined,
           ),
           ts.factory.createParameterDeclaration(
-            undefined,
             [],
             undefined,
             "url",
@@ -92,31 +71,20 @@ export default function generateClientSource(
           ),
         ]),
       ),
-      ...services.map((service) => {
-        const { name, functions, context } = service
-
-        const serviceRefMaker = new ReferenceMaker(
-          domainModels,
-          prog.getTypeChecker(),
-          undefined,
-        )
+      ...app.services.map((service) => {
+        const {
+          name,
+          funcs,
+          config: { contextType },
+        } = service
 
         return ts.factory.createPropertyDeclaration(
-          undefined,
           [],
           name,
           undefined,
           undefined,
           ts.factory.createObjectLiteralExpression(
-            functions.map((func) =>
-              generateClientFunction(
-                name,
-                context,
-                func,
-                serviceRefMaker,
-                prog,
-              ),
-            ),
+            funcs.map((func) => generateClientFunction(service, func, prog)),
             true,
           ),
         )
@@ -126,12 +94,16 @@ export default function generateClientSource(
 
   const pheroClientSource = tsx.sourceFile(
     importsFromClientPackage,
-    ...domainSource,
-    ...services.map((service) =>
-      generateErrorParser(service.name, [
-        ...parsedDomainErrors,
-        ...service.errors.map(parseError),
-      ]),
+    ...app.models.map((model) => model.ref),
+    ...app.models.map((model) => generateModelParser(model.ref, prog)),
+    ...app.errors.map((err) => generateError(err)),
+    ...app.services.flatMap((service) =>
+      service.funcs.map((func) =>
+        generateParserForFunction(service, func, prog),
+      ),
+    ),
+    ...app.services.map((service) =>
+      generateErrorParser(service.name, app.errors),
     ),
     classDeclr,
   )
@@ -139,10 +111,8 @@ export default function generateClientSource(
   return pheroClientSource
 }
 
-function generateOptsParam(
-  appDeclarationVersion: ParsedAppDeclarationVersion,
-): ts.ParameterDeclaration | undefined {
-  const optsProps = [generateContextParam(appDeclarationVersion)].filter(
+function generateOptsParam(app: PheroApp): ts.ParameterDeclaration | undefined {
+  const optsProps = [generateContextParam(app)].filter(
     (prop): prop is ts.PropertySignature => !!prop,
   )
 
@@ -158,15 +128,26 @@ function generateOptsParam(
   })
 }
 
-function generateContextParam(
-  appDeclarationVersion: ParsedAppDeclarationVersion,
-): ts.PropertySignature | undefined {
-  const serviceContextTypes = appDeclarationVersion.services
-    .filter((service) => !!service.context)
-    .map((service) => ({
-      serviceName: service.name,
-      contextType: service.context,
-    })) as { serviceName: string; contextType: ts.TypeNode }[]
+function generateContextParam(app: PheroApp): ts.PropertySignature | undefined {
+  const serviceContextTypes = app.services.reduce<
+    { serviceName: string; contextType: ts.TypeNode }[]
+  >((result, service) => {
+    const serviceContextType = service.funcs
+      .map((f) => f.contextParameterType)
+      .find((c) => !!c)
+
+    if (!serviceContextType) {
+      return result
+    }
+
+    return [
+      ...result,
+      {
+        serviceName: service.name,
+        contextType: serviceContextType,
+      },
+    ]
+  }, [])
 
   if (!serviceContextTypes.length) {
     return undefined
@@ -200,12 +181,12 @@ function generateError(parsedError: PheroError): ts.ClassDeclaration {
     ),
     export: true,
     constructor: tsx.constructor({
-      params: parsedError.props.map((prop) =>
+      params: parsedError.properties.map((prop) =>
         tsx.param({
           public: true,
           readonly: true,
           name: prop.name,
-          type: prop.type,
+          type: generateTypeNode(prop.type),
         }),
       ),
       block: tsx.block(
@@ -217,27 +198,6 @@ function generateError(parsedError: PheroError): ts.ClassDeclaration {
       ),
     }),
   })
-}
-
-// function generate
-interface PheroError {
-  name: string
-  props: Array<{
-    name: string
-    type: ts.TypeNode
-  }>
-}
-
-function parseError(errorClass: ts.ClassDeclaration): PheroError {
-  return {
-    name: errorClass.name!.text,
-    props: errorClass.members
-      .find(ts.isConstructorDeclaration)!
-      .parameters.map((param) => ({
-        name: param.name.getText(),
-        type: param.type!,
-      })),
-  }
 }
 
 function generateErrorParser(
@@ -274,7 +234,7 @@ function generateErrorParser(
             ),
             then: returnError(
               parsedError.name,
-              parsedError.props.map((prop) =>
+              parsedError.properties.map((prop) =>
                 tsx.expression.propertyAccess("error", "props", prop.name),
               ),
             ),
@@ -289,5 +249,109 @@ function generateErrorParser(
 function returnError(name: string, args: ts.Expression[]): ts.ReturnStatement {
   return tsx.statement.return(
     tsx.expression.new(tsx.expression.identifier(name), { args }),
+  )
+}
+
+function generateClientFunction(
+  service: PheroService,
+  func: PheroFunction,
+  prog: ts.Program,
+): ts.PropertyAssignment {
+  let parameters = func.parameters2.map((p) =>
+    ts.factory.createParameterDeclaration(
+      undefined,
+      undefined,
+      p.name,
+      p.questionToken
+        ? ts.factory.createToken(ts.SyntaxKind.QuestionToken)
+        : undefined,
+      generateTypeNode(p.type),
+      undefined, // initializer is prohibited, only on classes
+    ),
+  )
+
+  return ts.factory.createPropertyAssignment(
+    func.name,
+    ts.factory.createArrowFunction(
+      [ts.factory.createModifier(ts.SyntaxKind.AsyncKeyword)],
+      undefined,
+      parameters,
+      tsx.type.reference({
+        name: "Promise",
+        args: [generateTypeNode(func.returnType)],
+      }),
+      undefined,
+      generateClientFunctionBlock(service, func),
+    ),
+  )
+}
+
+function generateClientFunctionBlock(
+  service: PheroService,
+  func: PheroFunction,
+): ts.Block {
+  const isVoid = func.returnType.kind === ts.SyntaxKind.VoidKeyword
+
+  return tsx.block(
+    tsx.statement.return(
+      tsx.expression.call(
+        tsx.expression.propertyAccess(
+          ts.factory.createThis(),
+          isVoid ? "requestVoid" : "request",
+        ),
+        {
+          typeArgs: isVoid ? undefined : [generateTypeNode(func.returnType)],
+
+          args: [
+            tsx.literal.string(service.name),
+            tsx.literal.string(func.name),
+            tsx.literal.object(
+              ...[
+                ...(func.contextParameterType
+                  ? [
+                      tsx.property.assignment(
+                        "context",
+                        tsx.expression.await(
+                          tsx.expression.call(
+                            tsx.expression.propertyAccess(
+                              ts.factory.createThis(),
+                              "opts",
+                              "context",
+                              service.name,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ]
+                  : []),
+                ...func.parameters2.map((p) =>
+                  tsx.property.shorthandAssignment(p.name),
+                ),
+              ],
+            ),
+            `error_parser_${service.name}`,
+            ...(isVoid
+              ? []
+              : [
+                  tsx.expression.identifier(
+                    `${service.name}__${func.name}__parser`,
+                  ),
+                ]),
+          ],
+        },
+      ),
+    ),
+  )
+}
+
+function generateParserForFunction(
+  service: PheroService,
+  func: PheroFunction,
+  prog: ts.Program,
+): ts.ClassDeclaration | ts.FunctionDeclaration {
+  return generateNonModelParser(
+    generateTypeNode(func.returnType),
+    prog,
+    `${service.name}__${func.name}__parser`,
   )
 }

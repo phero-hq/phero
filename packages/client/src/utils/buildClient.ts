@@ -3,7 +3,7 @@ import { ClientCommandBuild, ClientServerLocation } from "@phero/dev"
 import { promises as fs } from "fs"
 import http from "http"
 import https from "https"
-import generateClientSource from "../code-gen/generateClientSource2"
+import generateClientSource from "../code-gen/generateClientSource"
 import writeClientSource from "./writeClientSource"
 
 export default async function buildClient(
