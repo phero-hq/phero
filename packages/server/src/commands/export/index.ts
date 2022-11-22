@@ -104,12 +104,42 @@ export default function exportCommand(command: ServerCommandExport) {
       encoding: "utf-8",
     })
 
+  function findLockFilePath(): string | undefined {
+    const maxDepth = 5
+
+    let currentPath = projectPath
+
+    for (let i = 0; i < maxDepth; i++) {
+      const lockFilePath = path.join(currentPath, "package-lock.json")
+      if (fs.existsSync(lockFilePath)) {
+        return lockFilePath
+      }
+
+      const yarnLockFilePath = path.join(currentPath, "yarn.lock")
+      if (fs.existsSync(yarnLockFilePath)) {
+        return yarnLockFilePath
+      }
+
+      currentPath = path.join(currentPath, "..")
+    }
+
+    return undefined
+  }
+
+  const lockFilePath = findLockFilePath()
+
+  if (!lockFilePath) {
+    throw new Error(
+      "Can't find a package-lock.json or yarn.lock file in the current directory or any of its parents.",
+    )
+  }
+
   const metaExportFiles: MetaExportFiles = {
     "phero-manifest.d.ts": dts,
     "phero-execution.js": pheroExecution.js,
     "phero.js": readFile(path.join(tsOutDir, "phero.js")),
     "package.json": readFile(path.join(projectPath, "package.json")),
-    "package-lock.json": readFile(path.join(projectPath, "package-lock.json")),
+    [path.basename(lockFilePath)]: readFile(lockFilePath),
   }
 
   switch (command.flavor) {

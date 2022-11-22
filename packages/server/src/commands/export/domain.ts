@@ -26,5 +26,4 @@ export interface MetaExportFiles {
   "phero-execution.js": string
   "phero.js": string
   "package.json": string
-  "package-lock.json": string
 }
