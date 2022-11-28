@@ -138,6 +138,25 @@ class ModelGenerator {
       }
     }
 
+    if (type.symbol.name === "Array") {
+      const arrayTypeArgs = this.typeChecker.getTypeArguments(
+        type as ts.TypeReference,
+      )
+      const elementType = arrayTypeArgs[0]
+
+      if (!elementType) {
+        throw new Error("Array has no TypeElement")
+      }
+
+      return {
+        type: ParserModelType.Array,
+        element: {
+          type: ParserModelType.ArrayElement,
+          parser: this.generate(elementType),
+        },
+      }
+    }
+
     if (hasTypeFlag(type, ts.TypeFlags.Object)) {
       // console.log(
       //   "ts.isTupleTypeNode(typeNode)",
