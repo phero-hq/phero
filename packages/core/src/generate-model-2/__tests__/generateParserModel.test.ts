@@ -1,6 +1,8 @@
 import fs from "fs"
 import path from "path"
 import ts from "typescript"
+import "jest-specific-snapshot"
+
 import { compileStatements } from "../../lib/tsTestUtils"
 import generateParserModel from "../generateParserModel"
 
@@ -8,22 +10,26 @@ describe("generateParserModel", () => {
   getExamples()
     .filter(([name]) =>
       [
-        // "_date.ts",
+        // "debug.ts",
+
+        "native.ts",
+        "literal.ts",
         "array.ts",
+        "interface.ts",
+        "union.ts",
+
+        "typeAlias.ts",
+
+        // "_date.ts",
         // "enum.ts",
         // "generics.ts",
         // "indexType.ts",
         // "indexedAccess.ts",
-        "interface.ts",
         // "intersection.ts",
-        "literal.ts",
         // "mappedType.ts",
-        "native.ts",
         // "objectLiteral.ts",
         // "recursive_data_type.ts",
         // "tuple.ts",
-        "typeAlias.ts",
-        "union.ts",
       ].includes(name),
     )
     .forEach(([name, tsContent]) => {
@@ -31,8 +37,8 @@ describe("generateParserModel", () => {
         const [funcs, prog] = getFunctionDeclarations(tsContent)
         funcs.forEach((func) => {
           const testCallback = (): void => {
-            expect(generateParserModel(func, prog)).toMatchSnapshot(
-              func.name?.text,
+            expect(generateParserModel(func, prog)).toMatchSpecificSnapshot(
+              path.join("..", "__tests__", "__snapshots__", `${name}.snap`),
             )
           }
           const funcName = `${func.name?.text ?? "-"}`

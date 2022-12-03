@@ -22,6 +22,7 @@ export class VirtualCompilerHost {
         // support for Pick, Omit, and other TS utilities
         "lib.es5.d.ts",
       ],
+      strictNullChecks: true,
       target: ts.ScriptTarget.ES5,
       module: ts.ModuleKind.CommonJS,
     }

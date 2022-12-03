@@ -1,0 +1,405 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateParserModel interface.ts getInterface1 1`] = `
+Object {
+  "deps": Object {
+    "Message1": Object {
+      "members": Array [
+        Object {
+          "name": "s",
+          "optional": false,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "n",
+          "optional": false,
+          "parser": Object {
+            "type": "number",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "b",
+          "optional": false,
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "os",
+          "optional": true,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "on",
+          "optional": true,
+          "parser": Object {
+            "type": "number",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "ob",
+          "optional": true,
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "nested",
+          "optional": false,
+          "parser": Object {
+            "type": "reference",
+            "typeName": "NestedMessage",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "oNested",
+          "optional": true,
+          "parser": Object {
+            "type": "reference",
+            "typeName": "NestedMessage",
+          },
+          "type": "member",
+        },
+      ],
+      "type": "object",
+    },
+    "NestedMessage": Object {
+      "members": Array [
+        Object {
+          "name": "x",
+          "optional": false,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "y",
+          "optional": false,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "z",
+          "optional": false,
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "ox",
+          "optional": true,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "oy",
+          "optional": true,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "oz",
+          "optional": true,
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "member",
+        },
+      ],
+      "type": "object",
+    },
+  },
+  "root": Object {
+    "type": "reference",
+    "typeName": "Message1",
+  },
+}
+`;
+
+exports[`generateParserModel interface.ts getInterface2 1`] = `
+Object {
+  "deps": Object {
+    "Message1": Object {
+      "members": Array [
+        Object {
+          "name": "s",
+          "optional": false,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "n",
+          "optional": false,
+          "parser": Object {
+            "type": "number",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "b",
+          "optional": false,
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "os",
+          "optional": true,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "on",
+          "optional": true,
+          "parser": Object {
+            "type": "number",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "ob",
+          "optional": true,
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "nested",
+          "optional": false,
+          "parser": Object {
+            "type": "reference",
+            "typeName": "NestedMessage",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "oNested",
+          "optional": true,
+          "parser": Object {
+            "type": "reference",
+            "typeName": "NestedMessage",
+          },
+          "type": "member",
+        },
+      ],
+      "type": "object",
+    },
+    "NestedMessage": Object {
+      "members": Array [
+        Object {
+          "name": "x",
+          "optional": false,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "y",
+          "optional": false,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "z",
+          "optional": false,
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "ox",
+          "optional": true,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "oy",
+          "optional": true,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "oz",
+          "optional": true,
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "member",
+        },
+      ],
+      "type": "object",
+    },
+  },
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "type": "reference",
+        "typeName": "Message1",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel interface.ts getInterface3 1`] = `
+Object {
+  "deps": Object {
+    "Message3": Object {
+      "members": Array [
+        Object {
+          "name": "strArr",
+          "optional": false,
+          "parser": Object {
+            "element": Object {
+              "parser": Object {
+                "type": "string",
+              },
+              "type": "arrayElement",
+            },
+            "type": "array",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "msgArr",
+          "optional": false,
+          "parser": Object {
+            "element": Object {
+              "parser": Object {
+                "type": "reference",
+                "typeName": "Message4",
+              },
+              "type": "arrayElement",
+            },
+            "type": "array",
+          },
+          "type": "member",
+        },
+      ],
+      "type": "object",
+    },
+    "Message4": Object {
+      "members": Array [
+        Object {
+          "name": "x",
+          "optional": false,
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "member",
+        },
+      ],
+      "type": "object",
+    },
+  },
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "type": "reference",
+        "typeName": "Message3",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel interface.ts getInterface4 1`] = `
+Object {
+  "deps": Object {
+    "Message5": Object {
+      "members": Array [
+        Object {
+          "name": "y",
+          "optional": false,
+          "parser": Object {
+            "type": "number",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "x",
+          "optional": false,
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "member",
+        },
+      ],
+      "type": "object",
+    },
+  },
+  "root": Object {
+    "type": "reference",
+    "typeName": "Message5",
+  },
+}
+`;
+
+exports[`generateParserModel interface.ts getInterface5 1`] = `
+Object {
+  "deps": Object {
+    "Message6": Object {
+      "members": Array [
+        Object {
+          "name": "x",
+          "optional": false,
+          "parser": Object {
+            "type": "number",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "y",
+          "optional": false,
+          "parser": Object {
+            "type": "number",
+          },
+          "type": "member",
+        },
+      ],
+      "type": "object",
+    },
+  },
+  "root": Object {
+    "type": "reference",
+    "typeName": "Message6",
+  },
+}
+`;

@@ -1,0 +1,217 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateParserModel array.ts getBooleanArray1 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "type": "boolean",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel array.ts getBooleanArray2 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "type": "boolean",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel array.ts getBooleanDoubleArray1 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "element": Object {
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "arrayElement",
+        },
+        "type": "array",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel array.ts getBooleanDoubleArray2 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "element": Object {
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "arrayElement",
+        },
+        "type": "array",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel array.ts getNumberArray1 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "type": "number",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel array.ts getNumberArray2 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "type": "number",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel array.ts getNumberDoubleArray1 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "element": Object {
+          "parser": Object {
+            "type": "number",
+          },
+          "type": "arrayElement",
+        },
+        "type": "array",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel array.ts getNumberDoubleArray2 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "element": Object {
+          "parser": Object {
+            "type": "number",
+          },
+          "type": "arrayElement",
+        },
+        "type": "array",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel array.ts getStringArray1 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "type": "string",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel array.ts getStringArray2 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "type": "string",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel array.ts getStringDoubleArray1 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "element": Object {
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "arrayElement",
+        },
+        "type": "array",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel array.ts getStringDoubleArray2 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "element": Object {
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "arrayElement",
+        },
+        "type": "array",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;

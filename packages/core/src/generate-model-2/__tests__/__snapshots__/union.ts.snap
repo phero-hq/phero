@@ -1,0 +1,316 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateParserModel union.ts getUnion1 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "oneOf": Array [
+      Object {
+        "type": "string",
+      },
+      Object {
+        "type": "number",
+      },
+      Object {
+        "type": "boolean",
+      },
+    ],
+    "type": "union",
+  },
+}
+`;
+
+exports[`generateParserModel union.ts getUnion2 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "oneOf": Array [
+      Object {
+        "type": "undefined",
+      },
+      Object {
+        "type": "null",
+      },
+      Object {
+        "type": "string",
+      },
+      Object {
+        "type": "number",
+      },
+      Object {
+        "type": "boolean",
+      },
+    ],
+    "type": "union",
+  },
+}
+`;
+
+exports[`generateParserModel union.ts getUnion3 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "oneOf": Array [
+      Object {
+        "literal": false,
+        "type": "boolean-literal",
+      },
+      Object {
+        "literal": "string",
+        "type": "string-literal",
+      },
+      Object {
+        "literal": 123,
+        "type": "number-literal",
+      },
+    ],
+    "type": "union",
+  },
+}
+`;
+
+exports[`generateParserModel union.ts getUnion4 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "oneOf": Array [
+      Object {
+        "element": Object {
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "arrayElement",
+        },
+        "type": "array",
+      },
+      Object {
+        "element": Object {
+          "parser": Object {
+            "type": "number",
+          },
+          "type": "arrayElement",
+        },
+        "type": "array",
+      },
+      Object {
+        "element": Object {
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "arrayElement",
+        },
+        "type": "array",
+      },
+    ],
+    "type": "union",
+  },
+}
+`;
+
+exports[`generateParserModel union.ts getUnion5 1`] = `
+Object {
+  "deps": Object {
+    "X1": Object {
+      "members": Array [
+        Object {
+          "name": "a",
+          "optional": false,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "b",
+          "optional": false,
+          "parser": Object {
+            "type": "number",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "c",
+          "optional": false,
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "member",
+        },
+      ],
+      "type": "object",
+    },
+  },
+  "root": Object {
+    "oneOf": Array [
+      Object {
+        "type": "reference",
+        "typeName": "X1",
+      },
+      Object {
+        "element": Object {
+          "parser": Object {
+            "type": "reference",
+            "typeName": "X1",
+          },
+          "type": "arrayElement",
+        },
+        "type": "array",
+      },
+    ],
+    "type": "union",
+  },
+}
+`;
+
+exports[`generateParserModel union.ts getUnion6 1`] = `
+Object {
+  "deps": Object {
+    "X2": Object {
+      "oneOf": Array [
+        Object {
+          "literal": false,
+          "type": "boolean-literal",
+        },
+        Object {
+          "literal": 123,
+          "type": "number-literal",
+        },
+        Object {
+          "literal": "str",
+          "type": "string-literal",
+        },
+      ],
+      "type": "union",
+    },
+  },
+  "root": Object {
+    "type": "reference",
+    "typeName": "X2",
+  },
+}
+`;
+
+exports[`generateParserModel union.ts getUnion7 1`] = `
+Object {
+  "deps": Object {
+    "X3": Object {
+      "oneOf": Array [
+        Object {
+          "members": Array [
+            Object {
+              "name": "a",
+              "optional": false,
+              "parser": Object {
+                "type": "string",
+              },
+              "type": "member",
+            },
+          ],
+          "type": "object",
+        },
+        Object {
+          "members": Array [
+            Object {
+              "name": "b",
+              "optional": false,
+              "parser": Object {
+                "type": "number",
+              },
+              "type": "member",
+            },
+          ],
+          "type": "object",
+        },
+        Object {
+          "members": Array [
+            Object {
+              "name": "c",
+              "optional": false,
+              "parser": Object {
+                "type": "boolean",
+              },
+              "type": "member",
+            },
+          ],
+          "type": "object",
+        },
+      ],
+      "type": "union",
+    },
+  },
+  "root": Object {
+    "type": "reference",
+    "typeName": "X3",
+  },
+}
+`;
+
+exports[`generateParserModel union.ts getUnion8 1`] = `
+Object {
+  "deps": Object {
+    "X3": Object {
+      "oneOf": Array [
+        Object {
+          "members": Array [
+            Object {
+              "name": "a",
+              "optional": false,
+              "parser": Object {
+                "type": "string",
+              },
+              "type": "member",
+            },
+          ],
+          "type": "object",
+        },
+        Object {
+          "members": Array [
+            Object {
+              "name": "b",
+              "optional": false,
+              "parser": Object {
+                "type": "number",
+              },
+              "type": "member",
+            },
+          ],
+          "type": "object",
+        },
+        Object {
+          "members": Array [
+            Object {
+              "name": "c",
+              "optional": false,
+              "parser": Object {
+                "type": "boolean",
+              },
+              "type": "member",
+            },
+          ],
+          "type": "object",
+        },
+      ],
+      "type": "union",
+    },
+  },
+  "root": Object {
+    "oneOf": Array [
+      Object {
+        "type": "reference",
+        "typeName": "X3",
+      },
+      Object {
+        "element": Object {
+          "parser": Object {
+            "type": "reference",
+            "typeName": "X3",
+          },
+          "type": "arrayElement",
+        },
+        "type": "array",
+      },
+    ],
+    "type": "union",
+  },
+}
+`;

@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateParserModel literal.ts getBooleanLiteral1 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "literal": true,
+    "type": "boolean-literal",
+  },
+}
+`;
+
+exports[`generateParserModel literal.ts getBooleanLiteral2 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "literal": true,
+        "type": "boolean-literal",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel literal.ts getNumberLiteral1 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "literal": 123,
+    "type": "number-literal",
+  },
+}
+`;
+
+exports[`generateParserModel literal.ts getNumberLiteral2 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "literal": 123,
+        "type": "number-literal",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel literal.ts getStringLiteral1 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "literal": "aap",
+    "type": "string-literal",
+  },
+}
+`;
+
+exports[`generateParserModel literal.ts getStringLiteral2 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "literal": "aap",
+        "type": "string-literal",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
