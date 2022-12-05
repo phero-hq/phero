@@ -19,9 +19,9 @@ describe("generateParserModel", () => {
         "union.ts",
 
         "typeAlias.ts",
+        "enum.ts",
 
         // "_date.ts",
-        // "enum.ts",
         // "generics.ts",
         // "indexType.ts",
         // "indexedAccess.ts",

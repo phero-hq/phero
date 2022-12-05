@@ -1,0 +1,155 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateParserModel enum.ts getEnum1 1`] = `
+Object {
+  "deps": Object {
+    "X1": Object {
+      "members": Array [
+        Object {
+          "literal": "aap",
+          "type": "string-literal",
+        },
+        Object {
+          "literal": "noot",
+          "type": "string-literal",
+        },
+        Object {
+          "literal": "mies",
+          "type": "string-literal",
+        },
+      ],
+      "type": "enum",
+    },
+  },
+  "root": Object {
+    "type": "reference",
+    "typeName": "X1",
+  },
+}
+`;
+
+exports[`generateParserModel enum.ts getEnum2 1`] = `
+Object {
+  "deps": Object {
+    "X2": Object {
+      "members": Array [
+        Object {
+          "literal": 0,
+          "type": "number-literal",
+        },
+        Object {
+          "literal": 1,
+          "type": "number-literal",
+        },
+        Object {
+          "literal": 2,
+          "type": "number-literal",
+        },
+      ],
+      "type": "enum",
+    },
+  },
+  "root": Object {
+    "type": "reference",
+    "typeName": "X2",
+  },
+}
+`;
+
+exports[`generateParserModel enum.ts getEnum3 1`] = `
+Object {
+  "deps": Object {
+    "X3": Object {
+      "members": Array [
+        Object {
+          "literal": "x",
+          "type": "string-literal",
+        },
+        Object {
+          "literal": 0,
+          "type": "number-literal",
+        },
+        Object {
+          "literal": 1,
+          "type": "number-literal",
+        },
+      ],
+      "type": "enum",
+    },
+  },
+  "root": Object {
+    "type": "reference",
+    "typeName": "X3",
+  },
+}
+`;
+
+exports[`generateParserModel enum.ts getEnum4 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "literal": "x",
+    "type": "string-literal",
+  },
+}
+`;
+
+exports[`generateParserModel enum.ts getEnum5 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "literal": 0,
+    "type": "number-literal",
+  },
+}
+`;
+
+exports[`generateParserModel enum.ts getEnum6 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "literal": 0,
+        "type": "number-literal",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel enum.ts getEnum32 1`] = `
+Object {
+  "deps": Object {
+    "X3": Object {
+      "members": Array [
+        Object {
+          "literal": "x",
+          "type": "string-literal",
+        },
+        Object {
+          "literal": 0,
+          "type": "number-literal",
+        },
+        Object {
+          "literal": 1,
+          "type": "number-literal",
+        },
+      ],
+      "type": "enum",
+    },
+  },
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "type": "reference",
+        "typeName": "X3",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;

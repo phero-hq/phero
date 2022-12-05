@@ -9,6 +9,7 @@ import {
 } from "./generateParserModelUtils"
 import {
   BooleanParserModel,
+  EnumParserModel,
   ParserModel,
   ParserModelType,
   UnionParserModel,
@@ -53,19 +54,13 @@ class ModelGenerator {
       ts.NodeBuilderFlags.NoTypeReduction,
     )
 
-    console.log(
-      "GEN",
-      typeNode && printCode(typeNode),
-      getTypeFlags(type),
-      getTypeNames(type),
-      // type.isUnion()
-      //   ? this.typeChecker.getSignatureFromDeclaration(ty)
-      //   : 100 + (type.aliasTypeArguments?.length ?? 0),
-      //   type.par
-      // type.symbol?.name,
-      // type.aliasSymbol?.name,
-      // !!type.aliasSymbol,
-    )
+    console.log("GEN", {
+      typeNode: typeNode && printCode(typeNode),
+      typeFlags: getTypeFlags(type),
+      typeNames: getTypeNames(type),
+      symbol: type.symbol && getSymbolFlags(type.symbol),
+      aliasSymbol: type.aliasSymbol && getSymbolFlags(type.aliasSymbol),
+    })
 
     if (!typeNode) {
       throw new Error("TypeNode expected")
@@ -86,7 +81,6 @@ class ModelGenerator {
         throw new Error("BooleanLiteral type has no LiteralTypeNode")
       }
       const isTrue = typeNode.literal.kind === ts.SyntaxKind.TrueKeyword
-      console.log("BOOLEAN ", getTypeFlags(type))
       return {
         type: ParserModelType.BooleanLiteral,
         literal: isTrue,
@@ -131,26 +125,42 @@ class ModelGenerator {
 
     if (type.aliasSymbol && !resolveReference) {
       this.symbolParsers.set(type.aliasSymbol, this.generate(type, true))
+
+      // if (hasTypeFlag(type, ts.TypeFlags.EnumLiteral)) {
+      //   return this.generateEnum(type)
+      // }
+
+      // const [aliasedSymbol, aliasedType] = this.getTypeOfReference(typeNode)
+      // this.symbolParsers.set(aliasedSymbol, this.generate(aliasedType, true))
+      // this.symbolParsers.set(type.aliasSymbol, this.generate(aliasedType, true))
       return {
+        // type: ParserModelType.Id,
+        // typeName: aliasedSymbol.name,
         type: ParserModelType.Reference,
         typeName: type.aliasSymbol.name,
       }
+      // }
+
+      // this.symbolParsers.set(type.aliasSymbol, this.generate(type, true))
+      // return {
+      //   type: ParserModelType.Reference,
+      //   typeName: type.aliasSymbol.name,
+      // }
     }
 
     // NOTE: union possibly has no symbol/aliasSymbol
     if (type.isUnion()) {
-      console.log(
-        "IS UNION JUNGEE",
-        type.types.length,
-        !!type.symbol,
-        !!type.aliasSymbol,
-        // TODO super hacky!!!
-        // maar dit is de manier om de origele te krijgen!!!
-        // https://ts-ast-viewer.com/#code/FAFwngDgpgBAGgZhgXmDGAfGBvGBDALhgGcQAnASwDsBzGAXzUxxgCMiqBXAW1ajIZMs2JunQBjIqwD20gDZQ8VUYOBQAHhGlkQMAGacq4kBWlUYAfRpQQAVSqmqADgAUASiKJmiANoBdHCYQAAsyaQB3GCooSIBRMjCyd2BGIA
-        (type as any)?.origin?.types.length,
-      )
-
+      // TODO super hacky!!!
+      // maar dit is de manier om de origele te krijgen!!!
+      // https://ts-ast-viewer.com/#code/FAFwngDgpgBAGgZhgXmDGAfGBvGBDALhgGcQAnASwDsBzGAXzUxxgCMiqBXAW1ajIZMs2JunQBjIqwD20gDZQ8VUYOBQAHhGlkQMAGacq4kBWlUYAfRpQQAVSqmqADgAUASiKJmiANoBdHCYQAAsyaQB3GCooSIBRMjCyd2BGIA
       const types = ((type as any)?.origin?.types as ts.Type[]) ?? type.types
+
+      if (hasTypeFlag(type, ts.TypeFlags.EnumLiteral)) {
+        return {
+          type: ParserModelType.Enum,
+          members: types.map((enumType) => this.generate(enumType)) as any,
+        }
+      }
 
       // NOTE: type.types will expand union of unions
       return replaceBooleanLiteralsWithBooleanType({
@@ -161,7 +171,6 @@ class ModelGenerator {
       })
     }
 
-    // console.log("alias symbol name", type.aliasSymbol?.name)
     if (type.symbol && type.symbol.name === "Array") {
       const arrayTypeArgs = this.typeChecker.getTypeArguments(
         type as ts.TypeReference,
@@ -239,12 +248,40 @@ class ModelGenerator {
 
     // symbols
 
-    console.log("typeNames", getTypeNames(type))
-    console.log("symbolFlags", type.symbol && getSymbolFlags(type.symbol))
-    console.log("typeFlags", getTypeFlags(type))
+    // console.log("typeNames", getTypeNames(type))
+    // console.log("symbolFlags", type.symbol && getSymbolFlags(type.symbol))
+    // console.log("typeFlags", getTypeFlags(type))
     // console.log("object", getObjectFlags(type.symbol.flags))
 
     throw new Error("Only literal " + getTypeFlags(type))
+  }
+
+  getTypeOfReference(typeNode: ts.TypeNode): [ts.Symbol, ts.Type] {
+    if (ts.isTypeReferenceNode(typeNode)) {
+      const typeRefSymbol = this.typeChecker.getSymbolAtLocation(
+        typeNode.typeName,
+      )
+
+      if (typeRefSymbol) {
+        return [
+          typeRefSymbol,
+          this.typeChecker.getDeclaredTypeOfSymbol(typeRefSymbol),
+        ]
+      }
+
+      throw new Error("TypeNode has no symbol " + typeNode.kind)
+    }
+
+    throw new Error("TypeNode is not a TypeReferenceNode " + typeNode.kind)
+  }
+
+  generateEnum(type: ts.Type): EnumParserModel {
+    return {
+      type: ParserModelType.Enum,
+      members: (type as any).types.map((memberType: ts.Type) =>
+        this.generate(memberType),
+      ),
+    }
   }
 }
 

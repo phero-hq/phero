@@ -1,0 +1,271 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateParserModel typeAlias.ts getTypeAlias1 1`] = `
+Object {
+  "deps": Object {
+    "Message1": Object {
+      "members": Array [
+        Object {
+          "name": "s",
+          "optional": false,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "n",
+          "optional": false,
+          "parser": Object {
+            "type": "number",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "b",
+          "optional": false,
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "os",
+          "optional": true,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "on",
+          "optional": true,
+          "parser": Object {
+            "type": "number",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "ob",
+          "optional": true,
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "nested",
+          "optional": false,
+          "parser": Object {
+            "type": "reference",
+            "typeName": "NestedMessage1",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "oNested",
+          "optional": true,
+          "parser": Object {
+            "type": "reference",
+            "typeName": "NestedMessage1",
+          },
+          "type": "member",
+        },
+      ],
+      "type": "object",
+    },
+    "NestedMessage1": Object {
+      "members": Array [
+        Object {
+          "name": "s",
+          "optional": false,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "n",
+          "optional": false,
+          "parser": Object {
+            "type": "number",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "b",
+          "optional": false,
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "os",
+          "optional": true,
+          "parser": Object {
+            "type": "string",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "on",
+          "optional": true,
+          "parser": Object {
+            "type": "number",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "ob",
+          "optional": true,
+          "parser": Object {
+            "type": "boolean",
+          },
+          "type": "member",
+        },
+      ],
+      "type": "object",
+    },
+  },
+  "root": Object {
+    "type": "reference",
+    "typeName": "Message1",
+  },
+}
+`;
+
+exports[`generateParserModel typeAlias.ts getTypeAlias2 1`] = `
+Object {
+  "deps": Object {},
+  "root": Object {
+    "type": "string",
+  },
+}
+`;
+
+exports[`generateParserModel typeAlias.ts getTypeAlias3 1`] = `
+Object {
+  "deps": Object {
+    "Message3": Object {
+      "element": Object {
+        "parser": Object {
+          "type": "number",
+        },
+        "type": "arrayElement",
+      },
+      "type": "array",
+    },
+  },
+  "root": Object {
+    "type": "reference",
+    "typeName": "Message3",
+  },
+}
+`;
+
+exports[`generateParserModel typeAlias.ts getTypeAlias4 1`] = `
+Object {
+  "deps": Object {
+    "Message3": Object {
+      "element": Object {
+        "parser": Object {
+          "type": "number",
+        },
+        "type": "arrayElement",
+      },
+      "type": "array",
+    },
+  },
+  "root": Object {
+    "type": "reference",
+    "typeName": "Message3",
+  },
+}
+`;
+
+exports[`generateParserModel typeAlias.ts getTypeAlias5 1`] = `
+Object {
+  "deps": Object {
+    "Message3": Object {
+      "element": Object {
+        "parser": Object {
+          "type": "number",
+        },
+        "type": "arrayElement",
+      },
+      "type": "array",
+    },
+  },
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "type": "reference",
+        "typeName": "Message3",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
+
+exports[`generateParserModel typeAlias.ts getTypeAlias6 1`] = `
+Object {
+  "deps": Object {
+    "Message3": Object {
+      "element": Object {
+        "parser": Object {
+          "type": "number",
+        },
+        "type": "arrayElement",
+      },
+      "type": "array",
+    },
+    "Message5": Object {
+      "members": Array [
+        Object {
+          "name": "x",
+          "optional": false,
+          "parser": Object {
+            "element": Object {
+              "parser": Object {
+                "type": "reference",
+                "typeName": "Message3",
+              },
+              "type": "arrayElement",
+            },
+            "type": "array",
+          },
+          "type": "member",
+        },
+        Object {
+          "name": "y",
+          "optional": false,
+          "parser": Object {
+            "element": Object {
+              "parser": Object {
+                "type": "string",
+              },
+              "type": "arrayElement",
+            },
+            "type": "array",
+          },
+          "type": "member",
+        },
+      ],
+      "type": "object",
+    },
+  },
+  "root": Object {
+    "element": Object {
+      "parser": Object {
+        "type": "reference",
+        "typeName": "Message5",
+      },
+      "type": "arrayElement",
+    },
+    "type": "array",
+  },
+}
+`;
