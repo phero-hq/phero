@@ -26,12 +26,6 @@
 // MemberParser
 // KeyValidator
 
-interface Person {
-  name: string
-  age: number
-  kids: string[]
-}
-
 export const ArrayParser =
   <T>(elementParser: Parser<T>) =>
   (data: unknown): ParseResult<T[]> => {
@@ -206,11 +200,28 @@ export const ObjectLiteralParser =
 //   return errors.length === 0 ? { ok: true, result } : { ok: false, errors }
 // }
 
+interface Person {
+  name: string
+  age: number
+  kids: string[]
+}
+
 export const PersonParser = ObjectLiteralParser<Person>([
   ["name", StringParser],
   ["age", NumberParser],
   ["kids", ArrayParser(StringParser)],
 ])
+
+interface MyData<X> {
+  prop: X
+}
+
+export const MyDataParser = <T, X>(
+  prop: Parser<X>,
+): ((data: unknown) => ParseResult<T>) =>
+  ObjectLiteralParser<T>([["prop", prop]])
+
+MyDataParser<MyData<number>, number>(NumberParser)({ prop: 1 })
 
 type TupleElementParsers<T extends any[]> = {
   [key in keyof T]: Parser<T[key]>
