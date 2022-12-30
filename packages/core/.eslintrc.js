@@ -8,7 +8,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
-    project: "./packages/core/tsconfig.json", // <-- Point to your project's tsconfig.json or create new one
+    project: "./tsconfig.json", // <-- Point to your project's tsconfig.json or create new one
   },
   // parser: '@typescript-eslint/parser',
   rules: {
@@ -27,6 +27,7 @@ module.exports = {
     "@typescript-eslint/brace-style": "off",
     "@typescript-eslint/restrict-plus-operands": "off",
     "@typescript-eslint/no-extraneous-class": "off",
+    "no-fallthrough": "off",
   },
   plugins: ["deprecation"],
 }
