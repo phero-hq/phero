@@ -141,7 +141,6 @@ describe("typeAlias", () => {
       deps: {
         X: {
           type: "tuple",
-
           elements: [
             {
               type: "tupleElement",
