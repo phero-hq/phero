@@ -6,6 +6,7 @@ import {
   EnumParserModel,
   IndexMemberParserModel,
   MemberParserModel,
+  ObjectParserModel,
   ParserModel,
   ParserModelType,
 } from "../generate-model-2/ParserModel"
@@ -154,31 +155,9 @@ function generate(
   if (ts.isTypeLiteralNode(typeNode)) {
     return {
       type: ParserModelType.Object,
-      members: typeNode.members.reduce<
-        (MemberParserModel | IndexMemberParserModel)[]
-      >((members, member) => {
-        if (ts.isPropertySignature(member)) {
-          if (!member.type) {
-            throw new ParseError("Member must have a type", member)
-          }
-          return [
-            ...members,
-            {
-              type: ParserModelType.Member,
-              name: getMemberNameAsString(member),
-              optional: !!member.questionToken,
-              parser: generate(member.type, typeChecker),
-            },
-          ]
-        } else if (ts.isIndexSignatureDeclaration(member)) {
-          if (!member.type) {
-            throw new ParseError("Member must have a type", member)
-          }
-          // TODO IndexMember
-        }
-
-        return members
-      }, []),
+      members: typeNode.members.map((member) =>
+        generateMemberParserModel(member, typeChecker),
+      ),
     }
   }
 
@@ -188,23 +167,55 @@ function generate(
 
     const symbol = typeChecker.getSymbolAtLocation(typeNode.typeName)
     // const type = typeChecker.getTypeAtLocation(typeNode)
+    const declaration = symbol?.declarations?.[0]
 
-    if (symbol?.valueDeclaration) {
-      if (ts.isEnumDeclaration(symbol.valueDeclaration)) {
-        return getEnumParserModelFromDeclaration(
-          symbol.valueDeclaration,
-          typeChecker,
-        )
-      } else if (ts.isEnumMember(symbol?.valueDeclaration)) {
-        return getEnumMemberParserModelFromDeclaration(
-          symbol.valueDeclaration,
-          typeChecker,
-        )
+    if (declaration) {
+      if (ts.isEnumDeclaration(declaration)) {
+        return getEnumParserModelFromDeclaration(declaration, typeChecker)
+      } else if (ts.isEnumMember(declaration)) {
+        return getEnumMemberParserModelFromDeclaration(declaration, typeChecker)
+      } else if (ts.isInterfaceDeclaration(declaration)) {
+        return getObjectParserModelFromDeclaration(declaration, typeChecker)
       }
     }
   }
 
-  throw new ParseError("not implemented", typeNode)
+  throw new ParseError("Not implemented", typeNode)
+}
+
+function getObjectParserModelFromDeclaration(
+  interfaceDeclr: ts.InterfaceDeclaration,
+  typeChecker: ts.TypeChecker,
+): ObjectParserModel {
+  return {
+    type: ParserModelType.Object,
+    members: interfaceDeclr.members.map((member) =>
+      generateMemberParserModel(member, typeChecker),
+    ),
+  }
+}
+
+function generateMemberParserModel(
+  member: ts.TypeElement,
+  typeChecker: ts.TypeChecker,
+): MemberParserModel | IndexMemberParserModel {
+  if (ts.isPropertySignature(member)) {
+    if (!member.type) {
+      throw new ParseError("Member must have a type", member)
+    }
+    return {
+      type: ParserModelType.Member,
+      name: getMemberNameAsString(member),
+      optional: !!member.questionToken,
+      parser: generate(member.type, typeChecker),
+    }
+  } else if (ts.isIndexSignatureDeclaration(member)) {
+    if (!member.type) {
+      throw new ParseError("Member must have a type", member)
+    }
+    // TODO IndexMember
+  }
+  throw new ParseError("Member type is not supported", member)
 }
 
 function getEnumParserModelFromDeclaration(
