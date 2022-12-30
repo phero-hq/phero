@@ -28,112 +28,63 @@ export function generateParserModel(
     throw new ParseError("Function must have type", func)
   }
 
-  return { root: generate(funcType, typeChecker) as any, deps: {} }
+  const { root, deps } = generate(funcType, typeChecker)
+
+  return { root, deps: resolveDependencies(deps, typeChecker) }
 }
 
 function generate(
   typeNode: ts.TypeNode,
   typeChecker: ts.TypeChecker,
-): ParserModel {
+): { root: ParserModel; deps: ts.TypeReferenceNode[] } {
   if (ts.isTokenKind(typeNode.kind)) {
-    switch (typeNode.kind) {
-      case ts.SyntaxKind.AnyKeyword:
-        return { type: ParserModelType.Any }
-      case ts.SyntaxKind.BigIntKeyword:
-        return { type: ParserModelType.BigInt }
-      case ts.SyntaxKind.BooleanKeyword:
-        return { type: ParserModelType.Boolean }
-      case ts.SyntaxKind.FalseKeyword:
-        return { type: ParserModelType.BooleanLiteral, literal: false }
-      case ts.SyntaxKind.NullKeyword:
-        return { type: ParserModelType.Null }
-      case ts.SyntaxKind.NumberKeyword:
-        return { type: ParserModelType.Number }
-      case ts.SyntaxKind.StringKeyword:
-        return { type: ParserModelType.String }
-      case ts.SyntaxKind.TrueKeyword:
-        return { type: ParserModelType.BooleanLiteral, literal: true }
-      case ts.SyntaxKind.UndefinedKeyword:
-        return { type: ParserModelType.Undefined }
-      case ts.SyntaxKind.UnknownKeyword:
-        return { type: ParserModelType.Any }
-      case ts.SyntaxKind.VoidKeyword:
-        return { type: ParserModelType.Undefined }
-
-      case ts.SyntaxKind.ObjectKeyword:
-      case ts.SyntaxKind.SymbolKeyword:
-      // TODO?
-      default:
-        throw new Error(`TokenKind ${typeNode.kind} not implemented`)
-    }
+    return { root: generateTokenType(typeNode.kind), deps: [] }
   }
 
   if (ts.isLiteralTypeNode(typeNode)) {
-    switch (typeNode.literal.kind) {
-      case ts.SyntaxKind.NullKeyword:
-        return { type: ParserModelType.Null }
-      case ts.SyntaxKind.TrueKeyword:
-        return { type: ParserModelType.BooleanLiteral, literal: true }
-      case ts.SyntaxKind.FalseKeyword:
-        return { type: ParserModelType.BooleanLiteral, literal: false }
-      case ts.SyntaxKind.StringLiteral: {
-        const stringType = typeChecker.getTypeAtLocation(
-          typeNode,
-        ) as ts.StringLiteralType
-        return {
-          type: ParserModelType.StringLiteral,
-          literal: stringType.value,
-        }
-      }
-      case ts.SyntaxKind.NumericLiteral: {
-        const numberType = typeChecker.getTypeAtLocation(
-          typeNode,
-        ) as ts.NumberLiteralType
-        return {
-          type: ParserModelType.NumberLiteral,
-          literal: numberType.value,
-        }
-      }
-      case ts.SyntaxKind.BigIntLiteral: {
-        const bigIntType = typeChecker.getTypeAtLocation(
-          typeNode,
-        ) as ts.BigIntLiteralType
-        return {
-          type: ParserModelType.BigIntLiteral,
-          literal: bigIntType.value,
-        }
-      }
-      case ts.SyntaxKind.RegularExpressionLiteral:
-      case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
-      case ts.SyntaxKind.JsxAttributes:
-      case ts.SyntaxKind.ObjectLiteralExpression:
-      case ts.SyntaxKind.PrefixUnaryExpression:
-      default:
-        throw new Error(`Literal ${typeNode.literal.kind} not implemented`)
-    }
+    return { root: generateLiteralType(typeNode, typeChecker), deps: [] }
   }
 
   if (ts.isArrayTypeNode(typeNode)) {
+    const { root: elementParser, deps } = generate(
+      typeNode.elementType,
+      typeChecker,
+    )
     return {
-      type: ParserModelType.Array,
-      element: {
-        type: ParserModelType.ArrayElement,
-        parser: generate(typeNode.elementType, typeChecker),
+      root: {
+        type: ParserModelType.Array,
+        element: {
+          type: ParserModelType.ArrayElement,
+          parser: elementParser,
+        },
       },
+      deps,
     }
   }
 
   if (ts.isUnionTypeNode(typeNode)) {
+    const typeParserModels = typeNode.types.map((type) =>
+      generate(type, typeChecker),
+    )
     return {
-      type: ParserModelType.Union,
-      oneOf: typeNode.types.map((type) => generate(type, typeChecker)),
+      root: {
+        type: ParserModelType.Union,
+        oneOf: typeParserModels.map((pm) => pm.root),
+      },
+      deps: typeParserModels.flatMap((pm) => pm.deps),
     }
   }
 
   if (ts.isIntersectionTypeNode(typeNode)) {
+    const typeParserModels = typeNode.types.map((type) =>
+      generate(type, typeChecker),
+    )
     return {
-      type: ParserModelType.Intersection,
-      parsers: typeNode.types.map((type) => generate(type, typeChecker)),
+      root: {
+        type: ParserModelType.Intersection,
+        parsers: typeParserModels.map((pm) => pm.root),
+      },
+      deps: typeParserModels.flatMap((pm) => pm.deps),
     }
   }
 
@@ -142,72 +93,150 @@ function generate(
   }
 
   if (ts.isTupleTypeNode(typeNode)) {
+    const elementParsers = typeNode.elements.map((element) =>
+      generate(element, typeChecker),
+    )
     return {
-      type: ParserModelType.Tuple,
-      elements: typeNode.elements.map((element, position) => ({
-        type: ParserModelType.TupleElement,
-        position,
-        parser: generate(element, typeChecker),
-      })),
+      root: {
+        type: ParserModelType.Tuple,
+        elements: elementParsers.map(({ root: parser }, position) => ({
+          type: ParserModelType.TupleElement,
+          position,
+          parser,
+        })),
+      },
+      deps: elementParsers.flatMap((p) => p.deps),
     }
   }
 
   if (ts.isTypeLiteralNode(typeNode)) {
+    const memberParsers = typeNode.members.map((member) =>
+      generateMemberParserModel(member, typeChecker),
+    )
     return {
-      type: ParserModelType.Object,
-      members: typeNode.members.map((member) =>
-        generateMemberParserModel(member, typeChecker),
-      ),
+      root: {
+        type: ParserModelType.Object,
+        members: memberParsers.map((member) => member.root),
+      },
+      deps: memberParsers.flatMap((member) => member.deps),
     }
   }
 
   if (ts.isTypeReferenceNode(typeNode)) {
-    // TODO this section should actually return a ParserModelType.Reference
-    // for now implementing the parsers for the reference types here as far as possible
-
-    const symbol = typeChecker.getSymbolAtLocation(typeNode.typeName)
-    // const type = typeChecker.getTypeAtLocation(typeNode)
-    const declaration = symbol?.declarations?.[0]
-
-    if (declaration) {
-      if (ts.isEnumDeclaration(declaration)) {
-        return getEnumParserModelFromDeclaration(declaration, typeChecker)
-      } else if (ts.isEnumMember(declaration)) {
-        return getEnumMemberParserModelFromDeclaration(declaration, typeChecker)
-      } else if (ts.isInterfaceDeclaration(declaration)) {
-        return getObjectParserModelFromDeclaration(declaration, typeChecker)
-      }
+    return {
+      root: {
+        type: ParserModelType.Reference,
+        typeName: entityNameAsString(typeNode.typeName),
+        typeArguments: undefined,
+      },
+      deps: [typeNode],
     }
   }
 
   throw new ParseError("Not implemented", typeNode)
 }
 
-function getObjectParserModelFromDeclaration(
-  interfaceDeclr: ts.InterfaceDeclaration,
+function generateTokenType(tokenKind: ts.SyntaxKind): ParserModel {
+  switch (tokenKind) {
+    case ts.SyntaxKind.AnyKeyword:
+      return { type: ParserModelType.Any }
+    case ts.SyntaxKind.BigIntKeyword:
+      return { type: ParserModelType.BigInt }
+    case ts.SyntaxKind.BooleanKeyword:
+      return { type: ParserModelType.Boolean }
+    case ts.SyntaxKind.FalseKeyword:
+      return { type: ParserModelType.BooleanLiteral, literal: false }
+    case ts.SyntaxKind.NullKeyword:
+      return { type: ParserModelType.Null }
+    case ts.SyntaxKind.NumberKeyword:
+      return { type: ParserModelType.Number }
+    case ts.SyntaxKind.StringKeyword:
+      return { type: ParserModelType.String }
+    case ts.SyntaxKind.TrueKeyword:
+      return { type: ParserModelType.BooleanLiteral, literal: true }
+    case ts.SyntaxKind.UndefinedKeyword:
+      return { type: ParserModelType.Undefined }
+    case ts.SyntaxKind.UnknownKeyword:
+      return { type: ParserModelType.Any }
+    case ts.SyntaxKind.VoidKeyword:
+      return { type: ParserModelType.Undefined }
+
+    case ts.SyntaxKind.ObjectKeyword:
+    case ts.SyntaxKind.SymbolKeyword:
+    // TODO?
+    default:
+      throw new Error(`TokenKind ${tokenKind} not implemented`)
+  }
+}
+
+function generateLiteralType(
+  typeNode: ts.LiteralTypeNode,
   typeChecker: ts.TypeChecker,
-): ObjectParserModel {
-  return {
-    type: ParserModelType.Object,
-    members: interfaceDeclr.members.map((member) =>
-      generateMemberParserModel(member, typeChecker),
-    ),
+): ParserModel {
+  switch (typeNode.literal.kind) {
+    case ts.SyntaxKind.NullKeyword:
+      return { type: ParserModelType.Null }
+    case ts.SyntaxKind.TrueKeyword:
+      return { type: ParserModelType.BooleanLiteral, literal: true }
+    case ts.SyntaxKind.FalseKeyword:
+      return { type: ParserModelType.BooleanLiteral, literal: false }
+    case ts.SyntaxKind.StringLiteral: {
+      const stringType = typeChecker.getTypeAtLocation(
+        typeNode,
+      ) as ts.StringLiteralType
+      return {
+        type: ParserModelType.StringLiteral,
+        literal: stringType.value,
+      }
+    }
+    case ts.SyntaxKind.NumericLiteral: {
+      const numberType = typeChecker.getTypeAtLocation(
+        typeNode,
+      ) as ts.NumberLiteralType
+      return {
+        type: ParserModelType.NumberLiteral,
+        literal: numberType.value,
+      }
+    }
+    case ts.SyntaxKind.BigIntLiteral: {
+      const bigIntType = typeChecker.getTypeAtLocation(
+        typeNode,
+      ) as ts.BigIntLiteralType
+      return {
+        type: ParserModelType.BigIntLiteral,
+        literal: bigIntType.value,
+      }
+    }
+    case ts.SyntaxKind.RegularExpressionLiteral:
+    case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
+    case ts.SyntaxKind.JsxAttributes:
+    case ts.SyntaxKind.ObjectLiteralExpression:
+    case ts.SyntaxKind.PrefixUnaryExpression:
+    default:
+      throw new Error(`Literal ${typeNode.literal.kind} not implemented`)
   }
 }
 
 function generateMemberParserModel(
   member: ts.TypeElement,
   typeChecker: ts.TypeChecker,
-): MemberParserModel | IndexMemberParserModel {
+): {
+  root: MemberParserModel | IndexMemberParserModel
+  deps: ts.TypeReferenceNode[]
+} {
   if (ts.isPropertySignature(member)) {
     if (!member.type) {
       throw new ParseError("Member must have a type", member)
     }
+    const { root: parser, deps } = generate(member.type, typeChecker)
     return {
-      type: ParserModelType.Member,
-      name: getMemberNameAsString(member),
-      optional: !!member.questionToken,
-      parser: generate(member.type, typeChecker),
+      root: {
+        type: ParserModelType.Member,
+        name: getMemberNameAsString(member),
+        optional: !!member.questionToken,
+        parser,
+      },
+      deps,
     }
   } else if (ts.isIndexSignatureDeclaration(member)) {
     if (!member.type) {
@@ -216,6 +245,86 @@ function generateMemberParserModel(
     // TODO IndexMember
   }
   throw new ParseError("Member type is not supported", member)
+}
+
+function resolveDependencies(
+  deps: ts.TypeReferenceNode[],
+  typeChecker: ts.TypeChecker,
+  symbols: ts.Symbol[] = [],
+  accum: Record<string, ParserModel> = {},
+): Record<string, ParserModel> {
+  if (deps.length === 0) {
+    return accum
+  }
+
+  const [typeRefNode, ...otherDeps] = deps
+
+  const symbol = typeChecker.getSymbolAtLocation(typeRefNode.typeName)
+
+  if (!symbol || symbols.includes(symbol)) {
+    if (!symbol) {
+      console.warn("TypeReferenceNode has no symbol: ", typeRefNode)
+    }
+
+    return resolveDependencies(otherDeps, typeChecker, symbols, accum)
+  }
+
+  const declaration = symbol?.declarations?.[0]
+
+  if (!declaration) {
+    throw new ParseError("TypeReference must have declaration", typeRefNode)
+  }
+
+  if (ts.isEnumDeclaration(declaration)) {
+    const enumParser = getEnumParserModelFromDeclaration(
+      declaration,
+      typeChecker,
+    )
+    return resolveDependencies(otherDeps, typeChecker, [...symbols, symbol], {
+      ...accum,
+      [enumParser.name]: enumParser,
+    })
+  } else if (ts.isEnumMember(declaration)) {
+    const enumMemberParser = getEnumMemberParserModelFromDeclaration(
+      declaration,
+      typeChecker,
+    )
+    const enumName = declaration.parent.name.text
+    return resolveDependencies(otherDeps, typeChecker, [...symbols, symbol], {
+      ...accum,
+      [`${enumName}.${enumMemberParser.name}`]: enumMemberParser,
+    })
+  } else if (ts.isInterfaceDeclaration(declaration)) {
+    const { root: objectParser, deps: interfaceDeclrDeps } =
+      getObjectParserModelFromDeclaration(declaration, typeChecker)
+    return resolveDependencies(
+      [...otherDeps, ...interfaceDeclrDeps],
+      typeChecker,
+      [...symbols, symbol],
+      {
+        ...accum,
+        [entityNameAsString(typeRefNode.typeName)]: objectParser,
+      },
+    )
+  }
+
+  throw new Error("Not implemented")
+}
+
+function getObjectParserModelFromDeclaration(
+  interfaceDeclr: ts.InterfaceDeclaration,
+  typeChecker: ts.TypeChecker,
+): { root: ObjectParserModel; deps: ts.TypeReferenceNode[] } {
+  const memberParsers = interfaceDeclr.members.map((member) =>
+    generateMemberParserModel(member, typeChecker),
+  )
+  return {
+    root: {
+      type: ParserModelType.Object,
+      members: memberParsers.map((member) => member.root),
+    },
+    deps: memberParsers.flatMap((member) => member.deps),
+  }
 }
 
 function getEnumParserModelFromDeclaration(
@@ -311,4 +420,11 @@ function propertyNameAsString(propertyName: ts.PropertyName): string {
   }
 
   throw new ParseError(`Unexpected value for member name`, propertyName)
+}
+
+function entityNameAsString(typeName: ts.EntityName): string {
+  if (ts.isIdentifier(typeName)) {
+    return typeName.text
+  }
+  return `${entityNameAsString(typeName.left)}.${typeName.right.text}`
 }

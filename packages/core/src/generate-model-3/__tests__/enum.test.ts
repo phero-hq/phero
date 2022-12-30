@@ -14,27 +14,32 @@ describe("enum", () => {
 
     expect(modelMap).toEqual({
       root: {
-        type: "enum",
-        name: "StringEnum",
-        members: [
-          {
-            type: "enumMember",
-            name: "Aap",
-            parser: { type: "string-literal", literal: "aap" },
-          },
-          {
-            type: "enumMember",
-            name: "Noot",
-            parser: { type: "string-literal", literal: "noot" },
-          },
-          {
-            type: "enumMember",
-            name: "Mies",
-            parser: { type: "string-literal", literal: "mies" },
-          },
-        ],
+        type: "reference",
+        typeName: "StringEnum",
       },
-      deps: {},
+      deps: {
+        StringEnum: {
+          type: "enum",
+          name: "StringEnum",
+          members: [
+            {
+              type: "enumMember",
+              name: "Aap",
+              parser: { type: "string-literal", literal: "aap" },
+            },
+            {
+              type: "enumMember",
+              name: "Noot",
+              parser: { type: "string-literal", literal: "noot" },
+            },
+            {
+              type: "enumMember",
+              name: "Mies",
+              parser: { type: "string-literal", literal: "mies" },
+            },
+          ],
+        },
+      },
     })
   })
   test(`NumberEnum`, () => {
@@ -50,27 +55,32 @@ describe("enum", () => {
 
     expect(modelMap).toEqual({
       root: {
-        type: "enum",
-        name: "NumberEnum",
-        members: [
-          {
-            type: "enumMember",
-            name: "Aap",
-            parser: { type: "number-literal", literal: 0 },
-          },
-          {
-            type: "enumMember",
-            name: "Noot",
-            parser: { type: "number-literal", literal: 1 },
-          },
-          {
-            type: "enumMember",
-            name: "Mies",
-            parser: { type: "number-literal", literal: 2 },
-          },
-        ],
+        type: "reference",
+        typeName: "NumberEnum",
       },
-      deps: {},
+      deps: {
+        NumberEnum: {
+          type: "enum",
+          name: "NumberEnum",
+          members: [
+            {
+              type: "enumMember",
+              name: "Aap",
+              parser: { type: "number-literal", literal: 0 },
+            },
+            {
+              type: "enumMember",
+              name: "Noot",
+              parser: { type: "number-literal", literal: 1 },
+            },
+            {
+              type: "enumMember",
+              name: "Mies",
+              parser: { type: "number-literal", literal: 2 },
+            },
+          ],
+        },
+      },
     })
   })
   test(`MixedEnum`, () => {
@@ -86,27 +96,32 @@ describe("enum", () => {
 
     expect(modelMap).toEqual({
       root: {
-        type: "enum",
-        name: "MixedEnum",
-        members: [
-          {
-            type: "enumMember",
-            name: "Aap",
-            parser: { type: "string-literal", literal: "x" },
-          },
-          {
-            type: "enumMember",
-            name: "Noot",
-            parser: { type: "number-literal", literal: 0 },
-          },
-          {
-            type: "enumMember",
-            name: "Mies",
-            parser: { type: "number-literal", literal: 1 },
-          },
-        ],
+        type: "reference",
+        typeName: "MixedEnum",
       },
-      deps: {},
+      deps: {
+        MixedEnum: {
+          type: "enum",
+          name: "MixedEnum",
+          members: [
+            {
+              type: "enumMember",
+              name: "Aap",
+              parser: { type: "string-literal", literal: "x" },
+            },
+            {
+              type: "enumMember",
+              name: "Noot",
+              parser: { type: "number-literal", literal: 0 },
+            },
+            {
+              type: "enumMember",
+              name: "Mies",
+              parser: { type: "number-literal", literal: 1 },
+            },
+          ],
+        },
+      },
     })
   })
   test(`ValuelessEnum`, () => {
@@ -122,27 +137,32 @@ describe("enum", () => {
 
     expect(modelMap).toEqual({
       root: {
-        type: "enum",
-        name: "ValuelessEnum",
-        members: [
-          {
-            type: "enumMember",
-            name: "Aap",
-            parser: { type: "number-literal", literal: 0 },
-          },
-          {
-            type: "enumMember",
-            name: "Noot",
-            parser: { type: "number-literal", literal: 1 },
-          },
-          {
-            type: "enumMember",
-            name: "Mies",
-            parser: { type: "number-literal", literal: 2 },
-          },
-        ],
+        type: "reference",
+        typeName: "ValuelessEnum",
       },
-      deps: {},
+      deps: {
+        ValuelessEnum: {
+          type: "enum",
+          name: "ValuelessEnum",
+          members: [
+            {
+              type: "enumMember",
+              name: "Aap",
+              parser: { type: "number-literal", literal: 0 },
+            },
+            {
+              type: "enumMember",
+              name: "Noot",
+              parser: { type: "number-literal", literal: 1 },
+            },
+            {
+              type: "enumMember",
+              name: "Mies",
+              parser: { type: "number-literal", literal: 2 },
+            },
+          ],
+        },
+      },
     })
   })
   test(`SkipEnum`, () => {
@@ -158,30 +178,35 @@ describe("enum", () => {
 
     expect(modelMap).toEqual({
       root: {
-        type: "enum",
-        name: "SkipEnum",
-        members: [
-          {
-            type: "enumMember",
-            name: "Aap",
-            parser: { type: "number-literal", literal: 3 },
-          },
-          {
-            type: "enumMember",
-            name: "Noot",
-            parser: { type: "number-literal", literal: 4 },
-          },
-          {
-            type: "enumMember",
-            name: "Mies",
-            parser: { type: "number-literal", literal: 5 },
-          },
-        ],
+        type: "reference",
+        typeName: "SkipEnum",
       },
-      deps: {},
+      deps: {
+        SkipEnum: {
+          type: "enum",
+          name: "SkipEnum",
+          members: [
+            {
+              type: "enumMember",
+              name: "Aap",
+              parser: { type: "number-literal", literal: 3 },
+            },
+            {
+              type: "enumMember",
+              name: "Noot",
+              parser: { type: "number-literal", literal: 4 },
+            },
+            {
+              type: "enumMember",
+              name: "Mies",
+              parser: { type: "number-literal", literal: 5 },
+            },
+          ],
+        },
+      },
     })
   })
-  test(`EnumValue`, () => {
+  test(`MixedEnum.Aap`, () => {
     const modelMap = generateParserModelMap(`
         enum MixedEnum {
           Aap = "x",
@@ -194,11 +219,16 @@ describe("enum", () => {
 
     expect(modelMap).toEqual({
       root: {
-        type: "enumMember",
-        name: "Aap",
-        parser: { type: "string-literal", literal: "x" },
+        type: "reference",
+        typeName: "MixedEnum.Aap",
       },
-      deps: {},
+      deps: {
+        "MixedEnum.Aap": {
+          type: "enumMember",
+          name: "Aap",
+          parser: { type: "string-literal", literal: "x" },
+        },
+      },
     })
   })
 })

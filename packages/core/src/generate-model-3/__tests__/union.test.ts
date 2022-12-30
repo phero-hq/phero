@@ -86,4 +86,61 @@ describe("union", () => {
       deps: {},
     })
   })
+  test(`InterfaceOne | InterfaceTwo[]`, () => {
+    const modelMap = generateParserModelMap(`
+        interface InterfaceOne {
+          prop: 1
+        }
+        interface InterfaceTwo {
+          prop: 2
+        }
+        function test(): InterfaceOne | InterfaceTwo[] { throw new Error() }
+    `)
+
+    expect(modelMap).toEqual({
+      root: {
+        type: "union",
+        oneOf: [
+          {
+            type: "reference",
+            typeName: "InterfaceOne",
+          },
+          {
+            type: "array",
+            element: {
+              type: "arrayElement",
+              parser: {
+                type: "reference",
+                typeName: "InterfaceTwo",
+              },
+            },
+          },
+        ],
+      },
+      deps: {
+        InterfaceOne: {
+          type: "object",
+          members: [
+            {
+              type: "member",
+              name: "prop",
+              optional: false,
+              parser: { type: "number-literal", literal: 1 },
+            },
+          ],
+        },
+        InterfaceTwo: {
+          type: "object",
+          members: [
+            {
+              type: "member",
+              name: "prop",
+              optional: false,
+              parser: { type: "number-literal", literal: 2 },
+            },
+          ],
+        },
+      },
+    })
+  })
 })

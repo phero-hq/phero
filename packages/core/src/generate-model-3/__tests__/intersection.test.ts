@@ -76,4 +76,55 @@ describe("intersection", () => {
       deps: {},
     })
   })
+  test(`InterfaceOne & InterfaceTwo`, () => {
+    const modelMap = generateParserModelMap(`
+        interface InterfaceOne {
+          prop1: number
+        }
+        interface InterfaceTwo {
+          prop2: string
+        }
+        function test(): InterfaceOne & InterfaceTwo { throw new Error() }
+    `)
+
+    expect(modelMap).toEqual({
+      root: {
+        type: "intersection",
+        parsers: [
+          {
+            type: "reference",
+            typeName: "InterfaceOne",
+          },
+          {
+            type: "reference",
+            typeName: "InterfaceTwo",
+          },
+        ],
+      },
+      deps: {
+        InterfaceOne: {
+          type: "object",
+          members: [
+            {
+              type: "member",
+              name: "prop1",
+              optional: false,
+              parser: { type: "number" },
+            },
+          ],
+        },
+        InterfaceTwo: {
+          type: "object",
+          members: [
+            {
+              type: "member",
+              name: "prop2",
+              optional: false,
+              parser: { type: "string" },
+            },
+          ],
+        },
+      },
+    })
+  })
 })
