@@ -19,6 +19,7 @@ export enum ParserModelType {
   Union = "union",
   Intersection = "intersection",
   Enum = "enum",
+  EnumMember = "enumMember",
   Reference = "reference",
   Date = "date",
   Any = "any",
@@ -46,6 +47,7 @@ export type ParserModel =
   | UnionParserModel
   | IntersectionParserModel
   | EnumParserModel
+  | EnumMemberParserModel
   | ReferenceParserModel
   | DateParserModel
   | AnyParserModel
@@ -127,8 +129,15 @@ export interface IntersectionParserModel {
 }
 export interface EnumParserModel {
   type: ParserModelType.Enum
-  members: (StringLiteralParserModel | NumberLiteralParserModel)[]
+  name: string
+  members: EnumMemberParserModel[]
 }
+export interface EnumMemberParserModel {
+  type: ParserModelType.EnumMember
+  name: string
+  parser: StringLiteralParserModel | NumberLiteralParserModel
+}
+
 export interface ReferenceParserModel {
   type: ParserModelType.Reference
   typeName: string

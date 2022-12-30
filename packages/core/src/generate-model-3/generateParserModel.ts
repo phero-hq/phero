@@ -1,6 +1,9 @@
 import ts from "typescript"
 import { ParseError } from "../domain/errors"
+import { getTypeFlags } from "../generate-model-2/generateParserModelUtils"
 import {
+  EnumMemberParserModel,
+  EnumParserModel,
   IndexMemberParserModel,
   MemberParserModel,
   ParserModel,
@@ -179,7 +182,87 @@ function generate(
     }
   }
 
+  if (ts.isTypeReferenceNode(typeNode)) {
+    // TODO this section should actually return a ParserModelType.Reference
+    // for now implementing the parsers for the reference types here as far as possible
+
+    const symbol = typeChecker.getSymbolAtLocation(typeNode.typeName)
+    // const type = typeChecker.getTypeAtLocation(typeNode)
+
+    if (symbol?.valueDeclaration) {
+      if (ts.isEnumDeclaration(symbol.valueDeclaration)) {
+        return getEnumParserModelFromDeclaration(
+          symbol.valueDeclaration,
+          typeChecker,
+        )
+      } else if (ts.isEnumMember(symbol?.valueDeclaration)) {
+        return getEnumMemberParserModelFromDeclaration(
+          symbol.valueDeclaration,
+          typeChecker,
+        )
+      }
+    }
+  }
+
   throw new ParseError("not implemented", typeNode)
+}
+
+function getEnumParserModelFromDeclaration(
+  enumDeclr: ts.EnumDeclaration,
+  typeChecker: ts.TypeChecker,
+): EnumParserModel {
+  return {
+    type: ParserModelType.Enum,
+    name: enumDeclr.name.text,
+    members: enumDeclr.members.map((member) =>
+      getEnumMemberParserModelFromDeclaration(member, typeChecker),
+    ),
+  }
+}
+
+function getEnumMemberParserModelFromDeclaration(
+  member: ts.EnumMember,
+  typeChecker: ts.TypeChecker,
+): EnumMemberParserModel {
+  const enumValueType = typeChecker.getTypeAtLocation(member)
+  const memberParser = typeToParserModel(enumValueType)
+  if (
+    memberParser.type !== ParserModelType.NumberLiteral &&
+    memberParser.type !== ParserModelType.StringLiteral
+  ) {
+    throw new ParseError(
+      "Enum member should be either of type string or number",
+      member,
+    )
+  }
+  return {
+    type: ParserModelType.EnumMember,
+    name: propertyNameAsString(member.name),
+    parser: memberParser,
+  }
+}
+
+function typeToParserModel(type: ts.Type): ParserModel {
+  if (type.flags & ts.TypeFlags.StringLiteral) {
+    const s = type as ts.StringLiteralType
+    return {
+      type: ParserModelType.StringLiteral,
+      literal: s.value,
+    }
+  }
+  if (type.flags & ts.TypeFlags.NumberLiteral) {
+    const s = type as ts.NumberLiteralType
+    return {
+      type: ParserModelType.NumberLiteral,
+      literal: s.value,
+    }
+  }
+
+  throw new Error(
+    `ParserModel for Type with flags (${getTypeFlags(type).join(
+      " | ",
+    )}) not implemented`,
+  )
 }
 
 function getMemberNameAsString(member: ts.TypeElement): string {
@@ -189,28 +272,32 @@ function getMemberNameAsString(member: ts.TypeElement): string {
     throw new ParseError("Member has no name", member)
   }
 
-  if (ts.isIdentifier(memberName)) {
-    return memberName.text
+  return propertyNameAsString(memberName)
+}
+
+function propertyNameAsString(propertyName: ts.PropertyName): string {
+  if (ts.isIdentifier(propertyName)) {
+    return propertyName.text
   }
-  if (ts.isStringLiteral(memberName)) {
-    return memberName.text
+  if (ts.isStringLiteral(propertyName)) {
+    return propertyName.text
   }
-  if (ts.isNumericLiteral(memberName)) {
-    return memberName.text
+  if (ts.isNumericLiteral(propertyName)) {
+    return propertyName.text
   }
-  if (ts.isComputedPropertyName(memberName)) {
+  if (ts.isComputedPropertyName(propertyName)) {
     throw new ParseError(
       "Member name must not be computed property",
-      memberName,
+      propertyName,
     )
   }
 
-  if (ts.isPrivateIdentifier(memberName)) {
+  if (ts.isPrivateIdentifier(propertyName)) {
     throw new ParseError(
       "Member name must not be private identifier",
-      memberName,
+      propertyName,
     )
   }
 
-  throw new ParseError(`Unexpected value for member name`, memberName)
+  throw new ParseError(`Unexpected value for member name`, propertyName)
 }
