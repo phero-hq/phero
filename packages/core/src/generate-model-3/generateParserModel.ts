@@ -306,6 +306,20 @@ function resolveDependencies(
         [entityNameAsString(typeRefNode.typeName)]: objectParser,
       },
     )
+  } else if (ts.isTypeAliasDeclaration(declaration)) {
+    const { root: typeAliasParser, deps: typeAliasDeclrDeps } = generate(
+      declaration.type,
+      typeChecker,
+    )
+    return resolveDependencies(
+      [...otherDeps, ...typeAliasDeclrDeps],
+      typeChecker,
+      [...symbols, symbol],
+      {
+        ...accum,
+        [entityNameAsString(typeRefNode.typeName)]: typeAliasParser,
+      },
+    )
   }
 
   throw new Error("Not implemented")

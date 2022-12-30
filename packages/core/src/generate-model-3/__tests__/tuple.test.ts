@@ -87,6 +87,41 @@ describe("tuple", () => {
       deps: {},
     })
   })
+  test(`[string, X]`, () => {
+    const modelMap = generateParserModelMap(`
+      type X = number
+      
+      function test(): [string, X] { throw new Error() }
+    `)
+
+    expect(modelMap).toEqual({
+      root: {
+        type: "tuple",
+        elements: [
+          {
+            type: "tupleElement",
+            position: 0,
+            parser: {
+              type: "string",
+            },
+          },
+          {
+            type: "tupleElement",
+            position: 1,
+            parser: {
+              type: "reference",
+              typeName: "X",
+            },
+          },
+        ],
+      },
+      deps: {
+        X: {
+          type: "number",
+        },
+      },
+    })
+  })
 })
 
 // TODO tuple with spread [number, ...string]
