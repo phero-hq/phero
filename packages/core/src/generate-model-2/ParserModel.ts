@@ -1,3 +1,5 @@
+import ts from "typescript"
+
 export enum ParserModelType {
   String = "string",
   StringLiteral = "string-literal",
@@ -20,6 +22,9 @@ export enum ParserModelType {
   Reference = "reference",
   Date = "date",
   Any = "any",
+  BigInt = "bigInt",
+  BigIntLiteral = "bigInt-literal",
+  Id = "Id",
 }
 
 export type ParserModel =
@@ -44,7 +49,14 @@ export type ParserModel =
   | ReferenceParserModel
   | DateParserModel
   | AnyParserModel
+  | BigIntParserModel
+  | BigIntLiteralParserModel
+  | IdParserModel
 
+export interface IdParserModel {
+  type: ParserModelType.Id
+  typeName: string
+}
 export interface StringParserModel {
   type: ParserModelType.String
 }
@@ -127,4 +139,11 @@ export interface DateParserModel {
 }
 export interface AnyParserModel {
   type: ParserModelType.Any
+}
+export interface BigIntParserModel {
+  type: ParserModelType.BigInt
+}
+export interface BigIntLiteralParserModel {
+  type: ParserModelType.BigIntLiteral
+  literal: ts.PseudoBigInt
 }

@@ -5,6 +5,10 @@ import ts, {
 import { TSFiles, VirtualCompilerHost } from "./VirtualCompilerHost"
 import { PheroApp } from "../domain/PheroApp"
 import { KindToNodeMappings } from "./tsUtils"
+import {
+  generateParserModel,
+  ParserModelMap,
+} from "../generate-model-3/generateParserModel"
 
 export function printPheroApp(app: PheroApp): string {
   return JSON.stringify(
@@ -134,4 +138,18 @@ export function printCode(code: ts.Node | ts.Node[]): string {
         sf,
       )
     : printer.printNode(ts.EmitHint.Unspecified, code, sf)
+}
+
+export function generateParserModelMap(tsContent: string): ParserModelMap {
+  const { statements, prog } = compileStatements(tsContent)
+
+  const func = statements.find((st): st is ts.FunctionDeclaration =>
+    ts.isFunctionDeclaration(st),
+  )
+
+  if (!func) {
+    throw new Error("Ts content doesn't contain any function")
+  }
+
+  return generateParserModel(func, prog)
 }
