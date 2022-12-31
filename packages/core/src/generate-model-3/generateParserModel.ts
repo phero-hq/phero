@@ -30,7 +30,8 @@ export function generateParserModel(
 
   const { root, deps } = generate(funcType, typeChecker)
 
-  return { root, deps: resolveDependencies(deps, typeChecker) }
+  const funcTypeType = typeChecker.getTypeAtLocation(funcType)
+  return { root, deps: resolveDependencies(deps, typeChecker, funcTypeType) }
 
   // DIT WERKT ALS EEN TIERELIER -->>>>
   // if (ts.isTypeReferenceNode(funcType)) {
@@ -177,25 +178,23 @@ function generate(
         deps: [],
       }
     }
-    const typeNodeType = typeChecker.getTypeAtLocation(typeNode)
-    const typeAAA = typeChecker.getTypeArguments(
-      typeNodeType as ts.TypeReference,
-    )
-    const typeArguments = typeNode.typeArguments?.map((typeArg) => {
-      const typeArgType = typeChecker.getTypeAtLocation(typeArg)
-      // const x = typeChecker.getTypeArguments(typeArgType as ts.TypeReference)
-      // console.log("x", x.length)
-      // console.log("XXX", typeAAA.length)
-      return typeToParserModel(typeArgType, typeArg, typeChecker)
-    })
 
-    // const typeArguments = typeAAA.map((a) => typeToParserModel(a))
+    const typeNodeType = typeChecker.getTypeAtLocation(typeNode)
+    const typeNodeTypeAsTypeRef = typeNodeType as ts.TypeReference
+
+    const typeArgumentTypes =
+      typeNodeTypeAsTypeRef.typeArguments ??
+      typeNodeTypeAsTypeRef.aliasTypeArguments
+
+    const typeArgumentParsers = typeArgumentTypes?.map((ta) =>
+      typeToParserModel(ta, typeNode, typeChecker),
+    )
 
     return {
       root: {
         type: ParserModelType.Reference,
         typeName: entityNameAsString(typeNode.typeName),
-        typeArguments,
+        typeArguments: typeArgumentParsers,
       },
       deps: [typeNode],
     }
@@ -318,6 +317,7 @@ function generateMemberParserModel(
 function resolveDependencies(
   deps: ts.TypeReferenceNode[],
   typeChecker: ts.TypeChecker,
+  funcTypeType: ts.Type,
   symbols: ts.Symbol[] = [],
   accum: Record<string, ParserModel> = {},
 ): Record<string, ParserModel> {
@@ -329,12 +329,18 @@ function resolveDependencies(
 
   const symbol = typeChecker.getSymbolAtLocation(typeRefNode.typeName)
 
-  if (!symbol || symbols.includes(symbol)) {
-    if (!symbol) {
-      console.warn("TypeReferenceNode has no symbol: ", typeRefNode)
-    }
+  if (!symbol) {
+    throw new ParseError("TypeReferenceNode has no symbol", typeRefNode)
+  }
 
-    return resolveDependencies(otherDeps, typeChecker, symbols, accum)
+  if (symbols.includes(symbol)) {
+    return resolveDependencies(
+      otherDeps,
+      typeChecker,
+      funcTypeType,
+      symbols,
+      accum,
+    )
   }
 
   const declaration = symbol?.declarations?.[0]
@@ -348,20 +354,32 @@ function resolveDependencies(
       declaration,
       typeChecker,
     )
-    return resolveDependencies(otherDeps, typeChecker, [...symbols, symbol], {
-      ...accum,
-      [enumParser.name]: enumParser,
-    })
+    return resolveDependencies(
+      otherDeps,
+      typeChecker,
+      funcTypeType,
+      [...symbols, symbol],
+      {
+        ...accum,
+        [enumParser.name]: enumParser,
+      },
+    )
   } else if (ts.isEnumMember(declaration)) {
     const enumMemberParser = getEnumMemberParserModelFromDeclaration(
       declaration,
       typeChecker,
     )
     const enumName = declaration.parent.name.text
-    return resolveDependencies(otherDeps, typeChecker, [...symbols, symbol], {
-      ...accum,
-      [`${enumName}.${enumMemberParser.name}`]: enumMemberParser,
-    })
+    return resolveDependencies(
+      otherDeps,
+      typeChecker,
+      funcTypeType,
+      [...symbols, symbol],
+      {
+        ...accum,
+        [`${enumName}.${enumMemberParser.name}`]: enumMemberParser,
+      },
+    )
   } else if (ts.isInterfaceDeclaration(declaration)) {
     const { root: objectParser, deps: interfaceDeclrDeps } =
       getObjectParserModelFromDeclaration(declaration, typeChecker)
@@ -369,6 +387,7 @@ function resolveDependencies(
     return resolveDependencies(
       [...otherDeps, ...interfaceDeclrDeps],
       typeChecker,
+      funcTypeType,
       [...symbols, symbol],
       {
         ...accum,
@@ -400,6 +419,7 @@ function resolveDependencies(
     return resolveDependencies(
       [...otherDeps, ...typeAliasDeclrDeps],
       typeChecker,
+      funcTypeType,
       [...symbols, symbol],
       {
         ...accum,
@@ -412,6 +432,7 @@ function resolveDependencies(
     return resolveDependencies(
       otherDeps,
       typeChecker,
+      funcTypeType,
       [...symbols, symbol],
       accum,
     )
@@ -507,9 +528,10 @@ function typeToParserModel(
       type: ParserModelType.Number,
     }
   } else if (type.flags & ts.TypeFlags.TypeParameter) {
-    console.log("TYPE FLAGS", getTypeFlags(type))
     return {
-      type: ParserModelType.String,
+      type: ParserModelType.TypeParameter,
+      name: type.symbol.name,
+      position: 0,
     }
   } else if (type.flags & ts.TypeFlags.Object) {
     if (typeNode == undefined) {
@@ -539,6 +561,16 @@ function typeToParserModel(
     }
   } else if (type.flags & ts.TypeFlags.Undefined) {
     return { type: ParserModelType.Undefined }
+  } else if (type.flags & ts.TypeFlags.Conditional) {
+    const conditionalType = type as ts.ConditionalType
+    const t = typeChecker.getTypeOfSymbolAtLocation(type.symbol, typeNode!)
+    if (ts.isTypeParameterDeclaration(conditionalType.root.node.parent)) {
+      return {
+        type: ParserModelType.TypeParameter,
+        name: conditionalType.root.node.parent.name.text,
+        position: 0,
+      }
+    }
   }
 
   throw new Error(
