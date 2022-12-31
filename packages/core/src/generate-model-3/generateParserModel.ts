@@ -31,6 +31,28 @@ export function generateParserModel(
   const { root, deps } = generate(funcType, typeChecker)
 
   return { root, deps: resolveDependencies(deps, typeChecker) }
+
+  // DIT WERKT ALS EEN TIERELIER -->>>>
+  // if (ts.isTypeReferenceNode(funcType)) {
+  //   const funcTypeType = typeChecker.getTypeAtLocation(funcType)
+
+  //   const propSymbol = funcTypeType.getProperty("prop")
+  //   const typeOfProp = typeChecker.getTypeOfSymbolAtLocation(
+  //     propSymbol!,
+  //     funcType,
+  //   )
+
+  //   const innerSymbol = typeOfProp.getProperty("inner")
+  //   const typeOfInner = typeChecker.getTypeOfSymbolAtLocation(
+  //     innerSymbol!,
+  //     funcType,
+  //   )
+
+  //   console.log("XX1", getTypeFlags(typeOfProp))
+  //   console.log("XX2", getTypeFlags(typeOfInner))
+  // }
+
+  throw new Error("xxxx")
 }
 
 function generate(
@@ -122,18 +144,64 @@ function generate(
     }
   }
 
+  if (ts.isConditionalTypeNode(typeNode)) {
+    const conditionalType = typeChecker.getTypeAtLocation(
+      typeNode,
+    ) as ts.ConditionalType
+    // const p = typeToParserModel(t)
+    // console.log("P", p)
+    // console.log(conditionalType)
+
+    // root: ConditionalRoot;
+    // checkType: Type;
+    // extendsType: Type;
+
+    console.log(conditionalType.extendsType)
+    console.log("---")
+    console.log(conditionalType.resolvedFalseType)
+  }
+
   if (ts.isTypeReferenceNode(typeNode)) {
+    const symbol = typeChecker.getSymbolAtLocation(typeNode.typeName)
+    const declaration = symbol && symbol.declarations?.[0]
+    const isTypeParameter =
+      !!declaration && ts.isTypeParameterDeclaration(declaration)
+
+    if (isTypeParameter) {
+      return {
+        root: {
+          type: ParserModelType.TypeParameter,
+          name: entityNameAsString(typeNode.typeName),
+          position: 0,
+        },
+        deps: [],
+      }
+    }
+    const typeNodeType = typeChecker.getTypeAtLocation(typeNode)
+    const typeAAA = typeChecker.getTypeArguments(
+      typeNodeType as ts.TypeReference,
+    )
+    const typeArguments = typeNode.typeArguments?.map((typeArg) => {
+      const typeArgType = typeChecker.getTypeAtLocation(typeArg)
+      // const x = typeChecker.getTypeArguments(typeArgType as ts.TypeReference)
+      // console.log("x", x.length)
+      // console.log("XXX", typeAAA.length)
+      return typeToParserModel(typeArgType, typeArg, typeChecker)
+    })
+
+    // const typeArguments = typeAAA.map((a) => typeToParserModel(a))
+
     return {
       root: {
         type: ParserModelType.Reference,
         typeName: entityNameAsString(typeNode.typeName),
-        typeArguments: undefined,
+        typeArguments,
       },
       deps: [typeNode],
     }
   }
 
-  throw new ParseError("Not implemented", typeNode)
+  throw new ParseError("TypeNode not implemented " + typeNode.kind, typeNode)
 }
 
 function generateTokenType(tokenKind: ts.SyntaxKind): ParserModel {
@@ -297,16 +365,34 @@ function resolveDependencies(
   } else if (ts.isInterfaceDeclaration(declaration)) {
     const { root: objectParser, deps: interfaceDeclrDeps } =
       getObjectParserModelFromDeclaration(declaration, typeChecker)
+
     return resolveDependencies(
       [...otherDeps, ...interfaceDeclrDeps],
       typeChecker,
       [...symbols, symbol],
       {
         ...accum,
-        [entityNameAsString(typeRefNode.typeName)]: objectParser,
+        [`${entityNameAsString(typeRefNode.typeName)}${getTypeParameterNames(
+          declaration,
+        )}`]: objectParser,
       },
     )
   } else if (ts.isTypeAliasDeclaration(declaration)) {
+    if (ts.isConditionalTypeNode(declaration.type)) {
+      const conditionalType = typeChecker.getTypeAtLocation(typeRefNode)
+      console.log(
+        "YYYYYYY",
+        JSON.stringify(
+          typeToParserModel(conditionalType, typeRefNode, typeChecker),
+          null,
+          4,
+        ),
+      )
+      // return {
+      //   ty
+      // }
+    }
+
     const { root: typeAliasParser, deps: typeAliasDeclrDeps } = generate(
       declaration.type,
       typeChecker,
@@ -317,12 +403,31 @@ function resolveDependencies(
       [...symbols, symbol],
       {
         ...accum,
-        [entityNameAsString(typeRefNode.typeName)]: typeAliasParser,
+        [`${entityNameAsString(typeRefNode.typeName)}${getTypeParameterNames(
+          declaration,
+        )}`]: typeAliasParser,
       },
+    )
+  } else if (ts.isTypeParameterDeclaration(declaration)) {
+    return resolveDependencies(
+      otherDeps,
+      typeChecker,
+      [...symbols, symbol],
+      accum,
     )
   }
 
-  throw new Error("Not implemented")
+  throw new Error("Declaration not implemented " + declaration.kind)
+}
+
+function getTypeParameterNames(
+  declaration: ts.InterfaceDeclaration | ts.TypeAliasDeclaration,
+): string {
+  const typeParameterNames = declaration.typeParameters?.map(
+    (typeParam) => typeParam.name.text,
+  )
+
+  return typeParameterNames ? `<${typeParameterNames.join(", ")}>` : ""
 }
 
 function getObjectParserModelFromDeclaration(
@@ -359,7 +464,7 @@ function getEnumMemberParserModelFromDeclaration(
   typeChecker: ts.TypeChecker,
 ): EnumMemberParserModel {
   const enumValueType = typeChecker.getTypeAtLocation(member)
-  const memberParser = typeToParserModel(enumValueType)
+  const memberParser = typeToParserModel(enumValueType, undefined, typeChecker)
   if (
     memberParser.type !== ParserModelType.NumberLiteral &&
     memberParser.type !== ParserModelType.StringLiteral
@@ -376,20 +481,64 @@ function getEnumMemberParserModelFromDeclaration(
   }
 }
 
-function typeToParserModel(type: ts.Type): ParserModel {
+function typeToParserModel(
+  type: ts.Type,
+  typeNode: ts.TypeNode | undefined,
+  typeChecker: ts.TypeChecker,
+): ParserModel {
   if (type.flags & ts.TypeFlags.StringLiteral) {
     const s = type as ts.StringLiteralType
     return {
       type: ParserModelType.StringLiteral,
       literal: s.value,
     }
-  }
-  if (type.flags & ts.TypeFlags.NumberLiteral) {
+  } else if (type.flags & ts.TypeFlags.NumberLiteral) {
     const s = type as ts.NumberLiteralType
     return {
       type: ParserModelType.NumberLiteral,
       literal: s.value,
     }
+  } else if (type.flags & ts.TypeFlags.String) {
+    return {
+      type: ParserModelType.String,
+    }
+  } else if (type.flags & ts.TypeFlags.Number) {
+    return {
+      type: ParserModelType.Number,
+    }
+  } else if (type.flags & ts.TypeFlags.TypeParameter) {
+    console.log("TYPE FLAGS", getTypeFlags(type))
+    return {
+      type: ParserModelType.String,
+    }
+  } else if (type.flags & ts.TypeFlags.Object) {
+    if (typeNode == undefined) {
+      throw new Error("typeNode should not be typeNode")
+    }
+    return {
+      type: ParserModelType.Object,
+      members: type.getProperties().map((prop) => {
+        const g = typeChecker.getTypeOfSymbolAtLocation(prop, typeNode)
+        const parser = typeToParserModel(g, typeNode, typeChecker)
+        return {
+          type: ParserModelType.Member,
+          name: prop.name,
+          optional:
+            (prop.flags & ts.SymbolFlags.Optional) === ts.SymbolFlags.Optional,
+          parser,
+        }
+      }),
+    }
+  } else if (type.flags & ts.TypeFlags.Union) {
+    const unionType = type as ts.UnionType
+    return {
+      type: ParserModelType.Union,
+      oneOf: unionType.types.map((type) =>
+        typeToParserModel(type, typeNode, typeChecker),
+      ),
+    }
+  } else if (type.flags & ts.TypeFlags.Undefined) {
+    return { type: ParserModelType.Undefined }
   }
 
   throw new Error(
