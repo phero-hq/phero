@@ -163,8 +163,11 @@ function generate(
   }
 
   if (ts.isTypeReferenceNode(typeNode)) {
-    const symbol = typeChecker.getSymbolAtLocation(typeNode.typeName)
-    const declaration = symbol && symbol.declarations?.[0]
+    const { declaration } = getSymbolWithDeclarationOrThrow(
+      typeNode,
+      typeChecker,
+    )
+
     const isTypeParameter =
       !!declaration && ts.isTypeParameterDeclaration(declaration)
 
@@ -179,22 +182,11 @@ function generate(
       }
     }
 
-    const typeNodeType = typeChecker.getTypeAtLocation(typeNode)
-    const typeNodeTypeAsTypeRef = typeNodeType as ts.TypeReference
-
-    const typeArgumentTypes =
-      typeNodeTypeAsTypeRef.typeArguments ??
-      typeNodeTypeAsTypeRef.aliasTypeArguments
-
-    const typeArgumentParsers = typeArgumentTypes?.map((ta) =>
-      typeToParserModel(ta, typeNode, typeChecker),
-    )
-
     return {
       root: {
         type: ParserModelType.Reference,
         typeName: entityNameAsString(typeNode.typeName),
-        typeArguments: typeArgumentParsers,
+        typeArguments: getTypeArguments(declaration, typeNode, typeChecker),
       },
       deps: [typeNode],
     }
@@ -209,6 +201,35 @@ function generate(
   }
 
   throw new ParseError("TypeNode not implemented " + typeNode.kind, typeNode)
+}
+
+function getTypeArguments(
+  declaration: ts.Declaration,
+  typeNode: ts.TypeNode,
+  typeChecker: ts.TypeChecker,
+): ParserModel[] | undefined {
+  const typeParameterDeclrs: ts.TypeParameterDeclaration[] =
+    ts.isTypeAliasDeclaration(declaration) ||
+    ts.isInterfaceDeclaration(declaration)
+      ? declaration.typeParameters?.map((tp) => tp) ?? []
+      : []
+
+  if (typeParameterDeclrs.length === 0) {
+    return undefined
+  }
+
+  const typeNodeType = typeChecker.getTypeAtLocation(typeNode)
+  const typeNodeTypeAsTypeRef = typeNodeType as ts.TypeReference
+
+  const typeArgumentTypes =
+    typeNodeTypeAsTypeRef.typeArguments ??
+    typeNodeTypeAsTypeRef.aliasTypeArguments
+
+  const typeArgumentParsers = typeArgumentTypes?.map((ta) =>
+    typeToParserModel(ta, typeNode, typeChecker),
+  )
+
+  return typeArgumentParsers
 }
 
 function generateTokenType(tokenKind: ts.SyntaxKind): ParserModel {
@@ -335,11 +356,10 @@ function resolveDependencies(
 
   const [typeRefNode, ...otherDeps] = deps
 
-  const symbol = typeChecker.getSymbolAtLocation(typeRefNode.typeName)
-
-  if (!symbol) {
-    throw new ParseError("TypeReferenceNode has no symbol", typeRefNode)
-  }
+  const { symbol, declaration } = getSymbolWithDeclarationOrThrow(
+    typeRefNode,
+    typeChecker,
+  )
 
   if (symbols.includes(symbol)) {
     return resolveDependencies(
@@ -349,12 +369,6 @@ function resolveDependencies(
       symbols,
       accum,
     )
-  }
-
-  const declaration = symbol?.declarations?.[0]
-
-  if (!declaration) {
-    throw new ParseError("TypeReference must have declaration", typeRefNode)
   }
 
   if (ts.isEnumDeclaration(declaration)) {
@@ -537,7 +551,7 @@ function typeToParserModel(
       position: 0,
     }
   } else if (type.flags & ts.TypeFlags.Object) {
-    if (typeNode == undefined) {
+    if (typeNode === undefined) {
       throw new Error("typeNode should not be typeNode")
     }
     return {
@@ -629,4 +643,24 @@ function entityNameAsString(typeName: ts.EntityName): string {
     return typeName.text
   }
   return `${entityNameAsString(typeName.left)}.${typeName.right.text}`
+}
+
+function getSymbolWithDeclarationOrThrow(
+  typeNode: ts.TypeReferenceNode,
+  typeChecker: ts.TypeChecker,
+): {
+  symbol: ts.Symbol
+  declaration: ts.Declaration
+} {
+  const symbol = typeChecker.getSymbolAtLocation(typeNode.typeName)
+  if (!symbol) {
+    throw new ParseError("Entity must have symbol", typeNode)
+  }
+
+  const declaration = symbol?.declarations?.[0]
+  if (!declaration) {
+    throw new ParseError("Entity must have declaration", typeNode)
+  }
+
+  return { symbol, declaration }
 }
