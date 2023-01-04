@@ -527,6 +527,10 @@ function typeToParserModel(
     return {
       type: ParserModelType.Number,
     }
+  } else if (type.flags & ts.TypeFlags.Boolean) {
+    return {
+      type: ParserModelType.Boolean,
+    }
   } else if (type.flags & ts.TypeFlags.TypeParameter) {
     return {
       type: ParserModelType.TypeParameter,
