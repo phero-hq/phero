@@ -200,6 +200,14 @@ function generate(
     }
   }
 
+  if (ts.isConditionalTypeNode(typeNode)) {
+    const conditionalType = typeChecker.getTypeAtLocation(typeNode)
+    return {
+      root: typeToParserModel(conditionalType, typeNode, typeChecker),
+      deps: [],
+    }
+  }
+
   throw new ParseError("TypeNode not implemented " + typeNode.kind, typeNode)
 }
 
@@ -397,20 +405,11 @@ function resolveDependencies(
       },
     )
   } else if (ts.isTypeAliasDeclaration(declaration)) {
-    if (ts.isConditionalTypeNode(declaration.type)) {
-      const conditionalType = typeChecker.getTypeAtLocation(typeRefNode)
-      console.log(
-        "YYYYYYY",
-        JSON.stringify(
-          typeToParserModel(conditionalType, typeRefNode, typeChecker),
-          null,
-          4,
-        ),
-      )
-      // return {
-      //   ty
-      // }
-    }
+    // if (ts.isConditionalTypeNode(declaration.type)) {
+    //   const conditionalType = typeChecker.getTypeAtLocation(typeRefNode)
+    //   // return typeToParserModel(conditionalType, typeRefNode, typeChecker)
+
+    // }
 
     const { root: typeAliasParser, deps: typeAliasDeclrDeps } = generate(
       declaration.type,
@@ -567,14 +566,18 @@ function typeToParserModel(
     return { type: ParserModelType.Undefined }
   } else if (type.flags & ts.TypeFlags.Conditional) {
     const conditionalType = type as ts.ConditionalType
-    const t = typeChecker.getTypeOfSymbolAtLocation(type.symbol, typeNode!)
-    if (ts.isTypeParameterDeclaration(conditionalType.root.node.parent)) {
-      return {
-        type: ParserModelType.TypeParameter,
-        name: conditionalType.root.node.parent.name.text,
-        position: 0,
-      }
-    }
+
+    // const conditionalType = typeChecker.getTypeAtLocation(type)
+    return typeToParserModel(conditionalType, typeNode, typeChecker)
+
+    // const t = typeChecker.getTypeOfSymbolAtLocation(type.symbol, typeNode!)
+    // if (ts.isTypeParameterDeclaration(conditionalType.root.node.parent)) {
+    //   return {
+    //     type: ParserModelType.TypeParameter,
+    //     name: conditionalType.root.node.parent.name.text,
+    //     position: 0,
+    //   }
+    // }
   }
 
   throw new Error(
