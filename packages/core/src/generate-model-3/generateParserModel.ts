@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { ParseError } from "../domain/errors"
-import { getTypeFlags } from "../generate-model-2/generateParserModelUtils"
+import { getTypeFlags } from "./generateParserModelUtils"
 import {
   EnumMemberParserModel,
   EnumParserModel,
@@ -8,8 +8,7 @@ import {
   MemberParserModel,
   ParserModel,
   ParserModelType,
-} from "../generate-model-2/ParserModel"
-import { printCode } from "../lib/tsTestUtils"
+} from "./ParserModel"
 
 export interface ParserModelMap {
   root: ParserModel
@@ -874,14 +873,15 @@ function typeToParserModel(
       deps,
     }
   } else if (type.flags & ts.TypeFlags.TypeParameter) {
-    return {
-      root: {
-        type: ParserModelType.TypeParameter,
-        name: type.symbol.name,
-        position: 2,
-      },
-      deps, // TODO?
-    }
+    throw new Error("OEPS!")
+    // return {
+    //   root: {
+    //     type: ParserModelType.TypeParameter,
+    //     name: type.symbol.name,
+    //     position: 2,
+    //   },
+    //   deps, // TODO?
+    // }
   } else if (type.flags & ts.TypeFlags.Object) {
     if (typeNode === undefined) {
       throw new Error("typeNode should not be typeNode")

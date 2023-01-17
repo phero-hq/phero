@@ -26,7 +26,7 @@ export enum ParserModelType {
   BigInt = "bigInt",
   BigIntLiteral = "bigInt-literal",
   Id = "id",
-  TypeParameter = "typeParameter",
+  // TypeParameter = "typeParameter",
 }
 
 export type ParserModel =
@@ -50,7 +50,7 @@ export type ParserModel =
   | EnumParserModel
   | EnumMemberParserModel
   | ReferenceParserModel
-  | TypeParameterParserModel
+  // | TypeParameterParserModel
   | DateParserModel
   | AnyParserModel
   | BigIntParserModel
@@ -145,11 +145,11 @@ export interface ReferenceParserModel {
   typeName: string
   typeArguments?: ParserModel[]
 }
-export interface TypeParameterParserModel {
-  type: ParserModelType.TypeParameter
-  name: string
-  position: number
-}
+// export interface TypeParameterParserModel {
+//   type: ParserModelType.TypeParameter
+//   name: string
+//   position: number
+// }
 
 export interface DateParserModel {
   type: ParserModelType.Date
