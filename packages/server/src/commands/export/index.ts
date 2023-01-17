@@ -120,6 +120,11 @@ export default function exportCommand(command: ServerCommandExport) {
         return yarnLockFilePath
       }
 
+      const pnpmLockFilePath = path.join(currentPath, "pnpm-lock.yaml")
+      if (fs.existsSync(pnpmLockFilePath)) {
+        return pnpmLockFilePath
+      }
+
       currentPath = path.join(currentPath, "..")
     }
 
