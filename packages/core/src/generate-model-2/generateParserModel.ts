@@ -158,6 +158,7 @@ class ModelGenerator {
       if (hasTypeFlag(type, ts.TypeFlags.EnumLiteral)) {
         return {
           type: ParserModelType.Enum,
+          name: "TODO",
           members: types.map((enumType) => this.generate(enumType)) as any,
         }
       }
@@ -278,6 +279,7 @@ class ModelGenerator {
   generateEnum(type: ts.Type): EnumParserModel {
     return {
       type: ParserModelType.Enum,
+      name: "TODO",
       members: (type as any).types.map((memberType: ts.Type) =>
         this.generate(memberType),
       ),

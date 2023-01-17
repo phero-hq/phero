@@ -12,15 +12,10 @@ describe("generics", () => {
     expect(modelMap).toEqual({
       root: {
         type: "reference",
-        typeName: "MyInterface",
-        typeArguments: [
-          {
-            type: "number",
-          },
-        ],
+        typeName: "MyInterface<number>",
       },
       deps: {
-        "MyInterface<T>": {
+        "MyInterface<number>": {
           type: "object",
           members: [
             {
@@ -28,9 +23,7 @@ describe("generics", () => {
               name: "prop",
               optional: false,
               parser: {
-                type: "typeParameter",
-                name: "T",
-                position: 0,
+                type: "number",
               },
             },
           ],
@@ -49,15 +42,10 @@ describe("generics", () => {
     expect(modelMap).toEqual({
       root: {
         type: "reference",
-        typeName: "MyInterface",
-        typeArguments: [
-          {
-            type: "number",
-          },
-        ],
+        typeName: "MyInterface<number>",
       },
       deps: {
-        "MyInterface<T>": {
+        "MyInterface<number>": {
           type: "object",
           members: [
             {
@@ -65,9 +53,7 @@ describe("generics", () => {
               name: "prop",
               optional: false,
               parser: {
-                type: "typeParameter",
-                name: "T",
-                position: 0,
+                type: "number",
               },
             },
           ],
@@ -86,15 +72,10 @@ describe("generics", () => {
     expect(modelMap).toEqual({
       root: {
         type: "reference",
-        typeName: "MyTypeAlias",
-        typeArguments: [
-          {
-            type: "number",
-          },
-        ],
+        typeName: "MyTypeAlias<number>",
       },
       deps: {
-        "MyTypeAlias<T>": {
+        "MyTypeAlias<number>": {
           type: "object",
           members: [
             {
@@ -102,9 +83,7 @@ describe("generics", () => {
               name: "prop",
               optional: false,
               parser: {
-                type: "typeParameter",
-                name: "T",
-                position: 0,
+                type: "number",
               },
             },
           ],
@@ -128,15 +107,10 @@ describe("generics", () => {
     expect(modelMap).toEqual({
       root: {
         type: "reference",
-        typeName: "DeepGeneric",
-        typeArguments: [
-          {
-            type: "number",
-          },
-        ],
+        typeName: "DeepGeneric<number>",
       },
       deps: {
-        "DeepGeneric<T>": {
+        "DeepGeneric<number>": {
           type: "object",
           members: [
             {
@@ -145,14 +119,7 @@ describe("generics", () => {
               optional: false,
               parser: {
                 type: "reference",
-                typeName: "Wrap",
-                typeArguments: [
-                  {
-                    type: "typeParameter",
-                    name: "T",
-                    position: 0,
-                  },
-                ],
+                typeName: "Wrap<number>",
               },
             },
             {
@@ -165,7 +132,7 @@ describe("generics", () => {
             },
           ],
         },
-        "Wrap<T>": {
+        "Wrap<number>": {
           type: "object",
           members: [
             {
@@ -173,9 +140,7 @@ describe("generics", () => {
               name: "wrap",
               optional: false,
               parser: {
-                type: "typeParameter",
-                name: "T",
-                position: 0,
+                type: "number",
               },
             },
             {
@@ -204,15 +169,10 @@ describe("generics", () => {
     expect(modelMap).toEqual({
       root: {
         type: "reference",
-        typeName: "EmbeddedGeneric",
-        typeArguments: [
-          {
-            type: "number",
-          },
-        ],
+        typeName: "EmbeddedGeneric<number>",
       },
       deps: {
-        "EmbeddedGeneric<T>": {
+        "EmbeddedGeneric<number>": {
           type: "object",
           members: [
             {
@@ -227,9 +187,7 @@ describe("generics", () => {
                     name: "prop",
                     optional: false,
                     parser: {
-                      type: "typeParameter",
-                      name: "T",
-                      position: 0,
+                      type: "number",
                     },
                   },
                 ],
@@ -252,18 +210,10 @@ describe("generics", () => {
     expect(modelMap).toEqual({
       root: {
         type: "reference",
-        typeName: "GenericWithDefault",
-        typeArguments: [
-          {
-            type: "number",
-          },
-          {
-            type: "string",
-          },
-        ],
+        typeName: "GenericWithDefault<number, string>",
       },
       deps: {
-        "GenericWithDefault<T, X>": {
+        "GenericWithDefault<number, string>": {
           type: "object",
           members: [
             {
@@ -271,9 +221,7 @@ describe("generics", () => {
               name: "prop",
               optional: false,
               parser: {
-                type: "typeParameter",
-                name: "T",
-                position: 0,
+                type: "number",
               },
             },
             {
@@ -281,9 +229,7 @@ describe("generics", () => {
               name: "propDef",
               optional: false,
               parser: {
-                type: "typeParameter",
-                name: "X",
-                position: 0,
+                type: "string",
               },
             },
           ],
@@ -291,155 +237,4 @@ describe("generics", () => {
       },
     })
   })
-
-  // test.only("MyConditionalType<number>", () => {
-  //   const modelMap = generateParserModelMap(`
-  //     type MyConditionalType<T> = T extends string ? {
-  //       prop: number
-  //     } : {
-  //       prop: string
-  //     }
-  //     function test(): MyConditionalType<number> { throw new Error() }
-  //   `)
-
-  //   expect(modelMap).toEqual({
-  //     root: {
-  //       type: "object",
-  //       members: [
-  //         {
-  //           type: "member",
-  //           name: "prop",
-  //           optional: false,
-  //           parser: {
-  //             type: "string",
-  //           },
-  //         },
-  //       ],
-  //     },
-  //   })
-  // })
-  // test("MyType<number>", () => {
-  //   const modelMap = generateParserModelMap(`
-  //     interface MyType<T> {
-  //       prop: Wrap<T>
-  //     }
-  //     interface Wrap<W> {
-  //       inner: W
-  //     }
-  //     function test(): MyType<number> { throw new Error() }
-  //   `)
-
-  //   expect(modelMap).toEqual({
-  //     root: {
-  //       type: "reference",
-  //       typeName: "MyType",
-  //       typeArguments: [
-  //         {
-  //           type: "number",
-  //         },
-  //       ],
-  //     },
-  //     deps: {
-  //       "MyType<T>": {
-  //         type: "object",
-  //         members: [
-  //           {
-  //             type: "member",
-  //             name: "prop",
-  //             optional: false,
-  //             parser: {
-  //               type: "reference",
-  //               typeName: "Wrap",
-  //               typeArguments: [
-  //                 {
-  //                   name: "T",
-  //                   position: 0,
-  //                   type: "typeParameter",
-  //                 },
-  //               ],
-  //             },
-  //           },
-  //         ],
-  //       },
-  //       "Wrap<W>": {
-  //         type: "object",
-  //         members: [
-  //           {
-  //             type: "member",
-  //             name: "inner",
-  //             optional: false,
-  //             parser: {
-  //               type: "typeParameter",
-  //               name: "W",
-  //               position: 0,
-  //             },
-  //           },
-  //         ],
-  //       },
-  //     },
-  //   })
-  // })
-  // test("MyType<number>", () => {
-  //   const modelMap = generateParserModelMap(`
-  //     interface MyType<T> {
-  //       prop: Wrap<T>
-  //     }
-  //     interface Wrap<W, B = W extends string ? number : boolean> {
-  //       w: W
-  //       inner: B
-  //     }
-  //     function test(): MyType<number> { throw new Error() }
-  //   `)
-
-  //   console.log(JSON.stringify(modelMap, null, 4))
-  //   expect(modelMap).toEqual({
-  //     root: {
-  //       type: "reference",
-  //       typeName: "MyType",
-  //       typeArguments: [
-  //         {
-  //           type: "number",
-  //         },
-  //       ],
-  //     },
-  //     deps: {
-  //       "MyType<T>": {
-  //         type: "object",
-  //         members: [
-  //           {
-  //             type: "member",
-  //             name: "prop",
-  //             optional: false,
-  //             parser: {
-  //               type: "reference",
-  //               typeName: "Wrap",
-  //               typeArguments: [
-  //                 {
-  //                   name: "T",
-  //                   position: 0,
-  //                   type: "typeParameter",
-  //                 },
-  //               ],
-  //             },
-  //           },
-  //         ],
-  //       },
-  //       "Wrap<W>": {
-  //         type: "object",
-  //         members: [
-  //           {
-  //             type: "member",
-  //             name: "inner",
-  //             optional: false,
-  //             parser: {
-  //               type: "typeParameter",
-  //               name: "W",
-  //               position: 0,
-  //             },
-  //           },
-  //         ],
-  //       },
-  //     },
-  //   })
-  // })
 })

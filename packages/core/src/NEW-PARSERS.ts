@@ -223,6 +223,20 @@ export const MyDataParser = <T, X>(
 
 MyDataParser<MyData<number>, number>(NumberParser)({ prop: 1 })
 
+// const MyTypeParser = <T>(
+//   T: Parser<T>,
+// ): ((data: unknown) => ParseResult<T>) =>
+//   ObjectLiteralParser<T>([
+//     ["prop", WrapParser(T, UnionParser(NumberParser, BooleanParser))],
+//   ])
+
+// const MyType_number_Parser = MyTypeParser<
+
+// export const WrapParser = <W, B>(
+//   W: Parser<W>, B: Parser<B>,
+// ): ((data: unknown) => ParseResult<T>) =>
+//   ObjectLiteralParser<T>([["w", W], ["b", B], ["recursive", MyTypeParser(B)]])
+
 type TupleElementParsers<T extends any[]> = {
   [key in keyof T]: Parser<T[key]>
 }
