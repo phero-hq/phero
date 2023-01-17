@@ -99,43 +99,12 @@ export default function exportCommand(command: ServerCommandExport) {
   const dts = generateAppDeclarationFile(app, typeChecker)
   const pheroExecution = generateRPCProxy(app, typeChecker)
 
-  const readFile = (filePath: string): string =>
-    fs.readFileSync(filePath, {
-      encoding: "utf-8",
-    })
-
-  function findLockFilePath(): string | undefined {
-    const maxDepth = 5
-
-    let currentPath = projectPath
-
-    for (let i = 0; i < maxDepth; i++) {
-      const lockFilePath = path.join(currentPath, "package-lock.json")
-      if (fs.existsSync(lockFilePath)) {
-        return lockFilePath
-      }
-
-      const yarnLockFilePath = path.join(currentPath, "yarn.lock")
-      if (fs.existsSync(yarnLockFilePath)) {
-        return yarnLockFilePath
-      }
-
-      const pnpmLockFilePath = path.join(currentPath, "pnpm-lock.yaml")
-      if (fs.existsSync(pnpmLockFilePath)) {
-        return pnpmLockFilePath
-      }
-
-      currentPath = path.join(currentPath, "..")
-    }
-
-    return undefined
-  }
-
-  const lockFilePath = findLockFilePath()
+  const lockFilePath =
+    findLockFilePathInDir(projectPath) ?? findLockFileForWorkspace(projectPath)
 
   if (!lockFilePath) {
     throw new Error(
-      "Can't find a package-lock.json or yarn.lock file in the current directory or any of its parents.",
+      "No lockfile found in the current directory or for any workspace",
     )
   }
 
@@ -219,6 +188,69 @@ export default function exportCommand(command: ServerCommandExport) {
       break
     }
   }
+}
+
+function findLockFilePathInDir(dir: string): string | undefined {
+  const lockFilePath = path.join(dir, "package-lock.json")
+  if (fs.existsSync(lockFilePath)) {
+    return lockFilePath
+  }
+
+  const yarnLockFilePath = path.join(dir, "yarn.lock")
+  if (fs.existsSync(yarnLockFilePath)) {
+    return yarnLockFilePath
+  }
+
+  const pnpmLockFilePath = path.join(dir, "pnpm-lock.yaml")
+  if (fs.existsSync(pnpmLockFilePath)) {
+    return pnpmLockFilePath
+  }
+
+  return undefined
+}
+
+function findLockFileForWorkspace(projectPath: string): string | undefined {
+  const maxDepth = 5
+
+  let currentPath = projectPath
+
+  for (let i = 0; i < maxDepth; i++) {
+    if (hasWorkspaceSettingsInDir(currentPath)) {
+      const foundLockFilePath = findLockFilePathInDir(currentPath)
+      if (foundLockFilePath) {
+        return foundLockFilePath
+      } else {
+        throw new Error(
+          "No lockfile found at the same level of where workspace is defined",
+        )
+      }
+    }
+
+    currentPath = path.join(currentPath, "..")
+  }
+
+  return undefined
+}
+
+function hasWorkspaceSettingsInDir(dir: string): boolean {
+  const packageFilePath = path.join(dir, "package.json")
+  if (fs.existsSync(packageFilePath)) {
+    const packageJson = JSON.parse(readFile(packageFilePath))
+    return !!packageJson.workspaces
+  }
+
+  const pnpmWorkspaceFilePath = path.join(dir, "pnpm-workspace.yaml")
+  if (fs.existsSync(pnpmWorkspaceFilePath)) {
+    return true
+  }
+
+  return false
+}
+
+function readFile(filePath: string): string {
+  return fs.readFileSync(filePath, {
+    encoding: "utf-8",
+  })
 }
 
 function writeToDisk(
