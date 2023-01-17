@@ -286,7 +286,6 @@ function generateFromTypeReferenceNode(
   )
 
   if (ts.isTypeParameterDeclaration(declaration)) {
-    // typeChecker.getTypeArguments()
     const ttt = typeParams.get(declaration.name.text)
     if (ttt) {
       return typeToParserModel(
@@ -303,17 +302,6 @@ function generateFromTypeReferenceNode(
       typeNode,
     )
   }
-
-  // if (ts.isEnumDeclaration(declaration)) {
-  //   return generateFromEnumDeclaration(declaration, typeChecker)
-  // }
-
-  // if (
-  //   !ts.isInterfaceDeclaration(declaration) &&
-  //   !ts.isTypeAliasDeclaration(declaration)
-  // ) {
-  //   throw new ParseError("Unexpected reference type", declaration)
-  // }
 
   const ref = {
     type: ParserModelType.Reference,
