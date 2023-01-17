@@ -4,10 +4,12 @@ import { getTypeFlags } from "./generateParserModelUtils"
 import {
   EnumMemberParserModel,
   EnumParserModel,
+  GenericParserModel,
   IndexMemberParserModel,
   MemberParserModel,
   ParserModel,
   ParserModelType,
+  ReferenceParserModel,
 } from "./ParserModel"
 
 export interface ParserModelMap {
@@ -20,8 +22,8 @@ interface InternalParserModelMap {
   deps: DependencyMap
 }
 
-type DependencyMap = Map<ts.Symbol, { name: string; model: ParserModel }>
-type TypeParamMap = Map<string, ts.Type>
+type DependencyMap = Map<string, { name: string; model: ParserModel }>
+type TypeParamMap = Map<string, { name: string; model: ParserModel }>
 
 export function generateParserModel(
   func: ts.FunctionDeclaration,
@@ -303,19 +305,18 @@ function generateFromTypeReferenceNode(
     )
   }
 
-  const ref = {
-    type: ParserModelType.Reference,
-    typeName: entityNameWithParameters(
-      typeNode,
-      location,
-      type,
-      declaration,
-      typeChecker,
-      typeParams,
-    ),
-  } as const
+  const ref = getRefXXX(
+    typeNode,
+    location,
+    type,
+    declaration,
+    typeChecker,
+    deps,
+    typeParams,
+  )
 
-  if (deps.has(symbol)) {
+  if (deps.has(ref.typeName)) {
+    console.log("has already symbol", ref.typeName)
     return {
       root: ref,
       deps,
@@ -331,7 +332,7 @@ function generateFromTypeReferenceNode(
       ...deps,
       // short circuit for recursive reference types
       [
-        symbol,
+        ref.typeName,
         {
           name: `TODO`,
           model: ref,
@@ -346,11 +347,21 @@ function generateFromTypeReferenceNode(
     deps: new Map([
       ...depModel.deps,
       [
-        symbol,
-        {
-          name: ref.typeName,
-          model: depModel.root,
-        },
+        ref.typeName,
+        ref.typeArguments
+          ? {
+              name: ref.typeName,
+              model: {
+                type: ParserModelType.Generic,
+                typeName: ref.typeName,
+                typeArguments: ref.typeArguments,
+                parser: depModel.root,
+              },
+            }
+          : {
+              name: ref.typeName,
+              model: depModel.root,
+            },
       ],
     ]),
   }
@@ -470,10 +481,12 @@ function generateFromTypeNode(
 
     const newParams = rewriteTypeParams(
       typeNode,
+      location,
       xxxxx as any,
       type as ts.TypeReference,
       typeChecker,
       typeParams,
+      deps,
     )
 
     // console.group("typeReference", printCode(typeNode), newParams.size)
@@ -483,8 +496,8 @@ function generateFromTypeNode(
       type as ts.TypeReference,
       location,
       typeChecker,
-      deps,
-      newParams,
+      newParams.deps,
+      newParams.typeParams,
     )
     // console.groupEnd()
     return result
@@ -1044,40 +1057,50 @@ function getNonOptionalType(propType: ts.Type): ts.Type {
 
 function rewriteTypeParams(
   typeNode: ts.TypeReferenceNode,
+  location: ts.TypeNode,
   declaration: ts.Declaration,
   type: ts.TypeReference,
   typeChecker: ts.TypeChecker,
   typeParams: TypeParamMap,
-): TypeParamMap {
+  deps: DependencyMap,
+): { typeParams: TypeParamMap; deps: DependencyMap } {
   if (
-    !ts.isInterfaceDeclaration(declaration) &&
-    !ts.isTypeAliasDeclaration(declaration)
+    (!ts.isInterfaceDeclaration(declaration) &&
+      !ts.isTypeAliasDeclaration(declaration)) ||
+    !declaration.typeParameters ||
+    declaration.typeParameters.length === 0
   ) {
-    // throw new Error("XXXXXXXXXXBNXBXXNHXJHXJXJ" + printCode(declaration))
-    return typeParams
+    return { typeParams, deps }
   }
 
-  const typeParameters = declaration.typeParameters
-  if (!typeParameters || typeParameters.length === 0) {
-    // return typeParams
-    return typeParams
-  }
-
-  const typeArgs = ts.isTypeAliasDeclaration(declaration)
+  const typeArgs: readonly ts.Type[] = ts.isTypeAliasDeclaration(declaration)
     ? type.aliasTypeArguments ?? []
     : typeChecker.getTypeArguments(type)
 
   const map: TypeParamMap = typeParams
+  let depsMap: DependencyMap = deps
 
-  for (let i = 0; i < typeParameters.length; i++) {
-    const typeParam = typeParameters[i]
+  for (let i = 0; i < declaration.typeParameters.length; i++) {
+    const typeParam = declaration.typeParameters[i]
     const typeArg = typeArgs[i]
 
     if (typeArg) {
       if (typeArg.isTypeParameter()) {
         // do nothing
       } else {
-        map.set(typeParam.name.text, typeArg)
+        const typeArgModel = typeToParserModel(
+          typeArg,
+          typeNode,
+          location,
+          typeChecker,
+          depsMap,
+          map,
+        )
+        depsMap = typeArgModel.deps
+        map.set(typeParam.name.text, {
+          name: typeChecker.typeToString(typeArg),
+          model: typeArgModel.root,
+        })
       }
     } else if (typeNode.typeArguments) {
       const x = typeChecker.getTypeAtLocation(typeNode.typeArguments[i])
@@ -1092,8 +1115,20 @@ function rewriteTypeParams(
           )
         }
       } else {
+        const xModel = typeToParserModel(
+          x,
+          typeNode,
+          location,
+          typeChecker,
+          depsMap,
+          map,
+        )
+        depsMap = xModel.deps
         // must be conditional type
-        map.set(typeParam.name.text, x)
+        map.set(typeParam.name.text, {
+          name: typeChecker.typeToString(typeArg),
+          model: xModel.root,
+        })
       }
     } else {
       throw new ParseError(
@@ -1103,48 +1138,7 @@ function rewriteTypeParams(
     }
   }
 
-  return map
-}
-
-function entityNameWithParameters(
-  typeNode: ts.TypeReferenceNode,
-  location: ts.TypeNode,
-  type: ts.Type,
-  declaration: ts.Declaration,
-  typeChecker: ts.TypeChecker,
-  typeParams: TypeParamMap,
-): string {
-  if (
-    !ts.isInterfaceDeclaration(declaration) &&
-    !ts.isTypeAliasDeclaration(declaration)
-  ) {
-    return entityNameAsString(typeNode.typeName)
-  }
-  if (!declaration.typeParameters || declaration.typeParameters.length === 0) {
-    return entityNameAsString(typeNode.typeName)
-  }
-
-  const xxx: string[] = []
-
-  for (let i = 0; i < declaration.typeParameters.length; i++) {
-    const typeParam = declaration.typeParameters[i]
-    const typeArgument = typeNode.typeArguments?.[i]
-    // const typeArgumentType = typeArgumentTypes[i]
-
-    const typeParamType = typeParams.get(typeParam.name.text)
-
-    if (typeParamType?.isTypeParameter() && typeArgument) {
-      xxx.push(
-        typeChecker.typeToString(typeChecker.getTypeAtLocation(typeArgument)),
-      )
-    } else if (typeParamType) {
-      xxx.push(typeChecker.typeToString(typeParamType))
-    } else {
-      xxx.push("OJEEJ!!")
-    }
-  }
-
-  return `${entityNameAsString(typeNode.typeName)}<${xxx.join(", ")}>`
+  return { typeParams: map, deps: depsMap }
 }
 
 function entityNameAsString(typeName: ts.EntityName): string {
@@ -1152,4 +1146,48 @@ function entityNameAsString(typeName: ts.EntityName): string {
     return typeName.text
   }
   return `${entityNameAsString(typeName.left)}.${typeName.right.text}`
+}
+
+function getRefXXX(
+  typeNode: ts.TypeReferenceNode,
+  location: ts.TypeNode,
+  type: ts.TypeReference,
+  declaration: ts.Declaration,
+  typeChecker: ts.TypeChecker,
+  deps: DependencyMap,
+  typeParams: TypeParamMap,
+): ReferenceParserModel | GenericParserModel {
+  if (
+    (!ts.isInterfaceDeclaration(declaration) &&
+      !ts.isTypeAliasDeclaration(declaration)) ||
+    !declaration.typeParameters ||
+    declaration.typeParameters.length === 0
+  ) {
+    return {
+      type: ParserModelType.Reference,
+      typeName: entityNameAsString(typeNode.typeName),
+    }
+  }
+
+  const xxx: Array<{ name: string; model: ParserModel }> = []
+
+  for (let i = 0; i < declaration.typeParameters.length; i++) {
+    const typeParam = declaration.typeParameters[i]
+
+    const typeParamType = typeParams.get(typeParam.name.text)
+
+    if (!typeParamType) {
+      throw new Error("OPES " + typeParam.name.text)
+    }
+
+    xxx.push(typeParamType)
+  }
+
+  return {
+    type: ParserModelType.Reference,
+    typeName: `${entityNameAsString(typeNode.typeName)}<${xxx
+      .map((x) => x.name)
+      .join(", ")}>`,
+    typeArguments: xxx.map((x) => x.model),
+  }
 }
