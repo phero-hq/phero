@@ -3,10 +3,11 @@ import {
   ServerCommandServe,
   ServerDevEvent,
 } from "@phero/dev"
+import { exec } from "child_process"
 import { Box, Text } from "ink"
 import path from "path"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { spawnChildProcess } from "../../process"
+import { spawnNpmExec } from "../../process"
 import { ServerProject } from "../../types"
 import ActivityIndicator from "../ActivityIndicator"
 import ProjectStatus from "../ProjectStatus"
@@ -147,9 +148,9 @@ export default function ServerProjectStatus({
       },
     )
 
-    const childProcess = spawnChildProcess(
+    const childProcess = spawnNpmExec(
       "phero-server",
-      ["serve", "--port", `${command.port}`],
+      ["serve", `--port=${command.port}`],
       path.resolve(project.path),
       (log) =>
         onAddRow(

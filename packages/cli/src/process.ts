@@ -2,7 +2,7 @@ import { spawn } from "child_process"
 import { hasErrorCode } from "./utils/errors"
 
 interface ChildProcess {
-  executable: string // ./node_modules/.bin/phero-*
+  executableName: string // phero-*
   argv: string[] // ["watch", "--port", "3000"]
   pid: number
   cwd: string
@@ -25,14 +25,17 @@ export function fatalError(error: unknown) {
   process.exit(1)
 }
 
-export function spawnChildProcess(
+export function spawnNpmExec(
   executableName: string,
   argv: string[],
   cwd: string,
   onLog?: (data: string) => void,
 ): ChildProcess {
-  const executable = `./node_modules/.bin/${executableName}`
-  const { kill, pid, stdout, stderr } = spawn(executable, argv, { cwd })
+  const { kill, pid, stdout, stderr } = spawn(
+    "npm",
+    ["exec", executableName, ...argv],
+    { cwd },
+  )
     .on("close", (code) => {
       throw new Error(`${executableName} closed with code: ${code}`)
     })
@@ -66,7 +69,7 @@ export function spawnChildProcess(
   }
 
   const childProcess: ChildProcess = {
-    executable,
+    executableName,
     argv,
     cwd,
     pid,
