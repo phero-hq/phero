@@ -4,7 +4,6 @@ import { getTypeFlags } from "./generateParserModelUtils"
 import {
   EnumMemberParserModel,
   EnumParserModel,
-  GenericParserModel,
   IndexMemberParserModel,
   MemberParserModel,
   ParserModel,
@@ -274,6 +273,21 @@ function generateFromTypeLiteralNode(
   }
 }
 
+function getTypeParamParserModel(
+  typeNode: ts.TypeNode,
+  declaration: ts.TypeParameterDeclaration,
+  typeParams: TypeParamMap,
+): { name: string; model: ParserModel } {
+  const typeParamModel = typeParams.get(declaration.name.text)
+  if (!typeParamModel) {
+    throw new ParseError(
+      `No type found for type parameter ${declaration.name.text}`,
+      typeNode,
+    )
+  }
+  return typeParamModel
+}
+
 function generateFromTypeReferenceNode(
   typeNode: ts.TypeReferenceNode,
   type: ts.TypeReference,
@@ -285,25 +299,19 @@ function generateFromTypeReferenceNode(
   const declaration = getDeclaration(typeNode, typeChecker)
 
   if (ts.isTypeParameterDeclaration(declaration)) {
-    const ttt = typeParams.get(declaration.name.text)
-    if (ttt) {
-      return typeToParserModel(
-        type,
-        typeNode,
-        location,
-        typeChecker,
-        deps,
-        typeParams,
-      )
-    }
-    throw new ParseError(
-      "Typeparam not found! " + declaration.name.text,
+    const typeParserModel = getTypeParamParserModel(
       typeNode,
+      declaration,
+      typeParams,
     )
+    return {
+      root: typeParserModel.model,
+      deps,
+    }
   }
 
   const { typeParams: updatedTypeParams, deps: updatedDeps } =
-    rewriteTypeParams(
+    getUpdatedTypeParams(
       typeNode,
       location,
       declaration,
@@ -313,7 +321,11 @@ function generateFromTypeReferenceNode(
       deps,
     )
 
-  const ref = getRefXXX(typeNode, declaration, updatedTypeParams)
+  const ref = generateReferenceParserModelForDeclaration(
+    typeNode,
+    declaration,
+    updatedTypeParams,
+  )
 
   if (updatedDeps.has(ref.typeName)) {
     return {
@@ -323,6 +335,7 @@ function generateFromTypeReferenceNode(
   }
 
   const depModel = generateFromDeclaration(
+    typeNode,
     declaration,
     type,
     location,
@@ -607,13 +620,17 @@ function generateFromTypeElementDeclaration(
 
     const prop = type.getProperty(memberName)
     if (!prop) {
+      console.log("NO PROP")
       throw new Error(
-        "TODO" +
+        "TODO " +
           memberName +
+          " > " +
           type
             .getProperties()
             .map((p) => p.name)
-            .join("|"),
+            .join("|") +
+          " >>> " +
+          typeChecker.typeToString(type),
       )
     }
 
@@ -651,6 +668,7 @@ function generateFromTypeElementDeclaration(
 }
 
 function generateFromDeclaration(
+  typeNode: ts.TypeReferenceNode,
   declaration: ts.Declaration,
   type: ts.Type,
   location: ts.TypeNode,
@@ -660,8 +678,7 @@ function generateFromDeclaration(
 ): InternalParserModelMap {
   if (ts.isEnumDeclaration(declaration)) {
     const enumParser = generateFromEnumDeclaration(declaration, typeChecker)
-    // const name = enumParser.name
-    return { root: enumParser, deps: new Map() }
+    return { root: enumParser, deps }
   }
 
   if (ts.isEnumMember(declaration)) {
@@ -669,8 +686,7 @@ function generateFromDeclaration(
       declaration,
       typeChecker,
     )
-    // const name = `${declaration.parent.name.text}.${enumMemberParser.name}`
-    return { root: enumMemberParser, deps: new Map() }
+    return { root: enumMemberParser, deps }
   }
 
   if (ts.isInterfaceDeclaration(declaration)) {
@@ -682,7 +698,6 @@ function generateFromDeclaration(
       deps,
       typeParams,
     )
-    // const name = `${declaration.name.text}${getTypeParameterNames(declaration)}`
     return result
   }
 
@@ -695,19 +710,14 @@ function generateFromDeclaration(
       deps,
       typeParams,
     )
-    // const name = `${declaration.name.text}${getTypeParameterNames(declaration)}`
     return result
   }
 
-  if (ts.isTypeParameterDeclaration(declaration)) {
-    throw new Error("TODO typeparam declr")
-  }
-
   throw new ParseError(
-    `Declaration with kind ${
+    `Reference to type with kind ${
       ts.tokenToString(declaration.kind) ?? declaration.kind.toString()
     } not supported`,
-    declaration,
+    typeNode,
   )
 }
 
@@ -724,10 +734,10 @@ function generateFromInterfaceDeclaration(
     deps: DependencyMap
   }>(
     ({ models, deps }, member) => {
-      console.group(
-        "getObjectParserModelFromDeclaration",
-        interfaceDeclr.name.text,
-      )
+      // console.group(
+      //   "getObjectParserModelFromDeclaration",
+      //   interfaceDeclr.name.text,
+      // )
       const memberModel = generateFromTypeElementDeclaration(
         member,
         type,
@@ -736,7 +746,7 @@ function generateFromInterfaceDeclaration(
         deps,
         typeParams,
       )
-      console.groupEnd()
+      // console.groupEnd()
       return {
         models: [...models, memberModel.root],
         deps: memberModel.deps,
@@ -862,7 +872,7 @@ function typeToParserModel(
       deps: DependencyMap
     }>(
       ({ models, deps }, prop) => {
-        const g = typeChecker.getTypeOfSymbolAtLocation(prop, typeNode)
+        const propType = typeChecker.getTypeOfSymbolAtLocation(prop, typeNode)
 
         const propSignature = prop.declarations?.[0]
 
@@ -876,7 +886,7 @@ function typeToParserModel(
 
         const propModel = generateFromTypeNode(
           propSignature.type,
-          g,
+          propType,
           location,
           typeChecker,
           deps,
@@ -1019,7 +1029,7 @@ function getNonOptionalType(propType: ts.Type): ts.Type {
   return nonUndefinedType
 }
 
-function rewriteTypeParams(
+function getUpdatedTypeParams(
   typeNode: ts.TypeReferenceNode,
   location: ts.TypeNode,
   declaration: ts.Declaration,
@@ -1037,62 +1047,53 @@ function rewriteTypeParams(
     return { typeParams, deps }
   }
 
-  const typeArgs: readonly ts.Type[] = ts.isTypeAliasDeclaration(declaration)
-    ? type.aliasTypeArguments ?? []
-    : typeChecker.getTypeArguments(type)
+  const typeArgumentTypes: readonly ts.Type[] =
+    type.aliasTypeArguments ?? typeChecker.getTypeArguments(type)
+  const typeArguments = typeNode.typeArguments ?? []
 
-  const map: TypeParamMap = typeParams
   let depsMap: DependencyMap = deps
 
   for (let i = 0; i < declaration.typeParameters.length; i++) {
     const typeParam = declaration.typeParameters[i]
-    const typeArg = typeArgs[i]
+    const typeArgument = typeArguments[i]
+    const typeArgumentType = typeArgumentTypes[i]
 
-    if (typeArg) {
-      if (typeArg.isTypeParameter()) {
-        // do nothing
+    if (typeArgumentType) {
+      const typeArgModel = typeToParserModel(
+        typeArgumentType,
+        typeNode,
+        location,
+        typeChecker,
+        depsMap,
+        typeParams,
+      )
+      typeParams.set(typeParam.name.text, {
+        name: typeChecker.typeToString(typeArgumentType),
+        model: typeArgModel.root,
+      })
+      depsMap = typeArgModel.deps
+    } else if (typeArgument) {
+      const inferedTypeArgumentType =
+        typeChecker.getTypeAtLocation(typeArgument)
+      if (inferedTypeArgumentType.isTypeParameter()) {
+        typeParams.set(
+          typeParam.name.text,
+          getTypeParamParserModel(typeNode, typeParam, typeParams),
+        )
       } else {
-        const typeArgModel = typeToParserModel(
-          typeArg,
-          typeNode,
+        const typeArgModel = generateFromTypeNode(
+          typeArgument,
+          inferedTypeArgumentType,
           location,
           typeChecker,
-          depsMap,
-          map,
+          deps,
+          typeParams,
         )
-        depsMap = typeArgModel.deps
-        map.set(typeParam.name.text, {
-          name: typeChecker.typeToString(typeArg),
+        typeParams.set(typeParam.name.text, {
+          name: typeChecker.typeToString(inferedTypeArgumentType),
           model: typeArgModel.root,
         })
-      }
-    } else if (typeNode.typeArguments) {
-      const x = typeChecker.getTypeAtLocation(typeNode.typeArguments[i])
-      if (x.isTypeParameter()) {
-        const y = typeParams.get(typeChecker.typeToString(x))
-        // do nothing
-        if (y) {
-          map.set(typeParam.name.text, y)
-        } else {
-          throw new Error(
-            "askjdasdjkhaskdjhasdkjhasdkjhasdlkjasdlkjasdlkjasdlkjasdlk",
-          )
-        }
-      } else {
-        const xModel = typeToParserModel(
-          x,
-          typeNode,
-          location,
-          typeChecker,
-          depsMap,
-          map,
-        )
-        depsMap = xModel.deps
-        // must be conditional type
-        map.set(typeParam.name.text, {
-          name: typeChecker.typeToString(x),
-          model: xModel.root,
-        })
+        depsMap = typeArgModel.deps
       }
     } else {
       throw new ParseError(
@@ -1102,7 +1103,7 @@ function rewriteTypeParams(
     }
   }
 
-  return { typeParams: map, deps: depsMap }
+  return { typeParams, deps: depsMap }
 }
 
 function entityNameAsString(typeName: ts.EntityName): string {
@@ -1112,11 +1113,11 @@ function entityNameAsString(typeName: ts.EntityName): string {
   return `${entityNameAsString(typeName.left)}.${typeName.right.text}`
 }
 
-function getRefXXX(
+function generateReferenceParserModelForDeclaration(
   typeNode: ts.TypeReferenceNode,
   declaration: ts.Declaration,
   typeParams: TypeParamMap,
-): ReferenceParserModel | GenericParserModel {
+): ReferenceParserModel {
   if (
     (!ts.isInterfaceDeclaration(declaration) &&
       !ts.isTypeAliasDeclaration(declaration)) ||
