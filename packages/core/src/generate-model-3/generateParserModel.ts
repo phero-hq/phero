@@ -282,10 +282,7 @@ function generateFromTypeReferenceNode(
   deps: DependencyMap,
   typeParams: TypeParamMap,
 ): InternalParserModelMap {
-  const { symbol, declaration } = getSymbolWithDeclarationOrThrow(
-    typeNode,
-    typeChecker,
-  )
+  const declaration = getDeclaration(typeNode, typeChecker)
 
   if (ts.isTypeParameterDeclaration(declaration)) {
     const ttt = typeParams.get(declaration.name.text)
@@ -305,21 +302,23 @@ function generateFromTypeReferenceNode(
     )
   }
 
-  const ref = getRefXXX(
-    typeNode,
-    location,
-    type,
-    declaration,
-    typeChecker,
-    deps,
-    typeParams,
-  )
+  const { typeParams: updatedTypeParams, deps: updatedDeps } =
+    rewriteTypeParams(
+      typeNode,
+      location,
+      declaration,
+      type,
+      typeChecker,
+      typeParams,
+      deps,
+    )
 
-  if (deps.has(ref.typeName)) {
-    console.log("has already symbol", ref.typeName)
+  const ref = getRefXXX(typeNode, declaration, updatedTypeParams)
+
+  if (updatedDeps.has(ref.typeName)) {
     return {
       root: ref,
-      deps,
+      deps: updatedDeps,
     }
   }
 
@@ -329,7 +328,7 @@ function generateFromTypeReferenceNode(
     location,
     typeChecker,
     new Map([
-      ...deps,
+      ...updatedDeps,
       // short circuit for recursive reference types
       [
         ref.typeName,
@@ -339,7 +338,7 @@ function generateFromTypeReferenceNode(
         },
       ],
     ]),
-    typeParams,
+    updatedTypeParams,
   )
 
   return {
@@ -474,30 +473,13 @@ function generateFromTypeNode(
   }
 
   if (ts.isTypeReferenceNode(typeNode)) {
-    const { declaration: xxxxx } = getSymbolWithDeclarationOrThrow(
-      typeNode,
-      typeChecker,
-    )
-
-    const newParams = rewriteTypeParams(
-      typeNode,
-      location,
-      xxxxx as any,
-      type as ts.TypeReference,
-      typeChecker,
-      typeParams,
-      deps,
-    )
-
-    // console.group("typeReference", printCode(typeNode), newParams.size)
-
     const result = generateFromTypeReferenceNode(
       typeNode,
       type as ts.TypeReference,
       location,
       typeChecker,
-      newParams.deps,
-      newParams.typeParams,
+      deps,
+      typeParams,
     )
     // console.groupEnd()
     return result
@@ -742,8 +724,8 @@ function generateFromInterfaceDeclaration(
     deps: DependencyMap
   }>(
     ({ models, deps }, member) => {
-      console.log(
-        "via getObjectParserModelFromDeclaration",
+      console.group(
+        "getObjectParserModelFromDeclaration",
         interfaceDeclr.name.text,
       )
       const memberModel = generateFromTypeElementDeclaration(
@@ -754,6 +736,7 @@ function generateFromInterfaceDeclaration(
         deps,
         typeParams,
       )
+      console.groupEnd()
       return {
         models: [...models, memberModel.root],
         deps: memberModel.deps,
@@ -873,21 +856,7 @@ function typeToParserModel(
       },
       deps,
     }
-  } else if (type.flags & ts.TypeFlags.TypeParameter) {
-    throw new Error("OEPS!")
-    // return {
-    //   root: {
-    //     type: ParserModelType.TypeParameter,
-    //     name: type.symbol.name,
-    //     position: 2,
-    //   },
-    //   deps, // TODO?
-    // }
   } else if (type.flags & ts.TypeFlags.Object) {
-    if (typeNode === undefined) {
-      throw new Error("typeNode should not be typeNode")
-    }
-
     const memberModels = type.getProperties().reduce<{
       models: (IndexMemberParserModel | MemberParserModel)[]
       deps: DependencyMap
@@ -913,8 +882,6 @@ function typeToParserModel(
           deps,
           typeParams,
         )
-
-        console.log(prop.name, JSON.stringify(propModel))
 
         return {
           models: [
@@ -1019,13 +986,10 @@ function propertyNameAsString(propertyName: ts.PropertyName): string {
   throw new ParseError(`Unexpected value for member name`, propertyName)
 }
 
-export function getSymbolWithDeclarationOrThrow(
+export function getDeclaration(
   typeNode: ts.TypeReferenceNode,
   typeChecker: ts.TypeChecker,
-): {
-  symbol: ts.Symbol
-  declaration: ts.Declaration
-} {
+): ts.Declaration {
   const symbol = typeChecker.getSymbolAtLocation(typeNode.typeName)
   if (!symbol) {
     throw new ParseError("Entity must have symbol", typeNode)
@@ -1036,7 +1000,7 @@ export function getSymbolWithDeclarationOrThrow(
     throw new ParseError("Entity must have declaration", typeNode)
   }
 
-  return { symbol, declaration }
+  return declaration
 }
 
 function getNonOptionalType(propType: ts.Type): ts.Type {
@@ -1126,7 +1090,7 @@ function rewriteTypeParams(
         depsMap = xModel.deps
         // must be conditional type
         map.set(typeParam.name.text, {
-          name: typeChecker.typeToString(typeArg),
+          name: typeChecker.typeToString(x),
           model: xModel.root,
         })
       }
@@ -1150,11 +1114,7 @@ function entityNameAsString(typeName: ts.EntityName): string {
 
 function getRefXXX(
   typeNode: ts.TypeReferenceNode,
-  location: ts.TypeNode,
-  type: ts.TypeReference,
   declaration: ts.Declaration,
-  typeChecker: ts.TypeChecker,
-  deps: DependencyMap,
   typeParams: TypeParamMap,
 ): ReferenceParserModel | GenericParserModel {
   if (

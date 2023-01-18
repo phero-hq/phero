@@ -13,20 +13,26 @@ describe("generics", () => {
       root: {
         type: "reference",
         typeName: "MyInterface<number>",
+        typeArguments: [{ type: "number" }],
       },
       deps: {
         "MyInterface<number>": {
-          type: "object",
-          members: [
-            {
-              type: "member",
-              name: "prop",
-              optional: false,
-              parser: {
-                type: "number",
+          type: "generic",
+          typeArguments: [{ type: "number" }],
+          typeName: "MyInterface<number>",
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "prop",
+                optional: false,
+                parser: {
+                  type: "number",
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
     })
@@ -43,20 +49,26 @@ describe("generics", () => {
       root: {
         type: "reference",
         typeName: "MyInterface<number>",
+        typeArguments: [{ type: "number" }],
       },
       deps: {
         "MyInterface<number>": {
-          type: "object",
-          members: [
-            {
-              type: "member",
-              name: "prop",
-              optional: false,
-              parser: {
-                type: "number",
+          type: "generic",
+          typeArguments: [{ type: "number" }],
+          typeName: "MyInterface<number>",
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "prop",
+                optional: false,
+                parser: {
+                  type: "number",
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
     })
@@ -73,20 +85,26 @@ describe("generics", () => {
       root: {
         type: "reference",
         typeName: "MyTypeAlias<number>",
+        typeArguments: [{ type: "number" }],
       },
       deps: {
         "MyTypeAlias<number>": {
-          type: "object",
-          members: [
-            {
-              type: "member",
-              name: "prop",
-              optional: false,
-              parser: {
-                type: "number",
+          type: "generic",
+          typeArguments: [{ type: "number" }],
+          typeName: "MyTypeAlias<number>",
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "prop",
+                optional: false,
+                parser: {
+                  type: "number",
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
     })
@@ -108,50 +126,62 @@ describe("generics", () => {
       root: {
         type: "reference",
         typeName: "DeepGeneric<number>",
+        typeArguments: [{ type: "number" }],
       },
       deps: {
         "DeepGeneric<number>": {
-          type: "object",
-          members: [
-            {
-              type: "member",
-              name: "prop",
-              optional: false,
-              parser: {
-                type: "reference",
-                typeName: "Wrap<number>",
+          type: "generic",
+          typeArguments: [{ type: "number" }],
+          typeName: "DeepGeneric<number>",
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "prop",
+                optional: false,
+                parser: {
+                  type: "reference",
+                  typeName: "Wrap<number>",
+                  typeArguments: [{ type: "number" }],
+                },
               },
-            },
-            {
-              type: "member",
-              name: "nonGenericProp",
-              optional: false,
-              parser: {
-                type: "boolean",
+              {
+                type: "member",
+                name: "nonGenericProp",
+                optional: false,
+                parser: {
+                  type: "boolean",
+                },
               },
-            },
-          ],
+            ],
+          },
         },
         "Wrap<number>": {
-          type: "object",
-          members: [
-            {
-              type: "member",
-              name: "wrap",
-              optional: false,
-              parser: {
-                type: "number",
+          type: "generic",
+          typeArguments: [{ type: "number" }],
+          typeName: "Wrap<number>",
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "wrap",
+                optional: false,
+                parser: {
+                  type: "number",
+                },
               },
-            },
-            {
-              type: "member",
-              name: "nonGenericWrap",
-              optional: false,
-              parser: {
-                type: "string",
+              {
+                type: "member",
+                name: "nonGenericWrap",
+                optional: false,
+                parser: {
+                  type: "string",
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
     })
@@ -170,30 +200,36 @@ describe("generics", () => {
       root: {
         type: "reference",
         typeName: "EmbeddedGeneric<number>",
+        typeArguments: [{ type: "number" }],
       },
       deps: {
         "EmbeddedGeneric<number>": {
-          type: "object",
-          members: [
-            {
-              type: "member",
-              name: "embed",
-              optional: false,
-              parser: {
-                type: "object",
-                members: [
-                  {
-                    type: "member",
-                    name: "prop",
-                    optional: false,
-                    parser: {
-                      type: "number",
+          type: "generic",
+          typeArguments: [{ type: "number" }],
+          typeName: "EmbeddedGeneric<number>",
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "embed",
+                optional: false,
+                parser: {
+                  type: "object",
+                  members: [
+                    {
+                      type: "member",
+                      name: "prop",
+                      optional: false,
+                      parser: {
+                        type: "number",
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
     })
@@ -211,28 +247,34 @@ describe("generics", () => {
       root: {
         type: "reference",
         typeName: "GenericWithDefault<number, string>",
+        typeArguments: [{ type: "number" }, { type: "string" }],
       },
       deps: {
         "GenericWithDefault<number, string>": {
-          type: "object",
-          members: [
-            {
-              type: "member",
-              name: "prop",
-              optional: false,
-              parser: {
-                type: "number",
+          type: "generic",
+          typeArguments: [{ type: "number" }, { type: "string" }],
+          typeName: "GenericWithDefault<number, string>",
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "prop",
+                optional: false,
+                parser: {
+                  type: "number",
+                },
               },
-            },
-            {
-              type: "member",
-              name: "propDef",
-              optional: false,
-              parser: {
-                type: "string",
+              {
+                type: "member",
+                name: "propDef",
+                optional: false,
+                parser: {
+                  type: "string",
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
     })

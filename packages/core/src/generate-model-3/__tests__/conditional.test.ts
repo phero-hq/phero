@@ -10,25 +10,35 @@ describe("conditional", () => {
       }
       function test(): MyConditionalType<number> { throw new Error() }
     `)
-    console.log(JSON.stringify(modelMap, null, 4))
+
     expect(modelMap).toEqual({
       root: {
         type: "reference",
         typeName: "MyConditionalType<number>",
+        typeArguments: [{ type: "number" }],
       },
       deps: {
         "MyConditionalType<number>": {
-          type: "object",
-          members: [
+          type: "generic",
+          typeName: "MyConditionalType<number>",
+          typeArguments: [
             {
-              type: "member",
-              name: "prop",
-              optional: false,
-              parser: {
-                type: "string",
-              },
+              type: "number",
             },
           ],
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "prop",
+                optional: false,
+                parser: {
+                  type: "string",
+                },
+              },
+            ],
+          },
         },
       },
     })
@@ -46,20 +56,30 @@ describe("conditional", () => {
       root: {
         type: "reference",
         typeName: "MyConditionalType<string>",
+        typeArguments: [{ type: "string" }],
       },
       deps: {
         "MyConditionalType<string>": {
-          type: "object",
-          members: [
+          type: "generic",
+          typeName: "MyConditionalType<string>",
+          typeArguments: [
             {
-              type: "member",
-              name: "prop",
-              optional: false,
-              parser: {
-                type: "number",
-              },
+              type: "string",
             },
           ],
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "prop",
+                optional: false,
+                parser: {
+                  type: "number",
+                },
+              },
+            ],
+          },
         },
       },
     })
@@ -79,47 +99,67 @@ describe("conditional", () => {
 
       function test(): MyDeepConditionalType<number> { throw new Error() }
     `)
-    console.log(JSON.stringify(modelMap, null, 4))
+
     expect(modelMap).toEqual({
       root: {
         type: "reference",
         typeName: "MyDeepConditionalType<number>",
+        typeArguments: [{ type: "number" }],
       },
       deps: {
         "MyDeepConditionalType<number>": {
-          type: "object",
-          members: [
+          type: "generic",
+          typeName: "MyDeepConditionalType<number>",
+          typeArguments: [
             {
-              type: "member",
-              name: "t",
-              optional: false,
-              parser: {
-                type: "number",
-              },
-            },
-            {
-              type: "member",
-              name: "deep",
-              optional: false,
-              parser: {
-                type: "reference",
-                typeName: "DeepCondition<string>",
-              },
+              type: "number",
             },
           ],
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "t",
+                optional: false,
+                parser: {
+                  type: "number",
+                },
+              },
+              {
+                type: "member",
+                name: "deep",
+                optional: false,
+                parser: {
+                  type: "reference",
+                  typeName: "DeepCondition<string>",
+                  typeArguments: [{ type: "string" }],
+                },
+              },
+            ],
+          },
         },
         "DeepCondition<string>": {
-          type: "object",
-          members: [
+          type: "generic",
+          typeName: "DeepCondition<string>",
+          typeArguments: [
             {
-              type: "member",
-              name: "prop",
-              optional: false,
-              parser: {
-                type: "number",
-              },
+              type: "string",
             },
           ],
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "prop",
+                optional: false,
+                parser: {
+                  type: "number",
+                },
+              },
+            ],
+          },
         },
       },
     })
@@ -138,39 +178,59 @@ describe("conditional", () => {
 
       function test(): MyDeepConditionalType<number> { throw new Error() }
     `)
-    console.log(JSON.stringify(modelMap, null, 4))
+
     expect(modelMap).toEqual({
       root: {
         type: "reference",
         typeName: "MyDeepConditionalType<number>",
+        typeArguments: [{ type: "number" }],
       },
       deps: {
         "MyDeepConditionalType<number>": {
-          type: "object",
-          members: [
+          type: "generic",
+          typeName: "MyDeepConditionalType<number>",
+          typeArguments: [
             {
-              type: "member",
-              name: "deep",
-              optional: false,
-              parser: {
-                type: "reference",
-                typeName: "DeepCondition<number>",
-              },
+              type: "number",
             },
           ],
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "deep",
+                optional: false,
+                parser: {
+                  type: "reference",
+                  typeName: "DeepCondition<number>",
+                  typeArguments: [{ type: "number" }],
+                },
+              },
+            ],
+          },
         },
         "DeepCondition<number>": {
-          type: "object",
-          members: [
+          type: "generic",
+          typeName: "DeepCondition<number>",
+          typeArguments: [
             {
-              type: "member",
-              name: "prop",
-              optional: false,
-              parser: {
-                type: "string",
-              },
+              type: "number",
             },
           ],
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "prop",
+                optional: false,
+                parser: {
+                  type: "string",
+                },
+              },
+            ],
+          },
         },
       },
     })
@@ -189,40 +249,60 @@ describe("conditional", () => {
       root: {
         type: "reference",
         typeName: "MyType<number>",
+        typeArguments: [{ type: "number" }],
       },
       deps: {
         "MyType<number>": {
-          type: "object",
-          members: [
+          type: "generic",
+          typeName: "MyType<number>",
+          typeArguments: [
             {
-              type: "member",
-              name: "prop",
-              optional: false,
-              parser: {
-                type: "reference",
-                typeName: "Wrap<number>",
-              },
+              type: "number",
             },
           ],
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "prop",
+                optional: false,
+                parser: {
+                  type: "reference",
+                  typeName: "Wrap<number>",
+                  typeArguments: [{ type: "number" }],
+                },
+              },
+            ],
+          },
         },
         "Wrap<number>": {
-          type: "object",
-          members: [
+          type: "generic",
+          typeName: "Wrap<number>",
+          typeArguments: [
             {
-              type: "member",
-              name: "inner",
-              optional: false,
-              parser: {
-                type: "number",
-              },
+              type: "number",
             },
           ],
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "inner",
+                optional: false,
+                parser: {
+                  type: "number",
+                },
+              },
+            ],
+          },
         },
       },
     })
   })
 
-  test.only("MyDeepConditionalRecursiveType<number>", () => {
+  test("MyDeepConditionalRecursiveType<number>", () => {
     const modelMap = generateParserModelMap(`
       interface MyDeepConditionalRecursiveType<T> {
         prop: Wrap<T>
@@ -230,104 +310,237 @@ describe("conditional", () => {
       interface Wrap<W, B = W extends string ? number : boolean> {
         w: W
         b: B
-        recursive?: MyDeepConditionalRecursiveType<B>
+        recursive?: MyDeepConditionalRecursiveType<{ b: B }>
       }
       function test(): MyDeepConditionalRecursiveType<number> { throw new Error() }
     `)
-    console.log(JSON.stringify(modelMap, null, 4))
+
     expect(modelMap).toEqual({
       root: {
         type: "reference",
         typeName: "MyDeepConditionalRecursiveType<number>",
+        typeArguments: [
+          {
+            type: "number",
+          },
+        ],
       },
       deps: {
         "MyDeepConditionalRecursiveType<number>": {
-          type: "object",
-          members: [
+          type: "generic",
+          typeName: "MyDeepConditionalRecursiveType<number>",
+          typeArguments: [
             {
-              type: "member",
-              name: "prop",
-              optional: false,
-              parser: {
-                type: "reference",
-                typeName: "Wrap<number, boolean>",
-              },
+              type: "number",
             },
           ],
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "prop",
+                optional: false,
+                parser: {
+                  type: "reference",
+                  typeName: "Wrap<number, boolean>",
+                  typeArguments: [
+                    {
+                      type: "number",
+                    },
+                    {
+                      type: "boolean",
+                    },
+                  ],
+                },
+              },
+            ],
+          },
         },
         "Wrap<number, boolean>": {
-          type: "object",
-          members: [
+          type: "generic",
+          typeName: "Wrap<number, boolean>",
+          typeArguments: [
             {
-              type: "member",
-              name: "w",
-              optional: false,
-              parser: {
-                type: "number",
-              },
+              type: "number",
             },
             {
-              type: "member",
-              name: "b",
-              optional: false,
-              parser: {
-                type: "boolean",
-              },
-            },
-            {
-              type: "member",
-              name: "recursive",
-              optional: true,
-              parser: {
-                type: "reference",
-                typeName: "MyDeepConditionalRecursiveType<boolean>",
-              },
+              type: "boolean",
             },
           ],
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "w",
+                optional: false,
+                parser: {
+                  type: "number",
+                },
+              },
+              {
+                type: "member",
+                name: "b",
+                optional: false,
+                parser: {
+                  type: "boolean",
+                },
+              },
+              {
+                type: "member",
+                name: "recursive",
+                optional: true,
+                parser: {
+                  type: "reference",
+                  typeName: "MyDeepConditionalRecursiveType<{ b: boolean; }>",
+                  typeArguments: [
+                    {
+                      type: "object",
+                      members: [
+                        {
+                          type: "member",
+                          name: "b",
+                          optional: false,
+                          parser: {
+                            type: "boolean",
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
         },
-        "MyDeepConditionalRecursiveType<boolean>": {
-          type: "object",
-          members: [
+        "MyDeepConditionalRecursiveType<{ b: boolean; }>": {
+          type: "generic",
+          typeName: "MyDeepConditionalRecursiveType<{ b: boolean; }>",
+          typeArguments: [
             {
-              type: "member",
-              name: "prop",
-              optional: false,
-              parser: {
-                type: "reference",
-                typeName: "Wrap<boolean, boolean>",
-              },
+              type: "object",
+              members: [
+                {
+                  type: "member",
+                  name: "b",
+                  optional: false,
+                  parser: {
+                    type: "boolean",
+                  },
+                },
+              ],
             },
           ],
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "prop",
+                optional: false,
+                parser: {
+                  type: "reference",
+                  typeName: "Wrap<{ b: boolean; }, boolean>",
+                  typeArguments: [
+                    {
+                      type: "object",
+                      members: [
+                        {
+                          type: "member",
+                          name: "b",
+                          optional: false,
+                          parser: {
+                            type: "boolean",
+                          },
+                        },
+                      ],
+                    },
+                    {
+                      type: "boolean",
+                    },
+                  ],
+                },
+              },
+            ],
+          },
         },
-        "Wrap<boolean, boolean>": {
-          type: "object",
-          members: [
+        "Wrap<{ b: boolean; }, boolean>": {
+          type: "generic",
+          typeName: "Wrap<{ b: boolean; }, boolean>",
+          typeArguments: [
             {
-              type: "member",
-              name: "w",
-              optional: false,
-              parser: {
-                type: "boolean",
-              },
+              type: "object",
+              members: [
+                {
+                  type: "member",
+                  name: "b",
+                  optional: false,
+                  parser: {
+                    type: "boolean",
+                  },
+                },
+              ],
             },
             {
-              type: "member",
-              name: "b",
-              optional: false,
-              parser: {
-                type: "boolean",
-              },
-            },
-            {
-              type: "member",
-              name: "recursive",
-              optional: true,
-              parser: {
-                type: "reference",
-                typeName: "MyDeepConditionalRecursiveType<boolean>",
-              },
+              type: "boolean",
             },
           ],
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "w",
+                optional: false,
+                parser: {
+                  type: "object",
+                  members: [
+                    {
+                      type: "member",
+                      name: "b",
+                      optional: false,
+                      parser: {
+                        type: "boolean",
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                type: "member",
+                name: "b",
+                optional: false,
+                parser: {
+                  type: "boolean",
+                },
+              },
+              {
+                type: "member",
+                name: "recursive",
+                optional: true,
+                parser: {
+                  type: "reference",
+                  typeName: "MyDeepConditionalRecursiveType<{ b: boolean; }>",
+                  typeArguments: [
+                    {
+                      type: "object",
+                      members: [
+                        {
+                          type: "member",
+                          name: "b",
+                          optional: false,
+                          parser: {
+                            type: "boolean",
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
         },
       },
     })
