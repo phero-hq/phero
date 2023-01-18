@@ -1184,7 +1184,7 @@ function generateReferenceParserModelForDeclaration(
     }
   }
 
-  const xxx: Array<{ name: string; model: ParserModel }> = []
+  const typeArgumentModels: Array<{ name: string; model: ParserModel }> = []
 
   for (let i = 0; i < declaration.typeParameters.length; i++) {
     const typeParam = declaration.typeParameters[i]
@@ -1193,14 +1193,14 @@ function generateReferenceParserModelForDeclaration(
       typeParam,
       typeParams,
     )
-    xxx.push(typeParamModel)
+    typeArgumentModels.push(typeParamModel)
   }
 
   return {
     type: ParserModelType.Reference,
-    typeName: `${generateTypeName(typeNode)}<${xxx
-      .map((x) => x.name)
+    typeName: `${generateTypeName(typeNode)}<${typeArgumentModels
+      .map((tam) => tam.name)
       .join(", ")}>`,
-    typeArguments: xxx.map((x) => x.model),
+    typeArguments: typeArgumentModels.map((tam) => tam.model),
   }
 }
