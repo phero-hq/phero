@@ -149,4 +149,223 @@ describe("interface", () => {
       },
     })
   })
+  test(`interface with parent interface`, () => {
+    const modelMap = generateParserModelMap(`
+        interface Base {
+          base: string
+        }
+        interface TheInterface extends Base {
+          prop: string
+        }
+
+        function test(): TheInterface { throw new Error() }
+    `)
+
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "TheInterface",
+      },
+      deps: {
+        TheInterface: {
+          type: "intersection",
+          parsers: [
+            {
+              type: "object",
+              members: [
+                {
+                  type: "member",
+                  name: "prop",
+                  optional: false,
+                  parser: {
+                    type: "string",
+                  },
+                },
+              ],
+            },
+            {
+              type: "reference",
+              typeName: "Base",
+            },
+          ],
+        },
+        Base: {
+          type: "object",
+          members: [
+            {
+              type: "member",
+              name: "base",
+              optional: false,
+              parser: {
+                type: "string",
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
+  test(`interface with ancestor interface`, () => {
+    const modelMap = generateParserModelMap(`
+        interface Root {
+          root: string
+        }
+        interface Base extends Root {
+          base: string
+        }
+        interface TheInterface extends Base {
+          prop: string
+        }
+
+        function test(): TheInterface { throw new Error() }
+    `)
+
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "TheInterface",
+      },
+      deps: {
+        TheInterface: {
+          type: "intersection",
+          parsers: [
+            {
+              type: "object",
+              members: [
+                {
+                  type: "member",
+                  name: "prop",
+                  optional: false,
+                  parser: {
+                    type: "string",
+                  },
+                },
+              ],
+            },
+            {
+              type: "reference",
+              typeName: "Base",
+            },
+          ],
+        },
+        Base: {
+          type: "intersection",
+          parsers: [
+            {
+              type: "object",
+              members: [
+                {
+                  type: "member",
+                  name: "base",
+                  optional: false,
+                  parser: {
+                    type: "string",
+                  },
+                },
+              ],
+            },
+            {
+              type: "reference",
+              typeName: "Root",
+            },
+          ],
+        },
+        Root: {
+          type: "object",
+          members: [
+            {
+              type: "member",
+              name: "root",
+              optional: false,
+              parser: {
+                type: "string",
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
+  test(`interface with multiple heritage clauses`, () => {
+    const modelMap = generateParserModelMap(`
+        type Other<T> {
+          other: T
+        }
+        interface Base {
+          base: string
+        }
+        interface TheInterface extends Base, Other<string> {
+          prop: string
+        }
+
+        function test(): TheInterface { throw new Error() }
+    `)
+
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "TheInterface",
+      },
+      deps: {
+        "Other<string>": {
+          type: "generic",
+          typeName: "Other<string>",
+          typeArguments: [{ type: "string" }],
+          parser: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "other",
+                optional: false,
+                parser: {
+                  type: "string",
+                },
+              },
+            ],
+          },
+        },
+        Base: {
+          type: "object",
+          members: [
+            {
+              type: "member",
+              name: "base",
+              optional: false,
+              parser: {
+                type: "string",
+              },
+            },
+          ],
+        },
+        TheInterface: {
+          type: "intersection",
+          parsers: [
+            {
+              type: "object",
+              members: [
+                {
+                  type: "member",
+                  name: "prop",
+                  optional: false,
+                  parser: {
+                    type: "string",
+                  },
+                },
+              ],
+            },
+            {
+              type: "reference",
+              typeName: "Base",
+            },
+            {
+              type: "reference",
+              typeName: "Other<string>",
+              typeArguments: [{ type: "string" }],
+            },
+          ],
+        },
+      },
+    })
+  })
 })

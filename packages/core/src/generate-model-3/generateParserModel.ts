@@ -289,7 +289,7 @@ function getTypeParamParserModel(
 }
 
 function generateFromTypeReferenceNode(
-  typeNode: ts.TypeReferenceNode,
+  typeNode: ts.TypeReferenceType,
   type: ts.TypeReference,
   location: ts.TypeNode,
   typeChecker: ts.TypeChecker,
@@ -668,7 +668,7 @@ function generateFromTypeElementDeclaration(
 }
 
 function generateFromDeclaration(
-  typeNode: ts.TypeReferenceNode,
+  typeNode: ts.TypeReferenceType,
   declaration: ts.Declaration,
   type: ts.Type,
   location: ts.TypeNode,
@@ -692,7 +692,7 @@ function generateFromDeclaration(
   if (ts.isInterfaceDeclaration(declaration)) {
     const result = generateFromInterfaceDeclaration(
       declaration,
-      type as ts.ObjectType,
+      type as ts.TypeReference,
       location,
       typeChecker,
       deps,
@@ -723,7 +723,7 @@ function generateFromDeclaration(
 
 function generateFromInterfaceDeclaration(
   interfaceDeclr: ts.InterfaceDeclaration,
-  type: ts.Type,
+  type: ts.TypeReference,
   location: ts.TypeNode,
   typeChecker: ts.TypeChecker,
   deps: DependencyMap,
@@ -754,12 +754,53 @@ function generateFromInterfaceDeclaration(
     },
     { models: [], deps },
   )
+
+  const selfModel = {
+    type: ParserModelType.Object,
+    members: memberParsers.models,
+  } as const
+
+  const inheritedTypes: ts.ExpressionWithTypeArguments[] | undefined =
+    interfaceDeclr.heritageClauses
+      ?.filter((base) => {
+        return base.token === ts.SyntaxKind.ExtendsKeyword
+      })
+      .flatMap((extendClause) => extendClause.types)
+
+  if (!inheritedTypes) {
+    return {
+      root: selfModel,
+      deps: memberParsers.deps,
+    }
+  }
+
+  const inheritedParsers = inheritedTypes.reduce<{
+    models: ParserModel[]
+    deps: DependencyMap
+  }>(
+    ({ models, deps }, inheritedType) => {
+      const inheritedTypeModel = generateFromTypeReferenceNode(
+        inheritedType,
+        type,
+        location,
+        typeChecker,
+        deps,
+        typeParams,
+      )
+      return {
+        models: [...models, inheritedTypeModel.root],
+        deps: inheritedTypeModel.deps,
+      }
+    },
+    { models: [], deps: memberParsers.deps },
+  )
+
   return {
     root: {
-      type: ParserModelType.Object,
-      members: memberParsers.models,
+      type: ParserModelType.Intersection,
+      parsers: [selfModel, ...inheritedParsers.models],
     },
-    deps: memberParsers.deps,
+    deps: inheritedParsers.deps,
   }
 }
 
@@ -997,10 +1038,12 @@ function propertyNameAsString(propertyName: ts.PropertyName): string {
 }
 
 export function getDeclaration(
-  typeNode: ts.TypeReferenceNode,
+  typeNode: ts.TypeReferenceType,
   typeChecker: ts.TypeChecker,
 ): ts.Declaration {
-  const symbol = typeChecker.getSymbolAtLocation(typeNode.typeName)
+  const symbol = typeChecker.getSymbolAtLocation(
+    ts.isTypeReferenceNode(typeNode) ? typeNode.typeName : typeNode.expression,
+  )
   if (!symbol) {
     throw new ParseError("Entity must have symbol", typeNode)
   }
@@ -1030,7 +1073,7 @@ function getNonOptionalType(propType: ts.Type): ts.Type {
 }
 
 function getUpdatedTypeParams(
-  typeNode: ts.TypeReferenceNode,
+  typeNode: ts.TypeReferenceType,
   location: ts.TypeNode,
   declaration: ts.Declaration,
   type: ts.TypeReference,
@@ -1106,15 +1149,26 @@ function getUpdatedTypeParams(
   return { typeParams, deps: depsMap }
 }
 
-function entityNameAsString(typeName: ts.EntityName): string {
-  if (ts.isIdentifier(typeName)) {
-    return typeName.text
+function generateTypeName(typeNode: ts.TypeReferenceType): string {
+  if (ts.isExpressionWithTypeArguments(typeNode)) {
+    if (!ts.isIdentifier(typeNode.expression)) {
+      throw new ParseError("Expression not supported", typeNode.expression)
+    }
+    return entityNameAsString(typeNode.expression)
   }
-  return `${entityNameAsString(typeName.left)}.${typeName.right.text}`
+
+  return entityNameAsString(typeNode.typeName)
+
+  function entityNameAsString(typeName: ts.EntityName): string {
+    if (ts.isIdentifier(typeName)) {
+      return typeName.text
+    }
+    return `${entityNameAsString(typeName.left)}.${typeName.right.text}`
+  }
 }
 
 function generateReferenceParserModelForDeclaration(
-  typeNode: ts.TypeReferenceNode,
+  typeNode: ts.TypeReferenceType,
   declaration: ts.Declaration,
   typeParams: TypeParamMap,
 ): ReferenceParserModel {
@@ -1126,7 +1180,7 @@ function generateReferenceParserModelForDeclaration(
   ) {
     return {
       type: ParserModelType.Reference,
-      typeName: entityNameAsString(typeNode.typeName),
+      typeName: generateTypeName(typeNode),
     }
   }
 
@@ -1134,19 +1188,17 @@ function generateReferenceParserModelForDeclaration(
 
   for (let i = 0; i < declaration.typeParameters.length; i++) {
     const typeParam = declaration.typeParameters[i]
-
-    const typeParamType = typeParams.get(typeParam.name.text)
-
-    if (!typeParamType) {
-      throw new Error("OPES " + typeParam.name.text)
-    }
-
-    xxx.push(typeParamType)
+    const typeParamModel = getTypeParamParserModel(
+      typeNode,
+      typeParam,
+      typeParams,
+    )
+    xxx.push(typeParamModel)
   }
 
   return {
     type: ParserModelType.Reference,
-    typeName: `${entityNameAsString(typeNode.typeName)}<${xxx
+    typeName: `${generateTypeName(typeNode)}<${xxx
       .map((x) => x.name)
       .join(", ")}>`,
     typeArguments: xxx.map((x) => x.model),
