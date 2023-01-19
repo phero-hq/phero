@@ -21,7 +21,7 @@ export default function ProjectStatus({
   return (
     <Box>
       <Box marginRight={1} width={15 + maxProjectPathLength}>
-        <Text dimColor>{`phero-${type} @ `}</Text>
+        <Text dimColor>{`phero-${type} ${projectPath && "@ "}`}</Text>
         <Text color="yellow">{projectPath}</Text>
       </Box>
 

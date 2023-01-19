@@ -50,6 +50,5 @@ async function getProject(filePath: string): Promise<Project | undefined> {
 }
 
 function formatProjectPath(packageJsonPath: string): string {
-  const projectPath = path.relative(".", path.dirname(packageJsonPath))
-  return projectPath === "." ? "./" : `./${projectPath}`
+  return path.relative(".", path.dirname(packageJsonPath))
 }
