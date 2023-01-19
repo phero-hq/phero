@@ -33,7 +33,7 @@ export function spawnNpmExec(
 ): ChildProcess {
   const { kill, pid, stdout, stderr } = spawn(
     "npm",
-    ["exec", executableName, ...argv],
+    ["exec", "--", executableName, ...argv],
     { cwd },
   )
     .on("close", (code) => {
@@ -49,16 +49,9 @@ export function spawnNpmExec(
       throw new Error(`uncaughtException in ${executableName}`)
     })
     .on("error", (error) => {
-      if (hasErrorCode(error)) {
-        switch (error.code) {
-          case "ENOENT":
-            throw new Error(`${executableName} is not installed in ${cwd}`)
-        }
-      } else {
-        throw new Error(
-          `${executableName} errored with message: ${error.message}`,
-        )
-      }
+      throw new Error(
+        `${executableName} errored with message: ${error.message}`,
+      )
     })
 
   stdout.on("data", (data) => onLog?.(data.toString().trim()))

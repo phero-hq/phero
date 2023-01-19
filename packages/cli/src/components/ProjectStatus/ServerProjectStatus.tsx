@@ -3,13 +3,11 @@ import {
   ServerCommandServe,
   ServerDevEvent,
 } from "@phero/dev"
-import { exec } from "child_process"
 import { Box, Text } from "ink"
 import path from "path"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { spawnNpmExec } from "../../process"
 import { ServerProject } from "../../types"
-import ActivityIndicator from "../ActivityIndicator"
 import ProjectStatus from "../ProjectStatus"
 import {
   ServerProjectStatusRowLog,

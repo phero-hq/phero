@@ -1,5 +1,9 @@
-import { execSync } from "child_process"
+import { spawn } from "child_process"
 
 export default function redirect(executable: string, argv: string[]) {
-  execSync(`${executable} ${argv.join(" ")}`, { stdio: "inherit" })
+  spawn("npm", ["exec", "--", executable, ...argv], {
+    cwd: process.cwd(),
+    detached: true,
+    stdio: "inherit",
+  })
 }
