@@ -21,9 +21,24 @@ export interface ExportFile {
   content: string
 }
 
-export interface MetaExportFiles {
-  "phero-manifest.d.ts": string
-  "phero-execution.js": string
-  "phero.js": string
-  "package.json": string
+export enum MetaExportLockFileName {
+  Npm = "package-lock.json",
+  Yarn = "yarn.lock",
+  Pnpm = "pnpm-lock.yaml",
+}
+
+export interface MetaExportLockFile {
+  name: MetaExportLockFileName
+  path: string
+}
+
+type MetaExportFileContent = string
+
+export type MetaExportFiles = {
+  "phero-manifest.d.ts": MetaExportFileContent
+  "phero-execution.js": MetaExportFileContent
+  "phero.js": MetaExportFileContent
+  "package.json": MetaExportFileContent
+} & {
+  [key in MetaExportLockFileName]?: MetaExportFileContent
 }

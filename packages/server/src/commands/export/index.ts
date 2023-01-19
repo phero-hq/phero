@@ -6,11 +6,16 @@ import {
   parsePheroApp,
 } from "@phero/core"
 import { ServerCommandExport, ServerExportFlavor } from "@phero/dev"
-import fs from "fs"
 import child_process from "child_process"
+import fs from "fs"
 import path from "path"
 import ts, { CompilerOptions } from "typescript"
-import { Export, ExportBundle, MetaExportFiles } from "./domain"
+import {
+  Export,
+  MetaExportFiles,
+  MetaExportLockFile,
+  MetaExportLockFileName,
+} from "./domain"
 import generateGCloudFunctionsExport from "./gcloud-functions"
 import generateNodeJSExport from "./nodejs"
 import generateVercelExport from "./vercel"
@@ -99,10 +104,10 @@ export default function exportCommand(command: ServerCommandExport) {
   const dts = generateAppDeclarationFile(app, typeChecker)
   const pheroExecution = generateRPCProxy(app, typeChecker)
 
-  const lockFilePath =
-    findLockFilePathInDir(projectPath) ?? findLockFileForWorkspace(projectPath)
+  const lockFile =
+    findLockFileInDir(projectPath) ?? findLockFileForWorkspace(projectPath)
 
-  if (!lockFilePath) {
+  if (!lockFile) {
     throw new Error(
       "No lockfile found in the current directory or for any workspace",
     )
@@ -113,7 +118,7 @@ export default function exportCommand(command: ServerCommandExport) {
     "phero-execution.js": pheroExecution.js,
     "phero.js": readFile(path.join(tsOutDir, "phero.js")),
     "package.json": readFile(path.join(projectPath, "package.json")),
-    [path.basename(lockFilePath)]: readFile(lockFilePath),
+    [lockFile.name]: readFile(lockFile.path),
   }
 
   switch (command.flavor) {
@@ -190,35 +195,37 @@ export default function exportCommand(command: ServerCommandExport) {
   }
 }
 
-function findLockFilePathInDir(dir: string): string | undefined {
-  const lockFilePath = path.join(dir, "package-lock.json")
+function findLockFileInDir(dir: string): MetaExportLockFile | undefined {
+  const lockFilePath = path.join(dir, MetaExportLockFileName.Npm)
   if (fs.existsSync(lockFilePath)) {
-    return lockFilePath
+    return { name: MetaExportLockFileName.Npm, path: lockFilePath }
   }
 
-  const yarnLockFilePath = path.join(dir, "yarn.lock")
+  const yarnLockFilePath = path.join(dir, MetaExportLockFileName.Yarn)
   if (fs.existsSync(yarnLockFilePath)) {
-    return yarnLockFilePath
+    return { name: MetaExportLockFileName.Yarn, path: yarnLockFilePath }
   }
 
-  const pnpmLockFilePath = path.join(dir, "pnpm-lock.yaml")
+  const pnpmLockFilePath = path.join(dir, MetaExportLockFileName.Pnpm)
   if (fs.existsSync(pnpmLockFilePath)) {
-    return pnpmLockFilePath
+    return { name: MetaExportLockFileName.Pnpm, path: pnpmLockFilePath }
   }
 
   return undefined
 }
 
-function findLockFileForWorkspace(projectPath: string): string | undefined {
+function findLockFileForWorkspace(
+  projectPath: string,
+): MetaExportLockFile | undefined {
   const maxDepth = 5
 
   let currentPath = projectPath
 
   for (let i = 0; i < maxDepth; i++) {
     if (hasWorkspaceSettingsInDir(currentPath)) {
-      const foundLockFilePath = findLockFilePathInDir(currentPath)
-      if (foundLockFilePath) {
-        return foundLockFilePath
+      const foundLockFile = findLockFileInDir(currentPath)
+      if (foundLockFile) {
+        return foundLockFile
       } else {
         throw new Error(
           "No lockfile found at the same level of where workspace is defined",
