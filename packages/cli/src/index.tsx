@@ -32,14 +32,14 @@ switch (command.name) {
 
   case PheroCommandName.Client:
     checkAndWarnForVersions([process.cwd()], console.warn)
-      .then(() => redirect("./node_modules/.bin/phero-client", command.argv))
+      .then(() => redirect("phero-client", command.argv))
       .catch(fatalError)
 
     break
 
   case PheroCommandName.Server:
     checkAndWarnForVersions([process.cwd()], console.warn)
-      .then(() => redirect("./node_modules/.bin/phero-server", command.argv))
+      .then(() => redirect("phero-server", command.argv))
       .catch(fatalError)
     break
 }

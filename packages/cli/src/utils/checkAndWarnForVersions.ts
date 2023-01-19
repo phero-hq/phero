@@ -51,7 +51,7 @@ async function getLocalItem(
   packageName: string,
 ): Promise<Item | undefined> {
   try {
-    const command = `./node_modules/.bin/${executable} --version`
+    const command = `npm exec -- ${executable} --version`
     const current = (await exec(command, { cwd })).stdout.trim()
     const latest = await getLatestFor(packageName)
 

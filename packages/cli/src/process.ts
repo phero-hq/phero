@@ -2,7 +2,7 @@ import { spawn } from "child_process"
 import { hasErrorCode } from "./utils/errors"
 
 interface ChildProcess {
-  executable: string // ./node_modules/.bin/phero-*
+  executableName: string // phero-*
   argv: string[] // ["watch", "--port", "3000"]
   pid: number
   cwd: string
@@ -25,14 +25,17 @@ export function fatalError(error: unknown) {
   process.exit(1)
 }
 
-export function spawnChildProcess(
+export function spawnNpmExec(
   executableName: string,
   argv: string[],
   cwd: string,
   onLog?: (data: string) => void,
 ): ChildProcess {
-  const executable = `./node_modules/.bin/${executableName}`
-  const { kill, pid, stdout, stderr } = spawn(executable, argv, { cwd })
+  const { kill, pid, stdout, stderr } = spawn(
+    "npm",
+    ["exec", "--", executableName, ...argv],
+    { cwd },
+  )
     .on("close", (code) => {
       throw new Error(`${executableName} closed with code: ${code}`)
     })
@@ -46,16 +49,9 @@ export function spawnChildProcess(
       throw new Error(`uncaughtException in ${executableName}`)
     })
     .on("error", (error) => {
-      if (hasErrorCode(error)) {
-        switch (error.code) {
-          case "ENOENT":
-            throw new Error(`${executableName} is not installed in ${cwd}`)
-        }
-      } else {
-        throw new Error(
-          `${executableName} errored with message: ${error.message}`,
-        )
-      }
+      throw new Error(
+        `${executableName} errored with message: ${error.message}`,
+      )
     })
 
   stdout.on("data", (data) => onLog?.(data.toString().trim()))
@@ -66,7 +62,7 @@ export function spawnChildProcess(
   }
 
   const childProcess: ChildProcess = {
-    executable,
+    executableName,
     argv,
     cwd,
     pid,

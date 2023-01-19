@@ -6,7 +6,7 @@ import {
 import { Box, Text } from "ink"
 import path from "path"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { spawnChildProcess } from "../../process"
+import { spawnNpmExec } from "../../process"
 import { ClientProject, StyledEvent } from "../../types"
 import ProjectStatus from "../ProjectStatus"
 
@@ -92,9 +92,9 @@ export default function ClientProjectStatus({
       },
     )
 
-    const childProcess = spawnChildProcess(
+    const childProcess = spawnNpmExec(
       "phero-client",
-      ["watch", "--port", `${command.port}`],
+      ["watch", `--port=${command.port}`],
       path.resolve(project.path),
     )
 
