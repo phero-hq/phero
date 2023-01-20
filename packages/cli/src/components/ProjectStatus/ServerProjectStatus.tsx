@@ -94,7 +94,9 @@ export default function ServerProjectStatus({
         break
 
       case "BUILD_RPCS_SUCCESS":
-        setStatus("Server is ready, waiting for changes.")
+        setStatus(
+          `Server is ready, waiting for changes: http://localhost:${command.port}`,
+        )
         setBuilding(false)
         setError(undefined)
         break
