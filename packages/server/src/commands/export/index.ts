@@ -13,7 +13,7 @@ import ts, { CompilerOptions } from "typescript"
 import {
   Export,
   MetaExportFiles,
-  MetaExportLockFile,
+  MetaExportFilesBase,
   MetaExportLockFileName,
 } from "./domain"
 import generateGCloudFunctionsExport from "./gcloud-functions"
@@ -113,12 +113,32 @@ export default function exportCommand(command: ServerCommandExport) {
     )
   }
 
-  const metaExportFiles: MetaExportFiles = {
+  const metaExportFilesBase: MetaExportFilesBase = {
     "phero-manifest.d.ts": dts,
     "phero-execution.js": pheroExecution.js,
     "phero.js": readFile(path.join(tsOutDir, "phero.js")),
     "package.json": readFile(path.join(projectPath, "package.json")),
-    [lockFile.name]: readFile(lockFile.path),
+  }
+  let metaExportFiles: MetaExportFiles
+  switch (lockFile[0]) {
+    case MetaExportLockFileName.Npm:
+      metaExportFiles = {
+        ...metaExportFilesBase,
+        [lockFile[0]]: readFile(lockFile[1]),
+      }
+      break
+    case MetaExportLockFileName.Yarn:
+      metaExportFiles = {
+        ...metaExportFilesBase,
+        [lockFile[0]]: readFile(lockFile[1]),
+      }
+      break
+    case MetaExportLockFileName.Pnpm:
+      metaExportFiles = {
+        ...metaExportFilesBase,
+        [lockFile[0]]: readFile(lockFile[1]),
+      }
+      break
   }
 
   switch (command.flavor) {
@@ -195,20 +215,22 @@ export default function exportCommand(command: ServerCommandExport) {
   }
 }
 
-function findLockFileInDir(dir: string): MetaExportLockFile | undefined {
+function findLockFileInDir(
+  dir: string,
+): [name: MetaExportLockFileName, path: string] | undefined {
   const lockFilePath = path.join(dir, MetaExportLockFileName.Npm)
   if (fs.existsSync(lockFilePath)) {
-    return { name: MetaExportLockFileName.Npm, path: lockFilePath }
+    return [MetaExportLockFileName.Npm, lockFilePath]
   }
 
   const yarnLockFilePath = path.join(dir, MetaExportLockFileName.Yarn)
   if (fs.existsSync(yarnLockFilePath)) {
-    return { name: MetaExportLockFileName.Yarn, path: yarnLockFilePath }
+    return [MetaExportLockFileName.Yarn, yarnLockFilePath]
   }
 
   const pnpmLockFilePath = path.join(dir, MetaExportLockFileName.Pnpm)
   if (fs.existsSync(pnpmLockFilePath)) {
-    return { name: MetaExportLockFileName.Pnpm, path: pnpmLockFilePath }
+    return [MetaExportLockFileName.Pnpm, pnpmLockFilePath]
   }
 
   return undefined
@@ -216,7 +238,7 @@ function findLockFileInDir(dir: string): MetaExportLockFile | undefined {
 
 function findLockFileForWorkspace(
   projectPath: string,
-): MetaExportLockFile | undefined {
+): [name: MetaExportLockFileName, path: string] | undefined {
   const maxDepth = 5
 
   let currentPath = projectPath

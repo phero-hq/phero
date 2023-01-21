@@ -27,18 +27,18 @@ export enum MetaExportLockFileName {
   Pnpm = "pnpm-lock.yaml",
 }
 
-export interface MetaExportLockFile {
-  name: MetaExportLockFileName
-  path: string
-}
-
 type MetaExportFileContent = string
 
-export type MetaExportFiles = {
+export interface MetaExportFilesBase {
   "phero-manifest.d.ts": MetaExportFileContent
   "phero-execution.js": MetaExportFileContent
   "phero.js": MetaExportFileContent
   "package.json": MetaExportFileContent
-} & {
-  [key in MetaExportLockFileName]?: MetaExportFileContent
 }
+
+export type MetaExportFiles = MetaExportFilesBase &
+  (
+    | { [MetaExportLockFileName.Npm]: MetaExportFileContent }
+    | { [MetaExportLockFileName.Yarn]: MetaExportFileContent }
+    | { [MetaExportLockFileName.Pnpm]: MetaExportFileContent }
+  )
