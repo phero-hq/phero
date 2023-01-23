@@ -1,5 +1,6 @@
 import ts from "typescript"
 import { ParseError } from "../domain/errors"
+import { printCode } from "../lib/tsTestUtils"
 import { getTypeFlags } from "./generateParserModelUtils"
 import {
   EnumMemberParserModel,
@@ -387,6 +388,12 @@ function generateFromTypeNode(
   deps: DependencyMap,
   typeParams: TypeParamMap,
 ): InternalParserModelMap {
+  // console.log(
+  //   "generateFromTypeNode",
+  //   typeNode.kind,
+  //   printCode(typeNode),
+  //   [...typeParams.entries()].map((t) => `${t[0]} -> ${t[1].name}`),
+  // )
   if (ts.isToken(typeNode)) {
     return { root: generateFromTokenTypeNode(typeNode), deps }
   }
@@ -509,6 +516,21 @@ function generateFromTypeNode(
     )
   }
 
+  if (ts.isTypeOperatorNode(typeNode)) {
+    const keyOfType = typeChecker.getTypeAtLocation(typeNode)
+    // Note: we ignore typeNode.type because we just want a string literal or union of
+    // string literals with the keys of the type, and not parse the actual type behind
+
+    return typeToParserModel(
+      keyOfType,
+      typeNode,
+      location,
+      typeChecker,
+      deps,
+      typeParams,
+    )
+  }
+
   throw new ParseError("TypeNode not implemented " + typeNode.kind, typeNode)
 }
 
@@ -610,6 +632,7 @@ function generateFromTypeElementDeclaration(
   root: MemberParserModel | IndexMemberParserModel
   deps: DependencyMap
 } {
+  // console.log("KOM IK HIERRRR??", 2)
   if (ts.isPropertySignature(member)) {
     if (!member.type) {
       throw new ParseError("Member must have a type", member)
@@ -649,6 +672,7 @@ function generateFromTypeElementDeclaration(
       typeParams,
     )
     // console.groupEnd()
+
     return {
       root: {
         type: ParserModelType.Member,
@@ -662,9 +686,71 @@ function generateFromTypeElementDeclaration(
     if (!member.type) {
       throw new ParseError("Member must have a type", member)
     }
-    // TODO IndexMember
+
+    // is either string or numberIndex type
+    // if both are present, they refer to the same type
+    const indexType = type.getStringIndexType() ?? type.getNumberIndexType()
+
+    if (!indexType) {
+      throw new ParseError("No index type found for index signature", member)
+    }
+
+    const memberParser = generateFromTypeNode(
+      member.type,
+      indexType,
+      location,
+      typeChecker,
+      deps,
+      typeParams,
+    )
+
+    const keyParsers = member.parameters.reduce<{
+      models: ParserModel[]
+      deps: DependencyMap
+    }>(
+      ({ models, deps }, param) => {
+        if (!param.type) {
+          throw new ParseError("Index parameter should have type", param)
+        }
+        const paramType = typeChecker.getTypeAtLocation(param)
+        // reduce dit
+        const paramTypeModel = generateFromTypeNode(
+          param.type,
+          paramType,
+          location,
+          typeChecker,
+          deps,
+          typeParams,
+        )
+        return {
+          models: [...models, paramTypeModel.root],
+          deps: paramTypeModel.deps,
+        }
+      },
+      { models: [], deps },
+    )
+
+    if (keyParsers.models.length !== 1) {
+      throw new ParseError(
+        "Index member should only have one parameter",
+        member,
+      )
+    }
+
+    const keyParser = keyParsers.models[0]
+
+    return {
+      root: {
+        type: ParserModelType.IndexMember,
+        keyParser,
+        optional: false,
+        parser: memberParser.root,
+      },
+      deps: memberParser.deps,
+    }
   }
-  throw new ParseError("Member type is not supported", member)
+
+  throw new ParseError(`Member type ${member.kind} is not supported`, member)
 }
 
 function generateFromDeclaration(
@@ -868,6 +954,7 @@ function typeToParserModel(
   deps: DependencyMap,
   typeParams: TypeParamMap,
 ): InternalParserModelMap {
+  console.log("typeToParserModel", printCode(typeNode))
   if (type.flags & ts.TypeFlags.StringLiteral) {
     const s = type as ts.StringLiteralType
     return {
@@ -952,12 +1039,50 @@ function typeToParserModel(
       { models: [], deps },
     )
 
+    const stringIndexType = type.getStringIndexType()
+    const numberIndexType = type.getNumberIndexType()
+    let depsIndexTypes = memberModels.deps
+    if (stringIndexType) {
+      const x = typeToParserModel(
+        stringIndexType,
+        typeNode,
+        location,
+        typeChecker,
+        depsIndexTypes,
+        typeParams,
+      )
+      depsIndexTypes = x.deps
+      memberModels.models.push({
+        type: ParserModelType.IndexMember,
+        keyParser: { type: ParserModelType.String },
+        optional: false,
+        parser: x.root,
+      } as const)
+    }
+    if (numberIndexType) {
+      const x = typeToParserModel(
+        numberIndexType,
+        typeNode,
+        location,
+        typeChecker,
+        depsIndexTypes,
+        typeParams,
+      )
+      depsIndexTypes = x.deps
+      memberModels.models.push({
+        type: ParserModelType.IndexMember,
+        keyParser: { type: ParserModelType.Number },
+        optional: false,
+        parser: x.root,
+      } as const)
+    }
+
     return {
       root: {
         type: ParserModelType.Object,
         members: memberModels.models,
       },
-      deps: memberModels.deps,
+      deps: depsIndexTypes,
     }
   } else if (type.flags & ts.TypeFlags.Union) {
     const unionType = type as ts.UnionType
@@ -991,8 +1116,21 @@ function typeToParserModel(
     }
   } else if (type.flags & ts.TypeFlags.Undefined) {
     return { root: { type: ParserModelType.Undefined }, deps }
+  } else if (type.isIndexType()) {
+    return typeToParserModel(
+      type.type,
+      typeNode,
+      location,
+      typeChecker,
+      deps,
+      typeParams,
+    )
   }
 
+  // console.log(
+  //   type,
+  //   type.getProperties().map((p) => p.name),
+  // )
   throw new Error(
     `ParserModel for Type with flags (${getTypeFlags(type).join(
       " | ",
@@ -1090,9 +1228,17 @@ function getUpdatedTypeParams(
     return { typeParams, deps }
   }
 
+  console.group("getUpdatedTypeParams", printCode(typeNode))
+
   const typeArgumentTypes: readonly ts.Type[] =
     type.aliasTypeArguments ?? typeChecker.getTypeArguments(type)
   const typeArguments = typeNode.typeArguments ?? []
+
+  console.log(
+    "getUpdatedTypeParams COUNT",
+    typeArguments.length,
+    declaration.typeParameters.length,
+  )
 
   let depsMap: DependencyMap = deps
 
@@ -1102,6 +1248,7 @@ function getUpdatedTypeParams(
     const typeArgumentType = typeArgumentTypes[i]
 
     if (typeArgumentType) {
+      console.log("ABC", 1)
       const typeArgModel = typeToParserModel(
         typeArgumentType,
         typeNode,
@@ -1116,14 +1263,17 @@ function getUpdatedTypeParams(
       })
       depsMap = typeArgModel.deps
     } else if (typeArgument) {
+      console.log("ABC", 2)
       const inferedTypeArgumentType =
         typeChecker.getTypeAtLocation(typeArgument)
       if (inferedTypeArgumentType.isTypeParameter()) {
+        console.log("ABC", 21)
         typeParams.set(
           typeParam.name.text,
           getTypeParamParserModel(typeNode, typeParam, typeParams),
         )
       } else {
+        console.log("ABC", 22)
         const typeArgModel = generateFromTypeNode(
           typeArgument,
           inferedTypeArgumentType,
@@ -1138,7 +1288,41 @@ function getUpdatedTypeParams(
         })
         depsMap = typeArgModel.deps
       }
+    } else if (typeParam.default) {
+      // const typeArgModel = generateFromTypeNode(
+      //   typeParam.default,
+      //   type,
+      //   location,
+      //   typeChecker,
+      //   deps,
+      //   typeParams,
+      // )
+      // typeParams.set(typeParam.name.text, {
+      //   name: typeParam.name.text,
+      //   model: typeArgModel.root,
+      // })
+      // depsMap = typeArgModel.deps
+
+      const x = typeToParserModel(
+        type,
+        typeNode,
+        location,
+        typeChecker,
+        deps,
+        typeParams,
+      )
+
+      typeParams.set(typeParam.name.text, {
+        name: typeChecker.typeToString(type),
+        model: x.root,
+      })
+      console.log("x.deps BEFORE", deps.keys())
+      console.log("x.deps AFTER", x.deps.keys())
+      depsMap = x.deps
     } else {
+      console.log("ABC", 4)
+      console.log("typeArgument", typeArgument)
+      console.log("typeArgumentType", typeArgumentType)
       throw new ParseError(
         "Type parameter has no default or is is it parameterised",
         typeParam,
@@ -1146,7 +1330,13 @@ function getUpdatedTypeParams(
     }
   }
 
-  return { typeParams, deps: depsMap }
+  const r = { typeParams, deps: depsMap }
+  console.log(
+    "getUpdatedTypeParams RESULT 2",
+    console.log(JSON.stringify(depsMap, null, 4)),
+  )
+  console.groupEnd()
+  return r
 }
 
 function generateTypeName(typeNode: ts.TypeReferenceType): string {

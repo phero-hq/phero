@@ -10,7 +10,7 @@ describe("conditional", () => {
       }
       function test(): MyConditionalType<number> { throw new Error() }
     `)
-
+    console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
         type: "reference",
