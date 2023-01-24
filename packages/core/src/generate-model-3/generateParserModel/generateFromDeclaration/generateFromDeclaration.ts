@@ -36,45 +36,37 @@ export default function generateFromDeclaration(
   }
 
   if (ts.isEnumDeclaration(declaration)) {
-    const updatedDeps: DependencyMap = deps.has(declaration.name.text)
-      ? deps
-      : new Map([
-          ...deps,
-          [
-            declaration.name.text,
-            generateFromEnumDeclaration(declaration, typeChecker),
-          ],
-        ])
+    const reference: ReferenceParserModel = {
+      type: ParserModelType.Reference,
+      typeName: declaration.name.text,
+    }
+
+    const updatedDeps = lazilyGenerateDependency(deps, reference, () => ({
+      root: generateFromEnumDeclaration(declaration, typeChecker),
+      deps,
+    }))
 
     return {
-      root: {
-        type: ParserModelType.Reference,
-        typeName: declaration.name.text,
-      },
+      root: reference,
       deps: updatedDeps,
     }
   }
 
   if (ts.isEnumMember(declaration)) {
-    const typeName = `${declaration.parent.name.text}.${propertyNameAsString(
-      declaration.name,
-    )}`
+    const reference: ReferenceParserModel = {
+      type: ParserModelType.Reference,
+      typeName: `${declaration.parent.name.text}.${propertyNameAsString(
+        declaration.name,
+      )}`,
+    }
 
-    const updatedDeps = deps.has(typeName)
-      ? deps
-      : new Map([
-          ...deps,
-          [
-            typeName,
-            generateFromEnumMemberDeclaration(declaration, typeChecker),
-          ],
-        ])
+    const updatedDeps = lazilyGenerateDependency(deps, reference, () => ({
+      root: generateFromEnumMemberDeclaration(declaration, typeChecker),
+      deps,
+    }))
 
     return {
-      root: {
-        type: ParserModelType.Reference,
-        typeName,
-      },
+      root: reference,
       deps: updatedDeps,
     }
   }
@@ -97,39 +89,23 @@ export default function generateFromDeclaration(
       updatedTypeParams,
     )
 
-    if (deps.has(ref.typeName)) {
-      return { root: ref, deps: updatedDeps }
-    }
-
-    const updatedDeps2: DependencyMap = deps.has(declaration.name.text)
-      ? updatedDeps
-      : new Map([...updatedDeps, [ref.typeName, ref]])
-
-    const result = generateFromInterfaceDeclaration(
-      declaration,
-      type as ts.TypeReference,
-      location,
-      typeChecker,
-      updatedDeps2,
-      updatedTypeParams,
+    const updatedDeps2 = lazilyGenerateDependency(
+      updatedDeps,
+      ref,
+      (updatedDeps) =>
+        generateFromInterfaceDeclaration(
+          declaration,
+          type as ts.TypeReference,
+          location,
+          typeChecker,
+          updatedDeps,
+          updatedTypeParams,
+        ),
     )
 
     return {
       root: ref,
-      deps: new Map([
-        ...result.deps,
-        [
-          ref.typeName,
-          ref.typeArguments
-            ? {
-                type: ParserModelType.Generic,
-                typeName: ref.typeName,
-                typeArguments: ref.typeArguments,
-                parser: result.root,
-              }
-            : result.root,
-        ],
-      ]),
+      deps: updatedDeps2,
     }
   }
 
@@ -146,7 +122,6 @@ export default function generateFromDeclaration(
       )
 
     if (ts.isMappedTypeNode(declaration.type)) {
-      console.log("JAAAAA", declaration.name.text)
       return generateFromType(
         type,
         declaration.type,
@@ -163,39 +138,23 @@ export default function generateFromDeclaration(
       updatedTypeParams,
     )
 
-    if (deps.has(ref.typeName)) {
-      return { root: ref, deps: updatedDeps }
-    }
-
-    const updatedDeps2: DependencyMap = deps.has(declaration.name.text)
-      ? updatedDeps
-      : new Map([...updatedDeps, [ref.typeName, ref]])
-
-    const result = generateFromTypeNode(
-      declaration.type,
-      type,
-      location,
-      typeChecker,
-      updatedDeps2,
-      updatedTypeParams,
+    const updatedDeps2 = lazilyGenerateDependency(
+      updatedDeps,
+      ref,
+      (updatedDeps) =>
+        generateFromTypeNode(
+          declaration.type,
+          type,
+          location,
+          typeChecker,
+          updatedDeps,
+          updatedTypeParams,
+        ),
     )
 
     return {
       root: ref,
-      deps: new Map([
-        ...result.deps,
-        [
-          ref.typeName,
-          ref.typeArguments
-            ? {
-                type: ParserModelType.Generic,
-                typeName: ref.typeName,
-                typeArguments: ref.typeArguments,
-                parser: result.root,
-              }
-            : result.root,
-        ],
-      ]),
+      deps: updatedDeps2,
     }
   }
 
@@ -408,7 +367,7 @@ function generateTypeName(typeNode: ts.TypeReferenceType): string {
   }
 }
 
-function getTypeParamParserModel(
+export function getTypeParamParserModel(
   typeNode: ts.TypeNode,
   declaration: ts.TypeParameterDeclaration,
   typeParams: TypeParamMap,
@@ -421,4 +380,38 @@ function getTypeParamParserModel(
     )
   }
   return typeParamModel
+}
+
+function lazilyGenerateDependency(
+  deps: DependencyMap,
+  ref: ReferenceParserModel,
+  generateDependencyParserModel: (
+    deps: DependencyMap,
+  ) => InternalParserModelMap,
+): DependencyMap {
+  if (deps.has(ref.typeName)) {
+    return deps
+  }
+
+  // prevents recursive loops
+  const depsWithCircuitBreaker = new Map([...deps, [ref.typeName, ref]])
+
+  const { root, deps: updatedDeps } = generateDependencyParserModel(
+    depsWithCircuitBreaker,
+  )
+
+  return new Map([
+    ...updatedDeps,
+    [
+      ref.typeName,
+      ref.typeArguments
+        ? {
+            type: ParserModelType.Generic,
+            typeName: ref.typeName,
+            typeArguments: ref.typeArguments,
+            parser: root,
+          }
+        : root,
+    ],
+  ])
 }
