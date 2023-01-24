@@ -185,12 +185,6 @@ function getUpdatedTypeParams(
     type.aliasTypeArguments ?? typeChecker.getTypeArguments(type)
   const typeArguments = typeNode.typeArguments ?? []
 
-  console.log(
-    "getUpdatedTypeParams COUNT",
-    typeArguments.length,
-    declaration.typeParameters.length,
-  )
-
   let depsMap: DependencyMap = deps
 
   for (let i = 0; i < declaration.typeParameters.length; i++) {
@@ -199,7 +193,6 @@ function getUpdatedTypeParams(
     const typeArgumentType = typeArgumentTypes[i]
 
     if (typeArgumentType) {
-      console.log("ABC", 1)
       const typeArgModel = generateFromType(
         typeArgumentType,
         typeNode,
@@ -214,17 +207,14 @@ function getUpdatedTypeParams(
       })
       depsMap = typeArgModel.deps
     } else if (typeArgument) {
-      console.log("ABC", 2)
       const inferedTypeArgumentType =
         typeChecker.getTypeAtLocation(typeArgument)
       if (inferedTypeArgumentType.isTypeParameter()) {
-        console.log("ABC", 21)
         typeParams.set(
           typeParam.name.text,
           getTypeParamParserModel(typeNode, typeParam, typeParams),
         )
       } else {
-        console.log("ABC", 22)
         // Werkt voor test "MyMappedType keyof as default parameter"
         const typeArgModel = generateFromTypeNode(
           typeArgument,
@@ -288,13 +278,9 @@ function getUpdatedTypeParams(
         name: typeChecker.typeToString(type),
         model: x.root,
       })
-      console.log("x.deps BEFORE", deps.keys())
-      console.log("x.deps AFTER", x.deps.keys())
+
       depsMap = x.deps
     } else {
-      console.log("ABC", 4)
-      console.log("typeArgument", typeArgument)
-      console.log("typeArgumentType", typeArgumentType)
       throw new ParseError(
         "Type parameter has no default or is is it parameterised",
         typeParam,
@@ -303,10 +289,7 @@ function getUpdatedTypeParams(
   }
 
   const r = { typeParams, deps: depsMap }
-  console.log(
-    "getUpdatedTypeParams RESULT 2",
-    console.log(JSON.stringify(depsMap, null, 4)),
-  )
+
   console.groupEnd()
   return r
 }
@@ -367,7 +350,7 @@ function generateTypeName(typeNode: ts.TypeReferenceType): string {
   }
 }
 
-export function getTypeParamParserModel(
+function getTypeParamParserModel(
   typeNode: ts.TypeNode,
   declaration: ts.TypeParameterDeclaration,
   typeParams: TypeParamMap,

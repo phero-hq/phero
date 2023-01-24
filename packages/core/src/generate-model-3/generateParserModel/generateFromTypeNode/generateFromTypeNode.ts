@@ -21,12 +21,6 @@ export default function generateFromTypeNode(
   deps: DependencyMap,
   typeParams: TypeParamMap,
 ): InternalParserModelMap {
-  // console.log(
-  //   "generateFromTypeNode",
-  //   typeNode.kind,
-  //   printCode(typeNode),
-  //   [...typeParams.entries()].map((t) => `${t[0]} -> ${t[1].name}`),
-  // )
   if (ts.isToken(typeNode)) {
     return { root: generateFromTokenTypeNode(typeNode), deps }
   }
@@ -150,8 +144,6 @@ export default function generateFromTypeNode(
   }
 
   if (ts.isMappedTypeNode(typeNode)) {
-    // console.log("------------------------")
-    // console.log("MAPPED TYPE", printCode(typeNode))
     return generateFromType(
       type,
       typeNode,

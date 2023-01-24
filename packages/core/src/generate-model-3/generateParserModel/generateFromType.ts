@@ -19,7 +19,6 @@ export default function generateFromType(
   deps: DependencyMap,
   typeParams: TypeParamMap,
 ): InternalParserModelMap {
-  console.log("generateFromType", printCode(typeNode))
   if (type.flags & ts.TypeFlags.StringLiteral) {
     const s = type as ts.StringLiteralType
     return {
@@ -193,7 +192,6 @@ export default function generateFromType(
   }
 
   if (type.isTypeParameter()) {
-    // console.log(typeChecker.typeToString(type), type)
     const x = typeParams.get(typeChecker.typeToString(type))
     if (x) {
       return {
@@ -203,35 +201,6 @@ export default function generateFromType(
     }
   }
 
-  // console.log("XX", type)
-  // const c = type.getConstraint()
-  // if (c) {
-  //   console.log("XXXXX")
-  //   return generateFromType(
-  //     c,
-  //     typeNode,
-  //     location,
-  //     typeChecker,
-  //     deps,
-  //     typeParams,
-  //   )
-  // }
-  console.log("X", {
-    Union: type.isUnion(),
-    Intersection: type.isIntersection(),
-    UnionOrIntersection: type.isUnionOrIntersection(),
-    Literal: type.isLiteral(),
-    StringLiteral: type.isStringLiteral(),
-    NumberLiteral: type.isNumberLiteral(),
-    TypeParameter: type.isTypeParameter(),
-    ClassOrInterface: type.isClassOrInterface(),
-    Class: type.isClass(),
-    IndexType: type.isIndexType(),
-  })
-  // console.log(
-  //   type,
-  //   type.getProperties().map((p) => p.name),
-  // )
   throw new Error(
     `ParserModel for Type with flags (${getTypeFlags(type).join(
       " | ",

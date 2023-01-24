@@ -21,7 +21,6 @@ export default function generateFromTypeElementDeclaration(
   root: MemberParserModel | IndexMemberParserModel
   deps: DependencyMap
 } {
-  // console.log("KOM IK HIERRRR??", 2)
   if (ts.isPropertySignature(member)) {
     if (!member.type) {
       throw new ParseError("Member must have a type", member)
@@ -32,7 +31,6 @@ export default function generateFromTypeElementDeclaration(
 
     const prop = type.getProperty(memberName)
     if (!prop) {
-      console.log("NO PROP")
       throw new Error(
         "TODO " +
           memberName +
