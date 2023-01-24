@@ -42,10 +42,7 @@ export default function generateFromDeclaration(
           ...deps,
           [
             declaration.name.text,
-            {
-              name: declaration.name.text,
-              model: generateFromEnumDeclaration(declaration, typeChecker),
-            },
+            generateFromEnumDeclaration(declaration, typeChecker),
           ],
         ])
 
@@ -69,13 +66,7 @@ export default function generateFromDeclaration(
           ...deps,
           [
             typeName,
-            {
-              name: typeName,
-              model: generateFromEnumMemberDeclaration(
-                declaration,
-                typeChecker,
-              ),
-            },
+            generateFromEnumMemberDeclaration(declaration, typeChecker),
           ],
         ])
 
@@ -112,16 +103,7 @@ export default function generateFromDeclaration(
 
     const updatedDeps2: DependencyMap = deps.has(declaration.name.text)
       ? updatedDeps
-      : new Map([
-          ...updatedDeps,
-          [
-            ref.typeName,
-            {
-              name: ref.typeName,
-              model: ref,
-            },
-          ],
-        ])
+      : new Map([...updatedDeps, [ref.typeName, ref]])
 
     const result = generateFromInterfaceDeclaration(
       declaration,
@@ -140,18 +122,12 @@ export default function generateFromDeclaration(
           ref.typeName,
           ref.typeArguments
             ? {
-                name: ref.typeName,
-                model: {
-                  type: ParserModelType.Generic,
-                  typeName: ref.typeName,
-                  typeArguments: ref.typeArguments,
-                  parser: result.root,
-                },
+                type: ParserModelType.Generic,
+                typeName: ref.typeName,
+                typeArguments: ref.typeArguments,
+                parser: result.root,
               }
-            : {
-                name: ref.typeName,
-                model: result.root,
-              },
+            : result.root,
         ],
       ]),
     }
@@ -193,16 +169,7 @@ export default function generateFromDeclaration(
 
     const updatedDeps2: DependencyMap = deps.has(declaration.name.text)
       ? updatedDeps
-      : new Map([
-          ...updatedDeps,
-          [
-            ref.typeName,
-            {
-              name: ref.typeName,
-              model: ref,
-            },
-          ],
-        ])
+      : new Map([...updatedDeps, [ref.typeName, ref]])
 
     const result = generateFromTypeNode(
       declaration.type,
@@ -221,18 +188,12 @@ export default function generateFromDeclaration(
           ref.typeName,
           ref.typeArguments
             ? {
-                name: ref.typeName,
-                model: {
-                  type: ParserModelType.Generic,
-                  typeName: ref.typeName,
-                  typeArguments: ref.typeArguments,
-                  parser: result.root,
-                },
+                type: ParserModelType.Generic,
+                typeName: ref.typeName,
+                typeArguments: ref.typeArguments,
+                parser: result.root,
               }
-            : {
-                name: ref.typeName,
-                model: result.root,
-              },
+            : result.root,
         ],
       ]),
     }

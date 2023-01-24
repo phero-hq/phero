@@ -13,7 +13,7 @@ export interface InternalParserModelMap {
   deps: DependencyMap
 }
 
-export type DependencyMap = Map<string, { name: string; model: ParserModel }>
+export type DependencyMap = Map<string, ParserModel>
 export type TypeParamMap = Map<string, { name: string; model: ParserModel }>
 
 export function generateParserModel(
@@ -43,8 +43,8 @@ export function generateParserModel(
 
   return {
     root,
-    deps: [...deps.values()].reduce<Record<string, ParserModel>>(
-      (result, dep) => ({ ...result, [dep.name]: dep.model }),
+    deps: [...deps.entries()].reduce<Record<string, ParserModel>>(
+      (result, [name, model]) => ({ ...result, [name]: model }),
       {},
     ),
   }
