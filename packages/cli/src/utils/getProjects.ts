@@ -1,6 +1,7 @@
 import path from "path"
 import { promises as fs } from "fs"
 import { Project } from "../types"
+import { glob } from "glob"
 
 export default async function getProjects(): Promise<Project[]> {
   const projects = await getProjectsInternal()
@@ -12,7 +13,7 @@ async function getProjectsInternal(): Promise<Project[]> {
 
   // Get projects based on workspace-config
   const workspacePaths = await getWorkspacePaths(".")
-  if (workspacePaths && workspacePaths.length > 0) {
+  if (workspacePaths.length > 0) {
     for (const workspacePath of workspacePaths) {
       const project = await getProject(workspacePath)
       if (project) {
@@ -64,15 +65,31 @@ async function getPackageJson(
   }
 }
 
-async function getWorkspacePaths(
-  dirPath: string,
-): Promise<string[] | undefined> {
+async function getWorkspacePaths(dirPath: string): Promise<string[]> {
   const packageJson = await getPackageJson(dirPath)
+  const result: string[] = []
 
   if (packageJson?.workspaces) {
-    // TODO: Glob
-    return packageJson.workspaces
+    for (const pattern of packageJson.workspaces) {
+      result.push(...(await getWorkspacePathsForGlobPattern(pattern)))
+    }
   }
+
+  return result
+}
+
+async function getWorkspacePathsForGlobPattern(
+  pattern: string,
+): Promise<string[]> {
+  return new Promise((resolve, reject) => {
+    glob(pattern, (error, matches) => {
+      if (error) {
+        reject(error)
+      } else {
+        resolve(matches)
+      }
+    })
+  })
 }
 
 async function getProject(dirPath: string): Promise<Project | undefined> {
