@@ -1,22 +1,117 @@
 import { generateParserModelMap } from "../../lib/tsTestUtils"
 
-type Aad = {
-  kaas: string
-  koos: string
-}
-
 describe("mapped", () => {
+  test("MyMappedType keyof 1 key of a literal type", () => {
+    const modelMap = generateParserModelMap(`
+      type MyMappedType = keyof { kaas: string }
+      
+      function test(): MyMappedType { throw new Error() }
+    `)
+
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "MyMappedType",
+      },
+      deps: {
+        MyMappedType: {
+          type: "string-literal",
+          literal: "kaas",
+        },
+      },
+    })
+  })
+  test("MyMappedType keyof 1 key of an enum", () => {
+    const modelMap = generateParserModelMap(`
+      enum MyEnum {
+        Aap = "aap",
+        Noot = "noot",
+        Mies = "mies",
+      }
+      type MyMappedType = keyof typeof MyEnum
+      
+      function test(): MyMappedType { throw new Error() }
+    `)
+
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "MyMappedType",
+      },
+      deps: {
+        MyMappedType: {
+          type: "union",
+          oneOf: [
+            {
+              type: "string-literal",
+              literal: "Aap",
+            },
+            {
+              type: "string-literal",
+              literal: "Noot",
+            },
+            {
+              type: "string-literal",
+              literal: "Mies",
+            },
+          ],
+        },
+      },
+    })
+  })
+  test("MyMappedType keyof 1 key of a class", () => {
+    const modelMap = generateParserModelMap(`
+      class MyClass {
+        aap: string
+        noot: boolean
+        mies: number
+      }
+      type MyMappedType = keyof MyClass
+      
+      function test(): MyMappedType { throw new Error() }
+    `)
+
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "MyMappedType",
+      },
+      deps: {
+        MyMappedType: {
+          type: "union",
+          oneOf: [
+            {
+              type: "string-literal",
+              literal: "aap",
+            },
+            {
+              type: "string-literal",
+              literal: "noot",
+            },
+            {
+              type: "string-literal",
+              literal: "mies",
+            },
+          ],
+        },
+      },
+    })
+  })
   test("MyMappedType keyof 1 key", () => {
     const modelMap = generateParserModelMap(`
       type Aad = {
         kaas: string
       }
+
       type MyMappedType = keyof Aad
       
       function test(): MyMappedType { throw new Error() }
     `)
 
-    console.log(JSON.stringify(modelMap, null, 4))
+    // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
         type: "reference",
@@ -41,7 +136,7 @@ describe("mapped", () => {
       function test(): MyMappedType { throw new Error() }
     `)
 
-    console.log(JSON.stringify(modelMap, null, 4))
+    // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
         type: "reference",
@@ -75,7 +170,7 @@ describe("mapped", () => {
       function test(): MyMappedType { throw new Error() }
     `)
 
-    console.log(JSON.stringify(modelMap, null, 4))
+    // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
         type: "reference",
@@ -109,18 +204,18 @@ describe("mapped", () => {
       },
     })
   })
-  test.only("MyMappedType keyof as default parameter", () => {
+  test("MyMappedType keyof as default parameter", () => {
     const modelMap = generateParserModelMap(`
       type Aad = {
-        kaas: string
+          kaas: string
       }
-      type Bug<X, Y = keyof X> = Y
+      type Bug<X, Y = keyof X> = {y:Y}
       type MyMappedType = Bug<Aad>
       
       function test(): MyMappedType { throw new Error() }
     `)
 
-    console.log(JSON.stringify(modelMap, null, 4))
+    // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
         type: "reference",
@@ -129,7 +224,7 @@ describe("mapped", () => {
       deps: {
         MyMappedType: {
           type: "reference",
-          typeName: 'Bug<Aad, "kaas">',
+          typeName: "Bug<Aad, keyof X>",
           typeArguments: [
             {
               type: "reference",
@@ -141,9 +236,22 @@ describe("mapped", () => {
             },
           ],
         },
-        'Bug<Aad, "kaas">': {
+        Aad: {
+          type: "object",
+          members: [
+            {
+              type: "member",
+              name: "kaas",
+              optional: false,
+              parser: {
+                type: "string",
+              },
+            },
+          ],
+        },
+        "Bug<Aad, keyof X>": {
           type: "generic",
-          typeName: 'Bug<Aad, "kaas">',
+          typeName: "Bug<Aad, keyof X>",
           typeArguments: [
             {
               type: "reference",
@@ -155,8 +263,18 @@ describe("mapped", () => {
             },
           ],
           parser: {
-            type: "string-literal",
-            literal: "kaas",
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "y",
+                optional: false,
+                parser: {
+                  type: "string-literal",
+                  literal: "kaas",
+                },
+              },
+            ],
           },
         },
       },
@@ -174,7 +292,7 @@ describe("mapped", () => {
       function test(): MyMappedType { throw new Error() }
     `)
 
-    console.log(JSON.stringify(modelMap, null, 4))
+    // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
         type: "reference",
@@ -246,7 +364,7 @@ describe("mapped", () => {
       function test(): MyMappedType { throw new Error() }
     `)
 
-    console.log(JSON.stringify(modelMap, null, 4))
+    // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
         type: "reference",
@@ -270,69 +388,19 @@ describe("mapped", () => {
     })
   })
 
-  test.skip("MyMappedType = Omit", () => {
+  test("Omit", () => {
     const modelMap = generateParserModelMap(`
       type Aad = {
         kaas: string
         koos: string
       }
       
-      type MyMappedType = Omit<Aad, "kaas">
-      function test(): MyMappedType { throw new Error() }
-      
-      // type X = "aap" | "noot"
-      // type MyMappedType<T> = Exclude<T, Exclude<T, "aap">>
-      // function test(): MyMappedType<X> { throw new Error() }
-    `)
-
-    console.log(JSON.stringify(modelMap, null, 4))
-    expect(modelMap).toEqual({
-      root: {
-        type: "reference",
-        typeName: "MyMappedType",
-      },
-      deps: {
-        MyMappedType: {
-          type: "reference",
-          typeName: 'Bug<"kaas">',
-          typeArguments: [
-            {
-              type: "string-literal",
-              literal: "kaas",
-            },
-          ],
-        },
-        'Bug<"kaas">': {
-          type: "generic",
-          typeName: 'Bug<"kaas">',
-          typeArguments: [
-            {
-              type: "string-literal",
-              literal: "kaas",
-            },
-          ],
-          parser: {
-            type: "string-literal",
-            literal: "kaas",
-          },
-        },
-      },
-    })
-  })
-
-  test.skip("Omit", () => {
-    const modelMap = generateParserModelMap(`
-      type Aad = {
-        kaas: string
-        koos: string
-      }
-
       type MyMappedType = Omit<Aad, "koos">
-      
       function test(): MyMappedType { throw new Error() }
+
     `)
 
-    console.log(JSON.stringify(modelMap, null, 4))
+    // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
         type: "reference",
@@ -340,61 +408,34 @@ describe("mapped", () => {
       },
       deps: {
         MyMappedType: {
-          type: "reference",
-          typeName: 'Omit<Aad, "kaas">',
-          typeArguments: [
+          type: "object",
+          members: [
             {
-              type: "reference",
-              typeName: "Aad",
-            },
-            {
-              type: "string-literal",
-              literal: "kaas",
-            },
-          ],
-        },
-        'Omit<Aad, "kaas">': {
-          type: "generic",
-          typeName: 'Omit<Aad, "kaas">',
-          typeArguments: [
-            {
-              type: "reference",
-              typeName: "Aad",
-            },
-            {
-              type: "string-literal",
-              literal: "kaas",
-            },
-          ],
-          parser: {
-            type: "object",
-            members: [
-              {
-                type: "member",
-                name: "kaas",
-                optional: false,
-                parser: {
-                  type: "string",
-                },
+              type: "member",
+              name: "kaas",
+              optional: false,
+              parser: {
+                type: "string",
               },
-            ],
-          },
+            },
+          ],
         },
       },
     })
   })
-  test.skip("MyMappedType", () => {
+
+  test("MyMappedType", () => {
     const modelMap = generateParserModelMap(`
-      type T = {
+      type Aad = {
         a: string
         b: string
       }
-      type MyMappedType = Pick<T, Exclude<keyof T, "b">>;
+      type MyMappedType = Pick<Aad, Exclude<keyof Aad, "b">>;
   
       function test(): MyMappedType { throw new Error() }
     `)
 
-    console.log(JSON.stringify(modelMap, null, 4))
+    // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
         type: "reference",
@@ -418,19 +459,19 @@ describe("mapped", () => {
     })
   })
 
-  test.skip("Pick recursive", () => {
+  test("Pick recursive", () => {
     const modelMap = generateParserModelMap(`
       type Aad = {
         kaas?: Aad
         koos: string
       }
       
-      type MyMappedType = Pick<Aad, "kaas">
+      type MyMappedType = Omit<Aad, "koos">
       
       function test(): MyMappedType { throw new Error() }
     `)
 
-    console.log(JSON.stringify(modelMap, null, 4))
+    // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
         type: "reference",
@@ -443,6 +484,29 @@ describe("mapped", () => {
             {
               type: "member",
               name: "kaas",
+              optional: true,
+              parser: {
+                type: "reference",
+                typeName: "Aad",
+              },
+            },
+          ],
+        },
+        Aad: {
+          type: "object",
+          members: [
+            {
+              type: "member",
+              name: "kaas",
+              optional: true,
+              parser: {
+                type: "reference",
+                typeName: "Aad",
+              },
+            },
+            {
+              type: "member",
+              name: "koos",
               optional: false,
               parser: {
                 type: "string",

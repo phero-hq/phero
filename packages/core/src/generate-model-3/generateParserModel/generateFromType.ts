@@ -69,7 +69,10 @@ export default function generateFromType(
         const propSignature = prop.declarations?.[0]
 
         if (!propSignature || !ts.isPropertySignature(propSignature)) {
-          throw new ParseError("Unexpected declaration", typeNode)
+          throw new ParseError(
+            "Unexpected declaration " + typeNode.kind,
+            typeNode,
+          )
         }
 
         if (!propSignature.type) {
@@ -180,25 +183,8 @@ export default function generateFromType(
     }
   } else if (type.flags & ts.TypeFlags.Undefined) {
     return { root: { type: ParserModelType.Undefined }, deps }
-  } else if (type.isIndexType()) {
-    return generateFromType(
-      type.type,
-      typeNode,
-      location,
-      typeChecker,
-      deps,
-      typeParams,
-    )
-  }
-
-  if (type.isTypeParameter()) {
-    const x = typeParams.get(typeChecker.typeToString(type))
-    if (x) {
-      return {
-        root: x.model,
-        deps,
-      }
-    }
+  } else if (type.flags & ts.TypeFlags.Never) {
+    throw new ParseError("Never will never be supported", typeNode)
   }
 
   throw new Error(

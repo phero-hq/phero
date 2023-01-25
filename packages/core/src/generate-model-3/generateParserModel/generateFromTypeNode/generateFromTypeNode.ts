@@ -1,6 +1,9 @@
 import ts from "typescript"
 import { DependencyMap, InternalParserModelMap, TypeParamMap } from ".."
 import { ParseError } from "../../../domain/errors"
+import { printCode } from "../../../lib/tsTestUtils"
+import { getTypeFlags } from "../../generateParserModelUtils"
+import { MemberParserModel, ParserModelType } from "../../ParserModel"
 import generateFromType from "../generateFromType"
 
 import generateFromArrayTypeNode from "./generateFromArrayTypeNode"
@@ -10,6 +13,7 @@ import generateFromParenthesizedTypeNode from "./generateFromParenthesizedTypeNo
 import generateFromTokenTypeNode from "./generateFromTokenTypeNode"
 import generateFromTupleTypeNode from "./generateFromTupleTypeNode"
 import generateFromTypeLiteralNode from "./generateFromTypeLiteralNode"
+import generateFromTypeOperatorNode from "./generateFromTypeOperatorNode"
 import generateFromTypeReferenceNode from "./generateFromTypeReferenceNode"
 import generateFromUnionTypeNode from "./generateFromUnionTypeNode"
 
@@ -155,13 +159,9 @@ export default function generateFromTypeNode(
   }
 
   if (ts.isTypeOperatorNode(typeNode)) {
-    const keyOfType = typeChecker.getTypeAtLocation(typeNode)
-    // Note: we ignore typeNode.type because we just want a string literal or union of
-    // string literals with the keys of the type, and not parse the actual type behind
-
-    return generateFromType(
-      keyOfType,
+    return generateFromTypeOperatorNode(
       typeNode,
+      type,
       location,
       typeChecker,
       deps,

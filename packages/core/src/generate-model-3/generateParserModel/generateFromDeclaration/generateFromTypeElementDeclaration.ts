@@ -29,7 +29,8 @@ export default function generateFromTypeElementDeclaration(
     const memberName = getMemberNameAsString(member)
     // console.group("g>" + memberName, printCode(member))
 
-    const prop = type.getProperty(memberName)
+    const prop = getNonOptionalType(type).getProperty(memberName)
+
     if (!prop) {
       throw new Error(
         "TODO " +

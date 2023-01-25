@@ -1,7 +1,6 @@
 import ts from "typescript"
-import { DependencyMap, TypeParamMap, InternalParserModelMap } from ".."
+import { DependencyMap, InternalParserModelMap, TypeParamMap } from ".."
 import { ParseError } from "../../../domain/errors"
-import { printCode } from "../../../lib/tsTestUtils"
 import {
   ParserModel,
   ParserModelType,
@@ -16,13 +15,14 @@ import generateFromInterfaceDeclaration from "./generateFromInterfaceDeclaration
 
 export default function generateFromDeclaration(
   typeNode: ts.TypeReferenceType,
-  declaration: ts.Declaration,
-  type: ts.Type,
+  type: ts.TypeReference,
   location: ts.TypeNode,
   typeChecker: ts.TypeChecker,
   deps: DependencyMap,
   typeParams: TypeParamMap,
 ): InternalParserModelMap {
+  const declaration = getDeclaration(typeNode, typeChecker)
+
   if (ts.isTypeParameterDeclaration(declaration)) {
     const typeParserModel = getTypeParamParserModel(
       typeNode,
@@ -121,17 +121,6 @@ export default function generateFromDeclaration(
         deps,
       )
 
-    if (ts.isMappedTypeNode(declaration.type)) {
-      return generateFromType(
-        type,
-        declaration.type,
-        location,
-        typeChecker,
-        updatedDeps,
-        updatedTypeParams,
-      )
-    }
-
     const ref = generateReferenceParserModelForDeclaration(
       typeNode,
       declaration,
@@ -141,15 +130,25 @@ export default function generateFromDeclaration(
     const updatedDeps2 = lazilyGenerateDependency(
       updatedDeps,
       ref,
-      (updatedDeps) =>
-        generateFromTypeNode(
-          declaration.type,
-          type,
-          location,
-          typeChecker,
-          updatedDeps,
-          updatedTypeParams,
-        ),
+      (updatedDeps) => {
+        return isEventuallyMappedTypeNode(declaration.type, typeChecker)
+          ? generateFromType(
+              type,
+              declaration.type,
+              location,
+              typeChecker,
+              updatedDeps,
+              updatedTypeParams,
+            )
+          : generateFromTypeNode(
+              declaration.type,
+              type as ts.TypeReference,
+              location,
+              typeChecker,
+              updatedDeps,
+              updatedTypeParams,
+            )
+      },
     )
 
     return {
@@ -166,6 +165,25 @@ export default function generateFromDeclaration(
   )
 }
 
+function getDeclaration(
+  typeNode: ts.TypeReferenceType,
+  typeChecker: ts.TypeChecker,
+): ts.Declaration {
+  const symbol = typeChecker.getSymbolAtLocation(
+    ts.isTypeReferenceNode(typeNode) ? typeNode.typeName : typeNode.expression,
+  )
+  if (!symbol) {
+    throw new ParseError("Entity must have symbol", typeNode)
+  }
+
+  const declaration = symbol?.declarations?.[0]
+  if (!declaration) {
+    throw new ParseError("Entity must have declaration", typeNode)
+  }
+
+  return declaration
+}
+
 function getUpdatedTypeParams(
   typeNode: ts.TypeReferenceType,
   location: ts.TypeNode,
@@ -179,132 +197,77 @@ function getUpdatedTypeParams(
     return { typeParams, deps }
   }
 
-  console.group("getUpdatedTypeParams", printCode(typeNode))
-
   const typeArgumentTypes: readonly ts.Type[] =
     type.aliasTypeArguments ?? typeChecker.getTypeArguments(type)
   const typeArguments = typeNode.typeArguments ?? []
 
-  let depsMap: DependencyMap = deps
-
   for (let i = 0; i < declaration.typeParameters.length; i++) {
     const typeParam = declaration.typeParameters[i]
     const typeArgument = typeArguments[i]
-    const typeArgumentType = typeArgumentTypes[i]
 
-    if (typeArgumentType) {
-      const typeArgModel = generateFromType(
+    // type parameter has an argument
+    if (typeArgument) {
+      const typeArgumentType =
+        typeArgumentTypes[i] ?? typeChecker.getTypeAtLocation(typeArgument)
+
+      // argument refers to another type parameter
+      if (typeArgumentType.isTypeParameter()) {
+        const typeParamModel = typeParams.get(
+          typeChecker.typeToString(typeArgumentType),
+        )
+
+        if (!typeParamModel) {
+          throw new ParseError("Type parameter was not defined", typeParam)
+        }
+
+        typeParams.set(typeParam.name.text, typeParamModel)
+      } else {
+        const typeArgModel = generateFromTypeNode(
+          typeArgument,
+          typeArgumentType,
+          location,
+          typeChecker,
+          deps,
+          typeParams,
+        )
+
+        typeParams.set(typeParam.name.text, {
+          name: typeChecker.typeToString(typeArgumentType),
+          model: typeArgModel.root,
+        })
+        deps = typeArgModel.deps
+      }
+    }
+    // type argument is not default, fallback to default
+    else if (typeParam.default) {
+      const typeArgumentType =
+        typeArgumentTypes[i] ?? typeChecker.getTypeAtLocation(typeParam.default)
+
+      const typeArgModel = generateFromTypeNode(
+        typeParam.default,
         typeArgumentType,
-        typeNode,
         location,
         typeChecker,
-        depsMap,
+        deps,
         typeParams,
       )
       typeParams.set(typeParam.name.text, {
         name: typeChecker.typeToString(typeArgumentType),
         model: typeArgModel.root,
       })
-      depsMap = typeArgModel.deps
-    } else if (typeArgument) {
-      const inferedTypeArgumentType =
-        typeChecker.getTypeAtLocation(typeArgument)
-      if (inferedTypeArgumentType.isTypeParameter()) {
-        typeParams.set(
-          typeParam.name.text,
-          getTypeParamParserModel(typeNode, typeParam, typeParams),
-        )
-      } else {
-        // Werkt voor test "MyMappedType keyof as default parameter"
-        const typeArgModel = generateFromTypeNode(
-          typeArgument,
-          inferedTypeArgumentType,
-          location,
-          typeChecker,
-          deps,
-          typeParams,
-        )
-        typeParams.set(typeParam.name.text, {
-          name: typeChecker.typeToString(inferedTypeArgumentType),
-          model: typeArgModel.root,
-        })
-        depsMap = typeArgModel.deps
-
-        // Werkt voor test "MyMappedType = Omit"
-        // behalve dat de typeParameters niet kloppen
-
-        // const x = generateFromType(
-        //   type,
-        //   typeNode,
-        //   location,
-        //   typeChecker,
-        //   deps,
-        //   typeParams,
-        // )
-
-        // typeParams.set(typeParam.name.text, {
-        //   name: typeChecker.typeToString(inferedTypeArgumentType),
-        //   // model: typeArgModel.root,
-        //   model: x.root,
-        // })
-
-        // depsMap = x.deps
-      }
-    } else if (typeParam.default) {
-      // const typeArgModel = generateFromTypeNode(
-      //   typeParam.default,
-      //   type,
-      //   location,
-      //   typeChecker,
-      //   deps,
-      //   typeParams,
-      // )
-      // typeParams.set(typeParam.name.text, {
-      //   name: typeParam.name.text,
-      //   model: typeArgModel.root,
-      // })
-      // depsMap = typeArgModel.deps
-
-      const x = generateFromType(
-        type,
-        typeNode,
-        location,
-        typeChecker,
-        deps,
-        typeParams,
-      )
-
-      typeParams.set(typeParam.name.text, {
-        name: typeChecker.typeToString(type),
-        model: x.root,
-      })
-
-      depsMap = x.deps
-    } else {
-      throw new ParseError(
-        "Type parameter has no default or is is it parameterised",
-        typeParam,
-      )
+      deps = typeArgModel.deps
     }
   }
 
-  const r = { typeParams, deps: depsMap }
-
-  console.groupEnd()
-  return r
+  return { typeParams, deps }
 }
 
 function generateReferenceParserModelForDeclaration(
   typeNode: ts.TypeReferenceType,
-  declaration: ts.Declaration,
+  declaration: ts.InterfaceDeclaration | ts.TypeAliasDeclaration,
   typeParams: TypeParamMap,
 ): ReferenceParserModel {
-  if (
-    (!ts.isInterfaceDeclaration(declaration) &&
-      !ts.isTypeAliasDeclaration(declaration)) ||
-    !declaration.typeParameters ||
-    declaration.typeParameters.length === 0
-  ) {
+  if (!declaration.typeParameters || declaration.typeParameters.length === 0) {
     return {
       type: ParserModelType.Reference,
       typeName: generateTypeName(typeNode),
@@ -397,4 +360,24 @@ function lazilyGenerateDependency(
         : root,
     ],
   ])
+}
+
+function isEventuallyMappedTypeNode(
+  node: ts.Node,
+  typeChecker: ts.TypeChecker,
+): boolean {
+  if (ts.isMappedTypeNode(node)) {
+    return true
+  }
+
+  if (ts.isTypeAliasDeclaration(node)) {
+    return isEventuallyMappedTypeNode(node.type, typeChecker)
+  }
+
+  if (ts.isTypeReferenceNode(node)) {
+    const d = getDeclaration(node, typeChecker)
+    return isEventuallyMappedTypeNode(d, typeChecker)
+  }
+
+  return false
 }
