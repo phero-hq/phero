@@ -6,7 +6,7 @@ import {
 import { Box, Text } from "ink"
 import path from "path"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { spawnChildProcess } from "../../process"
+import { spawnClientDevEnv } from "../../process"
 import { ClientProject, StyledEvent } from "../../types"
 import ProjectStatus from "../ProjectStatus"
 
@@ -92,11 +92,7 @@ export default function ClientProjectStatus({
       },
     )
 
-    const childProcess = spawnChildProcess(
-      "phero-client",
-      ["watch", "--port", `${command.port}`],
-      path.resolve(project.path),
-    )
+    const childProcess = spawnClientDevEnv(command, path.resolve(project.path))
 
     return () => {
       removeEventListener()

@@ -1,38 +1,54 @@
-import { spawn } from "child_process"
-import { hasErrorCode } from "./utils/errors"
+import { ClientCommandWatch, ServerCommandServe } from "@phero/dev"
+import { ChildProcessWithoutNullStreams, spawn } from "child_process"
+
+type ExecutableName = "phero-server" | "phero-client"
+type Signal = Extract<NodeJS.Signals, "SIGKILL" | "SIGINT">
 
 interface ChildProcess {
-  executable: string // ./node_modules/.bin/phero-*
-  argv: string[] // ["watch", "--port", "3000"]
-  pid: number
-  cwd: string
+  executableName: ExecutableName
 
   // https://nodejs.org/api/process.html#signal-events
   // SIGKILL: Will unconditionally terminate the process
   // SIGINT: Similar to crtl+c in stopping the process
-  kill: (signal: NodeJS.Signals | number) => void
+  kill: (signal: Signal) => void
 }
 
 let childProcesses: ChildProcess[] = []
 
-export function fatalError(error: unknown) {
-  if (error instanceof Error) {
-    process.stderr.write(error.message + "\n")
-  } else {
-    process.stderr.write("Unknown error")
-  }
-  killAll("SIGKILL")
-  process.exit(1)
+export function spawnClientDevEnv(
+  command: ClientCommandWatch,
+  cwd: string,
+): ChildProcess {
+  const argv = ["exec", "--", "phero-client", "watch", `--port=${command.port}`]
+  const createdChildProcess = spawn("npm", argv, { cwd })
+  return handleDevEnvChildProcess(createdChildProcess, "phero-client")
 }
 
-export function spawnChildProcess(
-  executableName: string,
-  argv: string[],
+export function spawnServerDevEnv(
+  command: ServerCommandServe,
   cwd: string,
-  onLog?: (data: string) => void,
+  onLog: (data: string) => void,
 ): ChildProcess {
-  const executable = `./node_modules/.bin/${executableName}`
-  const { kill, pid, stdout, stderr } = spawn(executable, argv, { cwd })
+  const argv = ["exec", "--", "phero-server", "serve", `--port=${command.port}`]
+  const createdChildProcess = spawn("npm", argv, { cwd })
+
+  createdChildProcess.stdout.on("data", (data) =>
+    onLog?.(data.toString().trim()),
+  )
+  createdChildProcess.stderr.on("data", (data) =>
+    onLog?.(data.toString().trim()),
+  )
+
+  return handleDevEnvChildProcess(createdChildProcess, "phero-server")
+}
+
+function handleDevEnvChildProcess(
+  createdChildProcess: ChildProcessWithoutNullStreams,
+  executableName: ExecutableName,
+): ChildProcess {
+  const { kill, pid } = createdChildProcess
+
+  createdChildProcess
     .on("close", (code) => {
       throw new Error(`${executableName} closed with code: ${code}`)
     })
@@ -46,41 +62,54 @@ export function spawnChildProcess(
       throw new Error(`uncaughtException in ${executableName}`)
     })
     .on("error", (error) => {
-      if (hasErrorCode(error)) {
-        switch (error.code) {
-          case "ENOENT":
-            throw new Error(`${executableName} is not installed in ${cwd}`)
-        }
-      } else {
-        throw new Error(
-          `${executableName} errored with message: ${error.message}`,
-        )
-      }
+      throw new Error(
+        `${executableName} errored with message: ${error.message}`,
+      )
     })
-
-  stdout.on("data", (data) => onLog?.(data.toString().trim()))
-  stderr.on("data", (data) => onLog?.(data.toString().trim()))
 
   if (pid === undefined) {
     throw new Error(`Can't create process for ${executableName}.`)
   }
 
-  const childProcess: ChildProcess = {
-    executable,
-    argv,
-    cwd,
-    pid,
+  const storedChildProcess: ChildProcess = {
+    executableName,
     kill,
   }
 
-  childProcesses.push(childProcess)
+  childProcesses.push(storedChildProcess)
 
-  return childProcess
+  return storedChildProcess
 }
 
-export function killAll(signal: NodeJS.Signals) {
+export function fatalError(error: unknown) {
+  if (error instanceof Error) {
+    process.stderr.write(error.message + "\n")
+  } else {
+    process.stderr.write("Unknown error")
+  }
+  killAll("SIGKILL")
+  process.exit(1)
+}
+
+export function killAll(signal: Signal) {
   for (const proc of childProcesses) {
     proc.kill(signal)
   }
   childProcesses = []
+}
+
+export function redirectToServer(argv: string[]) {
+  spawn("npm", ["exec", "--", "phero-server", ...argv], {
+    cwd: process.cwd(),
+    detached: false,
+    stdio: "inherit",
+  })
+}
+
+export function redirectToClient(argv: string[]) {
+  spawn("npm", ["exec", "--", "phero-client", ...argv], {
+    cwd: process.cwd(),
+    detached: false,
+    stdio: "inherit",
+  })
 }
