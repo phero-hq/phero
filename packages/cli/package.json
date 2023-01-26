@@ -23,6 +23,7 @@
   "dependencies": {
     "@phero/dev": "^0.9.13",
     "@types/node": "^18.11.9",
+    "glob": "^8.1.0",
     "ink": "^3.2.0",
     "ink-select-input": "^4.2.1",
     "ink-spinner": "^4.0.3",
