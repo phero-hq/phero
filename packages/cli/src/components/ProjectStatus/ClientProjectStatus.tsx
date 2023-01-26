@@ -43,7 +43,7 @@ export default function ClientProjectStatus({
         break
 
       case "SERVER_NOT_FOUND":
-        setEvent(["error", "Could not find any phero server to connect too."])
+        setEvent(["error", "Could not find any phero server to connect too"])
         setError(event.errorMessage)
         break
 
@@ -53,7 +53,7 @@ export default function ClientProjectStatus({
         break
 
       case "BUILD_SUCCESS":
-        setEvent(["default", "Client is ready, waiting for changes."])
+        setEvent(["default", "Client is ready, waiting for changes"])
         setError(undefined)
         break
 
