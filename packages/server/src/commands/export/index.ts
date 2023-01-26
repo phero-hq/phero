@@ -6,11 +6,16 @@ import {
   parsePheroApp,
 } from "@phero/core"
 import { ServerCommandExport, ServerExportFlavor } from "@phero/dev"
-import fs from "fs"
 import child_process from "child_process"
+import fs from "fs"
 import path from "path"
 import ts, { CompilerOptions } from "typescript"
-import { Export, ExportBundle, MetaExportFiles } from "./domain"
+import {
+  Export,
+  MetaExportFiles,
+  MetaExportFilesBase,
+  MetaExportLockFileName,
+} from "./domain"
 import generateGCloudFunctionsExport from "./gcloud-functions"
 import generateNodeJSExport from "./nodejs"
 import generateVercelExport from "./vercel"
@@ -99,17 +104,41 @@ export default function exportCommand(command: ServerCommandExport) {
   const dts = generateAppDeclarationFile(app, typeChecker)
   const pheroExecution = generateRPCProxy(app, typeChecker)
 
-  const readFile = (filePath: string): string =>
-    fs.readFileSync(filePath, {
-      encoding: "utf-8",
-    })
+  const lockFile =
+    findLockFileInDir(projectPath) ?? findLockFileForWorkspace(projectPath)
 
-  const metaExportFiles: MetaExportFiles = {
+  if (!lockFile) {
+    throw new Error(
+      "No lockfile ('package-lock.json', 'yarn.lock' or 'pnpm-lock.yaml') found in the current directory or for any workspace",
+    )
+  }
+
+  const metaExportFilesBase: MetaExportFilesBase = {
     "phero-manifest.d.ts": dts,
     "phero-execution.js": pheroExecution.js,
     "phero.js": readFile(path.join(tsOutDir, "phero.js")),
     "package.json": readFile(path.join(projectPath, "package.json")),
-    "package-lock.json": readFile(path.join(projectPath, "package-lock.json")),
+  }
+  let metaExportFiles: MetaExportFiles
+  switch (lockFile.name) {
+    case MetaExportLockFileName.Npm:
+      metaExportFiles = {
+        ...metaExportFilesBase,
+        [lockFile.name]: readFile(lockFile.path),
+      }
+      break
+    case MetaExportLockFileName.Yarn:
+      metaExportFiles = {
+        ...metaExportFilesBase,
+        [lockFile.name]: readFile(lockFile.path),
+      }
+      break
+    case MetaExportLockFileName.Pnpm:
+      metaExportFiles = {
+        ...metaExportFilesBase,
+        [lockFile.name]: readFile(lockFile.path),
+      }
+      break
   }
 
   switch (command.flavor) {
@@ -184,6 +213,73 @@ export default function exportCommand(command: ServerCommandExport) {
       break
     }
   }
+}
+
+function findLockFileInDir(
+  dir: string,
+): { name: MetaExportLockFileName; path: string } | undefined {
+  const lockFilePath = path.join(dir, MetaExportLockFileName.Npm)
+  if (fs.existsSync(lockFilePath)) {
+    return { name: MetaExportLockFileName.Npm, path: lockFilePath }
+  }
+
+  const yarnLockFilePath = path.join(dir, MetaExportLockFileName.Yarn)
+  if (fs.existsSync(yarnLockFilePath)) {
+    return { name: MetaExportLockFileName.Yarn, path: yarnLockFilePath }
+  }
+
+  const pnpmLockFilePath = path.join(dir, MetaExportLockFileName.Pnpm)
+  if (fs.existsSync(pnpmLockFilePath)) {
+    return { name: MetaExportLockFileName.Pnpm, path: pnpmLockFilePath }
+  }
+
+  return undefined
+}
+
+function findLockFileForWorkspace(
+  projectPath: string,
+): { name: MetaExportLockFileName; path: string } | undefined {
+  const maxDepth = 5
+
+  let currentPath = projectPath
+
+  for (let i = 0; i < maxDepth; i++) {
+    if (hasWorkspaceSettingsInDir(currentPath)) {
+      const foundLockFile = findLockFileInDir(currentPath)
+      if (foundLockFile) {
+        return foundLockFile
+      } else {
+        throw new Error(
+          "No lockfile found at the same level of where workspace is defined",
+        )
+      }
+    }
+
+    currentPath = path.join(currentPath, "..")
+  }
+
+  return undefined
+}
+
+function hasWorkspaceSettingsInDir(dir: string): boolean {
+  const packageFilePath = path.join(dir, "package.json")
+  if (fs.existsSync(packageFilePath)) {
+    const packageJson = JSON.parse(readFile(packageFilePath))
+    return !!packageJson.workspaces
+  }
+
+  const pnpmWorkspaceFilePath = path.join(dir, "pnpm-workspace.yaml")
+  if (fs.existsSync(pnpmWorkspaceFilePath)) {
+    return true
+  }
+
+  return false
+}
+
+function readFile(filePath: string): string {
+  return fs.readFileSync(filePath, {
+    encoding: "utf-8",
+  })
 }
 
 function writeToDisk(
