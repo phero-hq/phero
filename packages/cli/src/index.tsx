@@ -4,9 +4,8 @@ import { parsePheroCommand, PheroCommandName } from "@phero/dev"
 import devEnv from "./commands/dev-env"
 import help from "./commands/help"
 import init from "./commands/init"
-import { redirectToClient, redirectToServer } from "./commands/redirect"
 import version from "./commands/version"
-import { fatalError } from "./process"
+import { fatalError, redirectToClient, redirectToServer } from "./process"
 import checkAndWarnForVersions from "./utils/checkAndWarnForVersions"
 
 const command = parsePheroCommand(process.argv.slice(2))
