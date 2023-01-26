@@ -1,5 +1,4 @@
 import { spawn } from "child_process"
-import { hasErrorCode } from "./utils/errors"
 
 interface ChildProcess {
   executableName: string // phero-*

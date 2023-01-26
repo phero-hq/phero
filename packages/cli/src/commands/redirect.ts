@@ -1,7 +1,15 @@
 import { spawn } from "child_process"
 
-export default function redirect(executable: string, argv: string[]) {
-  spawn("npm", ["exec", "--", executable, ...argv], {
+export function redirectToServer(argv: string[]) {
+  spawn("npm", ["exec", "--", "phero-server", ...argv], {
+    cwd: process.cwd(),
+    detached: false,
+    stdio: "inherit",
+  })
+}
+
+export function redirectToClient(argv: string[]) {
+  spawn("npm", ["exec", "--", "phero-client", ...argv], {
     cwd: process.cwd(),
     detached: false,
     stdio: "inherit",
