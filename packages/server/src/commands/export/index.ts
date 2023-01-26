@@ -109,7 +109,7 @@ export default function exportCommand(command: ServerCommandExport) {
 
   if (!lockFile) {
     throw new Error(
-      "No lockfile found in the current directory or for any workspace",
+      "No lockfile ('package-lock.json', 'yarn.lock' or 'pnpm-lock.yaml') found in the current directory or for any workspace",
     )
   }
 
