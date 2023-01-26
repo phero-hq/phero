@@ -1,40 +1,54 @@
-import { spawn } from "child_process"
+import { ClientCommandWatch, ServerCommandServe } from "@phero/dev"
+import { ChildProcessWithoutNullStreams, spawn } from "child_process"
+
+type ExecutableName = "phero-server" | "phero-client"
+type Signal = Extract<NodeJS.Signals, "SIGKILL" | "SIGINT">
 
 interface ChildProcess {
-  executableName: string // phero-*
-  argv: string[] // ["watch", "--port", "3000"]
-  pid: number
-  cwd: string
+  executableName: ExecutableName
 
   // https://nodejs.org/api/process.html#signal-events
   // SIGKILL: Will unconditionally terminate the process
   // SIGINT: Similar to crtl+c in stopping the process
-  kill: (signal: NodeJS.Signals | number) => void
+  kill: (signal: Signal) => void
 }
 
 let childProcesses: ChildProcess[] = []
 
-export function fatalError(error: unknown) {
-  if (error instanceof Error) {
-    process.stderr.write(error.message + "\n")
-  } else {
-    process.stderr.write("Unknown error")
-  }
-  killAll("SIGKILL")
-  process.exit(1)
+export function spawnClientDevEnv(
+  command: ClientCommandWatch,
+  cwd: string,
+): ChildProcess {
+  const argv = ["exec", "--", "phero-client", "watch", `--port=${command.port}`]
+  const createdChildProcess = spawn("npm", argv, { cwd })
+  return handleDevEnvChildProcess(createdChildProcess, "phero-client")
 }
 
-export function spawnNpmExec(
-  executableName: string,
-  argv: string[],
+export function spawnServerDevEnv(
+  command: ServerCommandServe,
   cwd: string,
-  onLog?: (data: string) => void,
+  onLog: (data: string) => void,
 ): ChildProcess {
-  const { kill, pid, stdout, stderr } = spawn(
-    "npm",
-    ["exec", "--", executableName, ...argv],
-    { cwd },
+  const argv = ["exec", "--", "phero-server", "serve", `--port=${command.port}`]
+  const createdChildProcess = spawn("npm", argv, { cwd })
+
+  createdChildProcess.stdout.on("data", (data) =>
+    onLog?.(data.toString().trim()),
   )
+  createdChildProcess.stderr.on("data", (data) =>
+    onLog?.(data.toString().trim()),
+  )
+
+  return handleDevEnvChildProcess(createdChildProcess, "phero-server")
+}
+
+function handleDevEnvChildProcess(
+  createdChildProcess: ChildProcessWithoutNullStreams,
+  executableName: ExecutableName,
+): ChildProcess {
+  const { kill, pid } = createdChildProcess
+
+  createdChildProcess
     .on("close", (code) => {
       throw new Error(`${executableName} closed with code: ${code}`)
     })
@@ -53,27 +67,31 @@ export function spawnNpmExec(
       )
     })
 
-  stdout.on("data", (data) => onLog?.(data.toString().trim()))
-  stderr.on("data", (data) => onLog?.(data.toString().trim()))
-
   if (pid === undefined) {
     throw new Error(`Can't create process for ${executableName}.`)
   }
 
-  const childProcess: ChildProcess = {
+  const storedChildProcess: ChildProcess = {
     executableName,
-    argv,
-    cwd,
-    pid,
     kill,
   }
 
-  childProcesses.push(childProcess)
+  childProcesses.push(storedChildProcess)
 
-  return childProcess
+  return storedChildProcess
 }
 
-export function killAll(signal: NodeJS.Signals) {
+export function fatalError(error: unknown) {
+  if (error instanceof Error) {
+    process.stderr.write(error.message + "\n")
+  } else {
+    process.stderr.write("Unknown error")
+  }
+  killAll("SIGKILL")
+  process.exit(1)
+}
+
+export function killAll(signal: Signal) {
   for (const proc of childProcesses) {
     proc.kill(signal)
   }

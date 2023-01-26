@@ -6,7 +6,7 @@ import {
 import { Box, Text } from "ink"
 import path from "path"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { spawnNpmExec } from "../../process"
+import { spawnServerDevEnv } from "../../process"
 import { ServerProject } from "../../types"
 import ProjectStatus from "../ProjectStatus"
 import {
@@ -146,9 +146,8 @@ export default function ServerProjectStatus({
       },
     )
 
-    const childProcess = spawnNpmExec(
-      "phero-server",
-      ["serve", `--port=${command.port}`],
+    const childProcess = spawnServerDevEnv(
+      command,
       path.resolve(project.path),
       (log) =>
         onAddRow(
