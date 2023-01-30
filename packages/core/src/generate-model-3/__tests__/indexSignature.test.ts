@@ -3,6 +3,41 @@ import { generateParserModelMap } from "../../lib/tsTestUtils"
 describe("indexSignature", () => {
   test("MyIndexSignature number", () => {
     const modelMap = generateParserModelMap(`
+
+      function test(): {
+        [key: string]: string | number;
+      } { throw new Error() }
+    `)
+    console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "object",
+        members: [
+          {
+            type: "indexMember",
+            keyParser: {
+              type: "string",
+            },
+            optional: false,
+            parser: {
+              type: "union",
+              oneOf: [
+                {
+                  type: "string",
+                },
+                {
+                  type: "number",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      deps: {},
+    })
+  })
+  test("MyIndexSignature number", () => {
+    const modelMap = generateParserModelMap(`
       type MyIndexSignature = {
         [key: string]: string | number;
       };
