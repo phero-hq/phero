@@ -8,7 +8,7 @@ describe("indexSignature", () => {
         [key: string]: string | number;
       } { throw new Error() }
     `)
-    console.log(JSON.stringify(modelMap, null, 4))
+    // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
         type: "object",
