@@ -169,5 +169,16 @@ export default function generateFromTypeNode(
     )
   }
 
+  if (ts.isIndexedAccessTypeNode(typeNode)) {
+    return generateFromType(
+      type,
+      typeNode,
+      location,
+      typeChecker,
+      deps,
+      typeParams,
+    )
+  }
+
   throw new ParseError("TypeNode not implemented " + typeNode.kind, typeNode)
 }

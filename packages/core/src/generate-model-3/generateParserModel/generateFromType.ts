@@ -1,7 +1,6 @@
 import ts from "typescript"
 import { DependencyMap, TypeParamMap, InternalParserModelMap } from "."
 import { ParseError } from "../../domain/errors"
-import { printCode } from "../../lib/tsTestUtils"
 import { getTypeFlags } from "../generateParserModelUtils"
 import {
   ParserModelType,
@@ -34,6 +33,15 @@ export default function generateFromType(
       root: {
         type: ParserModelType.NumberLiteral,
         literal: s.value,
+      },
+      deps,
+    }
+  } else if (type.flags & ts.TypeFlags.BooleanLiteral) {
+    return {
+      root: {
+        type: ParserModelType.BooleanLiteral,
+        // this is the way...
+        literal: typeChecker.typeToString(type) === "true",
       },
       deps,
     }
@@ -139,6 +147,7 @@ export default function generateFromType(
           deps,
           typeParams,
         )
+
         return {
           models: [...models, typeModel.root],
           deps: typeModel.deps,
@@ -150,7 +159,7 @@ export default function generateFromType(
     return {
       root: {
         type: ParserModelType.Union,
-        oneOf: unionModels.models,
+        oneOf: fixBooleanLiterals(unionModels.models),
       },
       deps: unionModels.deps,
     }
@@ -163,7 +172,7 @@ export default function generateFromType(
   throw new Error(
     `ParserModel for Type with flags (${getTypeFlags(type).join(
       " | ",
-    )}) not implemented + ${typeParams.has("T")}`,
+    )}) not implemented`,
   )
 }
 
@@ -217,4 +226,36 @@ function generateFromIndexType(
   }
 
   return { models, deps }
+}
+
+function fixBooleanLiterals(models: ParserModel[]): ParserModel[] {
+  const trueLiteralIndex = models.findIndex(
+    (m) => m.type === ParserModelType.BooleanLiteral && m.literal === true,
+  )
+
+  if (trueLiteralIndex === -1) {
+    return models
+  }
+
+  const falseLiteralIndex = models.findIndex(
+    (m) => m.type === ParserModelType.BooleanLiteral && m.literal === false,
+  )
+
+  if (falseLiteralIndex === -1) {
+    return models
+  }
+
+  const smallestIndex = Math.min(trueLiteralIndex, falseLiteralIndex)
+  const otherIndex =
+    smallestIndex === trueLiteralIndex ? falseLiteralIndex : trueLiteralIndex
+
+  return models.reduce<ParserModel[]>((result, model, index) => {
+    if (index === smallestIndex) {
+      return [...result, { type: ParserModelType.Boolean }]
+    }
+    if (index === otherIndex) {
+      return result
+    }
+    return [...result, model]
+  }, [])
 }
