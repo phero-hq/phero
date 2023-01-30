@@ -80,7 +80,7 @@ export default function generateFromType(
         }
 
         const propModel = generateFromTypeNode(
-          propSignature.type,
+          ts.isMappedTypeNode(typeNode) ? typeNode : propSignature.type,
           propType,
           location,
           typeChecker,

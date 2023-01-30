@@ -517,6 +517,53 @@ describe("mapped", () => {
       },
     })
   })
+
+  test("MyMappedType", () => {
+    const modelMap = generateParserModelMap(`
+      type Aad = {
+        a: string
+        b: string
+      }
+      type MyMappedType = {
+        [key in keyof Aad]: string | number
+      }
+  
+      function test(): MyMappedType { throw new Error() }
+    `)
+
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "MyMappedType",
+      },
+      deps: {
+        MyMappedType: {
+          type: "object",
+          members: [
+            {
+              type: "member",
+              name: "a",
+              optional: false,
+              parser: {
+                type: "union",
+                oneOf: [{ type: "string" }, { type: "number" }],
+              },
+            },
+            {
+              type: "member",
+              name: "b",
+              optional: false,
+              parser: {
+                type: "union",
+                oneOf: [{ type: "string" }, { type: "number" }],
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
 })
 
 // MET JASPER:
