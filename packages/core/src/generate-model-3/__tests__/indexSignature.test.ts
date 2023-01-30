@@ -371,4 +371,65 @@ describe("indexSignature", () => {
       },
     })
   })
+  test("MyIndexSignatureInterface string and number + prop", () => {
+    const modelMap = generateParserModelMap(`
+      interface MyIndexSignature {
+        [key: string]: string | number;
+        [index: number]: string;
+        length: number;
+      };
+
+      function test(): MyIndexSignature { throw new Error() }
+    `)
+
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "MyIndexSignature",
+      },
+      deps: {
+        MyIndexSignature: {
+          type: "object",
+          members: [
+            {
+              type: "indexMember",
+              keyParser: {
+                type: "string",
+              },
+              optional: false,
+              parser: {
+                type: "union",
+                oneOf: [
+                  {
+                    type: "string",
+                  },
+                  {
+                    type: "number",
+                  },
+                ],
+              },
+            },
+            {
+              type: "indexMember",
+              keyParser: {
+                type: "number",
+              },
+              optional: false,
+              parser: {
+                type: "string",
+              },
+            },
+            {
+              type: "member",
+              name: "length",
+              optional: false,
+              parser: {
+                type: "number",
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
 })

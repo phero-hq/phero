@@ -106,43 +106,16 @@ export default function generateFromType(
       { models: [], deps },
     )
 
-    const stringIndexType = type.getStringIndexType()
-    const numberIndexType = type.getNumberIndexType()
-    let depsIndexTypes = memberModels.deps
-    if (stringIndexType) {
-      const x = generateFromType(
-        stringIndexType,
-        typeNode,
-        location,
-        typeChecker,
-        depsIndexTypes,
-        typeParams,
-      )
-      depsIndexTypes = x.deps
-      memberModels.models.push({
-        type: ParserModelType.IndexMember,
-        keyParser: { type: ParserModelType.String },
-        optional: false,
-        parser: x.root,
-      } as const)
-    }
-    if (numberIndexType) {
-      const x = generateFromType(
-        numberIndexType,
-        typeNode,
-        location,
-        typeChecker,
-        depsIndexTypes,
-        typeParams,
-      )
-      depsIndexTypes = x.deps
-      memberModels.models.push({
-        type: ParserModelType.IndexMember,
-        keyParser: { type: ParserModelType.Number },
-        optional: false,
-        parser: x.root,
-      } as const)
-    }
+    const { deps: depsIndexTypes, models: indexModels } = generateFromIndexType(
+      typeNode,
+      type,
+      location,
+      typeChecker,
+      memberModels.deps,
+      typeParams,
+    )
+
+    memberModels.models.push(...indexModels)
 
     return {
       root: {
@@ -192,4 +165,56 @@ export default function generateFromType(
       " | ",
     )}) not implemented + ${typeParams.has("T")}`,
   )
+}
+
+function generateFromIndexType(
+  typeNode: ts.TypeNode,
+  type: ts.Type,
+  location: ts.TypeNode,
+  typeChecker: ts.TypeChecker,
+  deps: DependencyMap,
+  typeParams: TypeParamMap,
+): { models: IndexMemberParserModel[]; deps: DependencyMap } {
+  const models: IndexMemberParserModel[] = []
+
+  const stringIndexType = type.getStringIndexType()
+  const numberIndexType = type.getNumberIndexType()
+
+  if (stringIndexType) {
+    const stringIndexModel = generateFromType(
+      stringIndexType,
+      typeNode,
+      location,
+      typeChecker,
+      deps,
+      typeParams,
+    )
+    models.push({
+      type: ParserModelType.IndexMember,
+      keyParser: { type: ParserModelType.String },
+      optional: false,
+      parser: stringIndexModel.root,
+    })
+    deps = stringIndexModel.deps
+  }
+
+  if (numberIndexType) {
+    const stringIndexModel = generateFromType(
+      numberIndexType,
+      typeNode,
+      location,
+      typeChecker,
+      deps,
+      typeParams,
+    )
+    models.push({
+      type: ParserModelType.IndexMember,
+      keyParser: { type: ParserModelType.Number },
+      optional: false,
+      parser: stringIndexModel.root,
+    })
+    deps = stringIndexModel.deps
+  }
+
+  return { models, deps }
 }
