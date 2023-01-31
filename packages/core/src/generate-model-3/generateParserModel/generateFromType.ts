@@ -163,10 +163,74 @@ export default function generateFromType(
       },
       deps: unionModels.deps,
     }
+  } else if (type.flags & ts.TypeFlags.Intersection) {
+    const unionType = type as ts.IntersectionType
+    const unionModels = unionType.types.reduce<{
+      models: ParserModel[]
+      deps: DependencyMap
+    }>(
+      ({ models, deps }, type) => {
+        const typeModel = generateFromType(
+          type,
+          typeNode,
+          location,
+          typeChecker,
+          deps,
+          typeParams,
+        )
+
+        return {
+          models: [...models, typeModel.root],
+          deps: typeModel.deps,
+        }
+      },
+      { models: [], deps },
+    )
+
+    return {
+      root: {
+        type: ParserModelType.Intersection,
+        parsers: unionModels.models,
+      },
+      deps: unionModels.deps,
+    }
   } else if (type.flags & ts.TypeFlags.Undefined) {
     return { root: { type: ParserModelType.Undefined }, deps }
   } else if (type.flags & ts.TypeFlags.Never) {
     throw new ParseError("Never will never be supported", typeNode)
+  } else if (type.flags & ts.TypeFlags.TemplateLiteral) {
+    const templateLiteralType = type as ts.TemplateLiteralType
+
+    const parsers: ParserModel[] = []
+
+    for (let i = 0; i < templateLiteralType.texts.length; i++) {
+      if (templateLiteralType.texts[i]) {
+        parsers.push({
+          type: ParserModelType.StringLiteral,
+          literal: templateLiteralType.texts[i],
+        })
+      }
+      if (templateLiteralType.types[i]) {
+        parsers.push(
+          generateFromType(
+            templateLiteralType.types[i],
+            typeNode,
+            location,
+            typeChecker,
+            deps,
+            typeParams,
+          ).root,
+        )
+      }
+    }
+
+    return {
+      root: {
+        type: ParserModelType.TemplateLiteral,
+        parsers,
+      },
+      deps,
+    }
   }
 
   throw new Error(

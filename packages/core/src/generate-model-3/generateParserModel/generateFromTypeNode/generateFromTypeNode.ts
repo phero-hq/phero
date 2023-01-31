@@ -1,9 +1,7 @@
 import ts from "typescript"
 import { DependencyMap, InternalParserModelMap, TypeParamMap } from ".."
 import { ParseError } from "../../../domain/errors"
-import { printCode } from "../../../lib/tsTestUtils"
-import { getTypeFlags } from "../../generateParserModelUtils"
-import { MemberParserModel, ParserModelType } from "../../ParserModel"
+import { ParserModelType } from "../../ParserModel"
 import generateFromType from "../generateFromType"
 
 import generateFromArrayTypeNode from "./generateFromArrayTypeNode"
@@ -26,6 +24,21 @@ export default function generateFromTypeNode(
   typeParams: TypeParamMap,
 ): InternalParserModelMap {
   if (ts.isToken(typeNode)) {
+    if (typeNode.kind === ts.SyntaxKind.IntrinsicKeyword) {
+      const literal = typeChecker
+        .typeToString(type)
+        // unwrap quotes
+        .replace(/^"(.+(?="$))"$/, "$1")
+
+      return {
+        root: {
+          type: ParserModelType.StringLiteral,
+          literal,
+        },
+        deps,
+      }
+    }
+
     return { root: generateFromTokenTypeNode(typeNode), deps }
   }
 
@@ -170,6 +183,17 @@ export default function generateFromTypeNode(
   }
 
   if (ts.isIndexedAccessTypeNode(typeNode)) {
+    return generateFromType(
+      type,
+      typeNode,
+      location,
+      typeChecker,
+      deps,
+      typeParams,
+    )
+  }
+
+  if (ts.isTemplateLiteralTypeNode(typeNode)) {
     return generateFromType(
       type,
       typeNode,

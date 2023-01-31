@@ -26,6 +26,7 @@ export enum ParserModelType {
   BigInt = "bigInt",
   BigIntLiteral = "bigInt-literal",
   Generic = "generic",
+  TemplateLiteral = "template-literal",
 }
 
 export type ParserModel =
@@ -54,6 +55,7 @@ export type ParserModel =
   | BigIntParserModel
   | BigIntLiteralParserModel
   | GenericParserModel
+  | TemplateLiteralParserModel
 
 export interface StringParserModel {
   type: ParserModelType.String
@@ -144,6 +146,11 @@ export interface GenericParserModel {
   typeName: string
   typeArguments?: ParserModel[]
   parser: ParserModel
+}
+
+export interface TemplateLiteralParserModel {
+  type: ParserModelType.TemplateLiteral
+  parsers: ParserModel[]
 }
 
 export interface DateParserModel {
