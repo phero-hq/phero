@@ -72,6 +72,13 @@ export default function generateFromDeclaration(
   }
 
   if (ts.isInterfaceDeclaration(declaration)) {
+    if (
+      declaration.name.text === "Date" &&
+      declaration.getSourceFile().fileName.endsWith("lib.es5.d.ts")
+    ) {
+      return { root: { type: ParserModelType.Date }, deps }
+    }
+
     const { typeParams: updatedTypeParams, deps: updatedDeps } =
       getUpdatedTypeParams(
         typeNode,
