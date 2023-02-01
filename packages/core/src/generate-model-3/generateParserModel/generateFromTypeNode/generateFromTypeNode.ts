@@ -204,5 +204,9 @@ export default function generateFromTypeNode(
     )
   }
 
+  if (ts.isFunctionTypeNode(typeNode)) {
+    throw new ParseError("Function types are not supported", typeNode)
+  }
+
   throw new ParseError("TypeNode not implemented " + typeNode.kind, typeNode)
 }

@@ -138,6 +138,14 @@ export default function generateFromTypeElementDeclaration(
     }
   }
 
+  if (ts.isMethodSignature(member)) {
+    throw new ParseError(`Type with methods are not supported`, member)
+  }
+
+  if (ts.isCallSignatureDeclaration(member)) {
+    throw new ParseError(`Type with methods are not supported`, member)
+  }
+
   throw new ParseError(`Member type ${member.kind} is not supported`, member)
 }
 

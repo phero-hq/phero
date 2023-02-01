@@ -164,6 +164,13 @@ export default function generateFromDeclaration(
     }
   }
 
+  if (ts.isClassDeclaration(declaration)) {
+    throw new ParseError(
+      `References to class types are not supported`,
+      typeNode,
+    )
+  }
+
   throw new ParseError(
     `Reference to type with kind ${
       ts.tokenToString(declaration.kind) ?? declaration.kind.toString()
