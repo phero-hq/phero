@@ -20,7 +20,7 @@ export function spawnClientDevEnv(
   cwd: string,
 ): ChildProcess {
   const argv = ["exec", "--", "phero-client", "watch", `--port=${command.port}`]
-  const createdChildProcess = spawn("npm", argv, { cwd })
+  const createdChildProcess = spawn("npm", argv, { cwd, shell: true })
   return handleDevEnvChildProcess(createdChildProcess, "phero-client")
 }
 
@@ -30,7 +30,7 @@ export function spawnServerDevEnv(
   onLog: (data: string) => void,
 ): ChildProcess {
   const argv = ["exec", "--", "phero-server", "serve", `--port=${command.port}`]
-  const createdChildProcess = spawn("npm", argv, { cwd })
+  const createdChildProcess = spawn("npm", argv, { cwd, shell: true })
 
   createdChildProcess.stdout.on("data", (data) =>
     onLog?.(data.toString().trim()),
