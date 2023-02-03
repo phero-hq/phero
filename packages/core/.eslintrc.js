@@ -9,6 +9,7 @@ module.exports = {
     ecmaVersion: "latest",
     sourceType: "module",
     project: "./tsconfig.json", // <-- Point to your project's tsconfig.json or create new one
+    tsconfigRootDir: __dirname,
   },
   // parser: '@typescript-eslint/parser',
   rules: {
