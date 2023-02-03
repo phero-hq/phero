@@ -1,8 +1,8 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("union", () => {
   test(`string | number | boolean`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         function test(): string | number | boolean { throw new Error() }
     `)
 
@@ -15,7 +15,7 @@ describe("union", () => {
     })
   })
   test(`"str" | 123 | false`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         function test(): "str" | 123 | false { throw new Error() }
     `)
 
@@ -32,7 +32,7 @@ describe("union", () => {
     })
   })
   test(`(string | 123)[]`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         function test(): (string | 123)[] { throw new Error() }
     `)
 
@@ -54,7 +54,7 @@ describe("union", () => {
     })
   })
   test(`number[] | "yes"[]`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         function test(): number[] | "yes"[] { throw new Error() }
     `)
 
@@ -87,7 +87,7 @@ describe("union", () => {
     })
   })
   test(`InterfaceOne | InterfaceTwo[]`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         interface InterfaceOne {
           prop: 1
         }

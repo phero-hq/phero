@@ -1,8 +1,8 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("conditional", () => {
   test("MyConditionalType<number>", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type MyConditionalType<T> = T extends string ? {
         prop: number
       } : {
@@ -44,7 +44,7 @@ describe("conditional", () => {
     })
   })
   test("MyConditionalType<string>", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type MyConditionalType<T> = T extends string ? {
         prop: number
       } : {
@@ -85,7 +85,7 @@ describe("conditional", () => {
     })
   })
   test("MyDeepConditionalType<number>", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type MyDeepConditionalType<T> = {
         t: T
         deep: DeepCondition<string>
@@ -165,7 +165,7 @@ describe("conditional", () => {
     })
   })
   test("MyDeepConditionalType<number>", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type MyDeepConditionalType<T> = {
         deep: DeepCondition<T>
       }
@@ -236,7 +236,7 @@ describe("conditional", () => {
     })
   })
   test("MyType<number>", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       interface MyType<T> {
         prop: Wrap<T>
       }
@@ -303,7 +303,7 @@ describe("conditional", () => {
   })
 
   test("MyDeepConditionalRecursiveType<number>", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       interface MyDeepConditionalRecursiveType<T> {
         prop: Wrap<T>
       }
@@ -546,7 +546,7 @@ describe("conditional", () => {
     })
   })
   test("MyConditionalType<number>", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type MyConditionalType<T, K> = T extends string ? {
         prop: number
         x: K

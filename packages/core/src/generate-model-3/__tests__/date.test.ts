@@ -1,8 +1,8 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("Date", () => {
   test("Date", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       interface Test {
         createdAt: Date
       }
@@ -34,7 +34,7 @@ describe("Date", () => {
     })
   })
   test("Date", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Test = [string, Date]
 
       function test(): Test { throw new Error() }

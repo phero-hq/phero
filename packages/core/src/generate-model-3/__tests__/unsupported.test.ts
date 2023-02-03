@@ -1,9 +1,9 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("unsupported", () => {
   test("class", () => {
     expect(() =>
-      generateParserModelMap(`
+      generateParserModelForReturnType(`
       class Test {
         public aap: number = 1
       }
@@ -14,7 +14,7 @@ describe("unsupported", () => {
   })
   test("interface with methods", () => {
     expect(() =>
-      generateParserModelMap(`
+      generateParserModelForReturnType(`
       interface Test {
         aap(a: number, b: number): number
       }
@@ -25,7 +25,7 @@ describe("unsupported", () => {
   })
   test("interface with methods", () => {
     expect(() =>
-      generateParserModelMap(`
+      generateParserModelForReturnType(`
       interface Test {
         aap: (a: number, b: number) => number
       }
@@ -36,7 +36,7 @@ describe("unsupported", () => {
   })
   test("Function type", () => {
     expect(() =>
-      generateParserModelMap(`
+      generateParserModelForReturnType(`
       type Test = (a: number, b: number): number
 
       function test(): Test { throw new Error() }
@@ -45,7 +45,7 @@ describe("unsupported", () => {
   })
   test("Function types are not supported", () => {
     expect(() =>
-      generateParserModelMap(`
+      generateParserModelForReturnType(`
       interface Test {
         (a: number, b: number): number
         (a: number, b: number, c: string): number

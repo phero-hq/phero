@@ -1,8 +1,8 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("indexedAccess", () => {
   test("by prop name", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Person = { age: number; name: string; alive: boolean };
       type MyIndexedAccess = Person["age"];
       function test(): MyIndexedAccess { throw new Error() }
@@ -18,7 +18,7 @@ describe("indexedAccess", () => {
     })
   })
   test("by prop name with union", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Person = { age: number; name: string; alive: boolean };
       type MyIndexedAccess = Person["age" | "name"];
       function test(): MyIndexedAccess { throw new Error() }
@@ -42,7 +42,7 @@ describe("indexedAccess", () => {
     })
   })
   test("by keyof of props", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Person = { age: number; name: string; alive: boolean };
       type MyIndexedAccess = Person[keyof Person];
       function test(): MyIndexedAccess { throw new Error() }
@@ -69,7 +69,7 @@ describe("indexedAccess", () => {
     })
   })
   test("by indirect union from other type", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Person = { age: number; name: string; alive: boolean };
       type AliveOrName = "alive" | "name";
       type MyIndexedAccess = Person[AliveOrName];
@@ -94,7 +94,7 @@ describe("indexedAccess", () => {
     })
   })
   test("complex example", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Aap = {
         aap: number
         noot: string

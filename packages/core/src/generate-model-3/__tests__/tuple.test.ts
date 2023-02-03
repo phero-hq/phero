@@ -1,8 +1,8 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("tuple", () => {
   test(`[string, string]`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         function test(): [string, string] { throw new Error() }
     `)
 
@@ -18,7 +18,7 @@ describe("tuple", () => {
     })
   })
   test(`[string, 123, boolean]`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         function test(): [string, 123, boolean] { throw new Error() }
     `)
 
@@ -39,7 +39,7 @@ describe("tuple", () => {
     })
   })
   test(`["aap"]`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         function test(): ["aap"] { throw new Error() }
     `)
 
@@ -58,7 +58,7 @@ describe("tuple", () => {
     })
   })
   test(`[123 | "str", number]`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         function test(): [123 | "str", number] { throw new Error() }
     `)
 
@@ -88,7 +88,7 @@ describe("tuple", () => {
     })
   })
   test(`[string, X]`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type X = number
       
       function test(): [string, X] { throw new Error() }

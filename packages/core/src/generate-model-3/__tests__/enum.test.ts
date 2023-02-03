@@ -1,8 +1,8 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("enum", () => {
   test(`StringEnum`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         enum StringEnum {
           Aap = "aap",
           Noot = "noot",
@@ -43,7 +43,7 @@ describe("enum", () => {
     })
   })
   test(`NumberEnum`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         enum NumberEnum {
           Aap = 0,
           Noot,
@@ -84,7 +84,7 @@ describe("enum", () => {
     })
   })
   test(`MixedEnum`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         enum MixedEnum {
           Aap = "x",
           Noot = 0,
@@ -125,7 +125,7 @@ describe("enum", () => {
     })
   })
   test(`ValuelessEnum`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         enum ValuelessEnum {
           Aap,
           Noot,
@@ -166,7 +166,7 @@ describe("enum", () => {
     })
   })
   test(`SkipEnum`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         enum SkipEnum {
           Aap = 3,
           Noot,
@@ -207,7 +207,7 @@ describe("enum", () => {
     })
   })
   test(`MixedEnum.Aap`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         enum MixedEnum {
           Aap = "x",
           Noot = 0,

@@ -1,8 +1,8 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("literal", () => {
   test(`"str"`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       function test(): "str" { throw new Error() }
     `)
 
@@ -12,7 +12,7 @@ describe("literal", () => {
     })
   })
   test("123", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       function test(): 123 { throw new Error() }
     `)
 
@@ -22,7 +22,7 @@ describe("literal", () => {
     })
   })
   test("false", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       function test(): false { throw new Error() }
     `)
 
@@ -32,7 +32,7 @@ describe("literal", () => {
     })
   })
   test("9007199254740991n", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       function test(): 9007199254740991n { throw new Error() }
     `)
 

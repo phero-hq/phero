@@ -1,8 +1,8 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("indexSignature", () => {
   test("MyIndexSignature number", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
 
       function test(): {
         [key: string]: string | number;
@@ -37,7 +37,7 @@ describe("indexSignature", () => {
     })
   })
   test("MyIndexSignature number", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type MyIndexSignature = {
         [key: string]: string | number;
       };
@@ -78,7 +78,7 @@ describe("indexSignature", () => {
     })
   })
   test("MyIndexSignature string", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type MyIndexSignature = {
         [index: number]: string;
       };
@@ -111,7 +111,7 @@ describe("indexSignature", () => {
     })
   })
   test("MyIndexSignature string and number", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type MyIndexSignature = {
         [key: string]: string | number;
         [index: number]: string;
@@ -163,7 +163,7 @@ describe("indexSignature", () => {
     })
   })
   test("MyIndexSignature string and number + prop", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type MyIndexSignature = {
         [key: string]: string | number;
         [index: number]: string;
@@ -224,7 +224,7 @@ describe("indexSignature", () => {
     })
   })
   test("MyIndexSignature number", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type MyIndexSignature = {
         [key: string]: string | number;
         [key: number]: number;
@@ -372,7 +372,7 @@ describe("indexSignature", () => {
     })
   })
   test("MyIndexSignatureInterface string and number + prop", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       interface MyIndexSignature {
         [key: string]: string | number;
         [index: number]: string;

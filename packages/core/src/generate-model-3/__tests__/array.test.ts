@@ -1,8 +1,8 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("array", () => {
   test(`string[]`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       function test(): string[] { throw new Error() }
     `)
 
@@ -17,7 +17,7 @@ describe("array", () => {
     )
   })
   test("number[]", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       function test(): number[] { throw new Error() }
     `)
 
@@ -32,7 +32,7 @@ describe("array", () => {
     )
   })
   test("boolean", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       function test(): boolean[] { throw new Error() }
     `)
 
@@ -48,7 +48,7 @@ describe("array", () => {
   })
 
   test(`string[][]`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       function test(): string[][] { throw new Error() }
     `)
 
@@ -70,7 +70,7 @@ describe("array", () => {
   })
 
   test("number[][]", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       function test(): number[][] { throw new Error() }
     `)
 
@@ -89,7 +89,7 @@ describe("array", () => {
     })
   })
   test("boolean[][]", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       function test(): boolean[][] { throw new Error() }
     `)
 

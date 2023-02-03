@@ -1,8 +1,8 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("intersection", () => {
   test(`{ a: string} & { b: string }`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         function test(): { a: string} & { b: string } { throw new Error() }
     `)
 
@@ -38,7 +38,7 @@ describe("intersection", () => {
     })
   })
   test(`{ a: string} & { b?: number[] }`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         function test(): { a: string} & { b?: number[] } { throw new Error() }
     `)
 
@@ -77,7 +77,7 @@ describe("intersection", () => {
     })
   })
   test(`InterfaceOne & InterfaceTwo`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         interface InterfaceOne {
           prop1: number
         }

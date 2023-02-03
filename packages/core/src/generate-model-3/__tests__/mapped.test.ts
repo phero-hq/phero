@@ -1,8 +1,8 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("mapped", () => {
   test("MyMappedType keyof 1 key of a literal type", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type MyMappedType = keyof { kaas: string }
       
       function test(): MyMappedType { throw new Error() }
@@ -23,7 +23,7 @@ describe("mapped", () => {
     })
   })
   test("MyMappedType keyof 1 key of an enum", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       enum MyEnum {
         Aap = "aap",
         Noot = "noot",
@@ -62,7 +62,7 @@ describe("mapped", () => {
     })
   })
   test("MyMappedType keyof 1 key of a class", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       class MyClass {
         aap: string
         noot: boolean
@@ -101,7 +101,7 @@ describe("mapped", () => {
     })
   })
   test("MyMappedType keyof 1 key", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Aad = {
         kaas: string
       }
@@ -126,7 +126,7 @@ describe("mapped", () => {
     })
   })
   test("MyMappedType keyof multiple keys", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Aad = {
         kaas: string
         aap: string
@@ -160,7 +160,7 @@ describe("mapped", () => {
     })
   })
   test("MyMappedType keyof as type parameter", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Aad = {
         kaas: string
       }
@@ -205,7 +205,7 @@ describe("mapped", () => {
     })
   })
   test("MyMappedType keyof as default parameter", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Aad = {
           kaas: string
       }
@@ -281,7 +281,7 @@ describe("mapped", () => {
     })
   })
   test("Exclude", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Aad = {
         kaas: string
         koos: string
@@ -353,7 +353,7 @@ describe("mapped", () => {
     })
   })
   test("Pick", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Aad = {
         kaas: string
         koos: string
@@ -389,7 +389,7 @@ describe("mapped", () => {
   })
 
   test("Omit", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Aad = {
         kaas: string
         koos: string
@@ -425,7 +425,7 @@ describe("mapped", () => {
   })
 
   test("MyMappedType", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Aad = {
         a: string
         b: string
@@ -460,7 +460,7 @@ describe("mapped", () => {
   })
 
   test("Pick recursive", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Aad = {
         kaas?: Aad
         koos: string
@@ -519,7 +519,7 @@ describe("mapped", () => {
   })
 
   test("MyMappedType", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Aad = {
         a: string
         b: string

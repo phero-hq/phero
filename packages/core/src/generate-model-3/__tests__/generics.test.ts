@@ -1,8 +1,8 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("generics", () => {
   test("MyInterface<number>", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       interface MyInterface<T> {
         prop: T
       }
@@ -38,7 +38,7 @@ describe("generics", () => {
     })
   })
   test("MyInterface", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       interface MyInterface<T = number> {
         prop: T
       }
@@ -74,7 +74,7 @@ describe("generics", () => {
     })
   })
   test("MyTypeAlias<number>", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type MyTypeAlias<T> = {
         prop: T
       }
@@ -110,7 +110,7 @@ describe("generics", () => {
     })
   })
   test("DeepGeneric<number>", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       interface DeepGeneric<T> {
         prop: Wrap<T>
         nonGenericProp: boolean
@@ -187,7 +187,7 @@ describe("generics", () => {
     })
   })
   test("EmbeddedGeneric<number>", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       interface EmbeddedGeneric<T> {
         embed: {
           prop: T
@@ -235,7 +235,7 @@ describe("generics", () => {
     })
   })
   test("GenericWithDefault<number>", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       interface GenericWithDefault<T, X = string> {
         prop: T
         propDef: X

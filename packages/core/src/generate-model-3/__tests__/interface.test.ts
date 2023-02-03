@@ -1,8 +1,8 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("interface", () => {
   test(`SimpleInterface`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         interface SimpleInterface {
           aap: string
           noot?: number
@@ -45,7 +45,7 @@ describe("interface", () => {
     })
   })
   test(`InterfaceWithRef`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         interface InterfaceWithRef {
           aap: Aap
           noot?: Noot
@@ -118,7 +118,7 @@ describe("interface", () => {
     })
   })
   test(`RecursiveInterface`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         interface RecursiveInterface {
           recur?: RecursiveInterface
         }
@@ -150,7 +150,7 @@ describe("interface", () => {
     })
   })
   test(`interface with parent interface`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         interface Base {
           base: string
         }
@@ -206,7 +206,7 @@ describe("interface", () => {
     })
   })
   test(`interface with ancestor interface`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         interface Root {
           root: string
         }
@@ -287,7 +287,7 @@ describe("interface", () => {
     })
   })
   test(`interface with multiple heritage clauses`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         type Other<T> {
           other: T
         }

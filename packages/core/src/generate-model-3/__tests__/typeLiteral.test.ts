@@ -1,8 +1,8 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("typeLiteral", () => {
   test(`{ prop: string }`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         function test(): { prop: string } { throw new Error() }
     `)
 
@@ -22,7 +22,7 @@ describe("typeLiteral", () => {
     })
   })
   test(`{ prop1: string, prop2: number  }`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         function test(): { prop1: string, prop2: number } { throw new Error() }
     `)
 
@@ -48,7 +48,7 @@ describe("typeLiteral", () => {
     })
   })
   test(`{ prop?: boolean  }`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         function test(): { prop?: boolean } { throw new Error() }
     `)
 
@@ -68,7 +68,7 @@ describe("typeLiteral", () => {
     })
   })
   test(`{ prop1: string | 123, prop2?: boolean[] }`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         function test(): { prop1: string | 123, prop2?: boolean[] } { throw new Error() }
     `)
 
@@ -106,7 +106,7 @@ describe("typeLiteral", () => {
     })
   })
   test(`{ prop1: string, prop2: { prop3: boolean, prop4: { prop5: number, prop6?: "prop6" } } }`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         function test(): { prop1: string, prop2: { prop3: boolean, prop4: { prop5: number, prop6?: "prop6" } } } { throw new Error() }
     `)
 

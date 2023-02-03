@@ -1,8 +1,8 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("templateLiteral", () => {
   test("Greeting", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type World = "world"; 
       type Greeting = \`hello \${World}\`;
 
@@ -24,7 +24,7 @@ describe("templateLiteral", () => {
     })
   })
   test("AllLocaleIDs", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type EmailLocaleIDs = "welcome_email" | "email_heading";
       type FooterLocaleIDs = "footer_title" | "footer_sendoff";
       type AllLocaleIDs = \`\${EmailLocaleIDs | FooterLocaleIDs}_id\`;
@@ -64,7 +64,7 @@ describe("templateLiteral", () => {
     })
   })
   test("LocaleMessageIDs", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type EmailLocaleIDs = "welcome_email" | "email_heading";
       type FooterLocaleIDs = "footer_title" | "footer_sendoff";
       type AllLocaleIDs = \`\${EmailLocaleIDs | FooterLocaleIDs}_id\`;
@@ -138,7 +138,7 @@ describe("templateLiteral", () => {
     })
   })
   test("EventName", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type MyType = { aap: string, noot: string, mies: string }
       type EventName = \`\${string & keyof MyType}Changed\`
       function test(): EventName { throw new Error() }
@@ -172,7 +172,7 @@ describe("templateLiteral", () => {
     })
   })
   test("EventName generic", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type MyType = { aap: string, noot: string, mies: string }
       type EventName<T> = \`\${string & keyof T}Changed\`
       function test(): EventName<MyType> { throw new Error() }
@@ -251,7 +251,7 @@ describe("templateLiteral", () => {
     })
   })
   test("ShoutyGreeting", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Greeting = "Hello, world"
       type ShoutyGreeting = Uppercase<Greeting>
       function test(): ShoutyGreeting { throw new Error() }
@@ -296,7 +296,7 @@ describe("templateLiteral", () => {
     })
   })
   test("Lowercase", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       function test(): Lowercase<"HELLO WORLD"> { throw new Error() }
     `)
 
@@ -331,7 +331,7 @@ describe("templateLiteral", () => {
     })
   })
   test("ASCIICacheKey", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type ASCIICacheKey<Str extends string> = \`id-\${Lowercase<Str>}\`
       type MainID = ASCIICacheKey<"MY_APP">
       function test(): MainID { throw new Error() }
@@ -372,7 +372,7 @@ describe("templateLiteral", () => {
     })
   })
   test("Email", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Ext = "com" | "nl"
       type Email = \`\${number}@\${string}.\${Ext}\`
       function test(): Email { throw new Error() }
@@ -432,7 +432,7 @@ describe("templateLiteral", () => {
     })
   })
   test("Email generic", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Ext = { com: string, nl: string }
       type Email<T> = \`\${number}@\${string}.\${string & keyof T}\`
       function test(): Email<Ext> { throw new Error() }
@@ -529,7 +529,7 @@ describe("templateLiteral", () => {
     })
   })
   test("Email protocol", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Ext = "com" | "nl"
       type Email = \`email:\${number}@\${string}.\${Ext}\`
       function test(): Email { throw new Error() }
@@ -598,7 +598,7 @@ describe("templateLiteral", () => {
   })
 
   test("Email generic with type constraint and template literal type parameter", () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Email<T extends string, X = \`email:\${number}@\${string}.\${T}\`> = { x: X }
       function test(): Email<"com"> { throw new Error() }
     `)

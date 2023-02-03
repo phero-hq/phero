@@ -1,8 +1,8 @@
-import { generateParserModelMap } from "../../lib/tsTestUtils"
+import { generateParserModelForReturnType } from "../../lib/tsTestUtils"
 
 describe("typeAlias", () => {
   test(`type X = string`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
         type X = string
 
         function test(): X { throw new Error() }
@@ -21,7 +21,7 @@ describe("typeAlias", () => {
     })
   })
   test(`type X = Y`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Y = number  
       type X = Y
 
@@ -45,7 +45,7 @@ describe("typeAlias", () => {
     })
   })
   test(`type X = { y: Y }`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Y = number  
       type X = { y: Y }
 
@@ -79,7 +79,7 @@ describe("typeAlias", () => {
     })
   })
   test(`type X = { y: Y | Z }`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Z = boolean
       type Y = number  
       type X = { y: Y | Z }
@@ -126,7 +126,7 @@ describe("typeAlias", () => {
     })
   })
   test(`type X = [string, Y]`, () => {
-    const modelMap = generateParserModelMap(`
+    const modelMap = generateParserModelForReturnType(`
       type Y = number
       type X = [string, Y]
 
