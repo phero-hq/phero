@@ -102,7 +102,7 @@ export default function generateFromDeclaration(
       (updatedDeps) =>
         generateFromInterfaceDeclaration(
           declaration,
-          type as ts.TypeReference,
+          type,
           location,
           typeChecker,
           updatedDeps,
@@ -122,7 +122,7 @@ export default function generateFromDeclaration(
         typeNode,
         location,
         declaration,
-        type as ts.TypeReference,
+        type,
         typeChecker,
         typeParams,
         deps,
@@ -149,7 +149,7 @@ export default function generateFromDeclaration(
             )
           : generateFromTypeNode(
               declaration.type,
-              type as ts.TypeReference,
+              type,
               location,
               typeChecker,
               updatedDeps,
