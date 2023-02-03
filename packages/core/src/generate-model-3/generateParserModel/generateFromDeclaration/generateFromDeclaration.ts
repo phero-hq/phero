@@ -72,6 +72,17 @@ export default function generateFromDeclaration(
   }
 
   if (ts.isInterfaceDeclaration(declaration)) {
+    const { typeParams: updatedTypeParams, deps: updatedDeps } =
+      getUpdatedTypeParams(
+        typeNode,
+        location,
+        declaration,
+        type,
+        typeChecker,
+        typeParams,
+        deps,
+      )
+
     if (
       declaration.name.text === "Date" &&
       declaration.getSourceFile().fileName.endsWith("lib.es5.d.ts")
@@ -79,16 +90,38 @@ export default function generateFromDeclaration(
       return { root: { type: ParserModelType.Date }, deps }
     }
 
-    const { typeParams: updatedTypeParams, deps: updatedDeps } =
-      getUpdatedTypeParams(
-        typeNode,
+    if (
+      (declaration.name.text === "Array" &&
+        typeNode.typeArguments?.length === 1,
+      declaration.getSourceFile().fileName.endsWith("lib.es5.d.ts"))
+    ) {
+      const arrayElementTypeNode = typeNode.typeArguments?.[0]
+      const arrayElementType = type.typeArguments?.[0]
+
+      if (!arrayElementTypeNode || !arrayElementType) {
+        throw new ParseError("Array should have a type", typeNode)
+      }
+
+      const elementModel = generateFromTypeNode(
+        arrayElementTypeNode,
+        arrayElementType,
         location,
-        declaration,
-        type as ts.TypeReference,
         typeChecker,
-        typeParams,
         deps,
+        typeParams,
       )
+
+      return {
+        root: {
+          type: ParserModelType.Array,
+          element: {
+            type: ParserModelType.ArrayElement,
+            parser: elementModel.root,
+          },
+        },
+        deps: elementModel.deps,
+      }
+    }
 
     const ref = generateReferenceParserModelForDeclaration(
       typeNode,
@@ -207,8 +240,10 @@ function getUpdatedTypeParams(
   typeParams: TypeParamMap,
   deps: DependencyMap,
 ): { typeParams: TypeParamMap; deps: DependencyMap } {
+  const updatedTypeParams = new Map([...typeParams])
+
   if (!declaration.typeParameters || declaration.typeParameters.length === 0) {
-    return { typeParams, deps }
+    return { typeParams: updatedTypeParams, deps }
   }
 
   const typeArgumentTypes: readonly ts.Type[] =
@@ -226,7 +261,7 @@ function getUpdatedTypeParams(
 
       // argument refers to another type parameter
       if (typeArgumentType.isTypeParameter()) {
-        const typeParamModel = typeParams.get(
+        const typeParamModel = updatedTypeParams.get(
           typeChecker.typeToString(typeArgumentType),
         )
 
@@ -234,7 +269,7 @@ function getUpdatedTypeParams(
           throw new ParseError("Type parameter was not defined", typeParam)
         }
 
-        typeParams.set(typeParam.name.text, typeParamModel)
+        updatedTypeParams.set(typeParam.name.text, typeParamModel)
       } else {
         const typeArgModel = generateFromTypeNode(
           typeArgument,
@@ -242,10 +277,10 @@ function getUpdatedTypeParams(
           location,
           typeChecker,
           deps,
-          typeParams,
+          updatedTypeParams,
         )
 
-        typeParams.set(typeParam.name.text, {
+        updatedTypeParams.set(typeParam.name.text, {
           name: typeChecker.typeToString(typeArgumentType),
           model: typeArgModel.root,
         })
@@ -263,9 +298,10 @@ function getUpdatedTypeParams(
         location,
         typeChecker,
         deps,
-        typeParams,
+        updatedTypeParams,
       )
-      typeParams.set(typeParam.name.text, {
+
+      updatedTypeParams.set(typeParam.name.text, {
         name: typeChecker.typeToString(typeArgumentType),
         model: typeArgModel.root,
       })
@@ -273,7 +309,7 @@ function getUpdatedTypeParams(
     }
   }
 
-  return { typeParams, deps }
+  return { typeParams: updatedTypeParams, deps }
 }
 
 function generateReferenceParserModelForDeclaration(
