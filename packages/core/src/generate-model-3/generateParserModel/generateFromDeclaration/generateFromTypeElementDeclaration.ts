@@ -32,17 +32,7 @@ export default function generateFromTypeElementDeclaration(
     const prop = getNonOptionalType(type).getProperty(memberName)
 
     if (!prop) {
-      throw new Error(
-        "TODO " +
-          memberName +
-          " > " +
-          type
-            .getProperties()
-            .map((p) => p.name)
-            .join("|") +
-          " >>> " +
-          typeChecker.typeToString(type),
-      )
+      throw new ParseError("Member not found", member)
     }
 
     const propType = typeChecker.getTypeOfSymbolAtLocation(prop, location)
