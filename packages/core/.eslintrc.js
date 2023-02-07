@@ -29,6 +29,8 @@ module.exports = {
     "@typescript-eslint/restrict-plus-operands": "off",
     "@typescript-eslint/no-extraneous-class": "off",
     "no-fallthrough": "off",
+    "@typescript-eslint/quotes": "off",
+    "no-template-curly-in-string": "off",
   },
   plugins: ["deprecation"],
 }

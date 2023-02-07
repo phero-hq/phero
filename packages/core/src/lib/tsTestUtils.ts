@@ -2,16 +2,11 @@ import ts, {
   FunctionLikeDeclarationBase,
   VariableDeclaration,
 } from "typescript"
-import { TSFiles, VirtualCompilerHost } from "./VirtualCompilerHost"
 import { PheroApp } from "../domain/PheroApp"
-import { KindToNodeMappings } from "./tsUtils"
-import {
-  DependencyMap,
-  FunctionParserModel,
-  generateParserModel,
-  ParserModelMap,
-} from "../generate-model-3/generateParserModel"
+import { generateParserModel } from "../generate-model-3/generateParserModel"
 import { ObjectParserModel, ParserModel } from "../generate-model-3/ParserModel"
+import { KindToNodeMappings } from "./tsUtils"
+import { TSFiles, VirtualCompilerHost } from "./VirtualCompilerHost"
 
 export function printPheroApp(app: PheroApp): string {
   return JSON.stringify(

@@ -295,7 +295,7 @@ function generateFromIndexType(
 
 function fixBooleanLiterals(models: ParserModel[]): ParserModel[] {
   const trueLiteralIndex = models.findIndex(
-    (m) => m.type === ParserModelType.BooleanLiteral && m.literal === true,
+    (m) => m.type === ParserModelType.BooleanLiteral && m.literal,
   )
 
   if (trueLiteralIndex === -1) {
@@ -303,7 +303,7 @@ function fixBooleanLiterals(models: ParserModel[]): ParserModel[] {
   }
 
   const falseLiteralIndex = models.findIndex(
-    (m) => m.type === ParserModelType.BooleanLiteral && m.literal === false,
+    (m) => m.type === ParserModelType.BooleanLiteral && !m.literal,
   )
 
   if (falseLiteralIndex === -1) {

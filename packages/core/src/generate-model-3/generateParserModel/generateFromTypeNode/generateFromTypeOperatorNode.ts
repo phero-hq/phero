@@ -1,14 +1,11 @@
 import ts from "typescript"
 import { DependencyMap, InternalParserModelMap, TypeParamMap } from ".."
 import { ParseError } from "../../../domain/errors"
-import { printCode } from "../../../lib/tsTestUtils"
-import { getTypeFlags } from "../../generateParserModelUtils"
 import {
-  ParserModelType,
   MemberParserModel,
   ParserModel,
+  ParserModelType,
 } from "../../ParserModel"
-import generateFromDeclaration from "../generateFromDeclaration"
 import generateFromType from "../generateFromType"
 import generateFromTypeNode from "./generateFromTypeNode"
 
@@ -20,7 +17,7 @@ export default function generateFromTypeOperatorNode(
   deps: DependencyMap,
   typeParams: TypeParamMap,
 ): InternalParserModelMap {
-  if (typeNode.operator != ts.SyntaxKind.KeyOfKeyword) {
+  if (typeNode.operator !== ts.SyntaxKind.KeyOfKeyword) {
     throw new ParseError("Operator not supported", typeNode)
   }
 
