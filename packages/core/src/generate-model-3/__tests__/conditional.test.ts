@@ -651,38 +651,3 @@ describe("conditional", () => {
     })
   })
 })
-
-// MET JASPER:
-// // MyDeepConditionalRecursiveType<number>
-
-// const MyDeepConditionalRecursiveType_number_Parser = {
-//   prop: Wrap_number_boolean_Parser
-// }
-
-// const Wrap_number_boolean_Parser = {
-//   w: NumberParser,
-//   b: BooleanParser,
-//   recursive: MyDeepConditionalRecursiveType_boolean_Parser,
-// }
-
-// const MyDeepConditionalRecursiveType_boolean_Parser = {
-//   prop: Wrap_boolean_boolean_Parser
-// }
-
-// const Wrap_boolean_boolean_Parser = {
-//   w: BooleanParser,
-//   b: BooleanParser,
-//   recursive: MyDeepConditionalRecursiveType_boolean_Parser,
-// }
-
-// // MyDeepConditionalRecursiveType<string>
-
-// const MyDeepConditionalRecursiveType_string_Parser = {
-//   prop: Wrap_string_number_Parser
-// }
-
-// const Wrap_string_number_Parser = {
-//   w: StringParser,
-//   b: NumberParser,
-//   recursive: MyDeepConditionalRecursiveType_number_Parser,
-// }
