@@ -12,7 +12,7 @@ export default function generateFromArrayTypeNode(
   deps: DependencyMap,
   typeParams: TypeParamMap,
 ): InternalParserModelMap {
-  const elementType = type.typeArguments?.[0]
+  const elementType = typeChecker.getTypeAtLocation(typeNode.elementType)
 
   if (!elementType) {
     throw new ParseError("Array should have element type", typeNode)

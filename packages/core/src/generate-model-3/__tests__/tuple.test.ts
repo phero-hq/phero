@@ -90,7 +90,7 @@ describe("tuple", () => {
   test(`[string, X]`, () => {
     const modelMap = generateParserModelForReturnType(`
       type X = number
-      
+
       function test(): [string, X] { throw new Error() }
     `)
 
@@ -122,6 +122,424 @@ describe("tuple", () => {
       },
     })
   })
+  test(`[string, ...number[]]`, () => {
+    const modelMap = generateParserModelForReturnType(`
+      type X = [string, ...number[]]
+      
+      function test(): X { throw new Error() }
+    `)
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "X",
+      },
+      deps: {
+        X: {
+          type: "tuple",
+          elements: [
+            {
+              type: "tupleElement",
+              position: 0,
+              parser: {
+                type: "string",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 1,
+              isRestElement: true,
+              parser: {
+                type: "number",
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
+  test(`[string, ...number[], boolean]`, () => {
+    const modelMap = generateParserModelForReturnType(`
+      type X = [string, ...number[], boolean]
+      
+      function test(): X { throw new Error() }
+    `)
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "X",
+      },
+      deps: {
+        X: {
+          type: "tuple",
+          elements: [
+            {
+              type: "tupleElement",
+              position: 0,
+              parser: {
+                type: "string",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 1,
+              isRestElement: true,
+              parser: {
+                type: "number",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 2,
+              parser: {
+                type: "boolean",
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
+  test(`[string, ...number[][]]`, () => {
+    const modelMap = generateParserModelForReturnType(`
+      type X = [string, ...number[][]]
+      
+      function test(): X { throw new Error() }
+    `)
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "X",
+      },
+      deps: {
+        X: {
+          type: "tuple",
+          elements: [
+            {
+              type: "tupleElement",
+              position: 0,
+              parser: {
+                type: "string",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 1,
+              isRestElement: true,
+              parser: {
+                type: "array",
+                element: {
+                  type: "arrayElement",
+                  parser: {
+                    type: "number",
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
+  test(`[string, ...Array<number>]`, () => {
+    const modelMap = generateParserModelForReturnType(`
+      type X = [string, ...Array<number>]
+      
+      function test(): X { throw new Error() }
+    `)
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "X",
+      },
+      deps: {
+        X: {
+          type: "tuple",
+          elements: [
+            {
+              type: "tupleElement",
+              position: 0,
+              parser: {
+                type: "string",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 1,
+              isRestElement: true,
+              parser: {
+                type: "number",
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
+  test(`[string, ...Array<number>, boolean]`, () => {
+    const modelMap = generateParserModelForReturnType(`
+      type X = [string, ...Array<number>, boolean]
+      
+      function test(): X { throw new Error() }
+    `)
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "X",
+      },
+      deps: {
+        X: {
+          type: "tuple",
+          elements: [
+            {
+              type: "tupleElement",
+              position: 0,
+              parser: {
+                type: "string",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 1,
+              isRestElement: true,
+              parser: {
+                type: "number",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 2,
+              parser: {
+                type: "boolean",
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
+  test(`[string, ...Array<Array<number>>]`, () => {
+    const modelMap = generateParserModelForReturnType(`
+      type X = [string, ...Array<Array<number>>]
+      
+      function test(): X { throw new Error() }
+    `)
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "X",
+      },
+      deps: {
+        X: {
+          type: "tuple",
+          elements: [
+            {
+              type: "tupleElement",
+              position: 0,
+              parser: {
+                type: "string",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 1,
+              isRestElement: true,
+              parser: {
+                type: "array",
+                element: {
+                  type: "arrayElement",
+                  parser: {
+                    type: "number",
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
+  test(`[string, ...[string, number]]`, () => {
+    const modelMap = generateParserModelForReturnType(`
+      type X = [string, ...[string, number]]
+      
+      function test(): X { throw new Error() }
+    `)
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "X",
+      },
+      deps: {
+        X: {
+          type: "tuple",
+          elements: [
+            {
+              type: "tupleElement",
+              position: 0,
+              parser: {
+                type: "string",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 1,
+              parser: {
+                type: "string",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 2,
+              parser: {
+                type: "number",
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
+  test(`[string, ...Y]`, () => {
+    const modelMap = generateParserModelForReturnType(`
+      type Y = [number, string]
+      type X = [string, ...Y]
+      
+      function test(): X { throw new Error() }
+    `)
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "X",
+      },
+      deps: {
+        X: {
+          type: "tuple",
+          elements: [
+            {
+              type: "tupleElement",
+              position: 0,
+              parser: {
+                type: "string",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 1,
+              isRestElement: true,
+              parser: {
+                type: "reference",
+                typeName: "Y",
+              },
+            },
+          ],
+        },
+        Y: {
+          type: "tuple",
+          elements: [
+            {
+              type: "tupleElement",
+              position: 0,
+              parser: {
+                type: "number",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 1,
+              parser: {
+                type: "string",
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
+  test(`[string, ...Y<string>]`, () => {
+    const modelMap = generateParserModelForReturnType(`
+      type Y<T, A = T extends string ? number : boolean> = [T, A]
+      
+      type X = [number, ...Y<string>]
+      
+      
+      function test(): X { throw new Error() }
+    `)
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "X",
+      },
+      deps: {
+        X: {
+          type: "tuple",
+          elements: [
+            {
+              type: "tupleElement",
+              position: 0,
+              parser: {
+                type: "number",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 1,
+              isRestElement: true,
+              parser: {
+                type: "reference",
+                typeName: "Y<string, number>",
+                typeArguments: [
+                  {
+                    type: "string",
+                  },
+                  {
+                    type: "number",
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        "Y<string, number>": {
+          type: "generic",
+          typeName: "Y<string, number>",
+          typeArguments: [
+            {
+              type: "string",
+            },
+            {
+              type: "number",
+            },
+          ],
+          parser: {
+            type: "tuple",
+            elements: [
+              {
+                type: "tupleElement",
+                position: 0,
+                parser: {
+                  type: "string",
+                },
+              },
+              {
+                type: "tupleElement",
+                position: 1,
+                parser: {
+                  type: "number",
+                },
+              },
+            ],
+          },
+        },
+      },
+    })
+  })
 })
-
-// TODO tuple with spread [number, ...string]

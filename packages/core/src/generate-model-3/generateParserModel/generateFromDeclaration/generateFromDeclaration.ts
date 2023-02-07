@@ -96,7 +96,9 @@ export default function generateFromDeclaration(
       declaration.getSourceFile().fileName.endsWith("lib.es5.d.ts"))
     ) {
       const arrayElementTypeNode = typeNode.typeArguments?.[0]
-      const arrayElementType = type.typeArguments?.[0]
+      const arrayElementType =
+        arrayElementTypeNode &&
+        typeChecker.getTypeAtLocation(arrayElementTypeNode)
 
       if (!arrayElementTypeNode || !arrayElementType) {
         throw new ParseError("Array should have a type", typeNode)
@@ -287,7 +289,7 @@ function getUpdatedTypeParams(
         deps = typeArgModel.deps
       }
     }
-    // type argument is not default, fallback to default
+    // no type argument, fallback to default
     else if (typeParam.default) {
       const typeArgumentType =
         typeArgumentTypes[i] ?? typeChecker.getTypeAtLocation(typeParam.default)

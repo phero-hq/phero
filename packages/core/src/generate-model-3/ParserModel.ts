@@ -115,6 +115,7 @@ export interface TupleParserModel {
 export interface TupleElementParserModel {
   type: ParserModelType.TupleElement
   position: number
+  isRestElement?: boolean
   parser: ParserModel
 }
 export interface UnionParserModel {
