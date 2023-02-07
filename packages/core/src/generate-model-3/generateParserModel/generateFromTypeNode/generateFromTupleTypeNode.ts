@@ -1,14 +1,7 @@
 import ts from "typescript"
 import generateFromTypeNode from "."
 import { DependencyMap, InternalParserModelMap, TypeParamMap } from ".."
-import { ParseError } from "../../../domain/errors"
-import { printCode } from "../../../lib/tsTestUtils"
-import {
-  ParserModel,
-  ParserModelType,
-  TupleElementParserModel,
-  TupleParserModel,
-} from "../../ParserModel"
+import { ParserModelType, TupleElementParserModel } from "../../ParserModel"
 
 export default function generateFromTupleTypeNode(
   typeNode: ts.TupleTypeNode,
@@ -18,51 +11,13 @@ export default function generateFromTupleTypeNode(
   deps: DependencyMap,
   typeParams: TypeParamMap,
 ): InternalParserModelMap {
-  // const elementTypes = type.typeArguments?.map((t) => t)
   const elementTypes = typeChecker.getTypeArguments(type).map((t) => t)
 
-  if (!elementTypes) {
-    throw new ParseError("Tuple should have element type", typeNode)
-  }
-
-  const elementModels = xxx(
-    typeNode,
-    elementTypes,
-    location,
-    typeChecker,
-    deps,
-    typeParams,
-    type,
-  )
-
-  return {
-    root: {
-      type: ParserModelType.Tuple,
-      elements: elementModels.models,
-    },
-    deps: elementModels.deps,
-  }
-}
-
-function xxx(
-  typeNode: ts.TupleTypeNode,
-  elementTypes: ts.Type[],
-  location: ts.TypeNode,
-  typeChecker: ts.TypeChecker,
-  deps: DependencyMap,
-  typeParams: TypeParamMap,
-  type: ts.Type,
-): {
-  models: TupleElementParserModel[]
-  deps: DependencyMap
-} {
-  let index = 0
-
-  return typeNode.elements.reduce<{
+  const elementModels = typeNode.elements.reduce<{
     models: TupleElementParserModel[]
     deps: DependencyMap
   }>(
-    ({ models, deps }, subtype) => {
+    ({ models, deps }, subtype, index) => {
       if (ts.isRestTypeNode(subtype)) {
         const restTypeModel = generateFromTypeNode(
           subtype.type,
@@ -79,7 +34,7 @@ function xxx(
               ...models,
               {
                 type: ParserModelType.TupleElement,
-                position: index++,
+                position: index,
                 isRestElement: true,
                 parser: restTypeModel.root.element.parser,
               },
@@ -104,7 +59,7 @@ function xxx(
             ...models,
             {
               type: ParserModelType.TupleElement,
-              position: index++,
+              position: index,
               isRestElement: true,
               parser: restTypeModel.root,
             },
@@ -127,7 +82,7 @@ function xxx(
           ...models,
           {
             type: ParserModelType.TupleElement,
-            position: index++,
+            position: index,
             parser: subtypeModel.root,
           },
         ],
@@ -136,4 +91,12 @@ function xxx(
     },
     { models: [], deps },
   )
+
+  return {
+    root: {
+      type: ParserModelType.Tuple,
+      elements: elementModels.models,
+    },
+    deps: elementModels.deps,
+  }
 }
