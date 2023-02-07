@@ -233,10 +233,11 @@ export default function generateFromType(
     }
   }
 
-  throw new Error(
+  throw new ParseError(
     `ParserModel for Type with flags (${getTypeFlags(type).join(
       " | ",
     )}) not implemented`,
+    typeNode,
   )
 }
 
