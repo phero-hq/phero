@@ -31,7 +31,7 @@ export default function generateFromTokenTypeNode(
 
     case ts.SyntaxKind.ObjectKeyword:
     case ts.SyntaxKind.SymbolKeyword:
-    // TODO?
+    // TODO
     default:
       throw new ParseError(
         `TokenKind ${typeNode.kind} not implemented`,
