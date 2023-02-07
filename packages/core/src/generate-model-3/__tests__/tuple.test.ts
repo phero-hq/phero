@@ -542,4 +542,168 @@ describe("tuple", () => {
       },
     })
   })
+  test(`[lat: number, long: number]`, () => {
+    const modelMap = generateParserModelForReturnType(`
+      type X = [lat: number, long: number]
+      
+      function test(): X { throw new Error() }
+    `)
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "X",
+      },
+      deps: {
+        X: {
+          type: "tuple",
+          elements: [
+            {
+              type: "tupleElement",
+              position: 0,
+              parser: {
+                type: "number",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 1,
+              parser: {
+                type: "number",
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
+  test(`[myString: string, ...myNumber: number[]]`, () => {
+    const modelMap = generateParserModelForReturnType(`
+      type X = [myString: string, ...myNumber: number[]]
+      
+      function test(): X { throw new Error() }
+    `)
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "X",
+      },
+      deps: {
+        X: {
+          type: "tuple",
+          elements: [
+            {
+              type: "tupleElement",
+              position: 0,
+              parser: {
+                type: "string",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 1,
+              isRestElement: true,
+              parser: {
+                type: "number",
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
+  test(`[myString: string, ...myNumber: Array<number>]`, () => {
+    const modelMap = generateParserModelForReturnType(`
+      type X = [myString: string, ...myNumber: Array<number>]
+      
+      function test(): X { throw new Error() }
+    `)
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "X",
+      },
+      deps: {
+        X: {
+          type: "tuple",
+          elements: [
+            {
+              type: "tupleElement",
+              position: 0,
+              parser: {
+                type: "string",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 1,
+              isRestElement: true,
+              parser: {
+                type: "number",
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
+  test(`[myString: string, ...myNumber: Y]`, () => {
+    const modelMap = generateParserModelForReturnType(`
+      type Y = [a: string, b: boolean]
+      type X = [myString: string, ...myTuple: Y]
+      
+      function test(): X { throw new Error() }
+    `)
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "X",
+      },
+      deps: {
+        X: {
+          type: "tuple",
+          elements: [
+            {
+              type: "tupleElement",
+              position: 0,
+              parser: {
+                type: "string",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 1,
+              isRestElement: true,
+              parser: {
+                type: "reference",
+                typeName: "Y",
+              },
+            },
+          ],
+        },
+        Y: {
+          type: "tuple",
+          elements: [
+            {
+              type: "tupleElement",
+              position: 0,
+              parser: {
+                type: "string",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 1,
+              parser: {
+                type: "boolean",
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
 })
