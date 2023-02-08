@@ -173,7 +173,10 @@ export default function generateFromDeclaration(
       updatedDeps,
       ref,
       (updatedDeps) => {
-        return isEventuallyMappedTypeNode(declaration.type, typeChecker)
+        return isEventuallyMappedOrConditionalTypeNode(
+          declaration.type,
+          typeChecker,
+        )
           ? generateFromType(
               type,
               declaration.type,
@@ -414,21 +417,21 @@ function lazilyGenerateDependency(
   ])
 }
 
-function isEventuallyMappedTypeNode(
+function isEventuallyMappedOrConditionalTypeNode(
   node: ts.Node,
   typeChecker: ts.TypeChecker,
 ): boolean {
-  if (ts.isMappedTypeNode(node)) {
+  if (ts.isMappedTypeNode(node) || ts.isConditionalTypeNode(node)) {
     return true
   }
 
   if (ts.isTypeAliasDeclaration(node)) {
-    return isEventuallyMappedTypeNode(node.type, typeChecker)
+    return isEventuallyMappedOrConditionalTypeNode(node.type, typeChecker)
   }
 
   if (ts.isTypeReferenceNode(node)) {
     const d = getDeclaration(node, typeChecker)
-    return isEventuallyMappedTypeNode(d, typeChecker)
+    return isEventuallyMappedOrConditionalTypeNode(d, typeChecker)
   }
 
   return false

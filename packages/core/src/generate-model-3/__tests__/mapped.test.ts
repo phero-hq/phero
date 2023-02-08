@@ -300,54 +300,8 @@ describe("mapped", () => {
       },
       deps: {
         MyMappedType: {
-          type: "reference",
-          typeName: 'Exclude<keyof Aad, "koos">',
-          typeArguments: [
-            {
-              type: "union",
-              oneOf: [
-                {
-                  type: "string-literal",
-                  literal: "kaas",
-                },
-                {
-                  type: "string-literal",
-                  literal: "koos",
-                },
-              ],
-            },
-            {
-              type: "string-literal",
-              literal: "koos",
-            },
-          ],
-        },
-        'Exclude<keyof Aad, "koos">': {
-          type: "generic",
-          typeName: 'Exclude<keyof Aad, "koos">',
-          typeArguments: [
-            {
-              type: "union",
-              oneOf: [
-                {
-                  type: "string-literal",
-                  literal: "kaas",
-                },
-                {
-                  type: "string-literal",
-                  literal: "koos",
-                },
-              ],
-            },
-            {
-              type: "string-literal",
-              literal: "koos",
-            },
-          ],
-          parser: {
-            type: "string-literal",
-            literal: "kaas",
-          },
+          type: "string-literal",
+          literal: "kaas",
         },
       },
     })

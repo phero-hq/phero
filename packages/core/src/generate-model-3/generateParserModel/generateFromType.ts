@@ -1,12 +1,13 @@
 import ts from "typescript"
-import { DependencyMap, TypeParamMap, InternalParserModelMap } from "."
+import { DependencyMap, InternalParserModelMap, TypeParamMap } from "."
 import { ParseError } from "../../domain/errors"
 import { getTypeFlags } from "../generateParserModelUtils"
 import {
-  ParserModelType,
   IndexMemberParserModel,
   MemberParserModel,
   ParserModel,
+  ParserModelType,
+  TupleElementParserModel,
 } from "../ParserModel"
 import generateFromTypeNode from "./generateFromTypeNode"
 
@@ -67,70 +68,110 @@ export default function generateFromType(
       deps,
     }
   } else if (type.flags & ts.TypeFlags.Object) {
-    const memberModels = type.getProperties().reduce<{
-      models: (IndexMemberParserModel | MemberParserModel)[]
-      deps: DependencyMap
-    }>(
-      ({ models, deps }, prop) => {
-        const propType = typeChecker.getTypeOfSymbolAtLocation(prop, typeNode)
+    if (
+      (type as ts.ObjectType).objectFlags & ts.ObjectFlags.Reference &&
+      (type as ts.TypeReference).target.objectFlags & ts.ObjectFlags.Tuple
+    ) {
+      const elements = typeChecker
+        .getTypeArguments(type as ts.TypeReference)
+        .reduce<{ models: TupleElementParserModel[]; deps: DependencyMap }>(
+          ({ models, deps }, elementType, index) => {
+            const elementModel = generateFromType(
+              elementType,
+              typeNode,
+              location,
+              typeChecker,
+              deps,
+              typeParams,
+            )
+            return {
+              models: [
+                ...models,
+                {
+                  type: ParserModelType.TupleElement,
+                  position: index,
+                  parser: elementModel.root,
+                },
+              ],
+              deps: elementModel.deps,
+            }
+          },
+          { models: [], deps },
+        )
+      return {
+        root: {
+          type: ParserModelType.Tuple,
+          elements: elements.models,
+        },
+        deps,
+      }
+    } else {
+      const memberModels = type.getProperties().reduce<{
+        models: (IndexMemberParserModel | MemberParserModel)[]
+        deps: DependencyMap
+      }>(
+        ({ models, deps }, prop) => {
+          const propType = typeChecker.getTypeOfSymbolAtLocation(prop, typeNode)
 
-        const propSignature = prop.declarations?.[0]
+          const propSignature = prop.declarations?.[0]
 
-        if (!propSignature || !ts.isPropertySignature(propSignature)) {
-          throw new ParseError(
-            "Unexpected declaration " + typeNode.kind,
-            typeNode,
+          if (!propSignature || !ts.isPropertySignature(propSignature)) {
+            throw new ParseError(
+              "Unexpected declaration " + typeNode.kind,
+              typeNode,
+            )
+          }
+
+          if (!propSignature.type) {
+            throw new ParseError("Property must have type", propSignature)
+          }
+
+          const propModel = generateFromTypeNode(
+            ts.isMappedTypeNode(typeNode) ? typeNode : propSignature.type,
+            propType,
+            location,
+            typeChecker,
+            deps,
+            typeParams,
           )
-        }
 
-        if (!propSignature.type) {
-          throw new ParseError("Property must have type", propSignature)
-        }
+          return {
+            models: [
+              ...models,
+              {
+                type: ParserModelType.Member,
+                name: prop.name,
+                optional:
+                  (prop.flags & ts.SymbolFlags.Optional) ===
+                  ts.SymbolFlags.Optional,
+                parser: propModel.root,
+              },
+            ],
+            deps: propModel.deps,
+          }
+        },
+        { models: [], deps },
+      )
 
-        const propModel = generateFromTypeNode(
-          ts.isMappedTypeNode(typeNode) ? typeNode : propSignature.type,
-          propType,
+      const { deps: depsIndexTypes, models: indexModels } =
+        generateFromIndexType(
+          typeNode,
+          type,
           location,
           typeChecker,
-          deps,
+          memberModels.deps,
           typeParams,
         )
 
-        return {
-          models: [
-            ...models,
-            {
-              type: ParserModelType.Member,
-              name: prop.name,
-              optional:
-                (prop.flags & ts.SymbolFlags.Optional) ===
-                ts.SymbolFlags.Optional,
-              parser: propModel.root,
-            },
-          ],
-          deps: propModel.deps,
-        }
-      },
-      { models: [], deps },
-    )
+      memberModels.models.push(...indexModels)
 
-    const { deps: depsIndexTypes, models: indexModels } = generateFromIndexType(
-      typeNode,
-      type,
-      location,
-      typeChecker,
-      memberModels.deps,
-      typeParams,
-    )
-
-    memberModels.models.push(...indexModels)
-
-    return {
-      root: {
-        type: ParserModelType.Object,
-        members: memberModels.models,
-      },
-      deps: depsIndexTypes,
+      return {
+        root: {
+          type: ParserModelType.Object,
+          members: memberModels.models,
+        },
+        deps: depsIndexTypes,
+      }
     }
   } else if (type.flags & ts.TypeFlags.Union) {
     const unionType = type as ts.UnionType

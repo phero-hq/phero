@@ -706,4 +706,40 @@ describe("tuple", () => {
       },
     })
   })
+  test(`Parameters<typeof fn>`, () => {
+    const modelMap = generateParserModelForReturnType(`
+      function test(): X { throw new Error() }
+      
+      type X = Parameters<typeof fn>  
+      function fn(lng: number, lat: number) {}
+    `)
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "X",
+      },
+      deps: {
+        X: {
+          type: "tuple",
+          elements: [
+            {
+              type: "tupleElement",
+              position: 0,
+              parser: {
+                type: "number",
+              },
+            },
+            {
+              type: "tupleElement",
+              position: 1,
+              parser: {
+                type: "number",
+              },
+            },
+          ],
+        },
+      },
+    })
+  })
 })

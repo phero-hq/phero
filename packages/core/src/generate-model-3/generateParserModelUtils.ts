@@ -185,7 +185,8 @@ export function getSymbolFlags(symbol: ts.Symbol): string[] {
 }
 
 export function getObjectFlags(objectType: ts.ObjectType): string[] {
-  const isFlag = (f: ts.ObjectFlags): boolean => (objectType.flags & f) === f
+  const isFlag = (f: ts.ObjectFlags): boolean =>
+    (objectType.objectFlags & f) === f
   const result: (string | undefined)[] = [
     isFlag(ts.ObjectFlags.Class) ? "Class" : undefined,
     isFlag(ts.ObjectFlags.Interface) ? "Interface" : undefined,
