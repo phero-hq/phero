@@ -13,6 +13,10 @@ export class Literal {
     return ts.factory.createNumericLiteral(value)
   }
 
+  public static bigint(value: string | ts.PseudoBigInt): ts.BigIntLiteral {
+    return ts.factory.createBigIntLiteral(value)
+  }
+
   public static string(value: string): ts.StringLiteral {
     return ts.factory.createStringLiteral(value)
   }

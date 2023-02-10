@@ -5,6 +5,7 @@ import ts, {
 import { PheroApp } from "../domain/PheroApp"
 import { generateParserModel } from "../generate-model-3/generateParserModel"
 import { ObjectParserModel, ParserModel } from "../generate-model-3/ParserModel"
+import { generateFunctionParsers } from "../generate-parser"
 import { KindToNodeMappings } from "./tsUtils"
 import { TSFiles, VirtualCompilerHost } from "./VirtualCompilerHost"
 
@@ -185,6 +186,40 @@ export function generateParserModelForFunction(tsContent: string): {
     parameters: funcModel.parameters,
     deps: [...funcModel.deps.entries()].reduce<Record<string, ParserModel>>(
       (result, [name, model]) => ({ ...result, [name]: model }),
+      {},
+    ),
+  }
+}
+
+export function generateParsersForFunction(tsContent: string): {
+  input: string
+  output: string
+  deps: Record<string, string>
+} {
+  const { statements, prog } = compileStatements(tsContent)
+
+  const func = statements.find((st): st is ts.FunctionDeclaration =>
+    ts.isFunctionDeclaration(st),
+  )
+
+  if (!func) {
+    throw new Error("Ts content doesn't contain any function")
+  }
+
+  const funcModel = generateParserModel(func, prog.getTypeChecker(), new Map())
+
+  const parsers = generateFunctionParsers(funcModel)
+
+  return {
+    input: printCode(parsers.inputParser),
+    output: printCode(parsers.outputParser),
+    deps: [...parsers.dependencyParsers.entries()].reduce<
+      Record<string, string>
+    >(
+      (result, [name, parser]) => ({
+        ...result,
+        [name.text]: printCode(parser),
+      }),
       {},
     ),
   }

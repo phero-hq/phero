@@ -23,8 +23,8 @@ export enum ParserModelType {
   Reference = "reference",
   Date = "date",
   Any = "any",
-  BigInt = "bigInt",
-  BigIntLiteral = "bigInt-literal",
+  BigInt = "bigint",
+  BigIntLiteral = "bigint-literal",
   Generic = "generic",
   TemplateLiteral = "template-literal",
 }
