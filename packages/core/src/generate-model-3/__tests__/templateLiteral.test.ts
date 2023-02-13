@@ -707,4 +707,45 @@ describe("templateLiteral", () => {
       },
     })
   })
+  test("Template literal within a template literal", () => {
+    const modelMap = generateParserModelForReturnType(`
+      type Test = \`$\{string}@$\{\`\${string}x\${number}\`}yyy\`
+      function test(): Test { throw new Error() }
+    `)
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "reference",
+        typeName: "Test",
+      },
+      deps: {
+        Test: {
+          type: "template-literal",
+          parsers: [
+            {
+              type: "string",
+            },
+            {
+              type: "string-literal",
+              literal: "@",
+            },
+            {
+              type: "string",
+            },
+            {
+              type: "string-literal",
+              literal: "x",
+            },
+            {
+              type: "number",
+            },
+            {
+              type: "string-literal",
+              literal: "yyy",
+            },
+          ],
+        },
+      },
+    })
+  })
 })

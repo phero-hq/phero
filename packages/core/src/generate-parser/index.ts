@@ -12,13 +12,16 @@ export type DependencyParserMap = Map<ts.Identifier, ParserFuncRef>
 type DependencyRefs = Record<string, ts.Identifier>
 
 export function generateFunctionParsers(functionModel: FunctionParserModel): {
-  inputParser: ParserFuncRef
+  inputParser?: ParserFuncRef
   outputParser: ParserFuncRef
   dependencyParsers: DependencyParserMap
 } {
   const depRef = generateFuncDependencyRefs(functionModel.deps)
+
   return {
-    inputParser: generateParserRef(functionModel.parameters, depRef),
+    inputParser:
+      functionModel.parameters &&
+      generateParserRef(functionModel.parameters, depRef),
     outputParser: generateParserRef(functionModel.returnType, depRef),
     dependencyParsers: generateFuncDependencyModelMap(
       functionModel.deps,
@@ -29,9 +32,12 @@ export function generateFunctionParsers(functionModel: FunctionParserModel): {
 
 function generateFuncDependencyRefs(deps: DependencyMap): DependencyRefs {
   return [...deps.keys()].reduce<DependencyRefs>(
-    (refs, [typeName], index) => ({
+    (refs, typeName, index) => ({
       ...refs,
-      [typeName]: tsx.expression.identifier(`dep_${index}`),
+      [typeName]: typeName.includes("<")
+        ? tsx.expression.identifier(`ref_${index}`)
+        : // the replace is necessary for EnumMembers
+          tsx.expression.identifier(`${typeName.replace(".", "_")}Parser`),
     }),
     {},
   )
@@ -42,7 +48,7 @@ function generateFuncDependencyModelMap(
   depRef: DependencyRefs,
 ): DependencyParserMap {
   return [...deps.entries()].reduce<DependencyParserMap>(
-    (refs, [typeName, model], index) => {
+    (refs, [typeName, model]) => {
       refs.set(depRef[typeName], generateParserRef(model, depRef))
       return refs
     },
@@ -114,20 +120,21 @@ function generateParserRef(
                 "parser",
                 generateParserRef(el.parser, depRefs),
               ),
-              tsx.property.assignment(
-                "isRestElement",
-                tsx.literal.boolean(el.isRestElement ?? false),
-              ),
+              ...(el.isRestElement
+                ? [
+                    tsx.property.assignment(
+                      "rest",
+                      tsx.literal.boolean(el.isRestElement ?? false),
+                    ),
+                  ]
+                : []),
             ),
           ),
         ],
       })
-    case ParserModelType.ArrayElement:
-    case ParserModelType.TupleElement:
-    case ParserModelType.Member:
-    case ParserModelType.IndexMember:
+
     case ParserModelType.EnumMember:
-      throw new Error("xxx")
+      return generateParserRef(model.parser, depRefs)
 
     case ParserModelType.Object:
       return tsx.expression.call(`ObjectLiteralParser`, {
@@ -155,11 +162,80 @@ function generateParserRef(
         ),
       })
 
-    case ParserModelType.Reference: // TODO
+    case ParserModelType.Reference:
       return depRefs[model.typeName]
 
-    case ParserModelType.Generic: // TODO
-    case ParserModelType.TemplateLiteral: // TODO
-      throw new Error("not implemented")
+    case ParserModelType.Generic:
+      return generateParserRef(model.parser, depRefs)
+
+    case ParserModelType.TemplateLiteral:
+      return tsx.expression.call(`TemplateLiteralParser`, {
+        args: [
+          tsx.literal.regularExpression(
+            `/^${model.parsers.map(generateRegExpSegmentForParser).join("")}$/`,
+          ),
+        ],
+      })
+
+    case ParserModelType.ArrayElement:
+    case ParserModelType.TupleElement:
+    case ParserModelType.Member:
+    case ParserModelType.IndexMember:
+      throw new Error("Inner models already handled")
+  }
+}
+
+function generateRegExpSegmentForParser(parser: ParserModel): string {
+  switch (parser.type) {
+    case ParserModelType.Any:
+    case ParserModelType.String:
+      return ".+"
+    case ParserModelType.StringLiteral:
+      return parser.literal
+    case ParserModelType.Number:
+    case ParserModelType.BigInt:
+      return "\\d+"
+    case ParserModelType.NumberLiteral:
+      return parser.literal.toString()
+    case ParserModelType.BigIntLiteral:
+      return (
+        (parser.literal.negative ? "\\-" : "") +
+        parser.literal.base10Value.toString()
+      )
+    case ParserModelType.Boolean:
+      return "true|false"
+    case ParserModelType.BooleanLiteral:
+      return parser.literal.toString()
+    case ParserModelType.Null:
+      return "null"
+    case ParserModelType.Undefined:
+      return "undefined"
+
+    case ParserModelType.Union:
+      return `(${parser.oneOf.map(generateRegExpSegmentForParser).join("|")}`
+
+    case ParserModelType.Enum:
+      return `(${parser.members
+        .map((member) => generateRegExpSegmentForParser(member.parser))
+        .join("|")})`
+    case ParserModelType.EnumMember:
+      return generateRegExpSegmentForParser(parser.parser)
+
+    // These should all be resolved by the model generator
+    case ParserModelType.Intersection:
+    case ParserModelType.Reference:
+    case ParserModelType.Generic:
+    case ParserModelType.TemplateLiteral:
+
+    // TS doesn't support this, so we should not see this
+    case ParserModelType.Object:
+    case ParserModelType.Member:
+    case ParserModelType.IndexMember:
+    case ParserModelType.Array:
+    case ParserModelType.ArrayElement:
+    case ParserModelType.Tuple:
+    case ParserModelType.TupleElement:
+    case ParserModelType.Date:
+      throw new Error("Template literal segment is not supported")
   }
 }

@@ -1,4 +1,4 @@
-import { generateParsersForFunction } from "../../lib/tsTestUtils"
+import { generateParsersForFunction } from "../../../lib/tsTestUtils"
 
 describe("array", () => {
   test(`string[]`, () => {
@@ -59,12 +59,16 @@ describe("array", () => {
 
     expect(parsers.output).toEqual(`ArrayParser(ArrayParser(BooleanParser))`)
   })
-  test.skip("SomeGenericArray<boolean>", () => {
+  test("SomeGenericArray<boolean>", () => {
     const parsers = generateParsersForFunction(`
       type SomeGenericArray<T> = Array<Array<T>>
       function test(): SomeGenericArray<boolean> { throw new Error() }
     `)
-    // console.log(JSON.stringify(modelMap, null, 4))
-    expect(parsers).toEqual({})
+    expect(parsers).toEqual({
+      output: "ref_0",
+      deps: {
+        ref_0: "ArrayParser(ArrayParser(BooleanParser))",
+      },
+    })
   })
 })

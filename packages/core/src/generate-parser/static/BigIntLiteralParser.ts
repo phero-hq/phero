@@ -1,7 +1,7 @@
 import { Parser, ParseResult } from "../Parser"
 
 export default function BigIntLiteralParser<T extends bigint>(
-  values: bigint[],
+  literal: bigint,
 ): Parser<T> {
   return (data: unknown): ParseResult<T> => {
     // BigInt's are serialized as string (obviously it wouldn't fit into a number)
@@ -9,7 +9,7 @@ export default function BigIntLiteralParser<T extends bigint>(
       try {
         const result = BigInt(data)
 
-        if (values.includes(result)) {
+        if (literal === result) {
           return { ok: true, result: result as T }
         }
       } catch {
@@ -19,7 +19,7 @@ export default function BigIntLiteralParser<T extends bigint>(
 
     return {
       ok: false,
-      errors: [{ message: `Not one of (${values.join("n, ") + "n"})` }],
+      errors: [{ message: `Must be ${literal}n` }],
     }
   }
 }

@@ -1,4 +1,4 @@
-import { generateParsersForFunction } from "../../lib/tsTestUtils"
+import { generateParsersForFunction } from "../../../lib/tsTestUtils"
 
 describe("literal", () => {
   test(`"str"`, () => {

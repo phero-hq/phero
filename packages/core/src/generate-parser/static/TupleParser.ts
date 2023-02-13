@@ -2,7 +2,7 @@ import { ParseError, Parser, ParseResult } from "../Parser"
 
 interface TupleElementParser<T> {
   parser: Parser<T>
-  isRestElement: boolean // TODO handle!
+  rest?: boolean // TODO handle!
 }
 export function TupleParser<T extends any[]>(
   ...elementParsers: TupleElementParser<T>[]

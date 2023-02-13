@@ -23,7 +23,7 @@ export type TypeParamMap = Map<string, { name: string; model: ParserModel }>
 
 export interface FunctionParserModel {
   returnType: ParserModel
-  parameters: ObjectParserModel
+  parameters?: ObjectParserModel
   deps: DependencyMap
 }
 
@@ -41,7 +41,7 @@ export function generateParserModel(
 
   return {
     returnType: returnTypeModel.root,
-    parameters: paramsModel.root,
+    parameters: paramsModel.root.members.length ? paramsModel.root : undefined,
     deps: paramsModel.deps,
   }
 }

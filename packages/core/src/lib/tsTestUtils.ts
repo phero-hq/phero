@@ -166,7 +166,7 @@ export function generateParserModelForReturnType(tsContent: string): {
 
 export function generateParserModelForFunction(tsContent: string): {
   returnType: ParserModel
-  parameters: ObjectParserModel
+  parameters?: ObjectParserModel
   deps: Record<string, ParserModel>
 } {
   const { statements, prog } = compileStatements(tsContent)
@@ -192,7 +192,7 @@ export function generateParserModelForFunction(tsContent: string): {
 }
 
 export function generateParsersForFunction(tsContent: string): {
-  input: string
+  input?: string
   output: string
   deps: Record<string, string>
 } {
@@ -211,7 +211,7 @@ export function generateParsersForFunction(tsContent: string): {
   const parsers = generateFunctionParsers(funcModel)
 
   return {
-    input: printCode(parsers.inputParser),
+    input: parsers.inputParser && printCode(parsers.inputParser),
     output: printCode(parsers.outputParser),
     deps: [...parsers.dependencyParsers.entries()].reduce<
       Record<string, string>
