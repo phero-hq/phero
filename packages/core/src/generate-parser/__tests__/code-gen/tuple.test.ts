@@ -7,7 +7,7 @@ describe("tuple", () => {
     `)
 
     expect(parsers.output).toEqual(
-      `TupleParser({ parser: StringParser }, { parser: StringParser })`,
+      `TupleParser([StringParser], [StringParser])`,
     )
   })
   test(`[string, 123, boolean]`, () => {
@@ -16,7 +16,7 @@ describe("tuple", () => {
     `)
 
     expect(parsers.output).toEqual(
-      `TupleParser({ parser: StringParser }, { parser: NumberLiteralParser(123) }, { parser: BooleanParser })`,
+      `TupleParser([StringParser], [NumberLiteralParser(123)], [BooleanParser])`,
     )
   })
   test(`["aap"]`, () => {
@@ -24,9 +24,7 @@ describe("tuple", () => {
         function test(): ["aap"] { throw new Error() }
     `)
 
-    expect(parsers.output).toEqual(
-      `TupleParser({ parser: StringLiteralParser("aap") })`,
-    )
+    expect(parsers.output).toEqual(`TupleParser([StringLiteralParser("aap")])`)
   })
   test(`[123 | "str", number]`, () => {
     const parsers = generateParsersForFunction(`
@@ -34,7 +32,7 @@ describe("tuple", () => {
     `)
 
     expect(parsers.output).toEqual(
-      `TupleParser({ parser: UnionParser(NumberLiteralParser(123), StringLiteralParser("str")) }, { parser: NumberParser })`,
+      `TupleParser([UnionParser(NumberLiteralParser(123), StringLiteralParser("str"))], [NumberParser])`,
     )
   })
   test(`[string, X]`, () => {
@@ -44,9 +42,7 @@ describe("tuple", () => {
       function test(): [string, X] { throw new Error() }
     `)
 
-    expect(parsers.output).toEqual(
-      `TupleParser({ parser: StringParser }, { parser: XParser })`,
-    )
+    expect(parsers.output).toEqual(`TupleParser([StringParser], [XParser])`)
   })
   test(`[string, ...number[]]`, () => {
     const parsers = generateParsersForFunction(`
@@ -58,7 +54,7 @@ describe("tuple", () => {
     expect(parsers).toEqual({
       output: `XParser`,
       deps: {
-        XParser: `TupleParser({ parser: StringParser }, { parser: NumberParser, rest: true })`,
+        XParser: `TupleParser([StringParser], [NumberParser, true])`,
       },
     })
   })
@@ -72,7 +68,7 @@ describe("tuple", () => {
     expect(parsers).toEqual({
       output: `XParser`,
       deps: {
-        XParser: `TupleParser({ parser: StringParser }, { parser: NumberParser, rest: true }, { parser: BooleanParser })`,
+        XParser: `TupleParser([StringParser], [NumberParser, true], [BooleanParser])`,
       },
     })
   })
@@ -86,7 +82,7 @@ describe("tuple", () => {
     expect(parsers).toEqual({
       output: `XParser`,
       deps: {
-        XParser: `TupleParser({ parser: StringParser }, { parser: ArrayParser(NumberParser), rest: true })`,
+        XParser: `TupleParser([StringParser], [ArrayParser(NumberParser), true])`,
       },
     })
   })
@@ -100,7 +96,7 @@ describe("tuple", () => {
     expect(parsers).toEqual({
       output: `XParser`,
       deps: {
-        XParser: `TupleParser({ parser: StringParser }, { parser: NumberParser, rest: true })`,
+        XParser: `TupleParser([StringParser], [NumberParser, true])`,
       },
     })
   })
@@ -114,7 +110,7 @@ describe("tuple", () => {
     expect(parsers).toEqual({
       output: `XParser`,
       deps: {
-        XParser: `TupleParser({ parser: StringParser }, { parser: NumberParser, rest: true }, { parser: BooleanParser })`,
+        XParser: `TupleParser([StringParser], [NumberParser, true], [BooleanParser])`,
       },
     })
   })
@@ -128,7 +124,7 @@ describe("tuple", () => {
     expect(parsers).toEqual({
       output: `XParser`,
       deps: {
-        XParser: `TupleParser({ parser: StringParser }, { parser: ArrayParser(NumberParser), rest: true })`,
+        XParser: `TupleParser([StringParser], [ArrayParser(NumberParser), true])`,
       },
     })
   })
@@ -142,7 +138,7 @@ describe("tuple", () => {
     expect(parsers).toEqual({
       output: `XParser`,
       deps: {
-        XParser: `TupleParser({ parser: StringParser }, { parser: StringParser }, { parser: NumberParser })`,
+        XParser: `TupleParser([StringParser], [StringParser], [NumberParser])`,
       },
     })
   })
@@ -157,8 +153,8 @@ describe("tuple", () => {
     expect(parsers).toEqual({
       output: `XParser`,
       deps: {
-        XParser: `TupleParser({ parser: StringParser }, { parser: YParser, rest: true })`,
-        YParser: `TupleParser({ parser: NumberParser }, { parser: StringParser })`,
+        XParser: `TupleParser([StringParser], [YParser, true])`,
+        YParser: `TupleParser([NumberParser], [StringParser])`,
       },
     })
   })
@@ -175,10 +171,8 @@ describe("tuple", () => {
     expect(parsers).toEqual({
       output: "XParser",
       deps: {
-        XParser:
-          "TupleParser({ parser: NumberParser }, { parser: ref_1, rest: true })",
-        ref_1:
-          "TupleParser({ parser: StringParser }, { parser: NumberParser })",
+        XParser: "TupleParser([NumberParser], [ref_1, true])",
+        ref_1: "TupleParser([StringParser], [NumberParser])",
       },
     })
   })
@@ -192,7 +186,7 @@ describe("tuple", () => {
     expect(parsers).toEqual({
       output: `XParser`,
       deps: {
-        XParser: `TupleParser({ parser: NumberParser }, { parser: NumberParser })`,
+        XParser: `TupleParser([NumberParser], [NumberParser])`,
       },
     })
   })
@@ -206,7 +200,7 @@ describe("tuple", () => {
     expect(parsers).toEqual({
       output: `XParser`,
       deps: {
-        XParser: `TupleParser({ parser: StringParser }, { parser: NumberParser, rest: true })`,
+        XParser: `TupleParser([StringParser], [NumberParser, true])`,
       },
     })
   })
@@ -220,7 +214,7 @@ describe("tuple", () => {
     expect(parsers).toEqual({
       output: `XParser`,
       deps: {
-        XParser: `TupleParser({ parser: StringParser }, { parser: NumberParser, rest: true })`,
+        XParser: `TupleParser([StringParser], [NumberParser, true])`,
       },
     })
   })
@@ -235,8 +229,8 @@ describe("tuple", () => {
     expect(parsers).toEqual({
       output: `XParser`,
       deps: {
-        XParser: `TupleParser({ parser: StringParser }, { parser: YParser, rest: true })`,
-        YParser: `TupleParser({ parser: StringParser }, { parser: BooleanParser })`,
+        XParser: `TupleParser([StringParser], [YParser, true])`,
+        YParser: `TupleParser([StringParser], [BooleanParser])`,
       },
     })
   })
@@ -251,7 +245,7 @@ describe("tuple", () => {
     expect(parsers).toEqual({
       output: `XParser`,
       deps: {
-        XParser: `TupleParser({ parser: NumberParser }, { parser: NumberParser })`,
+        XParser: `TupleParser([NumberParser], [NumberParser])`,
       },
     })
   })

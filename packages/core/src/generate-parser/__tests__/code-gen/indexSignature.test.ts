@@ -41,7 +41,7 @@ describe("indexSignature", () => {
     expect(parsers).toEqual({
       output: `MyIndexSignatureParser`,
       deps: {
-        MyIndexSignatureParser: `ObjectLiteralParser([NumberParser, false, StringParser])`,
+        MyIndexSignatureParser: `ObjectLiteralParser([NumberKeyParser, false, StringParser])`,
       },
     })
   })
@@ -58,7 +58,7 @@ describe("indexSignature", () => {
     expect(parsers).toEqual({
       output: `MyIndexSignatureParser`,
       deps: {
-        MyIndexSignatureParser: `ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)], [NumberParser, false, StringParser])`,
+        MyIndexSignatureParser: `ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)], [NumberKeyParser, false, StringParser])`,
       },
     })
   })
@@ -76,7 +76,7 @@ describe("indexSignature", () => {
     expect(parsers).toEqual({
       output: `MyIndexSignatureParser`,
       deps: {
-        MyIndexSignatureParser: `ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)], [NumberParser, false, StringParser], ["length", false, NumberParser])`,
+        MyIndexSignatureParser: `ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)], [NumberKeyParser, false, StringParser], ["length", false, NumberParser])`,
       },
     })
   })
@@ -98,7 +98,7 @@ describe("indexSignature", () => {
       output: "ref_0",
       deps: {
         ref_0:
-          'ObjectLiteralParser(["test", false, ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)], [NumberParser, false, NumberParser])])',
+          'ObjectLiteralParser(["test", false, ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)], [NumberKeyParser, false, NumberParser])])',
       },
     })
   })
@@ -116,7 +116,7 @@ describe("indexSignature", () => {
     expect(parsers).toEqual({
       output: `MyIndexSignatureParser`,
       deps: {
-        MyIndexSignatureParser: `ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)], [NumberParser, false, StringParser], ["length", false, NumberParser])`,
+        MyIndexSignatureParser: `ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)], [NumberKeyParser, false, StringParser], ["length", false, NumberParser])`,
       },
     })
   })

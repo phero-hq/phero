@@ -147,7 +147,7 @@ describe("templateLiteral", () => {
       output: "EmailParser",
       deps: {
         EmailParser:
-          "UnionParser(TemplateLiteralParser(/^\\d+@.+.com$/), TemplateLiteralParser(/^\\d+@.+.nl$/))",
+          "UnionParser(TemplateLiteralParser(/^\\d+@.+\\.com$/), TemplateLiteralParser(/^\\d+@.+\\.nl$/))",
       },
     })
   })
@@ -165,7 +165,7 @@ describe("templateLiteral", () => {
         ExtParser:
           'ObjectLiteralParser(["com", false, StringParser], ["nl", false, StringParser])',
         ref_1:
-          "UnionParser(TemplateLiteralParser(/^\\d+@.+.com$/), TemplateLiteralParser(/^\\d+@.+.nl$/))",
+          "UnionParser(TemplateLiteralParser(/^\\d+@.+\\.com$/), TemplateLiteralParser(/^\\d+@.+\\.nl$/))",
       },
     })
   })
@@ -181,7 +181,7 @@ describe("templateLiteral", () => {
       output: "EmailParser",
       deps: {
         EmailParser:
-          "UnionParser(TemplateLiteralParser(/^email:\\d+@.+.com$/), TemplateLiteralParser(/^email:\\d+@.+.nl$/))",
+          "UnionParser(TemplateLiteralParser(/^email:\\d+@.+\\.com$/), TemplateLiteralParser(/^email:\\d+@.+\\.nl$/))",
       },
     })
   })
@@ -196,7 +196,7 @@ describe("templateLiteral", () => {
       output: "ref_0",
       deps: {
         ref_0:
-          'ObjectLiteralParser(["x", false, TemplateLiteralParser(/^email:\\d+@.+.com$/)])',
+          'ObjectLiteralParser(["x", false, TemplateLiteralParser(/^email:\\d+@.+\\.com$/)])',
       },
     })
   })

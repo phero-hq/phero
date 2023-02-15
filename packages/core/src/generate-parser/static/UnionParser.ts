@@ -1,7 +1,7 @@
 import { ParseError, Parser, ParseResult } from "../Parser"
 
 export default function UnionParser<T>(
-  ...elementParsers: Parser<T>[]
+  ...elementParsers: Parser<any>[]
 ): Parser<T> {
   return (data: unknown): ParseResult<T> => {
     const errors: ParseError[] = []

@@ -115,20 +115,12 @@ function generateParserRef(
       return tsx.expression.call(`TupleParser`, {
         args: [
           ...model.elements.map((el) =>
-            tsx.literal.object(
-              tsx.property.assignment(
-                "parser",
-                generateParserRef(el.parser, depRefs),
-              ),
-              ...(el.isRestElement
-                ? [
-                    tsx.property.assignment(
-                      "rest",
-                      tsx.literal.boolean(el.isRestElement ?? false),
-                    ),
-                  ]
-                : []),
-            ),
+            el.isRestElement
+              ? tsx.literal.array(
+                  generateParserRef(el.parser, depRefs),
+                  tsx.literal.boolean(true),
+                )
+              : tsx.literal.array(generateParserRef(el.parser, depRefs)),
           ),
         ],
       })
@@ -146,7 +138,9 @@ function generateParserRef(
                 generateParserRef(el.parser, depRefs),
               )
             : tsx.literal.array(
-                generateParserRef(el.keyParser, depRefs),
+                el.keyParser.type === ParserModelType.Number
+                  ? tsx.expression.identifier("NumberKeyParser")
+                  : generateParserRef(el.keyParser, depRefs),
                 tsx.literal.boolean(el.optional),
                 generateParserRef(el.parser, depRefs),
               ),
@@ -191,7 +185,9 @@ function generateRegExpSegmentForParser(parser: ParserModel): string {
     case ParserModelType.String:
       return ".+"
     case ParserModelType.StringLiteral:
-      return parser.literal
+      // Escape RegExp string
+      // https://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
+      return parser.literal.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") // $& means the whole matched string
     case ParserModelType.Number:
     case ParserModelType.BigInt:
       return "\\d+"
