@@ -1,11 +1,11 @@
-import { ParserModel, ParserModelType } from "../generate-model-3/ParserModel"
+import { ParserModel, ParserModelType } from "../generate-model/ParserModel"
 
 import ts from "typescript"
 import { tsx } from ".."
 import {
   DependencyMap,
   FunctionParserModel,
-} from "../generate-model-3/generateParserModel"
+} from "../generate-model/generateParserModel"
 
 export type ParserFuncRef = ts.Identifier | ts.CallExpression
 export type DependencyParserMap = Map<ts.Identifier, ParserFuncRef>

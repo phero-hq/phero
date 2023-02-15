@@ -29,7 +29,7 @@ describe("Date", () => {
     expect(parsers).toEqual({
       output: `TestParser`,
       deps: {
-        TestParser: `TupleParser({ parser: StringParser }, { parser: DateParser })`,
+        TestParser: `TupleParser([StringParser], [DateParser])`,
       },
     })
   })

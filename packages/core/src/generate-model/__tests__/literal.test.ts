@@ -38,7 +38,7 @@ describe("literal", () => {
 
     expect(modelMap).toEqual({
       root: {
-        type: "bigInt-literal",
+        type: "bigint-literal",
         literal: {
           base10Value: "9007199254740991",
           negative: false,

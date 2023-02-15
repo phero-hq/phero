@@ -76,7 +76,7 @@ describe("typeAlias", () => {
 
     expect(parsers).toEqual({
       deps: {
-        XParser: "TupleParser({ parser: StringParser }, { parser: YParser })",
+        XParser: "TupleParser([StringParser], [YParser])",
         YParser: "NumberParser",
       },
       output: "XParser",
