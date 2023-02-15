@@ -4,7 +4,7 @@ import {
   IndexMemberParserModel,
   MemberParserModel,
   ParserModelType,
-} from "../../ParserModel"
+} from "../../domain/ParserModel"
 import generateFromTypeElementDeclaration from "../generateFromDeclaration/generateFromTypeElementDeclaration"
 
 export default function generateFromTypeLiteralNode(

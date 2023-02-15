@@ -1,6 +1,6 @@
 import ts from "typescript"
-import { ParseError } from "../../../domain/errors"
-import { ParserModel, ParserModelType } from "../../ParserModel"
+import { ParseError } from "../../domain/errors"
+import { ParserModel, ParserModelType } from "../../domain/ParserModel"
 
 export default function generateFromTokenTypeNode(
   typeNode: ts.TypeNode,

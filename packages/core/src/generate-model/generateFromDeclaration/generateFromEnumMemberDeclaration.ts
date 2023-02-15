@@ -1,6 +1,9 @@
 import ts from "typescript"
-import { ParseError } from "../../../domain/errors"
-import { EnumMemberParserModel, ParserModelType } from "../../ParserModel"
+import { ParseError } from "../../domain/errors"
+import {
+  EnumMemberParserModel,
+  ParserModelType,
+} from "../../domain/ParserModel"
 import propertyNameAsString from "../lib/propertyNameAsString"
 
 export default function generateFromEnumMemberDeclaration(

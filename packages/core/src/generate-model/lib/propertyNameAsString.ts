@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { ParseError } from "../../../domain/errors"
+import { ParseError } from "../../domain/errors"
 
 export default function propertyNameAsString(
   propertyName: ts.PropertyName,

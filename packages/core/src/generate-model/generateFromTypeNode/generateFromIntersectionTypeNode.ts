@@ -1,21 +1,21 @@
 import ts from "typescript"
 import generateFromTypeNode from "."
 import { DependencyMap, InternalParserModelMap, TypeParamMap } from ".."
-import { ParserModel, ParserModelType } from "../../ParserModel"
+import { ParserModel, ParserModelType } from "../../domain/ParserModel"
 
-export default function generateFromUnionTypeNode(
-  typeNode: ts.UnionTypeNode,
-  type: ts.UnionType,
+export default function generateFromIntersectionTypeNode(
+  typeNode: ts.IntersectionTypeNode,
+  type: ts.IntersectionType,
   location: ts.TypeNode,
   typeChecker: ts.TypeChecker,
   deps: DependencyMap,
   typeParams: TypeParamMap,
 ): InternalParserModelMap {
   const subtypeModels = typeNode.types.reduce<{
-    oneOf: ParserModel[]
+    parsers: ParserModel[]
     deps: DependencyMap
   }>(
-    ({ oneOf, deps }, subtype, index) => {
+    ({ parsers, deps }, subtype, index) => {
       const subtypeModel = generateFromTypeNode(
         subtype,
         type.types[index],
@@ -25,17 +25,17 @@ export default function generateFromUnionTypeNode(
         typeParams,
       )
       return {
-        oneOf: [...oneOf, subtypeModel.root],
+        parsers: [...parsers, subtypeModel.root],
         deps: subtypeModel.deps,
       }
     },
-    { oneOf: [], deps },
+    { parsers: [], deps },
   )
 
   return {
     root: {
-      type: ParserModelType.Union,
-      oneOf: subtypeModels.oneOf,
+      type: ParserModelType.Intersection,
+      parsers: subtypeModels.parsers,
     },
     deps: subtypeModels.deps,
   }

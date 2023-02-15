@@ -3,8 +3,8 @@ import ts, {
   VariableDeclaration,
 } from "typescript"
 import { PheroApp } from "../domain/PheroApp"
-import { generateParserModel } from "../generate-model/generateParserModel"
-import { ObjectParserModel, ParserModel } from "../generate-model/ParserModel"
+import { generateParserModel } from "../generate-model"
+import { ObjectParserModel, ParserModel } from "../domain/ParserModel"
 import { generateFunctionParsers } from "../generate-parser"
 import { KindToNodeMappings } from "./tsUtils"
 import { TSFiles, VirtualCompilerHost } from "./VirtualCompilerHost"

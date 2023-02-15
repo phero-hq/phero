@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { DependencyMap, InternalParserModelMap, TypeParamMap } from ".."
-import { ParserModelType } from "../../ParserModel"
+import { ParserModelType } from "../../domain/ParserModel"
 import generateFromTypeNode from "./generateFromTypeNode"
 
 export default function generateFromArrayTypeNode(

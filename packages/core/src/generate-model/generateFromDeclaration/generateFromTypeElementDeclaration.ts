@@ -1,12 +1,12 @@
 import ts from "typescript"
 import { DependencyMap, TypeParamMap } from ".."
-import { ParseError } from "../../../domain/errors"
+import { ParseError } from "../../domain/errors"
 import {
   MemberParserModel,
   IndexMemberParserModel,
   ParserModelType,
   ParserModel,
-} from "../../ParserModel"
+} from "../../domain/ParserModel"
 import generateFromTypeNode from "../generateFromTypeNode"
 import propertyNameAsString from "../lib/propertyNameAsString"
 

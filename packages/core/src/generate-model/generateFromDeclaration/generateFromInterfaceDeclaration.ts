@@ -5,7 +5,7 @@ import {
   IndexMemberParserModel,
   ParserModelType,
   ParserModel,
-} from "../../ParserModel"
+} from "../../domain/ParserModel"
 import generateFromTypeReferenceNode from "../generateFromTypeNode/generateFromTypeReferenceNode"
 import generateFromTypeElementDeclaration from "./generateFromTypeElementDeclaration"
 

@@ -1,11 +1,11 @@
 import ts from "typescript"
-import { ParseError } from "../../domain/errors"
+import { ParseError } from "../domain/errors"
 import {
   MemberParserModel,
   ObjectParserModel,
   ParserModel,
   ParserModelType,
-} from "../ParserModel"
+} from "../domain/ParserModel"
 import generateFromTypeNode from "./generateFromTypeNode"
 
 export interface ParserModelMap {

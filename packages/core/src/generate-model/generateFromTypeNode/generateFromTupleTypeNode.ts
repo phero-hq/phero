@@ -5,7 +5,7 @@ import {
   ParserModel,
   ParserModelType,
   TupleElementParserModel,
-} from "../../ParserModel"
+} from "../../domain/ParserModel"
 
 export default function generateFromTupleTypeNode(
   typeNode: ts.TupleTypeNode,
