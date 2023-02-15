@@ -173,16 +173,12 @@ function parseFunctionDeclarations(serviceModule: Module): PheroFunction[] {
     ),
     ...parseFunctionParams(func),
     ref: func,
-
-    // TODO remove after client refactor,
-    parameters: [],
-    serviceContext: undefined,
   }))
 }
 
 function parseFunctionParams(
   func: ts.FunctionDeclaration,
-): Pick<PheroFunction, "parameters2" | "contextParameterType"> {
+): Pick<PheroFunction, "parameters" | "contextParameterType"> {
   let contextParameterType: ts.TypeNode | undefined
 
   const firstParamType = func.parameters[0]?.type
@@ -202,7 +198,7 @@ function parseFunctionParams(
 
   return {
     contextParameterType,
-    parameters2: params.map((param) => ({
+    parameters: params.map((param) => ({
       name: getNameAsString(param.name),
       questionToken: !!param.questionToken,
       type: getOrThrow(param.type, "Parameter must have type"),

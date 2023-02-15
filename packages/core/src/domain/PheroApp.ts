@@ -39,14 +39,7 @@ export interface PheroFunction {
   name: string
   returnType: ts.TypeNode
 
-  // TODO remove after client refactor
-  parameters: ts.ParameterDeclaration[]
-  serviceContext?: {
-    type: ts.TypeNode
-    paramName?: string
-  }
-
-  parameters2: PheroFunctionParameter[]
+  parameters: PheroFunctionParameter[]
   contextParameterType?: ts.TypeNode
 
   ref: ts.FunctionLikeDeclarationBase

@@ -19,7 +19,7 @@ export default function generateFunctionDeclaration(
             }),
           ]
         : []),
-      ...func.parameters2.map((param) =>
+      ...func.parameters.map((param) =>
         tsx.param({
           name: param.name,
           questionToken: param.questionToken,

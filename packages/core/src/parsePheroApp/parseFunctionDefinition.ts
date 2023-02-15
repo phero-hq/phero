@@ -52,7 +52,7 @@ function parseFunctionName(
 function parseActualFunction(
   node: ts.Node,
   typeChecker: ts.TypeChecker,
-): Pick<PheroFunction, "ref" | "parameters" | "parameters2" | "returnType"> {
+): Pick<PheroFunction, "ref" | "parameters" | "returnType"> {
   if (ts.isShorthandPropertyAssignment(node)) {
     const symbol = typeChecker.getShorthandAssignmentValueSymbol(node)
 
@@ -74,8 +74,7 @@ function parseActualFunction(
   if (ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
     return {
       ref: node,
-      parameters: node.parameters.map((p) => p),
-      parameters2: makeParams(node.parameters),
+      parameters: makeParams(node.parameters),
       returnType: parseReturnType(node),
     }
   }
@@ -83,8 +82,7 @@ function parseActualFunction(
   if (ts.isFunctionDeclaration(node)) {
     return {
       ref: node,
-      parameters: node.parameters.map((p) => p),
-      parameters2: makeParams(node.parameters),
+      parameters: makeParams(node.parameters),
       returnType: parseReturnType(node),
     }
   }
@@ -93,8 +91,7 @@ function parseActualFunction(
     if (ts.isArrowFunction(node.initializer)) {
       return {
         ref: node.initializer,
-        parameters: node.initializer.parameters.map((p) => p),
-        parameters2: makeParams(node.initializer.parameters),
+        parameters: makeParams(node.initializer.parameters),
         returnType: parseReturnType(node.initializer),
       }
     }
