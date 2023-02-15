@@ -1,4 +1,4 @@
-import { ParseResult } from "../Parser"
+import { ParseResult } from "../../domain/Parser"
 
 export default function NullLiteralParser(data: unknown): ParseResult<null> {
   return data === null

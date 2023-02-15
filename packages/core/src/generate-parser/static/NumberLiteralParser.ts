@@ -1,4 +1,4 @@
-import { Parser, ParseResult } from "../Parser"
+import { Parser, ParseResult } from "../../domain/Parser"
 
 export default function NumberLiteralParser<T extends number>(
   literal: number,

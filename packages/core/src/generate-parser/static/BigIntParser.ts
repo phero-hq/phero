@@ -1,4 +1,4 @@
-import { ParseResult } from "../Parser"
+import { ParseResult } from "../../domain/Parser"
 
 export default function BigIntParser(data: unknown): ParseResult<bigint> {
   // BigInt's are serialized as string (obviously it wouldn't fit into a number)

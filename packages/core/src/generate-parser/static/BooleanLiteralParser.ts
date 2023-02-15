@@ -1,4 +1,4 @@
-import { ParseResult } from "../Parser"
+import { ParseResult } from "../../domain/Parser"
 
 export function TrueLiteralParser(data: unknown): ParseResult<true> {
   return data === true

@@ -1,4 +1,4 @@
-import { Parser, ParseResult, ParseError } from "../Parser"
+import { Parser, ParseResult, ParseError } from "../../domain/Parser"
 
 export default function ArrayParser<T>(elementParser: Parser<T>): Parser<T[]> {
   return (data: unknown): ParseResult<T[]> => {

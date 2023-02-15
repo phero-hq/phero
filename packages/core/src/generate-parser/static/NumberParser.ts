@@ -1,4 +1,4 @@
-import { ParseResult } from "../Parser"
+import { ParseResult } from "../../domain/Parser"
 
 export default function NumberParser(data: unknown): ParseResult<number> {
   return typeof data === "number" && !isNaN(data)

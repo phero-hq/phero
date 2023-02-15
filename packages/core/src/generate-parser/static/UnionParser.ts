@@ -1,4 +1,4 @@
-import { ParseError, Parser, ParseResult } from "../Parser"
+import { ParseError, Parser, ParseResult } from "../../domain/Parser"
 
 export default function UnionParser<T>(
   ...elementParsers: Parser<any>[]

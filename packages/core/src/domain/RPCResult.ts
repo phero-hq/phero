@@ -1,4 +1,4 @@
-import { ValidationError } from "../code-gen/ParseResult"
+import { ParseError } from "./Parser"
 
 export type RPCResult<T> =
   | RPCOkResult<T>
@@ -18,7 +18,7 @@ export interface RPCOkResult<T> {
 
 export interface RPCBadRequestResult {
   status: 400
-  errors: ValidationError[]
+  errors: ParseError[]
   input: any
 }
 

@@ -1,4 +1,4 @@
-import { Parser, ParseResult } from "../Parser"
+import { Parser, ParseResult } from "../../domain/Parser"
 
 export default function StringLiteralParser<T extends string>(
   literal: string,
