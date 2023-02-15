@@ -1,10 +1,11 @@
 import ts from "typescript"
-import generateParserModel, {
+
+import { ParseError } from "../domain/errors"
+import {
   MemberParserModel,
   ObjectParserModel,
   ParserModelType,
-} from "../code-gen/parsers/generateParserModel"
-import { ParseError } from "../domain/errors"
+} from "../domain/ParserModel"
 import { PheroFunction, PheroServiceConfig } from "../domain/PheroApp"
 import { getNameAsString } from "../lib/tsUtils"
 
@@ -254,30 +255,31 @@ function getRootObjectParserModel(
   typeNode: ts.TypeNode,
   prog: ts.Program,
 ): ObjectParserModel {
-  const nextParserModel = generateParserModel(
-    getDeclaredNode(typeNode, prog),
-    "root",
-    prog,
-  )
+  throw new Error("TODO")
+  // const nextParserModel = generateParserModel(
+  //   getDeclaredNode(typeNode, prog),
+  //   "root",
+  //   prog,
+  // )
 
-  if (nextParserModel.parser.type !== ParserModelType.Object) {
-    throw new ParseError("S115: Should be an object type", typeNode)
-  }
+  // if (nextParserModel.parser.type !== ParserModelType.Object) {
+  //   throw new ParseError("S115: Should be an object type", typeNode)
+  // }
 
-  return nextParserModel.parser
+  // return nextParserModel.parser
 }
 
-function getDeclaredNode(typeNode: ts.TypeNode, prog: ts.Program): ts.Node {
-  if (ts.isTypeReferenceNode(typeNode)) {
-    const type = prog.getTypeChecker().getTypeFromTypeNode(typeNode)
-    const symbol = type.aliasSymbol ?? type.symbol
-    if (symbol.declarations?.length) {
-      return symbol.declarations[0]
-    }
-  }
+// function getDeclaredNode(typeNode: ts.TypeNode, prog: ts.Program): ts.Node {
+//   if (ts.isTypeReferenceNode(typeNode)) {
+//     const type = prog.getTypeChecker().getTypeFromTypeNode(typeNode)
+//     const symbol = type.aliasSymbol ?? type.symbol
+//     if (symbol.declarations?.length) {
+//       return symbol.declarations[0]
+//     }
+//   }
 
-  return typeNode
-}
+//   return typeNode
+// }
 
 function getPropertySignatures(typeNode: ts.TypeNode): ts.PropertySignature[] {
   if (ts.isInterfaceDeclaration(typeNode)) {

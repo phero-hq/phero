@@ -23,12 +23,6 @@ export { parsePheroApp } from "./parsePheroApp"
 export { default as parseManifest } from "./parseManifest/parseManifest"
 export { default as generateManifest } from "./generateManifest/generateManifest"
 
-export {
-  generateModelParser,
-  generateNonModelParser,
-  generateInlineParser,
-} from "./code-gen/parsers/generateParser"
-
 export * as tsx from "./tsx"
 
 export { VirtualCompilerHost } from "./lib/VirtualCompilerHost"
