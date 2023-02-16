@@ -395,26 +395,22 @@ function lazilyGenerateDependency(
   }
 
   // prevents recursive loops
-  const depsWithCircuitBreaker = new Map([...deps, [ref.typeName, ref]])
+  const depsWithCircuitBreaker = deps.set(ref.typeName, ref)
 
-  const { root, deps: updatedDeps } = generateDependencyParserModel(
-    depsWithCircuitBreaker,
+  const { root } = generateDependencyParserModel(depsWithCircuitBreaker)
+
+  deps.set(
+    ref.typeName,
+    ref.typeArguments
+      ? {
+          type: ParserModelType.Generic,
+          typeName: ref.typeName,
+          typeArguments: ref.typeArguments,
+          parser: root,
+        }
+      : root,
   )
-
-  return new Map([
-    ...updatedDeps,
-    [
-      ref.typeName,
-      ref.typeArguments
-        ? {
-            type: ParserModelType.Generic,
-            typeName: ref.typeName,
-            typeArguments: ref.typeArguments,
-            parser: root,
-          }
-        : root,
-    ],
-  ])
+  return deps
 }
 
 function isEventuallyMappedOrConditionalTypeNode(
