@@ -13,6 +13,7 @@ describe("interface", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: `SimpleInterfaceParser`,
       deps: {
         SimpleInterfaceParser: `ObjectLiteralParser(["aap", false, StringParser], ["noot", true, NumberParser], ["mies", false, BooleanParser])`,
@@ -38,13 +39,14 @@ describe("interface", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "InterfaceWithRefParser",
       deps: {
         AapParser: 'ObjectLiteralParser(["aap", false, NumberParser])',
         InterfaceWithRefParser:
           'ObjectLiteralParser(["aap", false, AapParser], ["noot", true, NootParser])',
         NootParser: 'ObjectLiteralParser(["noot", false, NumberParser])',
       },
-      output: "InterfaceWithRefParser",
     })
   })
   test(`RecursiveInterface`, () => {
@@ -57,11 +59,12 @@ describe("interface", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "RecursiveInterfaceParser",
       deps: {
         RecursiveInterfaceParser:
           'ObjectLiteralParser(["recur", true, RecursiveInterfaceParser])',
       },
-      output: "RecursiveInterfaceParser",
     })
   })
   test(`interface with parent interface`, () => {
@@ -77,12 +80,13 @@ describe("interface", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "TheInterfaceParser",
       deps: {
         BaseParser: 'ObjectLiteralParser(["base", false, StringParser])',
         TheInterfaceParser:
           'IntersectionParser(ObjectLiteralParser(["prop", false, StringParser]), BaseParser)',
       },
-      output: "TheInterfaceParser",
     })
   })
   test(`interface with ancestor interface`, () => {
@@ -101,6 +105,8 @@ describe("interface", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "TheInterfaceParser",
       deps: {
         RootParser: 'ObjectLiteralParser(["root", false, StringParser])',
         BaseParser:
@@ -108,7 +114,6 @@ describe("interface", () => {
         TheInterfaceParser:
           'IntersectionParser(ObjectLiteralParser(["prop", false, StringParser]), BaseParser)',
       },
-      output: "TheInterfaceParser",
     })
   })
   test(`interface with multiple heritage clauses`, () => {
@@ -127,6 +132,7 @@ describe("interface", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "TheInterfaceParser",
       deps: {
         TheInterfaceParser:

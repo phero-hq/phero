@@ -9,6 +9,7 @@ describe("indexedAccess", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "MyIndexedAccessParser",
       deps: {
         MyIndexedAccessParser: "NumberParser",
@@ -23,6 +24,7 @@ describe("indexedAccess", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "MyIndexedAccessParser",
       deps: {
         MyIndexedAccessParser: "UnionParser(StringParser, NumberParser)",
@@ -37,11 +39,12 @@ describe("indexedAccess", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "MyIndexedAccessParser",
       deps: {
         MyIndexedAccessParser:
           "UnionParser(StringParser, NumberParser, BooleanParser)",
       },
-      output: "MyIndexedAccessParser",
     })
   })
   test("by indirect union from other type", () => {
@@ -53,10 +56,11 @@ describe("indexedAccess", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "MyIndexedAccessParser",
       deps: {
         MyIndexedAccessParser: "UnionParser(StringParser, BooleanParser)",
       },
-      output: "MyIndexedAccessParser",
     })
   })
   test("complex example", () => {
@@ -75,11 +79,12 @@ describe("indexedAccess", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "MyIndexedAccessParser",
       deps: {
         MyIndexedAccessParser:
           'ObjectLiteralParser(["aap", false, NumberParser], ["noot", false, StringParser], ["mies", false, BooleanParser])',
       },
-      output: "MyIndexedAccessParser",
     })
   })
 })

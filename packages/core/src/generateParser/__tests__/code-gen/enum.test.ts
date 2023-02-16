@@ -13,6 +13,7 @@ describe("enum", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: `StringEnumParser`,
       deps: {
         StringEnumParser: `EnumParser("aap", "noot", "mies")`,
@@ -31,6 +32,7 @@ describe("enum", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: `NumberEnumParser`,
       deps: {
         NumberEnumParser: `EnumParser(0, 1, 2)`,
@@ -49,6 +51,7 @@ describe("enum", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: `MixedEnumParser`,
       deps: {
         MixedEnumParser: `EnumParser("x", 0, 1)`,
@@ -67,6 +70,7 @@ describe("enum", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: `ValuelessEnumParser`,
       deps: {
         ValuelessEnumParser: `EnumParser(0, 1, 2)`,
@@ -85,6 +89,7 @@ describe("enum", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: `SkipEnumParser`,
       deps: {
         SkipEnumParser: `EnumParser(3, 4, 5)`,
@@ -103,6 +108,7 @@ describe("enum", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: `MixedEnum_AapParser`,
       deps: {
         MixedEnum_AapParser: `StringLiteralParser("x")`,

@@ -13,6 +13,7 @@ describe("mapped", () => {
       deps: {
         MyMappedTypeParser: 'StringLiteralParser("kaas")',
       },
+      input: "ObjectLiteralParser()",
       output: "MyMappedTypeParser",
     })
   })
@@ -34,6 +35,7 @@ describe("mapped", () => {
         MyMappedTypeParser:
           'UnionParser(StringLiteralParser("Aap"), StringLiteralParser("Noot"), StringLiteralParser("Mies"))',
       },
+      input: "ObjectLiteralParser()",
       output: "MyMappedTypeParser",
     })
   })
@@ -55,6 +57,7 @@ describe("mapped", () => {
         MyMappedTypeParser:
           'UnionParser(StringLiteralParser("aap"), StringLiteralParser("noot"), StringLiteralParser("mies"))',
       },
+      input: "ObjectLiteralParser()",
       output: "MyMappedTypeParser",
     })
   })
@@ -74,6 +77,7 @@ describe("mapped", () => {
       deps: {
         MyMappedTypeParser: 'StringLiteralParser("kaas")',
       },
+      input: "ObjectLiteralParser()",
       output: "MyMappedTypeParser",
     })
   })
@@ -94,6 +98,7 @@ describe("mapped", () => {
         MyMappedTypeParser:
           'UnionParser(StringLiteralParser("kaas"), StringLiteralParser("aap"))',
       },
+      input: "ObjectLiteralParser()",
       output: "MyMappedTypeParser",
     })
   })
@@ -114,6 +119,7 @@ describe("mapped", () => {
         MyMappedTypeParser: "ref_1",
         ref_1: 'StringLiteralParser("kaas")',
       },
+      input: "ObjectLiteralParser()",
       output: "MyMappedTypeParser",
     })
   })
@@ -135,6 +141,7 @@ describe("mapped", () => {
         MyMappedTypeParser: "ref_2",
         ref_2: 'ObjectLiteralParser(["y", false, StringLiteralParser("kaas")])',
       },
+      input: "ObjectLiteralParser()",
       output: "MyMappedTypeParser",
     })
   })
@@ -155,6 +162,7 @@ describe("mapped", () => {
       deps: {
         MyMappedTypeParser: 'StringLiteralParser("kaas")',
       },
+      input: "ObjectLiteralParser()",
       output: "MyMappedTypeParser",
     })
   })
@@ -176,6 +184,7 @@ describe("mapped", () => {
         MyMappedTypeParser:
           'ObjectLiteralParser(["kaas", false, StringParser])',
       },
+      input: "ObjectLiteralParser()",
       output: "MyMappedTypeParser",
     })
   })
@@ -198,6 +207,7 @@ describe("mapped", () => {
         MyMappedTypeParser:
           'ObjectLiteralParser(["kaas", false, StringParser])',
       },
+      input: "ObjectLiteralParser()",
       output: "MyMappedTypeParser",
     })
   })
@@ -218,6 +228,7 @@ describe("mapped", () => {
       deps: {
         MyMappedTypeParser: 'ObjectLiteralParser(["a", false, StringParser])',
       },
+      input: "ObjectLiteralParser()",
       output: "MyMappedTypeParser",
     })
   })
@@ -241,6 +252,7 @@ describe("mapped", () => {
           'ObjectLiteralParser(["kaas", true, AadParser], ["koos", false, StringParser])',
         MyMappedTypeParser: 'ObjectLiteralParser(["kaas", true, AadParser])',
       },
+      input: "ObjectLiteralParser()",
       output: "MyMappedTypeParser",
     })
   })
@@ -264,6 +276,7 @@ describe("mapped", () => {
         MyMappedTypeParser:
           'ObjectLiteralParser(["a", false, UnionParser(StringParser, NumberParser)], ["b", false, UnionParser(StringParser, NumberParser)])',
       },
+      input: "ObjectLiteralParser()",
       output: "MyMappedTypeParser",
     })
   })

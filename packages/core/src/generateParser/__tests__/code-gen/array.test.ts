@@ -65,6 +65,7 @@ describe("array", () => {
       function test(): SomeGenericArray<boolean> { throw new Error() }
     `)
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "ref_0",
       deps: {
         ref_0: "ArrayParser(ArrayParser(BooleanParser))",

@@ -12,6 +12,7 @@ describe("typeAlias", () => {
       deps: {
         XParser: "StringParser",
       },
+      input: "ObjectLiteralParser()",
       output: "XParser",
     })
   })
@@ -28,6 +29,7 @@ describe("typeAlias", () => {
         YParser: "NumberParser",
         XParser: "YParser",
       },
+      input: "ObjectLiteralParser()",
       output: "XParser",
     })
   })
@@ -44,6 +46,7 @@ describe("typeAlias", () => {
         XParser: 'ObjectLiteralParser(["y", false, YParser])',
         YParser: "NumberParser",
       },
+      input: "ObjectLiteralParser()",
       output: "XParser",
     })
   })
@@ -63,6 +66,7 @@ describe("typeAlias", () => {
         YParser: "NumberParser",
         ZParser: "BooleanParser",
       },
+      input: "ObjectLiteralParser()",
       output: "XParser",
     })
   })
@@ -79,6 +83,7 @@ describe("typeAlias", () => {
         XParser: "TupleParser([StringParser], [YParser])",
         YParser: "NumberParser",
       },
+      input: "ObjectLiteralParser()",
       output: "XParser",
     })
   })

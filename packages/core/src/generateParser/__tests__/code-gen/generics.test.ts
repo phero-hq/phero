@@ -10,10 +10,11 @@ describe("generics", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "ref_0",
       deps: {
         ref_0: 'ObjectLiteralParser(["prop", false, NumberParser])',
       },
-      output: "ref_0",
     })
   })
   test("MyInterface", () => {
@@ -24,10 +25,11 @@ describe("generics", () => {
       function test(): MyInterface { throw new Error() }
     `)
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "ref_0",
       deps: {
         ref_0: 'ObjectLiteralParser(["prop", false, NumberParser])',
       },
-      output: "ref_0",
     })
   })
   test("MyTypeAlias<number>", () => {
@@ -38,10 +40,11 @@ describe("generics", () => {
       function test(): MyTypeAlias<number> { throw new Error() }
     `)
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "ref_0",
       deps: {
         ref_0: 'ObjectLiteralParser(["prop", false, NumberParser])',
       },
-      output: "ref_0",
     })
   })
   test("DeepGeneric<number>", () => {
@@ -58,13 +61,14 @@ describe("generics", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "ref_0",
       deps: {
         ref_0:
           'ObjectLiteralParser(["prop", false, ref_1], ["nonGenericProp", false, BooleanParser])',
         ref_1:
           'ObjectLiteralParser(["wrap", false, NumberParser], ["nonGenericWrap", false, StringParser])',
       },
-      output: "ref_0",
     })
   })
   test("EmbeddedGeneric<number>", () => {
@@ -78,11 +82,12 @@ describe("generics", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "ref_0",
       deps: {
         ref_0:
           'ObjectLiteralParser(["embed", false, ObjectLiteralParser(["prop", false, NumberParser])])',
       },
-      output: "ref_0",
     })
   })
   test("GenericWithDefault<number>", () => {
@@ -95,11 +100,12 @@ describe("generics", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "ref_0",
       deps: {
         ref_0:
           'ObjectLiteralParser(["prop", false, NumberParser], ["propDef", false, StringParser])',
       },
-      output: "ref_0",
     })
   })
 })

@@ -12,10 +12,11 @@ describe("conditional", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "ref_0",
       deps: {
         ref_0: 'ObjectLiteralParser(["prop", false, StringParser])',
       },
-      output: "ref_0",
     })
   })
   test("MyConditionalType<string>", () => {
@@ -28,10 +29,11 @@ describe("conditional", () => {
       function test(): MyConditionalType<string> { throw new Error() }
     `)
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "ref_0",
       deps: {
         ref_0: 'ObjectLiteralParser(["prop", false, NumberParser])',
       },
-      output: "ref_0",
     })
   })
   test("MyDeepConditionalType<number>", () => {
@@ -51,12 +53,13 @@ describe("conditional", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "ref_0",
       deps: {
         ref_0:
           'ObjectLiteralParser(["t", false, NumberParser], ["deep", false, ref_1])',
         ref_1: 'ObjectLiteralParser(["prop", false, NumberParser])',
       },
-      output: "ref_0",
     })
   })
   test("MyDeepConditionalType<number>", () => {
@@ -75,11 +78,12 @@ describe("conditional", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "ref_0",
       deps: {
         ref_0: 'ObjectLiteralParser(["deep", false, ref_1])',
         ref_1: 'ObjectLiteralParser(["prop", false, StringParser])',
       },
-      output: "ref_0",
     })
   })
   test("MyType<number>", () => {
@@ -93,11 +97,12 @@ describe("conditional", () => {
       function test(): MyType<number> { throw new Error() }
     `)
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "ref_0",
       deps: {
         ref_0: 'ObjectLiteralParser(["prop", false, ref_1])',
         ref_1: 'ObjectLiteralParser(["inner", false, NumberParser])',
       },
-      output: "ref_0",
     })
   })
 
@@ -115,6 +120,8 @@ describe("conditional", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "ref_0",
       deps: {
         ref_0: 'ObjectLiteralParser(["prop", false, ref_1])',
         ref_1:
@@ -123,7 +130,6 @@ describe("conditional", () => {
         ref_3:
           'ObjectLiteralParser(["w", false, ObjectLiteralParser(["b", false, BooleanParser])], ["b", false, BooleanParser], ["recursive", true, ref_2])',
       },
-      output: "ref_0",
     })
   })
   test("MyConditionalType<number>", () => {
@@ -142,12 +148,13 @@ describe("conditional", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
+      output: "ref_1",
       deps: {
         ref_0: 'ObjectLiteralParser(["h", false, NumberParser])',
         ref_1:
           'ObjectLiteralParser(["prop", false, StringParser], ["x", false, ref_0])',
       },
-      output: "ref_1",
     })
   })
 })

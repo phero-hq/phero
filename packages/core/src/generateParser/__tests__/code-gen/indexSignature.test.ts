@@ -23,6 +23,7 @@ describe("indexSignature", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: `MyIndexSignatureParser`,
       deps: {
         MyIndexSignatureParser: `ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)])`,
@@ -39,6 +40,7 @@ describe("indexSignature", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: `MyIndexSignatureParser`,
       deps: {
         MyIndexSignatureParser: `ObjectLiteralParser([NumberKeyParser, false, StringParser])`,
@@ -56,6 +58,7 @@ describe("indexSignature", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: `MyIndexSignatureParser`,
       deps: {
         MyIndexSignatureParser: `ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)], [NumberKeyParser, false, StringParser])`,
@@ -74,6 +77,7 @@ describe("indexSignature", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: `MyIndexSignatureParser`,
       deps: {
         MyIndexSignatureParser: `ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)], [NumberKeyParser, false, StringParser], ["length", false, NumberParser])`,
@@ -95,6 +99,7 @@ describe("indexSignature", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "ref_0",
       deps: {
         ref_0:
@@ -114,6 +119,7 @@ describe("indexSignature", () => {
     `)
 
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: `MyIndexSignatureParser`,
       deps: {
         MyIndexSignatureParser: `ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)], [NumberKeyParser, false, StringParser], ["length", false, NumberParser])`,

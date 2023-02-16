@@ -29,6 +29,7 @@ describe("intersection", () => {
         function test(): InterfaceOne & InterfaceTwo { throw new Error() }
     `)
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: `IntersectionParser(InterfaceOneParser, InterfaceTwoParser)`,
       deps: {
         InterfaceOneParser:

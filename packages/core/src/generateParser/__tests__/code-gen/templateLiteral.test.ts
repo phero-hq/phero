@@ -11,6 +11,7 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "GreetingParser",
       deps: {
         GreetingParser: 'StringLiteralParser("hello world")',
@@ -28,6 +29,7 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "AllLocaleIDsParser",
       deps: {
         AllLocaleIDsParser:
@@ -48,6 +50,7 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "LocaleMessageIDsParser",
       deps: {
         LocaleMessageIDsParser:
@@ -64,6 +67,7 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "EventNameParser",
       deps: {
         EventNameParser:
@@ -80,6 +84,7 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "ref_1",
       deps: {
         MyTypeParser:
@@ -98,6 +103,7 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "ShoutyGreetingParser",
       deps: {
         ShoutyGreetingParser: "ref_2",
@@ -113,6 +119,7 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "ref_0",
       deps: {
         ref_0: 'StringLiteralParser("hello world")',
@@ -128,6 +135,7 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "MainIDParser",
       deps: {
         MainIDParser: "ref_1",
@@ -144,6 +152,7 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "EmailParser",
       deps: {
         EmailParser:
@@ -160,6 +169,7 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "ref_1",
       deps: {
         ExtParser:
@@ -178,6 +188,7 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "EmailParser",
       deps: {
         EmailParser:
@@ -193,6 +204,7 @@ describe("templateLiteral", () => {
     `)
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "ref_0",
       deps: {
         ref_0:
@@ -207,6 +219,7 @@ describe("templateLiteral", () => {
     `)
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: "TestParser",
       deps: {
         TestParser: "TemplateLiteralParser(/^.+@.+x\\d+yyy$/)",

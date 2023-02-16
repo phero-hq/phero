@@ -49,6 +49,7 @@ describe("union", () => {
     `)
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
+      input: "ObjectLiteralParser()",
       output: `UnionParser(InterfaceOneParser, ArrayParser(InterfaceTwoParser))`,
       deps: {
         InterfaceOneParser:
