@@ -25,5 +25,13 @@ export { default as generateManifest } from "./generateManifest/generateManifest
 
 export * as tsx from "./tsx"
 
+export {
+  generateFunctionParsers,
+  generateParserFunction,
+  generateInlineParser,
+  generateDependencyRefs,
+  DependencyRefs,
+} from "./generateParser"
+
 export { VirtualCompilerHost } from "./lib/VirtualCompilerHost"
 export { generateTypeNode, generateTypeElement } from "./lib/generateTypeNode"

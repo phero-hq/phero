@@ -1,6 +1,6 @@
 import { VirtualCompilerHost } from "@phero/core"
 import ts from "typescript"
-import { ExportFile, RawExportFile } from "../domain/PheroApp"
+import { ExportFile, RawExportFile } from "./domain"
 
 export default function compileExportToJS(
   files: RawExportFile[],

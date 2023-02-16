@@ -6,6 +6,10 @@ export class Type {
     return ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
   }
 
+  public static get unknown(): ts.TypeNode {
+    return ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
+  }
+
   public static get boolean(): ts.TypeNode {
     return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword)
   }
@@ -44,10 +48,10 @@ export class Type {
 
   public static literalType(
     literal:
-    | ts.LiteralExpression
-    | ts.NullLiteral
-    | ts.BooleanLiteral
-    | ts.PrefixUnaryExpression,
+      | ts.LiteralExpression
+      | ts.NullLiteral
+      | ts.BooleanLiteral
+      | ts.PrefixUnaryExpression,
   ): ts.LiteralTypeNode {
     return ts.factory.createLiteralTypeNode(literal)
   }

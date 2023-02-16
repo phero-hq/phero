@@ -3,10 +3,12 @@ import { ParseError } from "../domain/errors"
 import parseReturnType from "./parseReturnType"
 import { PheroFunction, PheroFunctionParameter } from "../domain/PheroApp"
 import { getNameAsString, resolveSymbol } from "../lib/tsUtils"
+import { DependencyMap, generateParserModel } from "../generateModel"
 
 export default function parseFunctionDefinition(
   node: ts.ObjectLiteralElementLike | ts.VariableDeclaration,
   typeChecker: ts.TypeChecker,
+  deps: DependencyMap,
 ): PheroFunction {
   if (ts.isSpreadAssignment(node)) {
     throw new ParseError(
@@ -17,7 +19,7 @@ export default function parseFunctionDefinition(
 
   const parsedPheroFunctionDef: PheroFunction = {
     name: parseFunctionName(node.name),
-    ...parseActualFunction(node, typeChecker),
+    ...parseActualFunction(node, typeChecker, deps),
   }
 
   return parsedPheroFunctionDef
@@ -52,7 +54,11 @@ function parseFunctionName(
 function parseActualFunction(
   node: ts.Node,
   typeChecker: ts.TypeChecker,
-): Pick<PheroFunction, "ref" | "parameters" | "returnType"> {
+  deps: DependencyMap,
+): Pick<
+  PheroFunction,
+  "ref" | "parameters" | "parametersModel" | "returnType" | "returnTypeModel"
+> {
   if (ts.isShorthandPropertyAssignment(node)) {
     const symbol = typeChecker.getShorthandAssignmentValueSymbol(node)
 
@@ -60,42 +66,55 @@ function parseActualFunction(
       throw new ParseError(`S118: Can't find function (${node.kind})`, node)
     }
 
-    return parseActualFunction(symbol.declarations?.[0], typeChecker)
+    return parseActualFunction(symbol.declarations?.[0], typeChecker, deps)
   }
 
   if (ts.isImportSpecifier(node)) {
-    return parseActualFunction(node.name, typeChecker)
+    return parseActualFunction(node.name, typeChecker, deps)
   }
 
   if (ts.isPropertyAssignment(node)) {
-    return parseActualFunction(node.initializer, typeChecker)
+    return parseActualFunction(node.initializer, typeChecker, deps)
   }
 
   if (ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
+    const parserModel = generateParserModel(node, typeChecker, deps)
     return {
       ref: node,
       parameters: makeParams(node.parameters),
       returnType: parseReturnType(node),
+      returnTypeModel: parserModel.returnType,
+      parametersModel: parserModel.parameters,
     }
   }
 
   if (ts.isFunctionDeclaration(node)) {
+    const parserModel = generateParserModel(node, typeChecker, deps)
     return {
       ref: node,
       parameters: makeParams(node.parameters),
       returnType: parseReturnType(node),
+      returnTypeModel: parserModel.returnType,
+      parametersModel: parserModel.parameters,
     }
   }
 
   if (ts.isVariableDeclaration(node) && node.initializer) {
     if (ts.isArrowFunction(node.initializer)) {
+      const parserModel = generateParserModel(
+        node.initializer,
+        typeChecker,
+        deps,
+      )
       return {
         ref: node.initializer,
         parameters: makeParams(node.initializer.parameters),
         returnType: parseReturnType(node.initializer),
+        returnTypeModel: parserModel.returnType,
+        parametersModel: parserModel.parameters,
       }
     }
-    return parseActualFunction(node.initializer, typeChecker)
+    return parseActualFunction(node.initializer, typeChecker, deps)
   }
 
   if (ts.isIdentifier(node)) {
@@ -103,13 +122,13 @@ function parseActualFunction(
     if (!symbol?.declarations?.[0]) {
       throw new ParseError(`S119: Can't find function (${node.kind})`, node)
     }
-    return parseActualFunction(symbol.declarations?.[0], typeChecker)
+    return parseActualFunction(symbol.declarations?.[0], typeChecker, deps)
   }
 
   if (ts.isPropertyAccessExpression(node)) {
     const lastToken = node.getLastToken()
     if (lastToken) {
-      return parseActualFunction(lastToken, typeChecker)
+      return parseActualFunction(lastToken, typeChecker, deps)
     }
   }
 

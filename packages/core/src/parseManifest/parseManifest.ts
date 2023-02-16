@@ -11,6 +11,7 @@ import {
 import parseReturnType from "../parsePheroApp/parseReturnType"
 import { getNameAsString } from "../lib/tsUtils"
 import { VirtualCompilerHost } from "../lib/VirtualCompilerHost"
+import { DependencyMap, generateParserModel } from "../generateModel"
 
 export default function parseManifest(dts: string): {
   result: PheroApp
@@ -29,12 +30,15 @@ export default function parseManifest(dts: string): {
     throw new Error("Can't compile declaration file")
   }
 
-  const result = parseManifestSourceFile(sourceFile)
+  const result = parseManifestSourceFile(sourceFile, program.getTypeChecker())
 
   return { result, program }
 }
 
-function parseManifestSourceFile(sourceFile: ts.SourceFile): PheroApp {
+function parseManifestSourceFile(
+  sourceFile: ts.SourceFile,
+  typeChecker: ts.TypeChecker,
+): PheroApp {
   const [domainModule] = findModules(sourceFile, (name) => name === "domain")
   const serviceModules = findModules(
     sourceFile,
@@ -42,12 +46,15 @@ function parseManifestSourceFile(sourceFile: ts.SourceFile): PheroApp {
   )
 
   const [models, errors] = parseDomainDeclarations(domainModule)
-  const services = parseServiceDeclarations(serviceModules)
+
+  const deps: DependencyMap = new Map()
+  const services = parseServiceDeclarations(serviceModules, typeChecker, deps)
 
   return {
     errors,
     models,
     services,
+    deps,
   }
 }
 
@@ -151,18 +158,26 @@ function parseErrorProperties(
   }))
 }
 
-function parseServiceDeclarations(serviceModules: Module[]): PheroService[] {
+function parseServiceDeclarations(
+  serviceModules: Module[],
+  typeChecker: ts.TypeChecker,
+  deps: DependencyMap,
+): PheroService[] {
   return serviceModules.map((serviceModule) => {
     return {
       name: serviceModule.name,
-      funcs: parseFunctionDeclarations(serviceModule),
+      funcs: parseFunctionDeclarations(serviceModule, typeChecker, deps),
       config: {},
       ref: serviceModule.ref,
     }
   })
 }
 
-function parseFunctionDeclarations(serviceModule: Module): PheroFunction[] {
+function parseFunctionDeclarations(
+  serviceModule: Module,
+  typeChecker: ts.TypeChecker,
+  deps: DependencyMap,
+): PheroFunction[] {
   const funcs = serviceModule.statements.filter(
     (st): st is ts.FunctionDeclaration => ts.isFunctionDeclaration(st),
   )
@@ -171,14 +186,19 @@ function parseFunctionDeclarations(serviceModule: Module): PheroFunction[] {
     returnType: parseReturnType(
       getOrThrow(func, "Fucntion must have return type"),
     ),
-    ...parseFunctionParams(func),
+    ...parseFunctionParams(func, typeChecker, deps),
     ref: func,
   }))
 }
 
 function parseFunctionParams(
   func: ts.FunctionDeclaration,
-): Pick<PheroFunction, "parameters" | "contextParameterType"> {
+  typeChecker: ts.TypeChecker,
+  deps: DependencyMap,
+): Pick<
+  PheroFunction,
+  "parameters" | "contextParameterType" | "parametersModel" | "returnTypeModel"
+> {
   let contextParameterType: ts.TypeNode | undefined
 
   const firstParamType = func.parameters[0]?.type
@@ -196,6 +216,8 @@ function parseFunctionParams(
     ? func.parameters.slice(1)
     : func.parameters
 
+  const functionModel = generateParserModel(func, typeChecker, deps)
+
   return {
     contextParameterType,
     parameters: params.map((param) => ({
@@ -203,6 +225,8 @@ function parseFunctionParams(
       questionToken: !!param.questionToken,
       type: getOrThrow(param.type, "Parameter must have type"),
     })),
+    parametersModel: functionModel.parameters,
+    returnTypeModel: functionModel.returnType,
   }
 }
 

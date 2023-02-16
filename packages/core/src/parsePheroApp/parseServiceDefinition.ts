@@ -9,10 +9,12 @@ import {
   PheroServiceConfig,
 } from "../domain/PheroApp"
 import parseServiceConfig from "./parseServiceConfig"
+import { DependencyMap } from "../generateModel"
 
 export default function parseServiceDefinition(
   serviceExport: ts.VariableDeclaration | ts.ExportSpecifier,
   prog: ts.Program,
+  deps: DependencyMap,
 ): PheroService {
   const typeChecker = prog.getTypeChecker()
   const serviceName = serviceExport.name.getText()
@@ -35,7 +37,7 @@ export default function parseServiceDefinition(
     PheroFunction[],
   ] = parseContext(
     parseServiceConfig(serviceConfigArg, prog),
-    parseFunctionDefinitions(functionDefsArg, typeChecker),
+    parseFunctionDefinitions(functionDefsArg, typeChecker, deps),
     prog,
   )
 

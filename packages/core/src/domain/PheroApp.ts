@@ -1,9 +1,11 @@
 import ts from "typescript"
+import { ObjectParserModel, ParserModel } from "./ParserModel"
 
 export interface PheroApp {
   models: PheroModel[]
   errors: PheroError[]
   services: PheroService[]
+  deps: Map<string, ParserModel>
 }
 
 export interface PheroModel {
@@ -38,8 +40,10 @@ export interface PheroService {
 export interface PheroFunction {
   name: string
   returnType: ts.TypeNode
+  returnTypeModel: ParserModel
 
   parameters: PheroFunctionParameter[]
+  parametersModel: ObjectParserModel
   contextParameterType?: ts.TypeNode
 
   ref: ts.FunctionLikeDeclarationBase

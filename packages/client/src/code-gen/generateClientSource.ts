@@ -1,12 +1,12 @@
 import {
-  generateModelParser,
-  generateNonModelParser,
   generateTypeNode,
   PheroApp,
   PheroError,
   PheroFunction,
   PheroService,
   tsx,
+  generateDependencyRefs,
+  generateParserFunction,
 } from "@phero/core"
 import ts from "typescript"
 
@@ -92,14 +92,22 @@ export default function generateClientSource2(
     ],
   )
 
+  const depRef = generateDependencyRefs(app.deps)
+
   const pheroClientSource = tsx.sourceFile(
     importsFromClientPackage,
     ...app.models.map((model) => model.ref),
-    ...app.models.map((model) => generateModelParser(model.ref, prog)),
+    ...Object.entries(app.deps).map(([name, model]) =>
+      generateParserFunction(name, model, depRef),
+    ),
     ...app.errors.map((err) => generateError(err)),
     ...app.services.flatMap((service) =>
       service.funcs.map((func) =>
-        generateParserForFunction(service, func, prog),
+        generateParserFunction(
+          `${service.name}__${func.name}__parser`,
+          func.returnTypeModel,
+          depRef,
+        ),
       ),
     ),
     ...app.services.map((service) =>
@@ -257,7 +265,7 @@ function generateClientFunction(
   func: PheroFunction,
   prog: ts.Program,
 ): ts.PropertyAssignment {
-  let parameters = func.parameters2.map((p) =>
+  let parameters = func.parameters.map((p) =>
     ts.factory.createParameterDeclaration(
       undefined,
       undefined,
@@ -324,7 +332,7 @@ function generateClientFunctionBlock(
                       ),
                     ]
                   : []),
-                ...func.parameters2.map((p) =>
+                ...func.parameters.map((p) =>
                   tsx.property.shorthandAssignment(p.name),
                 ),
               ],
@@ -341,17 +349,5 @@ function generateClientFunctionBlock(
         },
       ),
     ),
-  )
-}
-
-function generateParserForFunction(
-  service: PheroService,
-  func: PheroFunction,
-  prog: ts.Program,
-): ts.ClassDeclaration | ts.FunctionDeclaration {
-  return generateNonModelParser(
-    generateTypeNode(func.returnType),
-    prog,
-    `${service.name}__${func.name}__parser`,
   )
 }

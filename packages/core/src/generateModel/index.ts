@@ -28,7 +28,7 @@ export interface FunctionParserModel {
 }
 
 export function generateParserModel(
-  func: ts.FunctionDeclaration,
+  func: ts.FunctionDeclaration | ts.FunctionExpression | ts.ArrowFunction,
   typeChecker: ts.TypeChecker,
   deps: DependencyMap,
 ): FunctionParserModel {
@@ -47,7 +47,7 @@ export function generateParserModel(
 }
 
 function generateFromReturnType(
-  func: ts.FunctionDeclaration,
+  func: ts.FunctionDeclaration | ts.FunctionExpression | ts.ArrowFunction,
   typeChecker: ts.TypeChecker,
   deps: DependencyMap,
 ): InternalParserModelMap {
@@ -70,7 +70,7 @@ function generateFromReturnType(
 }
 
 function generateFromParameters(
-  func: ts.FunctionDeclaration,
+  func: ts.FunctionDeclaration | ts.FunctionExpression | ts.ArrowFunction,
   typeChecker: ts.TypeChecker,
   deps: DependencyMap,
 ): { root: ObjectParserModel; deps: DependencyMap } {

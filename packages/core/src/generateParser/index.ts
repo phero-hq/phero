@@ -6,14 +6,14 @@ import { DependencyMap, FunctionParserModel } from "../generateModel"
 
 export type ParserFuncRef = ts.Identifier | ts.CallExpression
 export type DependencyParserMap = Map<ts.Identifier, ParserFuncRef>
-type DependencyRefs = Record<string, ts.Identifier>
+export type DependencyRefs = Record<string, ts.Identifier>
 
 export function generateFunctionParsers(functionModel: FunctionParserModel): {
   inputParser?: ParserFuncRef
   outputParser: ParserFuncRef
   dependencyParsers: DependencyParserMap
 } {
-  const depRef = generateFuncDependencyRefs(functionModel.deps)
+  const depRef = generateDependencyRefs(functionModel.deps)
 
   return {
     inputParser:
@@ -27,7 +27,42 @@ export function generateFunctionParsers(functionModel: FunctionParserModel): {
   }
 }
 
-function generateFuncDependencyRefs(deps: DependencyMap): DependencyRefs {
+export function generateInlineParser(
+  model: ParserModel,
+  depRefs: DependencyRefs,
+): ts.ArrowFunction {
+  return tsx.arrowFunction({
+    params: [tsx.param({ name: "data", type: tsx.type.any })],
+    returnType: tsx.type.reference({
+      name: "ParseResult",
+      args: [tsx.type.any],
+    }),
+    body: [tsx.statement.expression(generateParserRef(model, depRefs))],
+  })
+}
+
+export function generateParserFunction(
+  name: string,
+  model: ParserModel,
+  depRefs: DependencyRefs,
+): ts.FunctionDeclaration {
+  return tsx.function({
+    name,
+    params: [
+      tsx.param({
+        name: "data",
+        type: tsx.type.unknown,
+      }),
+    ],
+    returnType: tsx.type.reference({
+      name: "ParseResult",
+      args: [tsx.type.any],
+    }),
+    body: [tsx.statement.return(generateParserRef(model, depRefs))],
+  })
+}
+
+export function generateDependencyRefs(deps: DependencyMap): DependencyRefs {
   return [...deps.keys()].reduce<DependencyRefs>(
     (refs, typeName, index) => ({
       ...refs,

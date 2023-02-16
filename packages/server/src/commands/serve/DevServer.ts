@@ -125,6 +125,7 @@ export default class DevServer {
       this.clearRequireCache()
       this.eventEmitter.emit({ type: "BUILD_RPCS_SUCCESS" })
     } catch (error) {
+      console.error(error)
       this.eventEmitter.emit({
         type: "BUILD_RPCS_FAILED",
         errorMessage: error instanceof Error ? error.message : "Unknown error",
@@ -217,7 +218,13 @@ export default class DevServer {
                 ms: Date.now() - startTime,
                 requestId,
                 dateTime: new Date().toISOString(),
-                errors: rpcResult.errors,
+                // TODO lets send all data we have
+                errors: rpcResult.errors.map((err) => {
+                  return {
+                    path: err.path ?? ".",
+                    message: err.message,
+                  }
+                }),
                 input: rpcResult.input,
               })
             } else if (rpcResult.status === 500) {

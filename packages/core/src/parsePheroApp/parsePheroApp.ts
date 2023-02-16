@@ -10,6 +10,7 @@ import {
 } from "../domain/PheroApp"
 import { parseFunctionModels } from "./parseModels"
 import parseServiceDefinition from "./parseServiceDefinition"
+import { DependencyMap } from "../generateModel"
 
 export function parsePheroApp(prog: ts.Program): PheroApp {
   const pheroSourceFiles = prog
@@ -24,8 +25,9 @@ export function parsePheroApp(prog: ts.Program): PheroApp {
     throw new MissingPheroFileError(prog.getCurrentDirectory())
   }
 
+  const deps: DependencyMap = new Map()
   const pheroServices = pheroSourceFiles.flatMap((pheroSourceFile) =>
-    parsePheroServices(pheroSourceFile, prog),
+    parsePheroServices(pheroSourceFile, prog, deps),
   )
 
   const modelMap: Map<string, PheroModel> = new Map<string, PheroModel>()
@@ -53,9 +55,9 @@ export function parsePheroApp(prog: ts.Program): PheroApp {
 
         if (!modelMap.has(modelName)) {
           modelMap.set(modelName, model)
-        } else if (modelMap.get(modelName) !== model) {
+        } else if (modelMap.get(modelName)?.ref !== model.ref) {
           throw new ParseError(
-            "You already have a different model with the same name, currently this is not possible. We intent to implement namespaces soon, stay tuned.",
+            `You already have a different model with the same name (${modelName}), currently this is not possible. We intent to implement namespaces soon, stay tuned.`,
             model.ref,
           )
         }
@@ -89,12 +91,14 @@ export function parsePheroApp(prog: ts.Program): PheroApp {
     models: [...modelMap.values()],
     errors: [...errorMap.values()],
     services: pheroServices,
+    deps,
   }
 }
 
 function parsePheroServices(
   pheroSourceFile: ts.SourceFile,
   prog: ts.Program,
+  deps: DependencyMap,
 ): PheroService[] {
   const exportStatements = pheroSourceFile.statements.filter(
     (s) =>
@@ -106,7 +110,7 @@ function parsePheroServices(
   for (const statement of exportStatements) {
     if (ts.isVariableStatement(statement)) {
       for (const varDeclr of statement.declarationList.declarations) {
-        const service = parseServiceDefinition(varDeclr, prog)
+        const service = parseServiceDefinition(varDeclr, prog, deps)
         services.push(service)
       }
     } else if (ts.isExportDeclaration(statement)) {
@@ -120,7 +124,7 @@ function parsePheroServices(
       }
 
       for (const specifier of statement.exportClause.elements) {
-        const service = parseServiceDefinition(specifier, prog)
+        const service = parseServiceDefinition(specifier, prog, deps)
         services.push(service)
       }
     } else {

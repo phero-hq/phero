@@ -6,10 +6,12 @@ import {
   PheroService,
   VirtualCompilerHost,
   tsx,
-  generateModelParser,
   PheroError,
-  generateInlineParser,
   PheroServiceConfig,
+  generateParserFunction,
+  generateDependencyRefs,
+  generateInlineParser,
+  DependencyRefs,
 } from "@phero/core"
 
 const factory = ts.factory
@@ -92,10 +94,13 @@ export default function generatePheroExecutionFile(
     }
   `),
   )
+  const depRefs = generateDependencyRefs(app.deps)
 
   for (const domainModel of app.models) {
     tsNodes.push(domainModel.ref)
-    tsNodes.push(generateModelParser(domainModel.ref, prog))
+  }
+  for (const [name, model] of [...app.deps]) {
+    tsNodes.push(generateParserFunction(name, model, depRefs))
   }
 
   const middlewareModelSet = new Set<ts.Node>()
@@ -104,7 +109,8 @@ export default function generatePheroExecutionFile(
   )) {
     if (!middlewareModelSet.has(middlewareModel.ref)) {
       middlewareModelSet.add(middlewareModel.ref)
-      tsNodes.push(generateModelParser(middlewareModel.ref, prog))
+      // TODO!!!! tsNodes.push(generateModelParser(middlewareModel.ref, prog))
+      throw new Error("TODO")
     }
   }
 
@@ -120,7 +126,7 @@ export default function generatePheroExecutionFile(
     for (const serviceFunction of service.funcs) {
       tsNodes.push(
         generateRPCExecutor(service, serviceFunction, app.errors, prog),
-        generateInnerFunction(service, serviceFunction, prog),
+        generateInnerFunction(service, serviceFunction, depRefs),
       )
     }
   }
@@ -224,7 +230,7 @@ function generateRPCExecutor(
 function generateInnerFunction(
   service: PheroService,
   funcDef: PheroFunction,
-  prog: ts.Program,
+  depRefs: DependencyRefs,
 ): ts.FunctionDeclaration {
   return tsx.function({
     name: `rpc_executor_${service.name}__${funcDef.name}__inner`,
@@ -256,16 +262,12 @@ function generateInnerFunction(
           body: tsx.block(
             tsx.const({
               name: "inputParser",
-              init: generateInlineParser(tsx.type.any, funcDef.ref, prog),
+              init: generateInlineParser(funcDef.parametersModel, depRefs),
             }),
 
             tsx.const({
               name: "outputParser",
-              init: generateInlineParser(
-                tsx.type.any,
-                funcDef.returnType,
-                prog,
-              ),
+              init: generateInlineParser(funcDef.returnTypeModel, depRefs),
             }),
 
             ...(service.config.middleware
@@ -345,10 +347,7 @@ function generateInnerFunction(
                       ),
                       {
                         args: [
-                          tsx.expression.propertyAccess(
-                            "input",
-                            funcDef.serviceContext?.paramName ?? "context",
-                          ),
+                          tsx.expression.propertyAccess("input", "context"),
                         ],
                       },
                     ),
@@ -713,11 +712,11 @@ function generateInnerFunction(
                   tsx.const({
                     name: "inputWithContext",
                     init: tsx.literal.object(
-                      ...(funcDef.serviceContext?.paramName
+                      ...(funcDef.contextParameterType
                         ? [
                             tsx.property.spreadAssignment("input"),
                             tsx.property.assignment(
-                              funcDef.serviceContext.paramName,
+                              "context",
                               tsx.expression.identifier("middlewareOutput"),
                             ),
                           ]
@@ -821,7 +820,7 @@ function generateRPCFunctionCall({
                 tsx.expression.propertyAccess(
                   "inputParseResult",
                   "result",
-                  getParameterName(param.name),
+                  param.name,
                 ),
               ),
             ],
@@ -1211,18 +1210,20 @@ function generateMiddlewareParsers(
   const middlewares = serviceConfig.middleware ?? []
   return tsx.const({
     name: `service_middlewares_${serviceName}`,
-    init: tsx.literal.array(
-      ...middlewares.map((middleware) =>
-        tsx.literal.array(
-          generateInlineParser(tsx.type.any, middleware.paramsType, prog),
+    init: tsx.literal
+      .array
+      // TODO!!!
+      // ...middlewares.map((middleware) =>
+      //   tsx.literal.array(
+      //     generateInlineParser(tsx.type.any, middleware.paramsType, prog),
 
-          generateInlineParser(tsx.type.any, middleware.contextType, prog),
+      //     generateInlineParser(tsx.type.any, middleware.contextType, prog),
 
-          middleware.nextType
-            ? generateInlineParser(tsx.type.any, middleware.nextType, prog)
-            : tsx.literal.null,
-        ),
-      ),
-    ),
+      //     middleware.nextType
+      //       ? generateInlineParser(tsx.type.any, middleware.nextType, prog)
+      //       : tsx.literal.null,
+      //   ),
+      // ),
+      (),
   })
 }
