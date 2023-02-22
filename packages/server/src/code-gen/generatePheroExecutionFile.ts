@@ -90,16 +90,16 @@ function defer<T>(): Defer<T> {
   return deferred
 }
 
-class ContextParseError extends Error {
-  constructor(public readonly errors: DataParseError[], public readonly input: any) {
-    super("ContextParseError")
+class ParseError extends Error {
+  constructor(public readonly errors: DataParseError[], public readonly input: unknown) {
+    super("ParseError")
     // https://github.com/microsoft/TypeScript/issues/22585
-    Object.setPrototypeOf(this, ContextParseError.prototype)
+    Object.setPrototypeOf(this, ParseError.prototype)
   }
 }
 
 function defaultErrorMapper<T>(error: unknown): RPCResult<T> {
-  if (error instanceof ContextParseError) {
+  if (error instanceof ParseError) {
     return { status: 400, input: error.input, errors: error.errors }
   } else if (error instanceof Error) {
     return {
@@ -244,7 +244,7 @@ function generateRPCExecutor(
     export: true,
     async: true,
     name: `rpc_executor_${service.name}__${funcDef.name}`,
-    params: [tsx.param({ name: "input", type: tsx.type.any })],
+    params: [tsx.param({ name: "input", type: tsx.type.unknown })],
     returnType: tsx.type.reference({
       name: "Promise",
       args: [
@@ -288,12 +288,12 @@ function generateInnerFunction(
     params: [
       tsx.param({
         name: "input",
-        type: tsx.type.any,
+        type: tsx.type.unknown,
       }),
     ],
     returnType: tsx.type.reference({
       name: "Promise",
-      args: [tsx.type.any],
+      args: [cloneTS(funcDef.returnType)],
     }),
     body: tsx.block(
       tsx.const({
@@ -313,12 +313,28 @@ function generateInnerFunction(
           body: tsx.block(
             tsx.const({
               name: "inputParser",
-              init: generateInlineParser(funcDef.parametersModel, depRefs),
+              init: generateInlineParser(
+                funcDef.parametersModel,
+                tsx.literal.type(
+                  ...funcDef.parameters.map((p) =>
+                    tsx.property.signature(
+                      p.name,
+                      cloneTS(p.type),
+                      p.questionToken,
+                    ),
+                  ),
+                ),
+                depRefs,
+              ),
             }),
 
             tsx.const({
               name: "outputParser",
-              init: generateInlineParser(funcDef.returnTypeModel, depRefs),
+              init: generateInlineParser(
+                funcDef.returnTypeModel,
+                cloneTS(funcDef.returnType),
+                depRefs,
+              ),
             }),
 
             ...(service.config.middleware
@@ -597,7 +613,7 @@ function generateInnerFunction(
                                                 {
                                                   args: [
                                                     tsx.expression.new(
-                                                      "ContextParseError",
+                                                      "ParseError",
                                                       {
                                                         args: [
                                                           tsx.expression.propertyAccess(
@@ -935,7 +951,7 @@ function generateErrorParsingFunction(domainErrors: PheroError[]): ts.Block {
     expression: tsx.expression.binary(
       tsx.expression.identifier("error"),
       "instanceof",
-      tsx.expression.identifier("ContextParseError"),
+      tsx.expression.identifier("ParseError"),
     ),
     then: tsx.block(
       tsx.statement.return(
@@ -1040,7 +1056,7 @@ function generateIfParseResultNotOkayEarlyReturn({
       tsx.statement.expression(
         tsx.expression.call("rejectEXEC", {
           args: [
-            tsx.expression.new("ContextParseError", {
+            tsx.expression.new("ParseError", {
               args: [
                 tsx.expression.propertyAccess(parseResult, "errors"),
                 tsx.expression.identifier(input),

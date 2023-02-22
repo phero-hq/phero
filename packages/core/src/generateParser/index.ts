@@ -33,17 +33,26 @@ export function generateFunctionParsers(functionModel: FunctionParserModel): {
 
 export function generateInlineParser(
   model: ParserModel,
+  typeNode: ts.TypeNode,
   depRefs: DependencyRefs,
 ): ts.ArrowFunction {
   return tsx.arrowFunction({
-    params: [tsx.param({ name: "data", type: tsx.type.any })],
+    params: [tsx.param({ name: "data", type: tsx.type.unknown })],
     returnType: tsx.type.reference({
       name: "ParseResult",
-      args: [tsx.type.any],
+      args: [typeNode],
     }),
     body: [
+      tsx.const({
+        name: `_parser`,
+        type: tsx.type.reference({
+          name: "Parser",
+          args: [typeNode],
+        }),
+        init: generateParserRef(model, depRefs),
+      }),
       tsx.statement.return(
-        tsx.expression.call(generateParserRef(model, depRefs), {
+        tsx.expression.call("_parser", {
           args: ["data"],
         }),
       ),
