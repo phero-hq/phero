@@ -1,12 +1,9 @@
 import ts from "typescript"
-import * as tsx from "../tsx"
-import { getNameAsString, hasModifier } from "../lib/tsUtils"
-import { PheroError, PheroErrorProperty } from "../domain/PheroApp"
 
 export default function parseThrowStatement(
   throwStatement: ts.ThrowStatement,
   prog: ts.Program,
-): PheroError | undefined {
+): ts.ClassDeclaration | undefined {
   if (!ts.isNewExpression(throwStatement.expression)) {
     // TODO Maybe emit a warning here?
     return undefined
@@ -26,23 +23,11 @@ export default function parseThrowStatement(
     return undefined
   }
 
-  const properties: PheroErrorProperty[] = [
-    { name: "message", type: tsx.type.string },
-    ...[classDeclaration, ...superClasses].flatMap((classDeclaration) =>
-      findPublicProperties(classDeclaration, prog),
-    ),
-  ]
-
   if (!classDeclaration.name) {
     return undefined
   }
 
-  return {
-    name: classDeclaration.name.text,
-    sourceFile: classDeclaration.getSourceFile().fileName,
-    properties,
-    ref: classDeclaration,
-  }
+  return classDeclaration
 }
 
 function getSuperClasses(
@@ -89,58 +74,4 @@ function getClassDeclaration(
   }
 
   return classDeclaration
-}
-
-function findPublicProperties(
-  classDeclaration: ts.ClassDeclaration,
-  prog: ts.Program,
-): PheroErrorProperty[] {
-  const typeChecker = prog.getTypeChecker()
-  const result: PheroErrorProperty[] = []
-
-  for (const member of classDeclaration.members) {
-    if (
-      (ts.isPropertyDeclaration(member) ||
-        ts.isGetAccessorDeclaration(member)) &&
-      (member.modifiers === undefined ||
-        hasModifier(member, ts.SyntaxKind.PublicKeyword))
-    ) {
-      const typeNode = typeChecker.typeToTypeNode(
-        typeChecker.getTypeAtLocation(member),
-        member,
-        undefined,
-      )
-
-      if (typeNode) {
-        result.push({
-          name: getNameAsString(member.name),
-          type: typeNode,
-        })
-      }
-    }
-
-    if (ts.isConstructorDeclaration(member)) {
-      for (const param of member.parameters) {
-        if (
-          hasModifier(param, ts.SyntaxKind.PublicKeyword) &&
-          !ts.isObjectBindingPattern(param.name) &&
-          !ts.isArrayBindingPattern(param.name)
-        ) {
-          const typeNode = typeChecker.typeToTypeNode(
-            typeChecker.getTypeAtLocation(param),
-            param,
-            undefined,
-          )
-          if (typeNode) {
-            result.push({
-              name: param.name.text,
-              type: typeNode,
-            })
-          }
-        }
-      }
-    }
-  }
-
-  return result
 }

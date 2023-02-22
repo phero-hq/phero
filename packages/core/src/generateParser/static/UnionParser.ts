@@ -1,10 +1,10 @@
-import { ParseError, Parser, ParseResult } from "../../domain/Parser"
+import { DataParseError, Parser, ParseResult } from "../../domain/Parser"
 
 export default function UnionParser<T>(
   ...elementParsers: Parser<any>[]
 ): Parser<T> {
   return (data: unknown): ParseResult<T> => {
-    const errors: ParseError[] = []
+    const errors: DataParseError[] = []
 
     for (let i = 0; i < elementParsers.length; i++) {
       const parseResult = elementParsers[i](data)

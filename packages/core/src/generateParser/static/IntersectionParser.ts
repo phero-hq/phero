@@ -1,11 +1,11 @@
-import { ParseError, Parser, ParseResult } from "../../domain/Parser"
+import { DataParseError, Parser, ParseResult } from "../../domain/Parser"
 
-export function IntersectionParser<T>(
+export default function IntersectionParser<T>(
   ...typeParsers: Parser<any>[]
 ): Parser<T> {
   return (data: unknown): ParseResult<T> => {
     const result: any = {}
-    const errors: ParseError[] = []
+    const errors: DataParseError[] = []
 
     for (let i = 0; i < typeParsers.length; i++) {
       const parseResult = typeParsers[i](data)

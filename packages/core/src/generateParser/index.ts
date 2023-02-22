@@ -1,7 +1,11 @@
-import { ParserModel, ParserModelType } from "../domain/ParserModel"
+import {
+  ObjectParserModel,
+  ParserModel,
+  ParserModelType,
+} from "../domain/ParserModel"
 
 import ts from "typescript"
-import { tsx } from ".."
+import { PheroError, tsx } from ".."
 import { DependencyMap, FunctionParserModel } from "../generateModel"
 
 export type ParserFuncRef = ts.Identifier | ts.CallExpression
@@ -37,28 +41,93 @@ export function generateInlineParser(
       name: "ParseResult",
       args: [tsx.type.any],
     }),
-    body: [tsx.statement.expression(generateParserRef(model, depRefs))],
+    body: [
+      tsx.statement.return(
+        tsx.expression.call(generateParserRef(model, depRefs), {
+          args: ["data"],
+        }),
+      ),
+    ],
+  })
+}
+
+export function generateModelParser(
+  name: string,
+  model: ParserModel,
+  depRefs: DependencyRefs,
+): ts.FunctionDeclaration {
+  return tsx.function({
+    name: `${name}Parser`,
+    params: [tsx.param({ name: "data", type: tsx.type.unknown })],
+    returnType: tsx.type.reference({
+      name: "ParseResult",
+      args: [tsx.type.reference({ name })],
+    }),
+    body: [
+      tsx.const({
+        name: `_parser`,
+        type: tsx.type.reference({
+          name: "Parser",
+          args: [tsx.type.reference({ name })],
+        }),
+        init: generateParserRef(model, depRefs),
+      }),
+      tsx.statement.return(
+        tsx.expression.call("_parser", {
+          args: ["data"],
+        }),
+      ),
+    ],
+  })
+}
+
+export function generateErrorParser(
+  error: PheroError,
+  depRefs: DependencyRefs,
+): ts.FunctionDeclaration {
+  const errorType = tsx.literal.type(
+    ...error.properties.map(({ name, type, optional }) =>
+      tsx.property.signature(name, type, optional),
+    ),
+  )
+  return tsx.function({
+    name: `${error.name}Parser`,
+    params: [tsx.param({ name: "data", type: tsx.type.unknown })],
+    returnType: tsx.type.reference({
+      name: "ParseResult",
+      args: [errorType],
+    }),
+    body: [
+      tsx.const({
+        name: `_parser`,
+        type: tsx.type.reference({
+          name: "Parser",
+          args: [errorType],
+        }),
+        init: generateParserRef(error.errorModel, depRefs),
+      }),
+      tsx.statement.return(
+        tsx.expression.call("_parser", {
+          args: ["data"],
+        }),
+      ),
+    ],
   })
 }
 
 export function generateParserFunction(
   name: string,
   model: ParserModel,
+  typeNode: ts.TypeNode,
   depRefs: DependencyRefs,
-): ts.FunctionDeclaration {
-  return tsx.function({
+): ts.VariableStatement {
+  return tsx.const({
     name,
-    params: [
-      tsx.param({
-        name: "data",
-        type: tsx.type.unknown,
-      }),
-    ],
-    returnType: tsx.type.reference({
-      name: "ParseResult",
-      args: [tsx.type.any],
+    type: tsx.type.reference({
+      name: "Parser",
+      args: [typeNode],
     }),
-    body: [tsx.statement.return(generateParserRef(model, depRefs))],
+    init: generateParserRef(model, depRefs),
   })
 }
 
@@ -94,35 +163,35 @@ function generateParserRef(
 ): ParserFuncRef {
   switch (model.type) {
     case ParserModelType.Any:
-      return tsx.expression.identifier("AnyParser")
+      return tsx.expression.identifier("parser.Any")
     case ParserModelType.String:
-      return tsx.expression.identifier("StringParser")
+      return tsx.expression.identifier("parser.String")
     case ParserModelType.StringLiteral:
-      return tsx.expression.call("StringLiteralParser", {
+      return tsx.expression.call("parser.StringLiteral", {
         args: [tsx.literal.string(model.literal)],
       })
     case ParserModelType.Number:
-      return tsx.expression.identifier("NumberParser")
+      return tsx.expression.identifier("parser.Number")
     case ParserModelType.NumberLiteral:
-      return tsx.expression.call("NumberLiteralParser", {
+      return tsx.expression.call("parser.NumberLiteral", {
         args: [tsx.literal.number(model.literal)],
       })
     case ParserModelType.Boolean:
-      return tsx.expression.identifier("BooleanParser")
+      return tsx.expression.identifier("parser.Boolean")
     case ParserModelType.BooleanLiteral:
-      return tsx.expression.call("BooleanLiteralParser", {
-        args: [tsx.literal.boolean(model.literal)],
-      })
+      return tsx.expression.identifier(
+        model.literal ? "parser.TrueLiteral" : "parser.FalseLiteral",
+      )
     case ParserModelType.Null:
-      return tsx.expression.identifier("NullParser")
+      return tsx.expression.identifier("parser.Null")
     case ParserModelType.Undefined:
-      return tsx.expression.identifier("UndefinedParser")
+      return tsx.expression.identifier("parser.Undefined")
     case ParserModelType.Date:
-      return tsx.expression.identifier("DateParser")
+      return tsx.expression.identifier("parser.Date")
     case ParserModelType.BigInt:
-      return tsx.expression.identifier("BigIntParser")
+      return tsx.expression.identifier("parser.BigInt")
     case ParserModelType.BigIntLiteral:
-      return tsx.expression.call("BigIntLiteralParser", {
+      return tsx.expression.call("parser.BigIntLiteral", {
         args: [
           tsx.literal.string(
             `${model.literal.negative ? "-" : ""}${model.literal.base10Value}`,
@@ -131,20 +200,20 @@ function generateParserRef(
       })
 
     case ParserModelType.Array:
-      return tsx.expression.call(`ArrayParser`, {
+      return tsx.expression.call("parser.Array", {
         args: [generateParserRef(model.element.parser, depRefs)],
       })
 
     case ParserModelType.Union:
-      return tsx.expression.call(`UnionParser`, {
+      return tsx.expression.call("parser.Union", {
         args: [...model.oneOf.map((el) => generateParserRef(el, depRefs))],
       })
     case ParserModelType.Intersection:
-      return tsx.expression.call(`IntersectionParser`, {
+      return tsx.expression.call("parser.Intersection", {
         args: [...model.parsers.map((el) => generateParserRef(el, depRefs))],
       })
     case ParserModelType.Tuple:
-      return tsx.expression.call(`TupleParser`, {
+      return tsx.expression.call("parser.Tuple", {
         args: [
           ...model.elements.map((el) =>
             el.isRestElement
@@ -161,7 +230,7 @@ function generateParserRef(
       return generateParserRef(model.parser, depRefs)
 
     case ParserModelType.Object:
-      return tsx.expression.call(`ObjectLiteralParser`, {
+      return tsx.expression.call("parser.ObjectLiteral", {
         args: model.members.map((el) =>
           el.type === ParserModelType.Member
             ? tsx.literal.array(
@@ -171,7 +240,7 @@ function generateParserRef(
               )
             : tsx.literal.array(
                 el.keyParser.type === ParserModelType.Number
-                  ? tsx.expression.identifier("NumberKeyParser")
+                  ? tsx.expression.identifier("parser.NumberKey")
                   : generateParserRef(el.keyParser, depRefs),
                 tsx.literal.boolean(el.optional),
                 generateParserRef(el.parser, depRefs),
@@ -180,7 +249,7 @@ function generateParserRef(
       })
 
     case ParserModelType.Enum:
-      return tsx.expression.call(`EnumParser`, {
+      return tsx.expression.call("parser.Enum", {
         args: model.members.map((el) =>
           el.parser.type === ParserModelType.StringLiteral
             ? tsx.literal.string(el.parser.literal)
@@ -195,7 +264,7 @@ function generateParserRef(
       return generateParserRef(model.parser, depRefs)
 
     case ParserModelType.TemplateLiteral:
-      return tsx.expression.call(`TemplateLiteralParser`, {
+      return tsx.expression.call("parser.TemplateLiteral", {
         args: [
           tsx.literal.regularExpression(
             `/^${model.parsers.map(generateRegExpSegmentForParser).join("")}$/`,

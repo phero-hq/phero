@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { DependencyMap, InternalParserModelMap, TypeParamMap } from "."
-import { ParseError } from "../domain/errors"
+import { PheroParseError } from "../domain/errors"
 import { getTypeFlags } from "./generateParserModelUtils"
 import {
   IndexMemberParserModel,
@@ -116,14 +116,14 @@ export default function generateFromType(
           const propSignature = prop.declarations?.[0]
 
           if (!propSignature || !ts.isPropertySignature(propSignature)) {
-            throw new ParseError(
+            throw new PheroParseError(
               "Unexpected declaration " + typeNode.kind,
               typeNode,
             )
           }
 
           if (!propSignature.type) {
-            throw new ParseError("Property must have type", propSignature)
+            throw new PheroParseError("Property must have type", propSignature)
           }
 
           const propModel = generateFromTypeNode(
@@ -238,7 +238,7 @@ export default function generateFromType(
   } else if (type.flags & ts.TypeFlags.Undefined) {
     return { root: { type: ParserModelType.Undefined }, deps }
   } else if (type.flags & ts.TypeFlags.Never) {
-    throw new ParseError("Never will never be supported", typeNode)
+    throw new PheroParseError("Never will never be supported", typeNode)
   } else if (type.flags & ts.TypeFlags.TemplateLiteral) {
     const templateLiteralType = type as ts.TemplateLiteralType
 
@@ -274,7 +274,7 @@ export default function generateFromType(
     }
   }
 
-  throw new ParseError(
+  throw new PheroParseError(
     `ParserModel for Type with flags (${getTypeFlags(type).join(
       " | ",
     )}) not implemented`,

@@ -1,13 +1,13 @@
-import { ParseError, Parser, ParseResult } from "../../domain/Parser"
+import { DataParseError, Parser, ParseResult } from "../../domain/Parser"
 
 type TupleElementParser = [parser: Parser<any>, isRestElement?: boolean]
 
-export function TupleParser<T extends unknown[]>(
+export default function TupleParser<T extends unknown[]>(
   ...elementParsers: TupleElementParser[]
 ): Parser<T> {
   return (data: unknown): ParseResult<T> => {
     const result: any = []
-    const errors: ParseError[] = []
+    const errors: DataParseError[] = []
 
     const processResult = (
       index: number,
@@ -28,7 +28,6 @@ export function TupleParser<T extends unknown[]>(
 
     if (Array.isArray(data)) {
       for (let i = 0; i < elementParsers.length; i++) {
-        // console.log("DO i", i)
         const [elementParser, isRestElement] = elementParsers[i]
         if (!isRestElement) {
           processResult(i, elementParser(data[i]))

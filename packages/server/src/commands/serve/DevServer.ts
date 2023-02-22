@@ -125,7 +125,7 @@ export default class DevServer {
       this.clearRequireCache()
       this.eventEmitter.emit({ type: "BUILD_RPCS_SUCCESS" })
     } catch (error) {
-      console.error(error)
+      console.error("err", error)
       this.eventEmitter.emit({
         type: "BUILD_RPCS_FAILED",
         errorMessage: error instanceof Error ? error.message : "Unknown error",

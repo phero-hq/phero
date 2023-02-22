@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { ParseError } from "../../domain/errors"
+import { PheroParseError } from "../../domain/errors"
 import { ParserModel, ParserModelType } from "../../domain/ParserModel"
 
 export default function generateFromLiteralTypeNode(
@@ -46,7 +46,7 @@ export default function generateFromLiteralTypeNode(
     case ts.SyntaxKind.ObjectLiteralExpression:
     case ts.SyntaxKind.PrefixUnaryExpression:
     default:
-      throw new ParseError(
+      throw new PheroParseError(
         `Literal ${typeNode.literal.kind} not implemented`,
         typeNode,
       )

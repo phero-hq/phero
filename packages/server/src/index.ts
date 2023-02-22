@@ -1,3 +1,11 @@
+export {
+  parser,
+  Parser,
+  ParseResult,
+  RPCResult,
+  DataParseError,
+} from "@phero/core"
+
 export type PheroServiceFunctions = Record<string, Function>
 
 export interface PheroServiceDefinition {

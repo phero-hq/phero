@@ -22,11 +22,13 @@ export interface PheroError {
   name: string
   sourceFile: string
   properties: PheroErrorProperty[]
+  errorModel: ObjectParserModel
   ref: ts.ClassDeclaration
 }
 
 export interface PheroErrorProperty {
   name: string
+  optional: boolean
   type: ts.TypeNode
 }
 
@@ -45,6 +47,7 @@ export interface PheroFunction {
   parameters: PheroFunctionParameter[]
   parametersModel: ObjectParserModel
   contextParameterType?: ts.TypeNode
+  // TODO contextModel?
 
   ref: ts.FunctionLikeDeclarationBase
 }

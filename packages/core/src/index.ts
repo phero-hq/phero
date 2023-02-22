@@ -8,7 +8,7 @@ export {
 export {
   MissingTSConfigFileError,
   MissingPheroFileError,
-  ParseError,
+  PheroParseError,
   PortInUseError,
   hasErrorCode,
 } from "./domain/errors"
@@ -27,6 +27,7 @@ export * as tsx from "./tsx"
 
 export {
   generateFunctionParsers,
+  generateModelParser,
   generateParserFunction,
   generateInlineParser,
   generateDependencyRefs,
@@ -34,4 +35,13 @@ export {
 } from "./generateParser"
 
 export { VirtualCompilerHost } from "./lib/VirtualCompilerHost"
-export { generateTypeNode, generateTypeElement } from "./lib/generateTypeNode"
+export { default as cloneTS } from "./lib/cloneTS"
+
+export * as parser from "./generateParser/static"
+export {
+  Parser,
+  ParseResult,
+  DataParseSuccess,
+  DataParseFailure,
+  DataParseError,
+} from "./domain/Parser"

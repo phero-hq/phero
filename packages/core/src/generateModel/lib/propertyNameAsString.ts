@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { ParseError } from "../../domain/errors"
+import { PheroParseError } from "../../domain/errors"
 
 export default function propertyNameAsString(
   propertyName: ts.PropertyName,
@@ -14,18 +14,18 @@ export default function propertyNameAsString(
     return propertyName.text
   }
   if (ts.isComputedPropertyName(propertyName)) {
-    throw new ParseError(
+    throw new PheroParseError(
       "Member name must not be computed property",
       propertyName,
     )
   }
 
   if (ts.isPrivateIdentifier(propertyName)) {
-    throw new ParseError(
+    throw new PheroParseError(
       "Member name must not be private identifier",
       propertyName,
     )
   }
 
-  throw new ParseError(`Unexpected value for member name`, propertyName)
+  throw new PheroParseError(`Unexpected value for member name`, propertyName)
 }

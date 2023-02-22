@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { ParseError } from "../domain/errors"
+import { PheroParseError } from "../domain/errors"
 import { PheroMiddlewareConfig } from "../domain/PheroApp"
 import {
   getFirstChildOfKind,
@@ -60,7 +60,7 @@ function parseMiddlewareConfig(
   middleware: ts.FunctionLikeDeclarationBase,
 ): PheroMiddlewareConfig {
   if (middleware.parameters.length !== 3) {
-    throw new ParseError(
+    throw new PheroParseError(
       `S129: Middleware should have three parameters "(params: PheroParams<P>, ctx: PheroContext<C>, next: PheroNextFunction<T>)"`,
       middleware,
     )
@@ -84,7 +84,7 @@ function parseParamsType(paramsParam: ts.ParameterDeclaration): ts.TypeNode {
     !ts.isTypeReferenceNode(paramsType) ||
     getTypeName(paramsType) !== "PheroParams"
   ) {
-    throw new ParseError(
+    throw new PheroParseError(
       `S130: Middleware params parameter has no or incorrect type, should be defined like "params: PheroParams<T>"`,
       paramsParam,
     )
@@ -101,7 +101,7 @@ function parseContextType(contextParam: ts.ParameterDeclaration): ts.TypeNode {
     !ts.isTypeReferenceNode(contextType) ||
     getTypeName(contextType) !== "PheroContext"
   ) {
-    throw new ParseError(
+    throw new PheroParseError(
       `S131: Middleware ctx parameter has no or incorrect type, should be defined like "ctx: PheroContext<T>"`,
       contextParam,
     )
@@ -120,7 +120,7 @@ function parseNextType(
     !ts.isTypeReferenceNode(nextType) ||
     getTypeName(nextType) !== "PheroNextFunction"
   ) {
-    throw new ParseError(
+    throw new PheroParseError(
       `S132: Middleware next parameter has no or incorrect type, should be defined like "next: PheroNextFunction<T>"`,
       nextParam,
     )

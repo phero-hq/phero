@@ -1,21 +1,22 @@
 import {
-  generateTypeNode,
+  cloneTS,
   PheroApp,
   PheroError,
   PheroFunction,
   PheroService,
   tsx,
   generateDependencyRefs,
+  generateModelParser,
   generateParserFunction,
 } from "@phero/core"
 import ts from "typescript"
 
-export default function generateClientSource2(
+export default function generateClientSource(
   app: PheroApp,
   prog: ts.Program,
 ): ts.SourceFile {
   const importsFromClientPackage = tsx.importDeclaration({
-    names: ["Fetch", "BasePheroClient", "ParseResult", "ValidationError"],
+    names: ["Fetch", "BasePheroClient", "Parser", "ParseResult", "parser"],
     module: "@phero/client",
   })
 
@@ -96,9 +97,9 @@ export default function generateClientSource2(
 
   const pheroClientSource = tsx.sourceFile(
     importsFromClientPackage,
-    ...app.models.map((model) => model.ref),
-    ...Object.entries(app.deps).map(([name, model]) =>
-      generateParserFunction(name, model, depRef),
+    ...app.models.map((model) => cloneTS(model.ref)),
+    ...[...app.deps.entries()].map(([name, model]) =>
+      generateModelParser(name, model, depRef),
     ),
     ...app.errors.map((err) => generateError(err)),
     ...app.services.flatMap((service) =>
@@ -106,6 +107,7 @@ export default function generateClientSource2(
         generateParserFunction(
           `${service.name}__${func.name}__parser`,
           func.returnTypeModel,
+          func.returnType,
           depRef,
         ),
       ),
@@ -167,7 +169,7 @@ function generateContextParam(app: PheroApp): ts.PropertySignature | undefined {
       ...serviceContextTypes.map(({ serviceName, contextType }) =>
         tsx.property.signature(
           serviceName,
-          tsx.literal.function({
+          tsx.type.function({
             params: [],
             type: tsx.type.union(
               contextType,
@@ -194,7 +196,8 @@ function generateError(parsedError: PheroError): ts.ClassDeclaration {
           public: true,
           readonly: true,
           name: prop.name,
-          type: generateTypeNode(prop.type),
+          type: cloneTS(prop.type),
+          questionToken: prop.optional,
         }),
       ),
       block: tsx.block(
@@ -273,7 +276,7 @@ function generateClientFunction(
       p.questionToken
         ? ts.factory.createToken(ts.SyntaxKind.QuestionToken)
         : undefined,
-      generateTypeNode(p.type),
+      cloneTS(p.type),
       undefined, // initializer is prohibited, only on classes
     ),
   )
@@ -286,7 +289,7 @@ function generateClientFunction(
       parameters,
       tsx.type.reference({
         name: "Promise",
-        args: [generateTypeNode(func.returnType)],
+        args: [cloneTS(func.returnType)],
       }),
       undefined,
       generateClientFunctionBlock(service, func),
@@ -308,7 +311,7 @@ function generateClientFunctionBlock(
           isVoid ? "requestVoid" : "request",
         ),
         {
-          typeArgs: isVoid ? undefined : [generateTypeNode(func.returnType)],
+          typeArgs: isVoid ? undefined : [cloneTS(func.returnType)],
 
           args: [
             tsx.literal.string(service.name),

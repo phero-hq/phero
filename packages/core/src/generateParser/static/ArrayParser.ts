@@ -1,9 +1,9 @@
-import { Parser, ParseResult, ParseError } from "../../domain/Parser"
+import { Parser, ParseResult, DataParseError } from "../../domain/Parser"
 
 export default function ArrayParser<T>(elementParser: Parser<T>): Parser<T[]> {
   return (data: unknown): ParseResult<T[]> => {
     const result: T[] = []
-    const errors: ParseError[] = []
+    const errors: DataParseError[] = []
     if (Array.isArray(data)) {
       for (let i = 0; i < data.length; i++) {
         const elementParseResult = elementParser(data[i])

@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { DependencyMap, InternalParserModelMap, TypeParamMap } from ".."
-import { ParseError } from "../../domain/errors"
+import { PheroParseError } from "../../domain/errors"
 import {
   MemberParserModel,
   ParserModel,
@@ -18,7 +18,7 @@ export default function generateFromTypeOperatorNode(
   typeParams: TypeParamMap,
 ): InternalParserModelMap {
   if (typeNode.operator !== ts.SyntaxKind.KeyOfKeyword) {
-    throw new ParseError("Operator not supported", typeNode)
+    throw new PheroParseError("Operator not supported", typeNode)
   }
 
   if (ts.isTypeQueryNode(typeNode.type)) {
@@ -93,7 +93,7 @@ function enumeratePropertiesOfParserModel(
   if (model.type === ParserModelType.Reference) {
     const referenceModel = deps.get(model.typeName)
     if (!referenceModel) {
-      throw new ParseError(
+      throw new PheroParseError(
         "Can't enumerate properties of reference with name " + model.typeName,
         typeNode,
       )
@@ -105,7 +105,7 @@ function enumeratePropertiesOfParserModel(
     return enumeratePropertiesOfParserModel(model.parser, deps, typeNode)
   }
 
-  throw new ParseError(
+  throw new PheroParseError(
     "Can't enumerate properties of model with type " + model.type,
     typeNode,
   )

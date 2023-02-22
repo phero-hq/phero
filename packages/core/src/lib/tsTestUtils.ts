@@ -24,23 +24,15 @@ export function printPheroApp(app: PheroApp): string {
     4,
   )
 
-  function printFunctionDeclaration(
-    func: FunctionLikeDeclarationBase | VariableDeclaration,
-  ): string {
-    const funcName = func.name?.getText()
-
-    if (!funcName) {
-      throw new Error("Func must have name")
-    }
-
-    return func.kind === ts.SyntaxKind.FunctionDeclaration
-      ? `[FunctionDeclaration(${funcName})]`
-      : func.kind === ts.SyntaxKind.VariableDeclaration
-      ? `[VariableDeclaration(${funcName})]`
-      : func.kind === ts.SyntaxKind.FunctionExpression
-      ? `[FunctionExpression(${funcName})]`
-      : func.kind === ts.SyntaxKind.ArrowFunction
-      ? `[ArrowFunction(${funcName})]`
+  function printFunctionDeclaration(func: ts.Node): string {
+    return ts.isFunctionDeclaration(func)
+      ? `[FunctionDeclaration(${func.name?.text ?? "no name"})]`
+      : ts.isVariableDeclaration(func)
+      ? `[VariableDeclaration(${func.name.getText()})]`
+      : ts.isFunctionExpression(func)
+      ? `[FunctionExpression(${func.name?.text ?? "no name"})]`
+      : ts.isArrowFunction(func)
+      ? `[ArrowFunction(no name)]`
       : "[UNKNOWN]"
   }
 }

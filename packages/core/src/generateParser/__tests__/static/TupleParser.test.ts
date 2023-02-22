@@ -1,6 +1,6 @@
 import NumberParser from "../../static/NumberParser"
 import StringParser from "../../static/StringParser"
-import { TupleParser } from "../../static/TupleParser"
+import TupleParser from "../../static/TupleParser"
 
 describe("TupleParser", () => {
   describe("[string, ...number[]]", () => {

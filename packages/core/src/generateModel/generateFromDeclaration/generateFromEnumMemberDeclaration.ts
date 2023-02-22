@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { ParseError } from "../../domain/errors"
+import { PheroParseError } from "../../domain/errors"
 import {
   EnumMemberParserModel,
   ParserModelType,
@@ -43,7 +43,7 @@ export default function generateFromEnumMemberDeclaration(
     }
   }
 
-  throw new ParseError(
+  throw new PheroParseError(
     "Enum member should be either of type string or number",
     member,
   )

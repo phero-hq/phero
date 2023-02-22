@@ -1,10 +1,8 @@
-import { ParseError } from "./Parser"
+import { DataParseError } from "./Parser"
 
 export type RPCResult<T> =
   | RPCOkResult<T>
-  // | RPCNoContentResult
   | RPCBadRequestResult
-  // | RPCUnauthorizedResult
   | RPCInternalServerErrorResult
 
 export interface RPCOkResult<T> {
@@ -12,25 +10,17 @@ export interface RPCOkResult<T> {
   result: T
 }
 
-// export interface RPCNoContentResult {
-//   status: 204
-// }
-
 export interface RPCBadRequestResult {
   status: 400
-  errors: ParseError[]
+  errors: DataParseError[]
   input: any
 }
-
-// export interface RPCUnauthorizedResult {
-//   status: 401
-// }
 
 export interface RPCInternalServerErrorResult {
   status: 500
   error: {
     name: string
     props: Record<string, any>
-    stack: string
+    stack?: string
   }
 }

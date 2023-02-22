@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { ParseError } from "../domain/errors"
+import { PheroParseError } from "../domain/errors"
 import { printCode } from "./tsTestUtils"
 
 export interface KindToNodeMappings {
@@ -260,23 +260,23 @@ export function getNameAsString(
   } else if (ts.isQualifiedName(name)) {
     return name.right.text
   } else if (ts.isComputedPropertyName(name)) {
-    throw new ParseError(
+    throw new PheroParseError(
       `S134: No support for computed names ${printCode(name)}`,
       name,
     )
   } else if (ts.isPrivateIdentifier(name)) {
-    throw new ParseError(
+    throw new PheroParseError(
       `S135: No support for private names ${printCode(name)}`,
       name,
     )
   } else if (ts.isBindingName(name)) {
-    throw new ParseError(
+    throw new PheroParseError(
       `S136: No support for binding names ${printCode(name)}`,
       name,
     )
   }
 
-  throw new ParseError("S137: Name not supported", name)
+  throw new PheroParseError("S137: Name not supported", name)
 }
 
 export function getFullyQualifiedName(

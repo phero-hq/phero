@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { ParseError } from "../domain/errors"
+import { PheroParseError } from "../domain/errors"
 import parseServiceMiddlewareConfig from "./parseServiceMiddlewareConfig"
 import { PheroServiceConfig } from "../domain/PheroApp"
 import { resolveSymbol } from "../lib/tsUtils"
@@ -32,5 +32,5 @@ export default function parseServiceConfig(
     return parseServiceConfig(node.initializer, prog)
   }
 
-  throw new ParseError("S126: Unsupport syntax for function config", node)
+  throw new PheroParseError("S126: Unsupport syntax for function config", node)
 }

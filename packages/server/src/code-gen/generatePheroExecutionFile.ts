@@ -1,18 +1,20 @@
 import ts from "typescript"
 import {
   PheroApp,
-  ParseError,
+  PheroParseError,
   PheroFunction,
   PheroService,
   VirtualCompilerHost,
   tsx,
   PheroError,
   PheroServiceConfig,
-  generateParserFunction,
   generateDependencyRefs,
   generateInlineParser,
   DependencyRefs,
+  generateModelParser,
+  cloneTS,
 } from "@phero/core"
+import { generateErrorParser } from "@phero/core/dist/generateParser"
 
 const factory = ts.factory
 
@@ -35,7 +37,13 @@ export default function generatePheroExecutionFile(
     new Map<ts.SourceFile, string[]>(),
   )
 
-  console.log(prog.getCompilerOptions().sourceRoot)
+  tsNodes.push(
+    tsx.importDeclaration({
+      names: ["Parser", "ParseResult", "parser", "RPCResult", "DataParseError"],
+      module: "@phero/server",
+    }),
+  )
+
   for (const [sourceFile, serviceNames] of serviceSourceFiles.entries()) {
     tsNodes.push(
       factory.createImportDeclaration(
@@ -65,42 +73,66 @@ export default function generatePheroExecutionFile(
     )
   }
 
-  tsNodes.push(...types)
-
   tsNodes.push(
-    tsx.verbatim(`
-    type Defer<T = void> = {
-      resolve: (result: T) => void
-      reject: (err: Error) => void
-      promise: Promise<T>
-    }
+    tsx.verbatim(`type Defer<T = void> = {
+  resolve: (result: T) => void
+  reject: (err: Error) => void
+  promise: Promise<T>
+}
 
-    function defer<T>(): Defer<T> {
-      const deferred: Defer<T> = {} as Defer<T>
-      const promise = new Promise<T>((resolve, reject) => {
-        deferred.resolve = (result: T) => resolve(result)
-        deferred.reject = (err: Error) => reject(err)
-      })
-      deferred.promise = promise
-      return deferred
-    }
+function defer<T>(): Defer<T> {
+  const deferred: Defer<T> = {} as Defer<T>
+  const promise = new Promise<T>((resolve, reject) => {
+    deferred.resolve = (result: T) => resolve(result)
+    deferred.reject = (err: Error) => reject(err)
+  })
+  deferred.promise = promise
+  return deferred
+}
 
-    class ContextParseError extends Error {
-      constructor(public readonly errors: ValidationError[], public readonly input: any) {
-        super("ContextParseError")
-        // https://github.com/microsoft/TypeScript/issues/22585
-        Object.setPrototypeOf(this, ContextParseError.prototype)
-      }
+class ContextParseError extends Error {
+  constructor(public readonly errors: DataParseError[], public readonly input: any) {
+    super("ContextParseError")
+    // https://github.com/microsoft/TypeScript/issues/22585
+    Object.setPrototypeOf(this, ContextParseError.prototype)
+  }
+}
+
+function defaultErrorMapper<T>(error: unknown): RPCResult<T> {
+  if (error instanceof ContextParseError) {
+    return { status: 400, input: error.input, errors: error.errors }
+  } else if (error instanceof Error) {
+    return {
+      status: 500,
+      error: {
+        name: "Error",
+        props: { message: error.message },
+        stack: error.stack,
+      },
     }
+  } else {
+    return {
+      status: 500,
+      error: {
+        name: "Error",
+        props: { message: "Internal Server Error" },
+      },
+    }
+  }
+}
   `),
   )
   const depRefs = generateDependencyRefs(app.deps)
 
   for (const domainModel of app.models) {
-    tsNodes.push(domainModel.ref)
+    tsNodes.push(cloneTS(domainModel.ref))
   }
   for (const [name, model] of [...app.deps]) {
-    tsNodes.push(generateParserFunction(name, model, depRefs))
+    // tsNodes.push(generateParserFunction(name, model,  depRefs))
+    tsNodes.push(generateModelParser(name, model, depRefs))
+  }
+  for (const error of [...app.errors]) {
+    tsNodes.push(generateErrorParser(error, depRefs))
   }
 
   const middlewareModelSet = new Set<ts.Node>()
@@ -125,7 +157,7 @@ export default function generatePheroExecutionFile(
 
     for (const serviceFunction of service.funcs) {
       tsNodes.push(
-        generateRPCExecutor(service, serviceFunction, app.errors, prog),
+        generateRPCExecutor(service, serviceFunction, app.errors),
         generateInnerFunction(service, serviceFunction, depRefs),
       )
     }
@@ -148,6 +180,12 @@ export default function generatePheroExecutionFile(
     ts.ListFormat.SourceFileStatements,
     ts.factory.createNodeArray(tsNodes),
     file,
+  )
+
+  require("fs").writeFileSync(
+    "/Users/kamilafsar/Projects/examples/web/server/src/out.ts",
+    tsPheroExecution,
+    { encoding: "utf8" },
   )
 
   const vHost = new VirtualCompilerHost({
@@ -182,7 +220,16 @@ function generateCorsConfigFunction(
     params: [],
     body: [
       tsx.statement.return(
-        tsx.expression.propertyAccess(service.name, "config", "cors"),
+        tsx.expression.binary(
+          tsx.expression.propertyAccess(
+            service.name,
+            "config",
+            "cors?",
+            "originWhitelist",
+          ),
+          "??",
+          tsx.literal.array(),
+        ),
       ),
     ],
   })
@@ -192,7 +239,6 @@ function generateRPCExecutor(
   service: PheroService,
   funcDef: PheroFunction,
   domainErrors: PheroError[],
-  prog: ts.Program,
 ): ts.FunctionDeclaration {
   return tsx.function({
     export: true,
@@ -201,7 +247,12 @@ function generateRPCExecutor(
     params: [tsx.param({ name: "input", type: tsx.type.any })],
     returnType: tsx.type.reference({
       name: "Promise",
-      args: [tsx.type.reference({ name: "RPCResult", args: [tsx.type.any] })],
+      args: [
+        tsx.type.reference({
+          name: "RPCResult",
+          args: [cloneTS(funcDef.returnType)],
+        }),
+      ],
     }),
     body: tsx.block(
       wrapWithErrorHandler(
@@ -792,7 +843,7 @@ function wrapWithErrorHandler(
     block: statements,
     catch: {
       error: "error",
-      block: [generateErrorParsingFunction(domainErrors)],
+      block: generateErrorParsingFunction(domainErrors),
     },
   })
 }
@@ -870,9 +921,7 @@ function generateRPCFunctionCall({
   )
 }
 
-function generateErrorParsingFunction(
-  domainErrors: PheroError[],
-): ts.IfStatement {
+function generateErrorParsingFunction(domainErrors: PheroError[]): ts.Block {
   function wrapErrorWithStatusObject(
     errorObj: ts.ObjectLiteralExpression,
   ): ts.ObjectLiteralExpression {
@@ -882,7 +931,7 @@ function generateErrorParsingFunction(
     )
   }
 
-  const fallbackSt = tsx.statement.if({
+  const fallbackSt: ts.IfStatement = tsx.statement.if({
     expression: tsx.expression.binary(
       tsx.expression.identifier("error"),
       "instanceof",
@@ -903,101 +952,75 @@ function generateErrorParsingFunction(
         ),
       ),
     ),
-    else: tsx.statement.if({
-      expression: tsx.expression.propertyAccess(
-        tsx.expression.identifier("error?"),
-        "message",
-      ),
-      then: tsx.statement.return(
-        wrapErrorWithStatusObject(
-          tsx.literal.object(
-            tsx.property.assignment("name", tsx.literal.string("Error")),
-            tsx.property.assignment(
-              "props",
-              tsx.literal.object(
-                tsx.property.assignment(
-                  "message",
-                  tsx.expression.propertyAccess("error", "message"),
-                ),
-              ),
-            ),
-            tsx.property.assignment(
-              "stack",
-              tsx.expression.propertyAccess("error", "stack"),
-            ),
-          ),
-        ),
-      ),
-      else: tsx.statement.return(
-        wrapErrorWithStatusObject(
-          tsx.literal.object(
-            tsx.property.assignment("name", tsx.literal.string("Error")),
-            tsx.property.assignment(
-              "props",
-              tsx.literal.object(
-                tsx.property.assignment(
-                  "message",
-                  tsx.literal.string("Internal Server Error"),
-                ),
-              ),
-            ),
-            tsx.property.assignment(
-              "stack",
-              tsx.expression.propertyAccess("error", "stack"),
-            ),
-          ),
-        ),
-      ),
-    }),
   })
 
-  const errors: Array<{ clientName: ts.StringLiteral; error: PheroError }> =
-    domainErrors.map((error) => ({
-      clientName: tsx.literal.string(error.name),
-      error,
-    }))
-
-  return errors.reduceRight((elseSt, { clientName, error }) => {
-    return tsx.statement.if({
-      expression: tsx.expression.binary(
-        tsx.expression.binary(
-          tsx.expression.identifier("error"),
-          "instanceof",
-          tsx.expression.identifier("Error"),
+  const errorIfElseTree: ts.IfStatement = domainErrors.reduceRight(
+    (elseSt: ts.IfStatement, error: PheroError) => {
+      return tsx.statement.if({
+        expression: tsx.expression.binary(
+          tsx.expression.binary(
+            tsx.expression.identifier("error"),
+            "instanceof",
+            tsx.expression.identifier("Error"),
+          ),
+          "&&",
+          tsx.expression.binary(
+            tsx.expression.propertyAccess("error", "constructor", "name"),
+            "==",
+            tsx.literal.string(error.name),
+          ),
         ),
-        "&&",
-        tsx.expression.binary(
-          tsx.expression.propertyAccess("error", "constructor", "name"),
-          "==",
-          tsx.literal.string(error.name),
-        ),
-      ),
-      then: tsx.statement.return(
-        wrapErrorWithStatusObject(
-          tsx.literal.object(
-            tsx.property.assignment("name", clientName),
-            tsx.property.assignment(
-              "props",
-
-              tsx.literal.object(
-                ...error.properties.map((prop) =>
+        then: tsx.block(
+          tsx.const({
+            name: "parsedError",
+            init: tsx.expression.call(`${error.name}Parser`, {
+              args: ["error"],
+            }),
+          }),
+          tsx.statement.if({
+            expression: tsx.expression.propertyAccess("parsedError", "ok"),
+            then: tsx.statement.return(
+              wrapErrorWithStatusObject(
+                tsx.literal.object(
                   tsx.property.assignment(
-                    prop.name,
-                    tsx.expression.propertyAccess("error", prop.name),
+                    "name",
+                    tsx.literal.string(error.name),
+                  ),
+                  tsx.property.assignment(
+                    "props",
+                    tsx.literal.object(
+                      tsx.property.assignment(
+                        "message",
+                        tsx.expression.propertyAccess("error", "message"),
+                      ),
+                      tsx.property.spreadAssignment(
+                        tsx.expression.propertyAccess("parsedError", "result"),
+                      ),
+                    ),
+                  ),
+                  tsx.property.assignment(
+                    "stack",
+                    tsx.expression.propertyAccess("error", "stack"),
                   ),
                 ),
               ),
             ),
-            tsx.property.assignment(
-              "stack",
-              tsx.expression.propertyAccess("error", "stack"),
-            ),
-          ),
+          }),
         ),
-      ),
-      else: elseSt,
-    })
-  }, fallbackSt)
+        else: elseSt,
+      })
+    },
+    fallbackSt,
+  )
+
+  return tsx.block(
+    errorIfElseTree,
+    tsx.statement.return(
+      tsx.expression.call("defaultErrorMapper", {
+        args: ["error"],
+      }),
+    ),
+  )
 }
 
 function generateIfParseResultNotOkayEarlyReturn({
@@ -1043,164 +1066,14 @@ function getParameterName(name: ts.BindingName): string {
   if (ts.isIdentifier(name)) {
     return name.text
   } else if (ts.isBindingName(name)) {
-    throw new ParseError(
+    throw new PheroParseError(
       `S138: No support for binding names ${name?.kind}`,
       name,
     )
   }
 
-  throw new ParseError("S139: Name not supported", name)
+  throw new PheroParseError("S139: Name not supported", name)
 }
-
-const types = [
-  tsx.typeAlias({
-    name: "ParseResult",
-    typeParameters: [tsx.typeParam({ name: "T" })],
-    type: tsx.type.union(
-      tsx.type.reference({
-        name: "ParseResultSuccess",
-        args: [tsx.type.reference({ name: "T" })],
-      }),
-      tsx.type.reference({ name: "ParseResultFailure" }),
-    ),
-  }),
-
-  tsx.interface({
-    name: "ParseResultSuccess",
-    typeParameters: [tsx.typeParam({ name: "T" })],
-    members: [
-      tsx.property.signature("ok", tsx.type.literalType(tsx.literal.true)),
-
-      tsx.property.signature("result", tsx.type.reference({ name: "T" })),
-    ],
-  }),
-
-  tsx.interface({
-    name: "ParseResultFailure",
-    members: [
-      tsx.property.signature("ok", tsx.type.literalType(tsx.literal.false)),
-
-      tsx.property.signature(
-        "errors",
-        tsx.type.array(tsx.type.reference({ name: "ValidationError" })),
-      ),
-    ],
-  }),
-  tsx.interface({
-    name: "ValidationError",
-    members: [
-      tsx.property.signature("path", tsx.type.string),
-      tsx.property.signature("message", tsx.type.string),
-    ],
-  }),
-
-  factory.createTypeAliasDeclaration(
-    undefined,
-    factory.createIdentifier("RPCResult"),
-    [
-      factory.createTypeParameterDeclaration(
-        undefined,
-        factory.createIdentifier("T"),
-        undefined,
-        undefined,
-      ),
-    ],
-    factory.createUnionTypeNode([
-      factory.createTypeReferenceNode(factory.createIdentifier("RPCOkResult"), [
-        factory.createTypeReferenceNode(
-          factory.createIdentifier("T"),
-          undefined,
-        ),
-      ]),
-      factory.createTypeReferenceNode(
-        factory.createIdentifier("RPCBadRequestResult"),
-        undefined,
-      ),
-      factory.createTypeReferenceNode(
-        factory.createIdentifier("RPCInternalServerErrorResult"),
-        undefined,
-      ),
-    ]),
-  ),
-  factory.createInterfaceDeclaration(
-    undefined,
-    factory.createIdentifier("RPCOkResult"),
-    [
-      factory.createTypeParameterDeclaration(
-        undefined,
-        factory.createIdentifier("T"),
-        undefined,
-        undefined,
-      ),
-    ],
-    undefined,
-    [
-      factory.createPropertySignature(
-        undefined,
-        factory.createIdentifier("status"),
-        undefined,
-        factory.createLiteralTypeNode(factory.createNumericLiteral("200")),
-      ),
-      factory.createPropertySignature(
-        undefined,
-        factory.createIdentifier("result"),
-        undefined,
-        factory.createTypeReferenceNode(
-          factory.createIdentifier("T"),
-          undefined,
-        ),
-      ),
-    ],
-  ),
-  factory.createInterfaceDeclaration(
-    undefined,
-    factory.createIdentifier("RPCBadRequestResult"),
-    undefined,
-    undefined,
-    [
-      factory.createPropertySignature(
-        undefined,
-        factory.createIdentifier("status"),
-        undefined,
-        factory.createLiteralTypeNode(factory.createNumericLiteral("400")),
-      ),
-      factory.createPropertySignature(
-        undefined,
-        factory.createIdentifier("errors"),
-        undefined,
-        factory.createArrayTypeNode(
-          factory.createTypeReferenceNode(
-            factory.createIdentifier("ValidationError"),
-            undefined,
-          ),
-        ),
-      ),
-    ],
-  ),
-  factory.createInterfaceDeclaration(
-    undefined,
-    factory.createIdentifier("RPCInternalServerErrorResult"),
-    undefined,
-    undefined,
-    [
-      factory.createPropertySignature(
-        undefined,
-        factory.createIdentifier("status"),
-        undefined,
-        factory.createLiteralTypeNode(factory.createNumericLiteral("500")),
-      ),
-      factory.createPropertySignature(
-        undefined,
-        factory.createIdentifier("error"),
-        undefined,
-        factory.createTypeReferenceNode(factory.createIdentifier("Record"), [
-          factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
-          factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword),
-        ]),
-      ),
-    ],
-  ),
-]
 
 function generateMiddlewareParsers(
   serviceName: string,

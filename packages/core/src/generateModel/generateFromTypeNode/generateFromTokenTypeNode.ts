@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { ParseError } from "../../domain/errors"
+import { PheroParseError } from "../../domain/errors"
 import { ParserModel, ParserModelType } from "../../domain/ParserModel"
 
 export default function generateFromTokenTypeNode(
@@ -33,7 +33,7 @@ export default function generateFromTokenTypeNode(
     case ts.SyntaxKind.SymbolKeyword:
     // TODO
     default:
-      throw new ParseError(
+      throw new PheroParseError(
         `TokenKind ${typeNode.kind} not implemented`,
         typeNode,
       )

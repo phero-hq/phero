@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { MissingPheroFileError, ParseError } from "../domain/errors"
+import { MissingPheroFileError, PheroParseError } from "../domain/errors"
 import extractErrors from "../extractErrors/extractErrors"
 import { hasModifier } from "../lib/tsUtils"
 import {
@@ -10,7 +10,7 @@ import {
 } from "../domain/PheroApp"
 import { parseFunctionModels } from "./parseModels"
 import parseServiceDefinition from "./parseServiceDefinition"
-import { DependencyMap } from "../generateModel"
+import { DependencyMap, generateParserModelForError } from "../generateModel"
 
 export function parsePheroApp(prog: ts.Program): PheroApp {
   const pheroSourceFiles = prog
@@ -37,7 +37,7 @@ export function parsePheroApp(prog: ts.Program): PheroApp {
 
   for (const service of pheroServices) {
     if (serviceNames.includes(service.name)) {
-      throw new ParseError(
+      throw new PheroParseError(
         "You already have a service with the same name.",
         service.ref,
       )
@@ -56,7 +56,7 @@ export function parsePheroApp(prog: ts.Program): PheroApp {
         if (!modelMap.has(modelName)) {
           modelMap.set(modelName, model)
         } else if (modelMap.get(modelName)?.ref !== model.ref) {
-          throw new ParseError(
+          throw new PheroParseError(
             `You already have a different model with the same name (${modelName}), currently this is not possible. We intent to implement namespaces soon, stay tuned.`,
             model.ref,
           )
@@ -68,21 +68,41 @@ export function parsePheroApp(prog: ts.Program): PheroApp {
   const allErrors = extractErrors(
     [
       ...pheroServices.flatMap((service) => [
-        ...service.funcs.map((func) => func.ref),
+        ...service.funcs
+          .map((func) => func.ref)
+          .filter(
+            (func): func is ts.FunctionLikeDeclarationBase =>
+              !ts.isMethodSignature(func),
+          ),
         ...(service.config.middleware?.map((m) => m.middleware) ?? []),
       ]),
     ],
     prog,
   )
 
-  for (const parsedError of allErrors) {
-    const errorName = parsedError.name
+  for (const error of allErrors) {
+    const errorName = error.name?.text
+
+    if (!errorName) {
+      throw new PheroParseError("Error must have name.", error)
+    }
     if (!errorMap.has(errorName)) {
-      errorMap.set(errorName, parsedError)
-    } else if (errorMap.get(errorName)?.ref !== parsedError.ref) {
-      throw new ParseError(
+      const { properties, errorModel } = generateParserModelForError(
+        error,
+        prog.getTypeChecker(),
+        deps,
+      )
+      errorMap.set(errorName, {
+        name: errorName,
+        ref: error,
+        sourceFile: error.getSourceFile().fileName,
+        properties,
+        errorModel,
+      })
+    } else if (errorMap.get(errorName)?.ref !== error) {
+      throw new PheroParseError(
         "You already have a different error class with the same name, currently this is not possible. We intent to implement namespaces soon, stay tuned.",
-        parsedError.ref,
+        error,
       )
     }
   }
@@ -115,12 +135,15 @@ function parsePheroServices(
       }
     } else if (ts.isExportDeclaration(statement)) {
       if (!statement.exportClause) {
-        throw new ParseError(
+        throw new PheroParseError(
           `S123: "export * from './file'" are not supported`,
           statement,
         )
       } else if (!ts.isNamedExports(statement.exportClause)) {
-        throw new ParseError("S124: Unsupported export statement", statement)
+        throw new PheroParseError(
+          "S124: Unsupported export statement",
+          statement,
+        )
       }
 
       for (const specifier of statement.exportClause.elements) {
@@ -128,7 +151,7 @@ function parsePheroServices(
         services.push(service)
       }
     } else {
-      throw new ParseError("S125: Unsupported export statement", statement)
+      throw new PheroParseError("S125: Unsupported export statement", statement)
     }
   }
 

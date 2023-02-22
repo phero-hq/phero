@@ -1,5 +1,5 @@
 import BooleanParser from "../../static/BooleanParser"
-import { IntersectionParser } from "../../static/IntersectionParser"
+import IntersectionParser from "../../static/IntersectionParser"
 import NumberParser from "../../static/NumberParser"
 import ObjectLiteralParser from "../../static/ObjectLiteralParser"
 import StringParser from "../../static/StringParser"

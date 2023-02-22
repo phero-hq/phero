@@ -7,19 +7,28 @@ export default function generateErrorDeclaration(
 ): ts.ClassDeclaration {
   return tsx.classDeclaration({
     name: error.name,
+    export: true,
     extendsType: ts.factory.createExpressionWithTypeArguments(
       tsx.expression.identifier("Error"),
       undefined,
     ),
     constructor: tsx.constructor({
-      params: error.properties.map((prop) =>
+      params: [
         tsx.param({
           // public: true,
           // readonly: true,
-          name: prop.name,
-          type: prop.type,
+          name: "message",
+          type: tsx.type.string,
         }),
-      ),
+        ...error.properties.map((prop) =>
+          tsx.param({
+            // public: true,
+            // readonly: true,
+            name: prop.name,
+            type: prop.type,
+          }),
+        ),
+      ],
     }),
   })
 }

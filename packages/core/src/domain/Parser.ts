@@ -1,19 +1,19 @@
 export type Parser<T> = (data: unknown) => ParseResult<T>
 
-export type ParseResult<T> = ParseSucceed<T> | ParseFailure
+export type ParseResult<T> = DataParseSuccess<T> | DataParseFailure
 
-export interface ParseSucceed<T> {
+export interface DataParseSuccess<T> {
   ok: true
   result: T
 }
 
-export interface ParseFailure {
+export interface DataParseFailure {
   ok: false
-  errors: ParseError[]
+  errors: DataParseError[]
 }
 
-export interface ParseError {
+export interface DataParseError {
   message: string
   path?: string
-  errors?: ParseError[]
+  errors?: DataParseError[]
 }

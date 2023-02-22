@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { ParseError } from "../domain/errors"
+import { PheroParseError } from "../domain/errors"
 import parseReturnType from "./parseReturnType"
 import { PheroFunction, PheroFunctionParameter } from "../domain/PheroApp"
 import { getNameAsString, resolveSymbol } from "../lib/tsUtils"
@@ -11,7 +11,7 @@ export default function parseFunctionDefinition(
   deps: DependencyMap,
 ): PheroFunction {
   if (ts.isSpreadAssignment(node)) {
-    throw new ParseError(
+    throw new PheroParseError(
       "S116: Sorry, no support for spread assignment (yet)",
       node,
     )
@@ -42,7 +42,7 @@ function parseFunctionName(
     ts.isObjectBindingPattern(functionName) ||
     ts.isArrayBindingPattern(functionName)
   ) {
-    throw new ParseError(
+    throw new PheroParseError(
       "S117: Function name should have a clear identifier, no support for computed names or binding patterns" +
         functionName.kind,
       functionName,
@@ -63,7 +63,10 @@ function parseActualFunction(
     const symbol = typeChecker.getShorthandAssignmentValueSymbol(node)
 
     if (!symbol || !symbol.declarations?.[0]) {
-      throw new ParseError(`S118: Can't find function (${node.kind})`, node)
+      throw new PheroParseError(
+        `S118: Can't find function (${node.kind})`,
+        node,
+      )
     }
 
     return parseActualFunction(symbol.declarations?.[0], typeChecker, deps)
@@ -120,7 +123,10 @@ function parseActualFunction(
   if (ts.isIdentifier(node)) {
     const symbol = resolveSymbol(node, typeChecker)
     if (!symbol?.declarations?.[0]) {
-      throw new ParseError(`S119: Can't find function (${node.kind})`, node)
+      throw new PheroParseError(
+        `S119: Can't find function (${node.kind})`,
+        node,
+      )
     }
     return parseActualFunction(symbol.declarations?.[0], typeChecker, deps)
   }
@@ -132,7 +138,7 @@ function parseActualFunction(
     }
   }
 
-  throw new ParseError(`S120: Unsupported syntax (${node.kind})`, node)
+  throw new PheroParseError(`S120: Unsupported syntax (${node.kind})`, node)
 }
 
 function makeParams(
@@ -141,7 +147,7 @@ function makeParams(
   return params.reduce<PheroFunctionParameter[]>(
     (result, param, paramIndex) => {
       if (!param.type) {
-        throw new ParseError(`Parameter should have a type`, param)
+        throw new PheroParseError(`Parameter should have a type`, param)
       }
 
       if (

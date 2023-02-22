@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { DependencyMap, InternalParserModelMap, TypeParamMap } from ".."
-import { ParseError } from "../../domain/errors"
+import { PheroParseError } from "../../domain/errors"
 import { ParserModelType } from "../../domain/ParserModel"
 import generateFromType from "../generateFromType"
 
@@ -62,7 +62,7 @@ export default function generateFromTypeNode(
 
   if (ts.isUnionTypeNode(typeNode)) {
     if (!type.isUnion()) {
-      throw new ParseError("Type should be Union", typeNode)
+      throw new PheroParseError("Type should be Union", typeNode)
     }
     // console.group("union", printCode(typeNode))
     const result = generateFromUnionTypeNode(
@@ -79,7 +79,7 @@ export default function generateFromTypeNode(
 
   if (ts.isIntersectionTypeNode(typeNode)) {
     if (!type.isIntersection()) {
-      throw new ParseError("Type should be Intersection", typeNode)
+      throw new PheroParseError("Type should be Intersection", typeNode)
     }
     // console.group("intersection", printCode(typeNode))
     const result = generateFromIntersectionTypeNode(
@@ -205,8 +205,11 @@ export default function generateFromTypeNode(
   }
 
   if (ts.isFunctionTypeNode(typeNode)) {
-    throw new ParseError("Function types are not supported", typeNode)
+    throw new PheroParseError("Function types are not supported", typeNode)
   }
 
-  throw new ParseError("TypeNode not implemented " + typeNode.kind, typeNode)
+  throw new PheroParseError(
+    "TypeNode not implemented " + typeNode.kind,
+    typeNode,
+  )
 }

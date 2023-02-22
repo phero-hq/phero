@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { DependencyMap, TypeParamMap } from ".."
-import { ParseError } from "../../domain/errors"
+import { PheroParseError } from "../../domain/errors"
 import {
   MemberParserModel,
   IndexMemberParserModel,
@@ -23,7 +23,7 @@ export default function generateFromTypeElementDeclaration(
 } {
   if (ts.isPropertySignature(member)) {
     if (!member.type) {
-      throw new ParseError("Member must have a type", member)
+      throw new PheroParseError("Member must have a type", member)
     }
 
     const memberName = getMemberNameAsString(member)
@@ -32,7 +32,7 @@ export default function generateFromTypeElementDeclaration(
     const prop = getNonOptionalType(type).getProperty(memberName)
 
     if (!prop) {
-      throw new ParseError("Member not found", member)
+      throw new PheroParseError("Member not found", member)
     }
 
     const propType = typeChecker.getTypeOfSymbolAtLocation(prop, location)
@@ -62,7 +62,7 @@ export default function generateFromTypeElementDeclaration(
     }
   } else if (ts.isIndexSignatureDeclaration(member)) {
     if (!member.type) {
-      throw new ParseError("Member must have a type", member)
+      throw new PheroParseError("Member must have a type", member)
     }
 
     // is either string or numberIndex type
@@ -70,7 +70,10 @@ export default function generateFromTypeElementDeclaration(
     const indexType = type.getStringIndexType() ?? type.getNumberIndexType()
 
     if (!indexType) {
-      throw new ParseError("No index type found for index signature", member)
+      throw new PheroParseError(
+        "No index type found for index signature",
+        member,
+      )
     }
 
     const memberParser = generateFromTypeNode(
@@ -88,7 +91,7 @@ export default function generateFromTypeElementDeclaration(
     }>(
       ({ models, deps }, param) => {
         if (!param.type) {
-          throw new ParseError("Index parameter should have type", param)
+          throw new PheroParseError("Index parameter should have type", param)
         }
         const paramType = typeChecker.getTypeAtLocation(param)
         // reduce dit
@@ -109,7 +112,7 @@ export default function generateFromTypeElementDeclaration(
     )
 
     if (keyParsers.models.length !== 1) {
-      throw new ParseError(
+      throw new PheroParseError(
         "Index member should only have one parameter",
         member,
       )
@@ -129,21 +132,24 @@ export default function generateFromTypeElementDeclaration(
   }
 
   if (ts.isMethodSignature(member)) {
-    throw new ParseError(`Type with methods are not supported`, member)
+    throw new PheroParseError(`Type with methods are not supported`, member)
   }
 
   if (ts.isCallSignatureDeclaration(member)) {
-    throw new ParseError(`Type with methods are not supported`, member)
+    throw new PheroParseError(`Type with methods are not supported`, member)
   }
 
-  throw new ParseError(`Member type ${member.kind} is not supported`, member)
+  throw new PheroParseError(
+    `Member type ${member.kind} is not supported`,
+    member,
+  )
 }
 
 function getMemberNameAsString(member: ts.TypeElement): string {
   const memberName = member.name
 
   if (!memberName) {
-    throw new ParseError("Member has no name", member)
+    throw new PheroParseError("Member has no name", member)
   }
 
   return propertyNameAsString(memberName)

@@ -1,4 +1,4 @@
-import { ParseError, Parser, ParseResult } from "../../domain/Parser"
+import { DataParseError, Parser, ParseResult } from "../../domain/Parser"
 
 type PropParser = [name: string, optional: boolean, parser: Parser<any>]
 type KeyParser = [key: Parser<any>, optional: boolean, parser: Parser<any>]
@@ -19,7 +19,7 @@ export default function ObjectLiteralParser<T>(
 
   return (data: unknown): ParseResult<T> => {
     const result: any = {}
-    const errors: ParseError[] = []
+    const errors: DataParseError[] = []
 
     if (typeof data === "object" && data !== null) {
       if (keys.length) {

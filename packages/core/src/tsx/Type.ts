@@ -57,4 +57,16 @@ export class Type {
   }
 
   public static reference = typeReference
+
+  public static function(props: {
+    params: ts.ParameterDeclaration[]
+    type: ts.TypeNode
+    typeParams?: ts.TypeParameterDeclaration[]
+  }): ts.FunctionTypeNode {
+    return ts.factory.createFunctionTypeNode(
+      props.typeParams,
+      props.params,
+      props.type,
+    )
+  }
 }

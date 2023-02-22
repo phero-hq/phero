@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { ParseError } from "../domain/errors"
+import { PheroParseError } from "../domain/errors"
 import parseCreateServiceCallExpression from "./parseCreateServiceCallExpression"
 import { parseContext } from "./parseContext"
 import parseFunctionDefinitions from "./parseFunctionDefinitions"
@@ -26,7 +26,7 @@ export default function parseServiceDefinition(
   )
 
   if (!createServiceCallExpr) {
-    throw new ParseError("S127: Cant find service export", serviceExport)
+    throw new PheroParseError("S127: Cant find service export", serviceExport)
   }
 
   // parsing arguments of createService
@@ -42,7 +42,7 @@ export default function parseServiceDefinition(
   )
 
   if (pheroFunctions.length === 0) {
-    throw new ParseError(
+    throw new PheroParseError(
       "S128: Can't find function definitions",
       createServiceCallExpr,
     )

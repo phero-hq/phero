@@ -1,11 +1,14 @@
 import ts from "typescript"
-import { ParseError } from "../domain/errors"
+import { PheroParseError } from "../domain/errors"
 import {
   MemberParserModel,
   ObjectParserModel,
   ParserModel,
   ParserModelType,
 } from "../domain/ParserModel"
+import { PheroErrorProperty } from "../domain/PheroApp"
+import { getNameAsString, hasModifier } from "../lib/tsUtils"
+import parseReturnType from "../parsePheroApp/parseReturnType"
 import generateFromTypeNode from "./generateFromTypeNode"
 
 export interface ParserModelMap {
@@ -27,12 +30,23 @@ export interface FunctionParserModel {
   deps: DependencyMap
 }
 
+export interface ErrorParserModel {
+  properties: PheroErrorProperty[]
+  errorModel: ObjectParserModel
+  deps: DependencyMap
+}
+
 export function generateParserModel(
-  func: ts.FunctionDeclaration | ts.FunctionExpression | ts.ArrowFunction,
+  func:
+    | ts.FunctionDeclaration
+    | ts.FunctionExpression
+    | ts.ArrowFunction
+    | ts.MethodSignature,
   typeChecker: ts.TypeChecker,
   deps: DependencyMap,
 ): FunctionParserModel {
   const returnTypeModel = generateFromReturnType(func, typeChecker, deps)
+
   const paramsModel = generateFromParameters(
     func,
     typeChecker,
@@ -47,15 +61,15 @@ export function generateParserModel(
 }
 
 function generateFromReturnType(
-  func: ts.FunctionDeclaration | ts.FunctionExpression | ts.ArrowFunction,
+  func:
+    | ts.FunctionDeclaration
+    | ts.FunctionExpression
+    | ts.ArrowFunction
+    | ts.MethodSignature,
   typeChecker: ts.TypeChecker,
   deps: DependencyMap,
 ): InternalParserModelMap {
-  const funcType = func.type
-
-  if (!funcType) {
-    throw new ParseError("Function must have an explicit return type", func)
-  }
+  const funcType = parseReturnType(func)
 
   const funcTypeType = typeChecker.getTypeAtLocation(funcType)
 
@@ -70,7 +84,11 @@ function generateFromReturnType(
 }
 
 function generateFromParameters(
-  func: ts.FunctionDeclaration | ts.FunctionExpression | ts.ArrowFunction,
+  func:
+    | ts.FunctionDeclaration
+    | ts.FunctionExpression
+    | ts.ArrowFunction
+    | ts.MethodSignature,
   typeChecker: ts.TypeChecker,
   deps: DependencyMap,
 ): { root: ObjectParserModel; deps: DependencyMap } {
@@ -80,7 +98,7 @@ function generateFromParameters(
   }>(
     ({ params, deps }, param) => {
       if (!param.type) {
-        throw new ParseError("Parameter should have a type", param)
+        throw new PheroParseError("Parameter should have a type", param)
       }
 
       const paramModel = generateFromTypeNode(
@@ -117,10 +135,93 @@ function generateFromParameters(
   }
 }
 
+export function generateParserModelForError(
+  classDeclaration: ts.ClassDeclaration,
+  typeChecker: ts.TypeChecker,
+  deps: DependencyMap,
+): ErrorParserModel {
+  const properties: PheroErrorProperty[] = []
+
+  for (const member of classDeclaration.members) {
+    if (
+      (ts.isPropertyDeclaration(member) ||
+        ts.isGetAccessorDeclaration(member)) &&
+      (member.modifiers === undefined ||
+        hasModifier(member, ts.SyntaxKind.PublicKeyword))
+    ) {
+      if (!member.type) {
+        throw new PheroParseError("Property must have type", member)
+      }
+
+      properties.push({
+        name: getNameAsString(member.name),
+        optional: !!member.questionToken,
+        type: member.type,
+      })
+    }
+
+    if (ts.isConstructorDeclaration(member)) {
+      for (const param of member.parameters) {
+        if (
+          // hasModifier(param, ts.SyntaxKind.PublicKeyword) &&
+          !ts.isObjectBindingPattern(param.name) &&
+          !ts.isArrayBindingPattern(param.name)
+        ) {
+          if (!param.type) {
+            throw new PheroParseError("Parameter must have type", member)
+          }
+
+          properties.push({
+            name: getNameAsString(param.name),
+            optional: !!param.questionToken,
+            type: param.type,
+          })
+        }
+      }
+    }
+  }
+
+  const memberModels = properties.reduce<{
+    models: MemberParserModel[]
+    deps: DependencyMap
+  }>(
+    ({ models, deps }, { name, optional, type }) => {
+      const memberParser = generateFromTypeNode(
+        type,
+        typeChecker.getTypeAtLocation(type),
+        type,
+        typeChecker,
+        deps,
+        new Map(),
+      )
+      return {
+        models: [
+          ...models,
+          {
+            type: ParserModelType.Member,
+            name,
+            optional,
+            parser: memberParser.root,
+          },
+        ],
+        deps: memberParser.deps,
+      }
+    },
+    { models: [], deps },
+  )
+
+  const errorModel: ObjectParserModel = {
+    type: ParserModelType.Object,
+    members: memberModels.models,
+  }
+
+  return { properties, errorModel, deps: memberModels.deps }
+}
+
 function bindingNameAsString(name: ts.BindingName): string {
   if (ts.isIdentifier(name)) {
     return name.text
   }
 
-  throw new ParseError("Binding names are not supported", name)
+  throw new PheroParseError("Binding names are not supported", name)
 }

@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { DependencyMap, InternalParserModelMap, TypeParamMap } from ".."
-import { ParseError } from "../../domain/errors"
+import { PheroParseError } from "../../domain/errors"
 import {
   ParserModel,
   ParserModelType,
@@ -101,7 +101,7 @@ export default function generateFromDeclaration(
         typeChecker.getTypeAtLocation(arrayElementTypeNode)
 
       if (!arrayElementTypeNode || !arrayElementType) {
-        throw new ParseError("Array should have a type", typeNode)
+        throw new PheroParseError("Array should have a type", typeNode)
       }
 
       const elementModel = generateFromTypeNode(
@@ -203,13 +203,13 @@ export default function generateFromDeclaration(
   }
 
   if (ts.isClassDeclaration(declaration)) {
-    throw new ParseError(
+    throw new PheroParseError(
       `References to class types are not supported`,
       typeNode,
     )
   }
 
-  throw new ParseError(
+  throw new PheroParseError(
     `Reference to type with kind ${
       ts.tokenToString(declaration.kind) ?? declaration.kind.toString()
     } not supported`,
@@ -225,12 +225,12 @@ function getDeclaration(
     ts.isTypeReferenceNode(typeNode) ? typeNode.typeName : typeNode.expression,
   )
   if (!symbol) {
-    throw new ParseError("Entity must have symbol", typeNode)
+    throw new PheroParseError("Entity must have symbol", typeNode)
   }
 
   const declaration = symbol?.declarations?.[0]
   if (!declaration) {
-    throw new ParseError("Entity must have declaration", typeNode)
+    throw new PheroParseError("Entity must have declaration", typeNode)
   }
 
   return declaration
@@ -271,7 +271,7 @@ function getUpdatedTypeParams(
         )
 
         if (!typeParamModel) {
-          throw new ParseError("Type parameter was not defined", typeParam)
+          throw new PheroParseError("Type parameter was not defined", typeParam)
         }
 
         updatedTypeParams.set(typeParam.name.text, typeParamModel)
@@ -353,7 +353,7 @@ function generateReferenceParserModelForDeclaration(
 function generateTypeName(typeNode: ts.TypeReferenceType): string {
   if (ts.isExpressionWithTypeArguments(typeNode)) {
     if (!ts.isIdentifier(typeNode.expression)) {
-      throw new ParseError("Expression not supported", typeNode.expression)
+      throw new PheroParseError("Expression not supported", typeNode.expression)
     }
     return entityNameAsString(typeNode.expression)
   }
@@ -364,7 +364,7 @@ function generateTypeName(typeNode: ts.TypeReferenceType): string {
     if (ts.isIdentifier(typeName)) {
       return typeName.text
     }
-    return `${entityNameAsString(typeName.left)}.${typeName.right.text}`
+    return typeName.right.text
   }
 }
 
@@ -375,7 +375,7 @@ function getTypeParamParserModel(
 ): { name: string; model: ParserModel } {
   const typeParamModel = typeParams.get(declaration.name.text)
   if (!typeParamModel) {
-    throw new ParseError(
+    throw new PheroParseError(
       `No type found for type parameter ${declaration.name.text}`,
       typeNode,
     )
