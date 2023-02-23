@@ -1,9 +1,6 @@
-import ts, {
-  FunctionLikeDeclarationBase,
-  VariableDeclaration,
-} from "typescript"
+import ts from "typescript"
 import { PheroApp } from "../domain/PheroApp"
-import { generateParserModel } from "../generateModel"
+import { generateParserModelForFunction as actualGenerateParserModelForFunction } from "../generateModel"
 import { ObjectParserModel, ParserModel } from "../domain/ParserModel"
 import { generateFunctionParsers } from "../generateParser"
 import { KindToNodeMappings } from "./tsUtils"
@@ -145,7 +142,11 @@ export function generateParserModelForReturnType(tsContent: string): {
     throw new Error("Ts content doesn't contain any function")
   }
 
-  const funcModel = generateParserModel(func, prog.getTypeChecker(), new Map())
+  const funcModel = actualGenerateParserModelForFunction(
+    func,
+    prog.getTypeChecker(),
+    new Map(),
+  )
   return {
     root: funcModel.returnType,
 
@@ -171,7 +172,11 @@ export function generateParserModelForFunction(tsContent: string): {
     throw new Error("Ts content doesn't contain any function")
   }
 
-  const funcModel = generateParserModel(func, prog.getTypeChecker(), new Map())
+  const funcModel = actualGenerateParserModelForFunction(
+    func,
+    prog.getTypeChecker(),
+    new Map(),
+  )
 
   return {
     returnType: funcModel.returnType,
@@ -198,7 +203,11 @@ export function generateParsersForFunction(tsContent: string): {
     throw new Error("Ts content doesn't contain any function")
   }
 
-  const funcModel = generateParserModel(func, prog.getTypeChecker(), new Map())
+  const funcModel = actualGenerateParserModelForFunction(
+    func,
+    prog.getTypeChecker(),
+    new Map(),
+  )
 
   const parsers = generateFunctionParsers(funcModel)
 

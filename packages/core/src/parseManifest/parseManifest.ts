@@ -12,7 +12,7 @@ import { getNameAsString } from "../lib/tsUtils"
 import { VirtualCompilerHost } from "../lib/VirtualCompilerHost"
 import {
   DependencyMap,
-  generateParserModel,
+  generateParserModelForFunction,
   generateParserModelForError,
 } from "../generateModel"
 
@@ -182,7 +182,7 @@ function parseFunctionParams(
     ? func.parameters.slice(1)
     : func.parameters
 
-  const functionModel = generateParserModel(func, typeChecker, deps)
+  const functionModel = generateParserModelForFunction(func, typeChecker, deps)
 
   return {
     contextParameterType,

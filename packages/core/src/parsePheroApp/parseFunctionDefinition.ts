@@ -3,7 +3,7 @@ import { PheroParseError } from "../domain/errors"
 import parseReturnType from "./parseReturnType"
 import { PheroFunction, PheroFunctionParameter } from "../domain/PheroApp"
 import { getNameAsString, resolveSymbol } from "../lib/tsUtils"
-import { DependencyMap, generateParserModel } from "../generateModel"
+import { DependencyMap, generateParserModelForFunction } from "../generateModel"
 
 export default function parseFunctionDefinition(
   node: ts.ObjectLiteralElementLike | ts.VariableDeclaration,
@@ -81,7 +81,7 @@ function parseActualFunction(
   }
 
   if (ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
-    const parserModel = generateParserModel(node, typeChecker, deps)
+    const parserModel = generateParserModelForFunction(node, typeChecker, deps)
     return {
       ref: node,
       parameters: makeParams(node.parameters),
@@ -92,7 +92,7 @@ function parseActualFunction(
   }
 
   if (ts.isFunctionDeclaration(node)) {
-    const parserModel = generateParserModel(node, typeChecker, deps)
+    const parserModel = generateParserModelForFunction(node, typeChecker, deps)
     return {
       ref: node,
       parameters: makeParams(node.parameters),
@@ -104,7 +104,7 @@ function parseActualFunction(
 
   if (ts.isVariableDeclaration(node) && node.initializer) {
     if (ts.isArrowFunction(node.initializer)) {
-      const parserModel = generateParserModel(
+      const parserModel = generateParserModelForFunction(
         node.initializer,
         typeChecker,
         deps,
