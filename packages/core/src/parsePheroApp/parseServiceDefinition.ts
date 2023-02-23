@@ -1,15 +1,17 @@
 import ts from "typescript"
+import { tsx } from ".."
 import { PheroParseError } from "../domain/errors"
-import parseCreateServiceCallExpression from "./parseCreateServiceCallExpression"
-import { parseContext } from "./parseContext"
-import parseFunctionDefinitions from "./parseFunctionDefinitions"
+import { PheroService, PheroServiceConfig } from "../domain/PheroApp"
 import {
-  PheroFunction,
-  PheroService,
-  PheroServiceConfig,
-} from "../domain/PheroApp"
+  DependencyMap,
+  generateParserModelForServiceContext,
+} from "../generateModel"
+import parseCreateServiceCallExpression from "./parseCreateServiceCallExpression"
+import parseFunctionDefinitions from "./parseFunctionDefinitions"
 import parseServiceConfig from "./parseServiceConfig"
-import { DependencyMap } from "../generateModel"
+import parseServiceContextType, {
+  ServiceContext,
+} from "./parseServiceContextType"
 
 export default function parseServiceDefinition(
   serviceExport: ts.VariableDeclaration | ts.ExportSpecifier,
@@ -32,13 +34,11 @@ export default function parseServiceDefinition(
   // parsing arguments of createService
   const [functionDefsArg, serviceConfigArg] = createServiceCallExpr.arguments
 
-  const [pheroServiceConfig, pheroFunctions]: [
-    PheroServiceConfig,
-    PheroFunction[],
-  ] = parseContext(
-    parseServiceConfig(serviceConfigArg, prog),
-    parseFunctionDefinitions(functionDefsArg, typeChecker, deps),
-    prog,
+  const serviceConfig = parseServiceConfig(serviceConfigArg, prog, deps)
+  const pheroFunctions = parseFunctionDefinitions(
+    functionDefsArg,
+    typeChecker,
+    deps,
   )
 
   if (pheroFunctions.length === 0) {
@@ -48,10 +48,43 @@ export default function parseServiceDefinition(
     )
   }
 
+  const serviceContextConfig = parseServiceContextType(
+    serviceConfig,
+    pheroFunctions,
+  )
+
   return {
     name: serviceName,
     funcs: pheroFunctions,
-    config: pheroServiceConfig,
+    config: {
+      ...serviceConfig,
+      ...generateServiceContextProps(serviceContextConfig, typeChecker, deps),
+    },
     ref: serviceExport,
+  }
+}
+
+function generateServiceContextProps(
+  serviceContext: ServiceContext | undefined,
+  typeChecker: ts.TypeChecker,
+  deps: DependencyMap,
+): Pick<PheroServiceConfig, "contextType" | "contextTypeModel"> {
+  if (!serviceContext) {
+    return {}
+  }
+
+  const contextType = tsx.literal.type(
+    ...serviceContext.properties.map((p) => p.signature),
+  )
+
+  const { root: contextTypeModel } = generateParserModelForServiceContext(
+    serviceContext,
+    typeChecker,
+    deps,
+  )
+
+  return {
+    contextType,
+    contextTypeModel,
   }
 }

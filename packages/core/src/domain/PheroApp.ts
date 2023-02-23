@@ -46,8 +46,9 @@ export interface PheroFunction {
 
   parameters: PheroFunctionParameter[]
   parametersModel: ObjectParserModel
+
   contextParameterType?: ts.TypeNode
-  // TODO contextModel?
+  contextParameterTypeModel?: ObjectParserModel
 
   ref: ts.FunctionLikeDeclarationBase
 }
@@ -62,12 +63,14 @@ export interface PheroServiceConfig {
   // these are models which are not used inside functions, but we need them to generate parsers on the server side
   models?: PheroModel[]
   middleware?: PheroMiddlewareConfig[]
-  contextType?: ts.TypeNode
+  contextType?: ts.TypeLiteralNode
+  contextTypeModel?: ObjectParserModel
 }
 
 export interface PheroMiddlewareConfig {
-  paramsType: ts.TypeNode
-  nextType: ts.TypeNode | undefined
-  contextType: ts.TypeNode
   middleware: ts.FunctionLikeDeclarationBase
+  contextType?: ts.TypeNode
+  contextTypeModel: ObjectParserModel
+  nextType?: ts.TypeNode
+  nextTypeModel: ObjectParserModel
 }

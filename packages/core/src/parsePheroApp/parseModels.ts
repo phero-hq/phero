@@ -27,7 +27,6 @@ export function parseMiddlewareModels(
   for (const config of middlewareConfigs) {
     modelParser.doType(config.contextType)
     modelParser.doType(config.nextType)
-    modelParser.doType(config.paramsType)
   }
 
   return modelParser.models.map((m) => ({

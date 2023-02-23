@@ -1,20 +1,22 @@
 import ts from "typescript"
-import { PheroParseError } from "../domain/errors"
 import { PheroMiddlewareConfig } from "../domain/PheroApp"
+import {
+  DependencyMap,
+  generateParserModelForMiddleware,
+} from "../generateModel"
+
 import {
   getFirstChildOfKind,
   getNameAsString,
-  getTypeName,
   resolveSymbol,
 } from "../lib/tsUtils"
-import * as tsx from "../tsx"
 
 export default function parseServiceMiddlewareConfig(
   configObject: ts.ObjectLiteralExpression,
   name: string,
-  prog: ts.Program,
+  typeChecker: ts.TypeChecker,
+  deps: DependencyMap,
 ): PheroMiddlewareConfig[] | undefined {
-  const typeChecker = prog.getTypeChecker()
   const prop = configObject.properties.find(
     (p) => p.name && getNameAsString(p.name) === name,
   )
@@ -42,89 +44,26 @@ export default function parseServiceMiddlewareConfig(
     if (symbol?.valueDeclaration) {
       if (ts.isFunctionDeclaration(symbol.valueDeclaration)) {
         const middleware = symbol.valueDeclaration
-        functionDeclrs.push(parseMiddlewareConfig(middleware))
+        const parserModel = generateParserModelForMiddleware(
+          middleware,
+          typeChecker,
+          deps,
+        )
+        functionDeclrs.push({ middleware, ...parserModel })
       } else if (
         ts.isVariableDeclaration(symbol.valueDeclaration) &&
         symbol.valueDeclaration.initializer &&
         ts.isArrowFunction(symbol.valueDeclaration.initializer)
       ) {
         const middleware = symbol.valueDeclaration.initializer
-        functionDeclrs.push(parseMiddlewareConfig(middleware))
+        const parserModel = generateParserModelForMiddleware(
+          middleware,
+          typeChecker,
+          deps,
+        )
+        functionDeclrs.push({ middleware, ...parserModel })
       }
     }
   }
   return functionDeclrs
-}
-
-function parseMiddlewareConfig(
-  middleware: ts.FunctionLikeDeclarationBase,
-): PheroMiddlewareConfig {
-  if (middleware.parameters.length !== 3) {
-    throw new PheroParseError(
-      `S129: Middleware should have three parameters "(params: PheroParams<P>, ctx: PheroContext<C>, next: PheroNextFunction<T>)"`,
-      middleware,
-    )
-  }
-
-  const [paramsParam, contextParam, nextParam] = middleware.parameters
-
-  return {
-    paramsType: parseParamsType(paramsParam),
-    contextType: parseContextType(contextParam),
-    nextType: parseNextType(nextParam),
-    middleware,
-  }
-}
-
-function parseParamsType(paramsParam: ts.ParameterDeclaration): ts.TypeNode {
-  const paramsType = paramsParam.type
-
-  if (
-    !paramsType ||
-    !ts.isTypeReferenceNode(paramsType) ||
-    getTypeName(paramsType) !== "PheroParams"
-  ) {
-    throw new PheroParseError(
-      `S130: Middleware params parameter has no or incorrect type, should be defined like "params: PheroParams<T>"`,
-      paramsParam,
-    )
-  }
-
-  return paramsType.typeArguments?.[0] ?? tsx.literal.type()
-}
-
-function parseContextType(contextParam: ts.ParameterDeclaration): ts.TypeNode {
-  const contextType = contextParam.type
-
-  if (
-    !contextType ||
-    !ts.isTypeReferenceNode(contextType) ||
-    getTypeName(contextType) !== "PheroContext"
-  ) {
-    throw new PheroParseError(
-      `S131: Middleware ctx parameter has no or incorrect type, should be defined like "ctx: PheroContext<T>"`,
-      contextParam,
-    )
-  }
-
-  return contextType.typeArguments?.[0] ?? tsx.literal.type()
-}
-
-function parseNextType(
-  nextParam: ts.ParameterDeclaration,
-): ts.TypeNode | undefined {
-  const nextType = nextParam.type
-
-  if (
-    !nextType ||
-    !ts.isTypeReferenceNode(nextType) ||
-    getTypeName(nextType) !== "PheroNextFunction"
-  ) {
-    throw new PheroParseError(
-      `S132: Middleware next parameter has no or incorrect type, should be defined like "next: PheroNextFunction<T>"`,
-      nextParam,
-    )
-  }
-
-  return nextType.typeArguments?.[0]
 }
