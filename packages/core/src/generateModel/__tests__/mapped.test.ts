@@ -122,6 +122,19 @@ describe("mapped", () => {
           type: "string-literal",
           literal: "kaas",
         },
+        Aad: {
+          members: [
+            {
+              name: "kaas",
+              optional: false,
+              parser: {
+                type: "string",
+              },
+              type: "member",
+            },
+          ],
+          type: "object",
+        },
       },
     })
   })
@@ -156,6 +169,27 @@ describe("mapped", () => {
             },
           ],
         },
+        Aad: {
+          members: [
+            {
+              name: "kaas",
+              optional: false,
+              parser: {
+                type: "string",
+              },
+              type: "member",
+            },
+            {
+              name: "aap",
+              optional: false,
+              parser: {
+                type: "string",
+              },
+              type: "member",
+            },
+          ],
+          type: "object",
+        },
       },
     })
   })
@@ -186,6 +220,19 @@ describe("mapped", () => {
               literal: "kaas",
             },
           ],
+        },
+        Aad: {
+          members: [
+            {
+              name: "kaas",
+              optional: false,
+              parser: {
+                type: "string",
+              },
+              type: "member",
+            },
+          ],
+          type: "object",
         },
         'Bug<"kaas">': {
           type: "generic",

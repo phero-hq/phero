@@ -20,8 +20,5 @@ export default function parseReturnType(
     }
   }
 
-  throw new PheroParseError(
-    "S122: Return type should be a Promise<T>",
-    typeNode,
-  )
+  return typeNode
 }
