@@ -1,5 +1,9 @@
 import ts from "typescript"
-import { ObjectParserModel, ParserModel } from "./ParserModel"
+import {
+  MemberParserModel,
+  ObjectParserModel,
+  ParserModel,
+} from "./ParserModel"
 
 export interface PheroApp {
   models: PheroModel[]
@@ -47,8 +51,8 @@ export interface PheroFunction {
   parameters: PheroFunctionParameter[]
   parametersModel: ObjectParserModel
 
-  contextParameterType?: ts.TypeNode
-  contextParameterTypeModel?: ObjectParserModel
+  contextType?: ts.TypeNode
+  contextTypeModel?: ObjectParserModel
 
   ref: ts.FunctionLikeDeclarationBase
 }
@@ -60,9 +64,7 @@ export interface PheroFunctionParameter {
 }
 
 export interface PheroServiceConfig {
-  // these are models which are not used inside functions, but we need them to generate parsers on the server side
-  models?: PheroModel[]
-  middleware?: PheroMiddlewareConfig[]
+  middleware: PheroMiddlewareConfig[]
   contextType?: ts.TypeLiteralNode
   contextTypeModel?: ObjectParserModel
 }

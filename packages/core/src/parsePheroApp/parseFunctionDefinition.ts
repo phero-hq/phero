@@ -57,7 +57,13 @@ function parseActualFunction(
   deps: DependencyMap,
 ): Pick<
   PheroFunction,
-  "ref" | "parameters" | "parametersModel" | "returnType" | "returnTypeModel"
+  | "ref"
+  | "returnType"
+  | "returnTypeModel"
+  | "parameters"
+  | "parametersModel"
+  | "contextType"
+  | "contextTypeModel"
 > {
   if (ts.isShorthandPropertyAssignment(node)) {
     const symbol = typeChecker.getShorthandAssignmentValueSymbol(node)
@@ -81,40 +87,54 @@ function parseActualFunction(
   }
 
   if (ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
-    const parserModel = generateParserModelForFunction(node, typeChecker, deps)
+    const functionParserModel = generateParserModelForFunction(
+      node,
+      typeChecker,
+      deps,
+    )
     return {
       ref: node,
-      parameters: makeParams(node.parameters),
       returnType: parseReturnType(node),
-      returnTypeModel: parserModel.returnType,
-      parametersModel: parserModel.parameters,
+      returnTypeModel: functionParserModel.returnType,
+      parameters: makeParams(node.parameters),
+      parametersModel: functionParserModel.parameters,
+      contextType: parseContextParameterType(node.parameters),
+      contextTypeModel: functionParserModel.contextType,
     }
   }
 
   if (ts.isFunctionDeclaration(node)) {
-    const parserModel = generateParserModelForFunction(node, typeChecker, deps)
+    const functionParserModel = generateParserModelForFunction(
+      node,
+      typeChecker,
+      deps,
+    )
     return {
       ref: node,
-      parameters: makeParams(node.parameters),
       returnType: parseReturnType(node),
-      returnTypeModel: parserModel.returnType,
-      parametersModel: parserModel.parameters,
+      returnTypeModel: functionParserModel.returnType,
+      parameters: makeParams(node.parameters),
+      parametersModel: functionParserModel.parameters,
+      contextType: parseContextParameterType(node.parameters),
+      contextTypeModel: functionParserModel.contextType,
     }
   }
 
   if (ts.isVariableDeclaration(node) && node.initializer) {
     if (ts.isArrowFunction(node.initializer)) {
-      const parserModel = generateParserModelForFunction(
+      const functionParserModel = generateParserModelForFunction(
         node.initializer,
         typeChecker,
         deps,
       )
       return {
         ref: node.initializer,
-        parameters: makeParams(node.initializer.parameters),
         returnType: parseReturnType(node.initializer),
-        returnTypeModel: parserModel.returnType,
-        parametersModel: parserModel.parameters,
+        returnTypeModel: functionParserModel.returnType,
+        parameters: makeParams(node.initializer.parameters),
+        parametersModel: functionParserModel.parameters,
+        contextType: parseContextParameterType(node.initializer.parameters),
+        contextTypeModel: functionParserModel.contextType,
       }
     }
     return parseActualFunction(node.initializer, typeChecker, deps)
@@ -169,4 +189,19 @@ function makeParams(
     },
     [],
   )
+}
+
+function parseContextParameterType(
+  params: ts.NodeArray<ts.ParameterDeclaration>,
+): ts.TypeNode | undefined {
+  const ctxParamType = params[0]?.type
+  if (
+    !ctxParamType ||
+    !ts.isTypeReferenceNode(ctxParamType) ||
+    getNameAsString(ctxParamType.typeName) !== "PheroContext"
+  ) {
+    return undefined
+  }
+
+  return ctxParamType.typeArguments?.[0]
 }

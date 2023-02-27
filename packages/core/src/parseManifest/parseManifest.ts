@@ -125,7 +125,9 @@ function parseServiceDeclaration(
     funcs: funcs.map((func) =>
       parseFunctionDeclaration(func, typeChecker, deps),
     ),
-    config: {},
+    config: {
+      middleware: [],
+    },
     ref: moduleDeclr,
   }
   return pheroService
@@ -163,7 +165,7 @@ function parseFunctionParams(
   deps: DependencyMap,
 ): Pick<
   PheroFunction,
-  "parameters" | "contextParameterType" | "parametersModel" | "returnTypeModel"
+  "parameters" | "parametersModel" | "returnTypeModel" | "contextType"
 > {
   let contextParameterType: ts.TypeNode | undefined
 
@@ -185,7 +187,7 @@ function parseFunctionParams(
   const functionModel = generateParserModelForFunction(func, typeChecker, deps)
 
   return {
-    contextParameterType,
+    contextType: contextParameterType,
     parameters: params.map((param) => ({
       name: getNameAsString(param.name),
       questionToken: !!param.questionToken,

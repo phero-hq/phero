@@ -120,7 +120,7 @@ export default class DevServer {
     try {
       this.eventEmitter.emit({ type: "BUILD_RPCS_START" })
       this.routes = this.generateRoutes(app)
-      const output = generatePheroExecutionFile(app, prog)
+      const output = generatePheroExecutionFile(app)
       await fs.writeFile(this.pheroExecutionJS, output.js)
       this.clearRequireCache()
       this.eventEmitter.emit({ type: "BUILD_RPCS_SUCCESS" })

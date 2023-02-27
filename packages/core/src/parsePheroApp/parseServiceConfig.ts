@@ -1,10 +1,9 @@
 import ts from "typescript"
 import { PheroParseError } from "../domain/errors"
-import parseServiceMiddlewareConfig from "./parseServiceMiddlewareConfig"
 import { PheroServiceConfig } from "../domain/PheroApp"
-import { resolveSymbol } from "../lib/tsUtils"
-import { parseMiddlewareModels } from "./parseModels"
 import { DependencyMap } from "../generateModel"
+import { resolveSymbol } from "../lib/tsUtils"
+import parseServiceMiddlewareConfig from "./parseServiceMiddlewareConfig"
 
 export default function parseServiceConfig(
   node: ts.Node | undefined,
@@ -12,7 +11,7 @@ export default function parseServiceConfig(
   deps: DependencyMap,
 ): PheroServiceConfig {
   if (!node) {
-    return {}
+    return { middleware: [] }
   }
 
   if (ts.isObjectLiteralExpression(node)) {
@@ -23,9 +22,7 @@ export default function parseServiceConfig(
       deps,
     )
 
-    const models = middleware && parseMiddlewareModels(middleware, prog)
-
-    return { middleware, models }
+    return { middleware: middleware ?? [] }
   }
 
   if (ts.isIdentifier(node)) {

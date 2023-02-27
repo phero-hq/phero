@@ -81,7 +81,7 @@ export default function exportCommand(command: ServerCommandExport) {
 
   const app = parsePheroApp(program)
   const { content: dts } = generateManifest(app)
-  const pheroExecution = generatePheroExecutionFile(app, program)
+  const pheroExecution = generatePheroExecutionFile(app)
 
   const readFile = (filePath: string): string =>
     fs.readFileSync(filePath, {

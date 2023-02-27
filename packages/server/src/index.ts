@@ -25,7 +25,7 @@ export type PheroMiddlewareFunction<C, N> = (
 ) => Promise<void>
 
 export interface PheroServiceConfig {
-  middleware?: PheroMiddlewareFunction<any, void>[]
+  middleware: PheroMiddlewareFunction<any, void>[]
   cors?: PheroCORSConfig
 }
 
@@ -38,7 +38,7 @@ export function createService(
   config?: PheroServiceConfig,
 ): PheroServiceDefinition {
   return {
-    config: config ?? {},
+    config: config ?? { middleware: [] },
     functions,
   }
 }

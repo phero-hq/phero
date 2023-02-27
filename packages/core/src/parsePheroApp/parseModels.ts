@@ -2,6 +2,7 @@ import ts from "typescript"
 import { getNameAsString, isExternal, isExternalSymbol } from "../lib/tsUtils"
 import {
   Model,
+  PheroError,
   PheroFunction,
   PheroMiddlewareConfig,
   PheroModel,
@@ -17,6 +18,24 @@ const IGNORE_SYNTAX_KIND = [
   ts.SyntaxKind.AnyKeyword,
   ts.SyntaxKind.UndefinedKeyword,
 ]
+
+export function parseFunctionModels(
+  func: PheroFunction,
+  prog: ts.Program,
+): PheroModel[] {
+  const modelParser = new ModelParser(prog)
+
+  for (const param of func.parameters) {
+    modelParser.doType(param.type)
+  }
+
+  modelParser.doType(func.returnType)
+
+  return modelParser.models.map((m) => ({
+    name: getNameAsString(m.name),
+    ref: m,
+  }))
+}
 
 export function parseMiddlewareModels(
   middlewareConfigs: PheroMiddlewareConfig[],
@@ -35,17 +54,17 @@ export function parseMiddlewareModels(
   }))
 }
 
-export function parseFunctionModels(
-  func: PheroFunction,
+export function parseErrorModels(
+  errors: PheroError[],
   prog: ts.Program,
 ): PheroModel[] {
   const modelParser = new ModelParser(prog)
 
-  for (const param of func.parameters) {
-    modelParser.doType(param.type)
+  for (const error of errors) {
+    for (const prop of error.properties) {
+      modelParser.doType(prop.type)
+    }
   }
-
-  modelParser.doType(func.returnType)
 
   return modelParser.models.map((m) => ({
     name: getNameAsString(m.name),

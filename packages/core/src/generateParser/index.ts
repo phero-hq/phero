@@ -66,7 +66,7 @@ export function generateModelParser(
   depRefs: DependencyRefs,
 ): ts.FunctionDeclaration {
   return tsx.function({
-    name: `${name}Parser`,
+    name: depRefs[name].text,
     params: [tsx.param({ name: "data", type: tsx.type.unknown })],
     returnType: tsx.type.reference({
       name: "ParseResult",

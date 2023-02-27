@@ -27,20 +27,20 @@ export default function parseServiceContextType(
     calculateServiceContext(serviceConfig.middleware ?? [])
 
   for (const {
-    contextParameterType,
-    contextParameterTypeModel,
+    contextType: contextParameterType,
+    contextTypeModel,
   } of pheroFunctions) {
-    if (!contextParameterType || !contextParameterTypeModel) {
+    if (!contextParameterType || !contextTypeModel) {
       continue
     }
 
-    for (const contextParameterTypeModelMember of contextParameterTypeModel.members as MemberParserModel[]) {
+    for (const contextParameterTypeModelMember of contextTypeModel.members as MemberParserModel[]) {
       const accumulatedMember = accumulatedContext.find(
         (m) => m.name === contextParameterTypeModelMember.name,
       )
       if (!accumulatedMember) {
         throw new PheroParseError(
-          "Context member is not accumulated in middlewares",
+          `Context member "${contextParameterTypeModelMember.name}" is not accumulated in middlewares`,
           contextParameterType,
         )
       } else {
@@ -48,7 +48,7 @@ export default function parseServiceContextType(
           contextParameterTypeModelMember,
           accumulatedMember,
           new PheroParseError(
-            "Context member is overwritten with other structure",
+            `Context member "${contextParameterTypeModelMember.name}" is not accumulated in middlewares`,
             contextParameterType,
           ),
         )

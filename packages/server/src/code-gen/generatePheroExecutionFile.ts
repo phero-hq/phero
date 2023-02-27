@@ -1,27 +1,22 @@
-import ts from "typescript"
 import {
-  PheroApp,
-  PheroParseError,
-  PheroFunction,
-  PheroService,
-  VirtualCompilerHost,
-  tsx,
-  PheroError,
-  PheroServiceConfig,
+  cloneTS,
+  DependencyRefs,
   generateDependencyRefs,
   generateInlineParser,
-  DependencyRefs,
   generateModelParser,
-  cloneTS,
+  PheroApp,
+  PheroError,
+  PheroFunction,
+  PheroService,
+  tsx,
+  VirtualCompilerHost,
 } from "@phero/core"
 import { generateErrorParser } from "@phero/core/dist/generateParser"
+import ts from "typescript"
 
-const factory = ts.factory
-
-export default function generatePheroExecutionFile(
-  app: PheroApp,
-  prog: ts.Program,
-): { js: string } {
+export default function generatePheroExecutionFile(app: PheroApp): {
+  js: string
+} {
   const tsNodes: ts.Node[] = []
 
   const serviceSourceFiles = app.services.reduce<Map<ts.SourceFile, string[]>>(
@@ -46,23 +41,23 @@ export default function generatePheroExecutionFile(
 
   for (const [sourceFile, serviceNames] of serviceSourceFiles.entries()) {
     tsNodes.push(
-      factory.createImportDeclaration(
+      ts.factory.createImportDeclaration(
         undefined,
-        factory.createImportClause(
+        ts.factory.createImportClause(
           false,
           undefined,
-          factory.createNamedImports(
+          ts.factory.createNamedImports(
             serviceNames.map((serviceName) =>
-              factory.createImportSpecifier(
+              ts.factory.createImportSpecifier(
                 false,
                 undefined,
-                factory.createIdentifier(serviceName),
+                ts.factory.createIdentifier(serviceName),
               ),
             ),
           ),
         ),
         // TODO cleanup
-        factory.createStringLiteral(
+        ts.factory.createStringLiteral(
           "." +
             sourceFile.fileName
               .substring(sourceFile.fileName.indexOf("src") + 3)
@@ -74,23 +69,7 @@ export default function generatePheroExecutionFile(
   }
 
   tsNodes.push(
-    tsx.verbatim(`type Defer<T = void> = {
-  resolve: (result: T) => void
-  reject: (err: Error) => void
-  promise: Promise<T>
-}
-
-function defer<T>(): Defer<T> {
-  const deferred: Defer<T> = {} as Defer<T>
-  const promise = new Promise<T>((resolve, reject) => {
-    deferred.resolve = (result: T) => resolve(result)
-    deferred.reject = (err: Error) => reject(err)
-  })
-  deferred.promise = promise
-  return deferred
-}
-
-class ParseError extends Error {
+    tsx.verbatim(`class ParseError extends Error {
   constructor(public readonly errors: DataParseError[], public readonly input: unknown) {
     super("ParseError")
     // https://github.com/microsoft/TypeScript/issues/22585
@@ -119,41 +98,23 @@ function defaultErrorMapper<T>(error: unknown): RPCResult<T> {
       },
     }
   }
-}
-  `),
+}`),
   )
+
   const depRefs = generateDependencyRefs(app.deps)
 
   for (const domainModel of app.models) {
     tsNodes.push(cloneTS(domainModel.ref))
   }
   for (const [name, model] of [...app.deps]) {
-    // tsNodes.push(generateParserFunction(name, model,  depRefs))
     tsNodes.push(generateModelParser(name, model, depRefs))
   }
-  for (const error of [...app.errors]) {
+  for (const error of app.errors) {
     tsNodes.push(generateErrorParser(error, depRefs))
-  }
-
-  const middlewareModelSet = new Set<ts.Node>()
-  for (const middlewareModel of app.services.flatMap(
-    (s) => s.config.models ?? [],
-  )) {
-    if (!middlewareModelSet.has(middlewareModel.ref)) {
-      middlewareModelSet.add(middlewareModel.ref)
-      // TODO!!!! tsNodes.push(generateModelParser(middlewareModel.ref, prog))
-      throw new Error("TODO")
-    }
   }
 
   for (const service of app.services) {
     tsNodes.push(generateCorsConfigFunction(service))
-
-    if (service.config.middleware?.length) {
-      tsNodes.push(
-        generateMiddlewareParsers(service.name, service.config, prog),
-      )
-    }
 
     for (const serviceFunction of service.funcs) {
       tsNodes.push(
@@ -244,7 +205,21 @@ function generateRPCExecutor(
     export: true,
     async: true,
     name: `rpc_executor_${service.name}__${funcDef.name}`,
-    params: [tsx.param({ name: "input", type: tsx.type.unknown })],
+    params: [
+      tsx.param({
+        name: "input",
+        type: tsx.type.reference({
+          name: "Record",
+          args: [
+            tsx.type.literalType(tsx.literal.string("context")),
+            tsx.type.reference({
+              name: "Record",
+              args: [tsx.type.string, tsx.type.unknown],
+            }),
+          ],
+        }),
+      }),
+    ],
     returnType: tsx.type.reference({
       name: "Promise",
       args: [
@@ -278,6 +253,36 @@ function generateRPCExecutor(
   })
 }
 
+const noopParser: ts.FunctionDeclaration = tsx.function({
+  name: "noopParser",
+  returnType: tsx.type.reference({
+    name: "ParseResult",
+    args: [
+      tsx.type.reference({
+        name: "Record",
+        args: [tsx.type.string, tsx.type.unknown],
+      }),
+    ],
+  }),
+  params: [
+    tsx.param({
+      name: "data",
+      type: tsx.type.reference({
+        name: "Record",
+        args: [tsx.type.string, tsx.type.unknown],
+      }),
+    }),
+  ],
+  body: [
+    tsx.statement.return(
+      tsx.literal.object(
+        tsx.property.assignment("ok", tsx.literal.true),
+        tsx.property.assignment("result", tsx.expression.identifier("data")),
+      ),
+    ),
+  ],
+})
+
 function generateInnerFunction(
   service: PheroService,
   funcDef: PheroFunction,
@@ -289,7 +294,16 @@ function generateInnerFunction(
     params: [
       tsx.param({
         name: "input",
-        type: tsx.type.unknown,
+        type: tsx.type.reference({
+          name: "Record",
+          args: [
+            tsx.type.literalType(tsx.literal.string("context")),
+            tsx.type.reference({
+              name: "Record",
+              args: [tsx.type.string, tsx.type.unknown],
+            }),
+          ],
+        }),
       }),
     ],
     returnType: tsx.type.reference({
@@ -297,6 +311,11 @@ function generateInnerFunction(
       args: [cloneTS(funcDef.returnType)],
     }),
     body: tsx.block(
+      tsx.statement.let({
+        name: "output",
+        type: tsx.type.union(cloneTS(funcDef.returnType), tsx.type.undefined),
+      }),
+
       tsx.const({
         name: "inputParser",
         init: generateInlineParser(
@@ -311,6 +330,18 @@ function generateInnerFunction(
       }),
 
       tsx.const({
+        name: "contextParser",
+        init:
+          funcDef.contextType && funcDef.contextTypeModel
+            ? generateInlineParser(
+                funcDef.contextTypeModel,
+                funcDef.contextType,
+                depRefs,
+              )
+            : tsx.expression.identifier("noopParser"),
+      }),
+
+      tsx.const({
         name: "outputParser",
         init: generateInlineParser(
           funcDef.returnTypeModel,
@@ -319,469 +350,235 @@ function generateInnerFunction(
         ),
       }),
 
-      ...(service.config.middleware
-        ? [
-            tsx.const({
-              name: "resolvers",
-              init: tsx.literal.array(
-                // for middleware
-                ...service.config.middleware.map((middleware) =>
-                  tsx.literal.object(
-                    tsx.property.assignment(
-                      "inputContext",
-                      tsx.expression.call("defer", {
-                        typeArgs: [
-                          middleware.contextType ?? tsx.literal.type(),
-                        ],
-                      }),
-                    ),
-                    tsx.property.assignment(
-                      "exec",
-                      tsx.expression.call("defer"),
-                    ),
-                  ),
-                ),
-                // for the actual function
-                tsx.literal.object(
-                  tsx.property.assignment(
-                    "inputContext",
-                    tsx.expression.call("defer", {
-                      typeArgs: [service.config.contextType ?? tsx.type.void],
-                    }),
-                  ),
-                  tsx.property.assignment("exec", tsx.expression.call("defer")),
-                ),
-              ),
-            }),
-
-            ...Array.from({
-              length: service.config.middleware.length + 1,
-            }).map((x, index) =>
-              tsx.statement.expression(
-                // resolvers[2].exec.promise.catch(rejectEXEC)
-                tsx.expression.call(
-                  tsx.expression.propertyAccess(
-                    tsx.expression.elementAccess("resolvers", index),
-                    "exec",
-                    "promise",
-                    "catch",
-                  ),
-                  { args: ["rejectEXEC"] },
-                ),
-              ),
-            ),
-
-            tsx.const({
-              name: "middlewarePromises",
-              init: tsx.literal.array(),
-              type: tsx.type.array(
-                tsx.type.reference({
-                  name: "Promise",
-                  args: [tsx.type.void],
-                }),
-              ),
-            }),
-
-            tsx.statement.expression(
-              tsx.expression.call(
-                tsx.expression.propertyAccess(
-                  tsx.expression.elementAccess("resolvers", 0),
-                  "inputContext",
-                  "resolve",
-                ),
-                {
-                  args: [tsx.expression.propertyAccess("input", "context")],
-                },
-              ),
-            ),
-
-            // for loop
-            tsx.statement.simpleForOver({
-              name: tsx.expression.propertyAccess(
-                service.name,
-                "config",
-                "middleware",
-              ),
-              block: [
-                tsx.const({
-                  name: "middleware",
-                  init: tsx.expression.elementAccess(
-                    tsx.expression.propertyAccess(
-                      service.name,
-                      "config",
-                      "middleware",
-                    ),
-                    "i",
-                  ),
-                }),
-                tsx.const({
-                  name: "parseMiddlewareParams",
-                  init: tsx.expression.elementAccess(
-                    tsx.expression.elementAccess(
-                      `service_middlewares_${service.name}`,
-                      "i",
-                    ),
-                    0,
-                  ),
-                }),
-                tsx.const({
-                  name: "parseMiddlewareContext",
-                  init: tsx.expression.elementAccess(
-                    tsx.expression.elementAccess(
-                      `service_middlewares_${service.name}`,
-                      "i",
-                    ),
-                    1,
-                  ),
-                }),
-                tsx.const({
-                  name: "parseMiddlewareNextOut",
-                  init: tsx.expression.elementAccess(
-                    tsx.expression.elementAccess(
-                      `service_middlewares_${service.name}`,
-                      "i",
-                    ),
-                    2,
-                  ),
-                }),
-                tsx.const({
-                  name: "currResolverIndex",
-                  init: tsx.expression.identifier("i"),
-                }),
-                tsx.const({
-                  name: "nextResolverIndex",
-                  init: tsx.expression.binary(
-                    tsx.expression.identifier("i"),
-                    "+",
-                    tsx.literal.number(1),
-                  ),
-                }),
-
-                // const ctx = await resolvers[currResolverIndex].inputContext.promise
-                tsx.const({
-                  name: "ctx",
-                  init: tsx.expression.await(
-                    tsx.expression.propertyAccess(
-                      tsx.expression.elementAccess(
-                        "resolvers",
-                        "currResolverIndex",
-                      ),
-                      "inputContext",
-                      "promise",
-                    ),
-                  ),
-                }),
-
-                // const parsedContext = parseMiddlewareContext(i, ctx)
-                tsx.const({
-                  name: "parsedContextParseResult",
-                  init: tsx.expression.call("parseMiddlewareContext", {
-                    args: ["ctx"],
-                  }),
-                }),
-
-                generateIfParseResultNotOkayEarlyReturn({
-                  parseResult: "parsedContextParseResult",
-                  input: "ctx",
-                }),
-
-                tsx.const({
-                  name: "parsedContext",
-                  init: tsx.expression.propertyAccess(
-                    "parsedContextParseResult",
-                    "result",
-                  ),
-                }),
-
-                // const parsedParams = parseMiddlewareParams(i, ctx)
-                tsx.const({
-                  name: "parsedParamsParseResult",
-                  init: tsx.expression.call("parseMiddlewareParams", {
-                    args: ["input"],
-                  }),
-                }),
-
-                generateIfParseResultNotOkayEarlyReturn({
-                  parseResult: "parsedParamsParseResult",
-                  input: "input",
-                }),
-
-                tsx.const({
-                  name: "parsedParams",
-                  init: tsx.expression.propertyAccess(
-                    "parsedParamsParseResult",
-                    "result",
-                  ),
-                }),
-
-                tsx.const({
-                  name: "middlewarePromise",
-                  init: tsx.expression.call(
-                    tsx.expression.propertyAccess(
-                      tsx.expression.call(
-                        tsx.expression.propertyAccess(
-                          tsx.expression.call("middleware", {
-                            args: [
-                              "parsedParams",
-                              "parsedContext",
-                              tsx.arrowFunction({
-                                async: true,
-                                params: [
-                                  tsx.param({
-                                    name: "nextOutput",
-                                    type: tsx.type.any,
-                                  }),
-                                ],
-                                body: [
-                                  // const parsedOut = parseMiddlewareNextOut(i, nextOutput)
-                                  tsx.const({
-                                    name: "parsedOutParseResult",
-                                    init: tsx.expression.ternary(
-                                      tsx.expression.binary(
-                                        tsx.expression.identifier(
-                                          "parseMiddlewareNextOut",
-                                        ),
-                                        "!=",
-                                        tsx.literal.null,
-                                      ),
-                                      tsx.expression.call(
-                                        "parseMiddlewareNextOut",
-                                        { args: ["nextOutput"] },
-                                      ),
-                                      tsx.literal.object(
-                                        tsx.property.assignment(
-                                          "ok",
-                                          tsx.literal.true,
-                                        ),
-                                        tsx.property.assignment(
-                                          "result",
-                                          tsx.literal.object(),
-                                        ),
-                                      ),
-                                    ),
-                                  }),
-
-                                  // generateIfParseResultNotOkayEarlyReturn({
-                                  //   parseResult: "parsedOutParseResult",
-                                  // }),
-
-                                  tsx.statement.if({
-                                    expression: tsx.expression.binary(
-                                      tsx.expression.propertyAccess(
-                                        "parsedOutParseResult",
-                                        "ok",
-                                      ),
-                                      "===",
-                                      tsx.literal.false,
-                                    ),
-                                    then: tsx.block(
-                                      tsx.statement.expression(
-                                        tsx.expression.call(
-                                          tsx.expression.propertyAccess(
-                                            tsx.expression.elementAccess(
-                                              "resolvers",
-                                              "nextResolverIndex",
-                                            ),
-                                            "inputContext",
-                                            "reject",
-                                          ),
-                                          {
-                                            args: [
-                                              tsx.expression.new("ParseError", {
-                                                args: [
-                                                  tsx.expression.propertyAccess(
-                                                    "parsedOutParseResult",
-                                                    "errors",
-                                                  ),
-                                                ],
-                                              }),
-                                            ],
-                                          },
-                                        ),
-                                      ),
-                                      tsx.statement.return(),
-                                    ),
-                                  }),
-
-                                  tsx.const({
-                                    name: "parsedOut",
-                                    init: tsx.expression.propertyAccess(
-                                      "parsedOutParseResult",
-                                      "result",
-                                    ),
-                                  }),
-
-                                  // resolvers[nextResolverIndex].inputContext.resolve(
-                                  //   {
-                                  //     ...ctx,
-                                  //     ...parsedOut,
-                                  //   },
-                                  // ),
-                                  tsx.statement.expression(
-                                    tsx.expression.call(
-                                      tsx.expression.propertyAccess(
-                                        tsx.expression.elementAccess(
-                                          "resolvers",
-                                          "nextResolverIndex",
-                                        ),
-                                        "inputContext",
-                                        "resolve",
-                                      ),
-                                      {
-                                        args: [
-                                          tsx.literal.object(
-                                            tsx.property.spreadAssignment(
-                                              "ctx",
-                                            ),
-                                            tsx.property.spreadAssignment(
-                                              "parsedOut",
-                                            ),
-                                          ),
-                                        ],
-                                      },
-                                    ),
-                                  ),
-
-                                  // await resolvers[nextResolverIndex].exec.promise
-                                  tsx.statement.expression(
-                                    tsx.expression.await(
-                                      tsx.expression.propertyAccess(
-                                        tsx.expression.elementAccess(
-                                          "resolvers",
-                                          "nextResolverIndex",
-                                        ),
-                                        "exec",
-                                        "promise",
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              }),
-                            ],
-                          }),
-                          "then",
-                        ),
-                        {
-                          args: [
-                            tsx.arrowFunction({
-                              params: [],
-                              body: [
-                                // resolvers[currResolverIndex].exec.resolve()
-                                tsx.statement.expression(
-                                  tsx.expression.call(
-                                    tsx.expression.propertyAccess(
-                                      tsx.expression.elementAccess(
-                                        "resolvers",
-                                        "currResolverIndex",
-                                      ),
-                                      "exec",
-                                      "resolve",
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            }),
-                          ],
-                        },
-                      ),
-                      "catch",
-                    ),
-                    {
-                      args: [
-                        tsx.arrowFunction({
-                          params: [
-                            tsx.param({
-                              name: "err",
-                              type: tsx.type.reference({
-                                name: "Error",
-                              }),
-                            }),
-                          ],
-                          body: [
-                            // resolvers[currResolverIndex].exec.reject(err)
-                            tsx.statement.expression(
-                              tsx.expression.call(
-                                tsx.expression.propertyAccess(
-                                  tsx.expression.elementAccess(
-                                    "resolvers",
-                                    "currResolverIndex",
-                                  ),
-                                  "exec",
-                                  "reject",
-                                ),
-                                {
-                                  args: ["err"],
-                                },
-                              ),
-                            ),
-                          ],
-                        }),
-                      ],
-                    },
-                  ),
-                }),
-                tsx.statement.expression(
-                  tsx.expression.call(
-                    tsx.expression.propertyAccess("middlewarePromises", "push"),
-                    {
-                      args: ["middlewarePromise"],
-                    },
-                  ),
-                ),
-              ],
-            }),
-
-            tsx.const({
-              name: "middlewareOutput",
-              init: tsx.expression.await(
-                tsx.expression.propertyAccess(
-                  tsx.expression.elementAccess(
-                    "resolvers",
-                    service.config.middleware.length,
-                  ),
-                  "inputContext",
-                  "promise",
-                ),
-              ),
-            }),
-
-            tsx.const({
-              name: "inputWithContext",
-              init: tsx.literal.object(
-                ...(funcDef.contextParameterType
-                  ? [
-                      tsx.property.spreadAssignment("input"),
-                      tsx.property.assignment(
-                        "context",
-                        tsx.expression.identifier("middlewareOutput"),
-                      ),
-                    ]
-                  : [tsx.property.spreadAssignment("input")]),
-              ),
-            }),
-
-            tsx.const({
-              name: "inputParseResult",
-              init: tsx.expression.call("inputParser", {
-                args: ["inputWithContext"],
-              }),
-            }),
-          ]
-        : [
-            tsx.const({
-              name: "inputParseResult",
-              init: tsx.expression.call("inputParser", {
-                args: ["input"],
-              }),
-            }),
-          ]),
-
-      generateIfParseResultNotOkayEarlyReturn({
-        parseResult: "inputParseResult",
-        input: "input",
+      tsx.statement.let({
+        name: "isFunctionCalled",
+        init: tsx.literal.false,
       }),
 
-      ...generateRPCFunctionCall({ service, funcDef }).statements,
+      ...(service.funcs.some((f) => !f.contextType) ||
+      service.config.middleware.some((m) => !m.contextType || !m.nextType)
+        ? [noopParser]
+        : []),
+
+      ...service.config.middleware.reduceRight<ts.Statement[]>(
+        (innerStatements, middleware, index) => {
+          const middlewareFuncRef = tsx.expression.elementAccess(
+            tsx.expression.propertyAccess(service.name, "config", "middleware"),
+            tsx.literal.number(index),
+          )
+
+          const ctxParser = tsx.const({
+            name: `ctx_parser_${index}`,
+            init: middleware.contextType
+              ? generateInlineParser(
+                  middleware.contextTypeModel,
+                  middleware.contextType,
+                  depRefs,
+                )
+              : tsx.expression.identifier("noopParser"),
+          })
+
+          const nextParser = tsx.const({
+            name: `next_parser_${index}`,
+            init: middleware.nextType
+              ? generateInlineParser(
+                  middleware.nextTypeModel,
+                  middleware.nextType,
+                  depRefs,
+                )
+              : tsx.expression.identifier("noopParser"),
+          })
+
+          const callMiddlewareExpr = tsx.expression.await(
+            tsx.expression.call(middlewareFuncRef, {
+              args: [
+                tsx.expression.propertyAccess(
+                  `ctx_parseResult_${index}`,
+                  "result",
+                ),
+                tsx.arrowFunction({
+                  async: true,
+                  params: [
+                    tsx.param({
+                      name: `next_${index}`,
+                      questionToken: true,
+                      type: tsx.type.unknown,
+                    }),
+                  ],
+                  body: [
+                    nextParser,
+                    tsx.const({
+                      name: `next_parseResult_${index}`,
+                      init: tsx.expression.call(`next_parser_${index}`, {
+                        args: [`next_${index}`],
+                      }),
+                    }),
+                    generateIfParseResultNotOkayEarlyReturn({
+                      input: `next_${index}`,
+                      parseResult: `next_parseResult_${index}`,
+                    }),
+                    ...innerStatements,
+                  ],
+                }),
+              ],
+            }),
+          )
+
+          const callCheckFuncCalledExpr = tsx.statement.if({
+            expression: tsx.expression.negate(
+              tsx.expression.identifier("isFunctionCalled"),
+            ),
+            then: tsx.statement.throw(
+              tsx.expression.new("Error", {
+                args: [
+                  tsx.literal.string(
+                    `It looks like middleware with index ${index} doesn't call next. Or maybe you forgot to await the next function call?`,
+                  ),
+                ],
+              }),
+            ),
+          })
+
+          return [
+            ctxParser,
+            tsx.const({
+              name: `ctx_${index}`,
+              init: tsx.literal.object(
+                ...(index === 0
+                  ? [
+                      tsx.property.spreadAssignment(
+                        tsx.expression.propertyAccess("input", "context"),
+                      ),
+                    ]
+                  : [
+                      tsx.property.spreadAssignment(`ctx_${index - 1}`),
+                      tsx.property.spreadAssignment(
+                        tsx.expression.propertyAccess(
+                          `next_parseResult_${index - 1}`,
+                          "result",
+                        ),
+                      ),
+                    ]),
+              ),
+            }),
+            tsx.const({
+              name: `ctx_parseResult_${index}`,
+              init: tsx.expression.call(`ctx_parser_${index}`, {
+                args: [`ctx_${index}`],
+              }),
+            }),
+            generateIfParseResultNotOkayEarlyReturn({
+              input: `ctx_${index}`,
+              parseResult: `ctx_parseResult_${index}`,
+            }),
+            tsx.statement.expression(callMiddlewareExpr),
+            callCheckFuncCalledExpr,
+          ]
+        },
+        [
+          tsx.const({
+            name: `parsedContext`,
+            init: tsx.literal.object(
+              ...(service.config.middleware.length === 0
+                ? []
+                : [
+                    tsx.property.spreadAssignment(
+                      tsx.expression.identifier(
+                        `ctx_${service.config.middleware.length - 1}`,
+                      ),
+                    ),
+                    tsx.property.spreadAssignment(
+                      tsx.expression.propertyAccess(
+                        `next_parseResult_${
+                          service.config.middleware.length - 1
+                        }`,
+                        "result",
+                      ),
+                    ),
+                  ]),
+            ),
+          }),
+
+          tsx.const({
+            name: "contextParseResult",
+            init: tsx.expression.call("contextParser", {
+              args: ["parsedContext"],
+            }),
+          }),
+
+          generateIfParseResultNotOkayEarlyReturn({
+            parseResult: "contextParseResult",
+            input: "parsedContext",
+          }),
+
+          tsx.const({
+            name: "inputParseResult",
+            init: tsx.expression.call("inputParser", {
+              args: ["input"],
+            }),
+          }),
+
+          generateIfParseResultNotOkayEarlyReturn({
+            parseResult: "inputParseResult",
+            input: "input",
+          }),
+
+          tsx.statement.expression(
+            tsx.expression.binary(
+              tsx.expression.identifier("output"),
+              "=",
+              tsx.expression.await(
+                tsx.expression.call(
+                  tsx.expression.propertyAccess(
+                    service.name,
+                    "functions",
+                    funcDef.name,
+                  ),
+                  {
+                    args: [
+                      ...(funcDef.contextType
+                        ? [
+                            tsx.expression.propertyAccess(
+                              "contextParseResult",
+                              "result",
+                            ),
+                          ]
+                        : []),
+                      ...funcDef.parameters.map((param) =>
+                        tsx.expression.propertyAccess(
+                          "inputParseResult",
+                          "result",
+                          param.name,
+                        ),
+                      ),
+                    ],
+                  },
+                ),
+              ),
+            ),
+          ),
+
+          tsx.statement.expression(
+            tsx.expression.binary(
+              tsx.expression.identifier("isFunctionCalled"),
+              "=",
+              tsx.literal.true,
+            ),
+          ),
+        ],
+      ),
+
+      tsx.const({
+        name: "outputParseResult",
+        init: tsx.expression.call("outputParser", { args: ["output"] }),
+      }),
+
+      generateIfParseResultNotOkayEarlyReturn({
+        parseResult: "outputParseResult",
+        input: "output",
+      }),
+
+      generateReturnOkay(),
     ),
   })
 }
@@ -797,79 +594,6 @@ function wrapWithErrorHandler(
       block: generateErrorParsingFunction(domainErrors),
     },
   })
-}
-
-function generateRPCFunctionCall({
-  service,
-  funcDef,
-}: {
-  service: PheroService
-  funcDef: PheroFunction
-}): ts.Block {
-  return tsx.block(
-    tsx.const({
-      name: "output",
-      init: tsx.expression.await(
-        tsx.expression.call(
-          tsx.expression.propertyAccess(
-            service.name,
-            "functions",
-            funcDef.name,
-          ),
-          {
-            args: [
-              ...funcDef.parameters.map((param) =>
-                tsx.expression.propertyAccess(
-                  "inputParseResult",
-                  "result",
-                  param.name,
-                ),
-              ),
-            ],
-          },
-        ),
-      ),
-    }),
-
-    ...(service.config.middleware?.length
-      ? [
-          // resolvers[3].exec.resolve()
-          tsx.statement.expression(
-            tsx.expression.call(
-              tsx.expression.propertyAccess(
-                tsx.expression.elementAccess(
-                  "resolvers",
-                  service.config.middleware.length,
-                ),
-                "exec",
-                "resolve",
-              ),
-            ),
-          ),
-          // await Promise.all(middlewarePromises);
-          tsx.statement.expression(
-            tsx.expression.await(
-              tsx.expression.call(
-                tsx.expression.propertyAccess("Promise", "all"),
-                { args: ["middlewarePromises"] },
-              ),
-            ),
-          ),
-        ]
-      : []),
-
-    tsx.const({
-      name: "outputParseResult",
-      init: tsx.expression.call("outputParser", { args: ["output"] }),
-    }),
-
-    generateIfParseResultNotOkayEarlyReturn({
-      parseResult: "outputParseResult",
-      input: "output",
-    }),
-
-    generateReturnOkay(),
-  )
 }
 
 function generateErrorParsingFunction(domainErrors: PheroError[]): ts.Block {
@@ -979,7 +703,7 @@ function generateIfParseResultNotOkayEarlyReturn({
   input,
 }: {
   parseResult: string
-  input: string
+  input: string | ts.Expression
 }): ts.Statement {
   return tsx.statement.if({
     expression: tsx.expression.negate(
@@ -989,7 +713,7 @@ function generateIfParseResultNotOkayEarlyReturn({
       tsx.expression.new("ParseError", {
         args: [
           tsx.expression.propertyAccess(parseResult, "errors"),
-          tsx.expression.identifier(input),
+          typeof input === "string" ? tsx.expression.identifier(input) : input,
         ],
       }),
     ),
@@ -1000,43 +724,4 @@ function generateReturnOkay(): ts.Statement {
   return tsx.statement.return(
     tsx.expression.propertyAccess("outputParseResult", "result"),
   )
-}
-
-function getParameterName(name: ts.BindingName): string {
-  if (ts.isIdentifier(name)) {
-    return name.text
-  } else if (ts.isBindingName(name)) {
-    throw new PheroParseError(
-      `S138: No support for binding names ${name?.kind}`,
-      name,
-    )
-  }
-
-  throw new PheroParseError("S139: Name not supported", name)
-}
-
-function generateMiddlewareParsers(
-  serviceName: string,
-  serviceConfig: PheroServiceConfig,
-  prog: ts.Program,
-): ts.VariableStatement {
-  const middlewares = serviceConfig.middleware ?? []
-  return tsx.const({
-    name: `service_middlewares_${serviceName}`,
-    init: tsx.literal
-      .array
-      // TODO!!!
-      // ...middlewares.map((middleware) =>
-      //   tsx.literal.array(
-      //     generateInlineParser(tsx.type.any, middleware.paramsType, prog),
-
-      //     generateInlineParser(tsx.type.any, middleware.contextType, prog),
-
-      //     middleware.nextType
-      //       ? generateInlineParser(tsx.type.any, middleware.nextType, prog)
-      //       : tsx.literal.null,
-      //   ),
-      // ),
-      (),
-  })
 }

@@ -21,8 +21,26 @@ export default function generateFromDeclaration(
   deps: DependencyMap,
   typeParams: TypeParamMap,
 ): InternalParserModelMap {
-  const declaration = getDeclaration(typeNode, typeChecker)
+  return generateFromDeclarationWithDeclaration(
+    getDeclaration(typeNode, typeChecker),
+    typeNode,
+    type,
+    location,
+    typeChecker,
+    deps,
+    typeParams,
+  )
+}
 
+function generateFromDeclarationWithDeclaration(
+  declaration: ts.Declaration,
+  typeNode: ts.TypeReferenceType,
+  type: ts.TypeReference,
+  location: ts.TypeNode,
+  typeChecker: ts.TypeChecker,
+  deps: DependencyMap,
+  typeParams: TypeParamMap,
+): InternalParserModelMap {
   if (ts.isTypeParameterDeclaration(declaration)) {
     const typeParserModel = getTypeParamParserModel(
       typeNode,
@@ -200,6 +218,28 @@ export default function generateFromDeclaration(
       root: ref,
       deps: updatedDeps2,
     }
+  }
+
+  if (ts.isImportSpecifier(declaration)) {
+    const symbol = typeChecker.getSymbolAtLocation(declaration.name)
+    if (!symbol) {
+      throw new PheroParseError("HUWEWE 1", declaration)
+    }
+
+    const aliasSymbol = typeChecker.getAliasedSymbol(symbol)
+    if (!aliasSymbol.declarations?.[0]) {
+      throw new PheroParseError("HUWEWE 2", declaration)
+    }
+
+    return generateFromDeclarationWithDeclaration(
+      aliasSymbol.declarations?.[0],
+      typeNode,
+      type,
+      location,
+      typeChecker,
+      deps,
+      typeParams,
+    )
   }
 
   if (ts.isClassDeclaration(declaration)) {
