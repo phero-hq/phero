@@ -19,6 +19,7 @@ export interface FunctionParserModel {
 }
 
 type FunctionType =
+  | ts.MethodDeclaration
   | ts.FunctionDeclaration
   | ts.FunctionExpression
   | ts.ArrowFunction

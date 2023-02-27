@@ -31,20 +31,29 @@ function generatePheroModels(app: PheroApp): ts.Statement[] {
   }
 
   return [
-    tsx.typeAlias({
-      name: "PheroContext",
+    tsx.classDeclaration({
+      name: "PheroService",
       export: true,
-      typeParameters: [tsx.typeParam({ name: "T" })],
-      type: tsx.type.reference({ name: "T" }),
+      abstract: true,
+      typeParams: [
+        tsx.typeParam({
+          name: "TContext",
+          default: tsx.literal.type(),
+        }),
+      ],
     }),
   ]
 }
 
-function generatePheroService(service: PheroService): ts.ModuleDeclaration {
-  return tsx.namespace({
-    export: true,
+function generatePheroService(service: PheroService): ts.ClassDeclaration {
+  return tsx.classDeclaration({
     name: service.name,
-    statements: service.funcs.map(generateFunctionDeclaration),
+    export: true,
+    elements: service.funcs.map(generateFunctionDeclaration),
+    extendsType: ts.factory.createExpressionWithTypeArguments(
+      tsx.expression.identifier("PheroService"),
+      service.config.contextType ? [cloneTS(service.config.contextType)] : [],
+    ),
   })
 }
 

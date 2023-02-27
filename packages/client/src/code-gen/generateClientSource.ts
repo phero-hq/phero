@@ -73,11 +73,7 @@ export default function generateClientSource(
         ]),
       ),
       ...app.services.map((service) => {
-        const {
-          name,
-          funcs,
-          config: { contextType },
-        } = service
+        const { name, funcs } = service
 
         return ts.factory.createPropertyDeclaration(
           [],
@@ -85,7 +81,7 @@ export default function generateClientSource(
           undefined,
           undefined,
           ts.factory.createObjectLiteralExpression(
-            funcs.map((func) => generateClientFunction(service, func, prog)),
+            funcs.map((func) => generateClientFunction(service, func)),
             true,
           ),
         )
@@ -142,9 +138,7 @@ function generateContextParam(app: PheroApp): ts.PropertySignature | undefined {
   const serviceContextTypes = app.services.reduce<
     { serviceName: string; contextType: ts.TypeNode }[]
   >((result, service) => {
-    const serviceContextType = service.funcs
-      .map((f) => f.contextParameterType)
-      .find((c) => !!c)
+    const serviceContextType = service.config.contextType
 
     if (!serviceContextType) {
       return result
@@ -190,24 +184,26 @@ function generateError(parsedError: PheroError): ts.ClassDeclaration {
       undefined,
     ),
     export: true,
-    constructor: tsx.constructor({
-      params: parsedError.properties.map((prop) =>
-        tsx.param({
-          public: true,
-          readonly: true,
-          name: prop.name,
-          type: cloneTS(prop.type),
-          questionToken: prop.optional,
-        }),
-      ),
-      block: tsx.block(
-        tsx.statement.expression(
-          tsx.expression.call(tsx.expression.identifier("super"), {
-            args: ["message"],
+    elements: [
+      tsx.constructor({
+        params: parsedError.properties.map((prop) =>
+          tsx.param({
+            public: true,
+            readonly: true,
+            name: prop.name,
+            type: cloneTS(prop.type),
+            questionToken: prop.optional,
           }),
         ),
-      ),
-    }),
+        block: tsx.block(
+          tsx.statement.expression(
+            tsx.expression.call(tsx.expression.identifier("super"), {
+              args: ["message"],
+            }),
+          ),
+        ),
+      }),
+    ],
   })
 }
 
@@ -266,7 +262,6 @@ function returnError(name: string, args: ts.Expression[]): ts.ReturnStatement {
 function generateClientFunction(
   service: PheroService,
   func: PheroFunction,
-  prog: ts.Program,
 ): ts.PropertyAssignment {
   let parameters = func.parameters.map((p) =>
     ts.factory.createParameterDeclaration(
@@ -318,7 +313,7 @@ function generateClientFunctionBlock(
             tsx.literal.string(func.name),
             tsx.literal.object(
               ...[
-                ...(func.contextParameterType
+                ...(service.config.contextType
                   ? [
                       tsx.property.assignment(
                         "context",

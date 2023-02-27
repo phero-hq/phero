@@ -15,6 +15,7 @@ import {
   generateParserModelForFunction,
   generateParserModelForError,
 } from "../generateModel"
+import generateFromTypeNode from "../generateModel/generateFromTypeNode"
 
 export default function parseManifest(dts: string): {
   result: PheroApp
@@ -52,9 +53,15 @@ function parseManifestSourceFile(
     if (isModel(statement)) {
       models.push(makePheroModel(statement))
     } else if (ts.isClassDeclaration(statement)) {
-      errors.push(makePheroError(statement, typeChecker, deps))
-    } else if (ts.isModuleDeclaration(statement)) {
-      services.push(parseServiceDeclaration(statement, typeChecker, deps))
+      const inheritedClassRef =
+        statement.heritageClauses?.[0].types?.[0].expression
+      if (inheritedClassRef && ts.isIdentifier(inheritedClassRef)) {
+        if (inheritedClassRef.text === "Error") {
+          errors.push(makePheroError(statement, typeChecker, deps))
+        } else if (inheritedClassRef.text === "PheroService") {
+          services.push(parseServiceDeclaration(statement, typeChecker, deps))
+        }
+      }
     } else {
       throw new Error("Unsupported statement in phero-manifest.d.ts")
     }
@@ -108,33 +115,41 @@ function makePheroError(
 }
 
 function parseServiceDeclaration(
-  moduleDeclr: ts.ModuleDeclaration,
+  classDeclr: ts.ClassDeclaration,
   typeChecker: ts.TypeChecker,
   deps: DependencyMap,
 ): PheroService {
-  if (!moduleDeclr.body || !ts.isModuleBlock(moduleDeclr.body)) {
-    throw new Error("Unexpected service declaration")
+  if (!classDeclr.name) {
+    throw new Error("PheroService must have name")
   }
 
-  const funcs = moduleDeclr.body.statements.filter(
-    (st): st is ts.FunctionDeclaration => ts.isFunctionDeclaration(st),
+  const funcs = classDeclr.members.filter((st): st is ts.MethodDeclaration =>
+    ts.isMethodDeclaration(st),
   )
 
+  const contextType =
+    classDeclr.heritageClauses?.[0].types?.[0].typeArguments?.[0]
+
+  if (contextType && !ts.isTypeLiteralNode(contextType)) {
+    throw new Error("Wrong syntax for context type")
+  }
+
   const pheroService: PheroService = {
-    name: moduleDeclr.name.text,
+    name: classDeclr.name.text,
     funcs: funcs.map((func) =>
       parseFunctionDeclaration(func, typeChecker, deps),
     ),
     config: {
       middleware: [],
+      contextType,
     },
-    ref: moduleDeclr,
+    ref: classDeclr,
   }
   return pheroService
 }
 
 function parseFunctionDeclaration(
-  func: ts.FunctionDeclaration,
+  func: ts.MethodDeclaration,
   typeChecker: ts.TypeChecker,
   deps: DependencyMap,
 ): PheroFunction {
@@ -160,40 +175,19 @@ function getOrThrow<T>(node: T | undefined, errorMessage: string): T {
 }
 
 function parseFunctionParams(
-  func: ts.FunctionDeclaration,
+  func: ts.MethodDeclaration,
   typeChecker: ts.TypeChecker,
   deps: DependencyMap,
-): Pick<
-  PheroFunction,
-  "parameters" | "parametersModel" | "returnTypeModel" | "contextType"
-> {
-  let contextParameterType: ts.TypeNode | undefined
-
-  const firstParamType = func.parameters[0]?.type
-
-  if (
-    firstParamType &&
-    ts.isTypeReferenceNode(firstParamType) &&
-    getNameAsString(firstParamType.typeName) === "PheroContext" &&
-    firstParamType.typeArguments?.length === 1
-  ) {
-    contextParameterType = firstParamType.typeArguments[0]
-  }
-
-  const params = contextParameterType
-    ? func.parameters.slice(1)
-    : func.parameters
-
+): Pick<PheroFunction, "returnTypeModel" | "parameters" | "parametersModel"> {
   const functionModel = generateParserModelForFunction(func, typeChecker, deps)
 
   return {
-    contextType: contextParameterType,
-    parameters: params.map((param) => ({
+    returnTypeModel: functionModel.returnType,
+    parameters: func.parameters.map((param) => ({
       name: getNameAsString(param.name),
       questionToken: !!param.questionToken,
       type: getOrThrow(param.type, "Parameter must have type"),
     })),
     parametersModel: functionModel.parameters,
-    returnTypeModel: functionModel.returnType,
   }
 }
