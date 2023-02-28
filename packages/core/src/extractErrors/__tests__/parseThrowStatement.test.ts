@@ -1,6 +1,29 @@
 import ts from "typescript"
+import {
+  ErrorParserModel,
+  generateParserModelForError,
+} from "../../generateModel"
 import { compileStatements } from "../../lib/tsTestUtils"
-import parseThrowStatement from "../parseThrowStatement"
+import _parseThrowStatement from "../parseThrowStatement"
+
+function parseThrowStatement(
+  tst: ts.ThrowStatement,
+  prog: ts.Program,
+): ErrorParserModel | undefined {
+  const classDeclr = _parseThrowStatement(tst, prog)
+
+  if (!classDeclr) {
+    return undefined
+  }
+
+  const result = generateParserModelForError(
+    classDeclr,
+    prog.getTypeChecker(),
+    new Map(),
+  )
+
+  return result
+}
 
 describe("parseThrowStatement", () => {
   describe("validate if throw statement throws a descendant of Error", () => {
@@ -125,8 +148,8 @@ describe("parseThrowStatement", () => {
         prog,
       } = compileStatements(`
         class SomethingError extends Error {
-          public aap = 1
-          kaas = true
+          public aap: number = 1
+          kaas: boolean = true
           private noot = 3
         }
 
@@ -207,7 +230,7 @@ describe("parseThrowStatement", () => {
         prog,
       } = compileStatements(`
         class ParentError extends Error {
-          public one = 1
+          public one: number = 1
           constructor(two: number, public three: number) {
             super("message")
           }

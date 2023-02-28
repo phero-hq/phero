@@ -51,25 +51,21 @@ export function parsePheroApp(prog: ts.Program): PheroApp {
   )
 
   for (const error of allErrors) {
-    const errorName = error.name?.text
+    const { name, properties, errorModel } = generateParserModelForError(
+      error,
+      prog.getTypeChecker(),
+      deps,
+    )
 
-    if (!errorName) {
-      throw new PheroParseError("Error must have name.", error)
-    }
-    if (!errorMap.has(errorName)) {
-      const { properties, errorModel } = generateParserModelForError(
-        error,
-        prog.getTypeChecker(),
-        deps,
-      )
-      errorMap.set(errorName, {
-        name: errorName,
+    if (!errorMap.has(name)) {
+      errorMap.set(name, {
+        name,
         ref: error,
         sourceFile: error.getSourceFile().fileName,
         properties,
         errorModel,
       })
-    } else if (errorMap.get(errorName)?.ref !== error) {
+    } else if (errorMap.get(name)?.ref !== error) {
       throw new PheroParseError(
         "You already have a different error class with the same name, currently this is not possible. We intent to implement namespaces soon, stay tuned.",
         error,

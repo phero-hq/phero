@@ -1,9 +1,5 @@
 import ts from "typescript"
-import {
-  MemberParserModel,
-  ObjectParserModel,
-  ParserModel,
-} from "./ParserModel"
+import { ObjectParserModel, ParserModel } from "./ParserModel"
 
 export interface PheroApp {
   models: PheroModel[]

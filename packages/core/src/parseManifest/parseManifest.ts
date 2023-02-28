@@ -15,7 +15,6 @@ import {
   generateParserModelForFunction,
   generateParserModelForError,
 } from "../generateModel"
-import generateFromTypeNode from "../generateModel/generateFromTypeNode"
 
 export default function parseManifest(dts: string): {
   result: PheroApp
@@ -95,18 +94,14 @@ function makePheroError(
   typeChecker: ts.TypeChecker,
   deps: DependencyMap,
 ): PheroError {
-  const { properties, errorModel } = generateParserModelForError(
+  const { name, properties, errorModel } = generateParserModelForError(
     error,
     typeChecker,
     deps,
   )
 
-  if (!error.name) {
-    throw new Error("Error without name found in phero-manifest.d.ts")
-  }
-
   return {
-    name: error.name.text,
+    name,
     sourceFile: "manifest.d.ts",
     ref: error,
     properties,

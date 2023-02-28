@@ -15,12 +15,6 @@ export default function generateErrorDeclaration(
     elements: [
       tsx.constructor({
         params: [
-          tsx.param({
-            // public: true,
-            // readonly: true,
-            name: "message",
-            type: tsx.type.string,
-          }),
           ...error.properties.map((prop) =>
             tsx.param({
               // public: true,
