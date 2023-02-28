@@ -113,27 +113,43 @@ export default function generateFromType(
         ({ models, deps }, prop) => {
           const propType = typeChecker.getTypeOfSymbolAtLocation(prop, typeNode)
 
-          const propSignature = prop.declarations?.[0]
+          let propModel: InternalParserModelMap
 
-          if (!propSignature || !ts.isPropertySignature(propSignature)) {
-            throw new PheroParseError(
-              "Unexpected declaration " + typeNode.kind,
+          if (ts.isMappedTypeNode(typeNode)) {
+            propModel = generateFromTypeNode(
               typeNode,
+              propType,
+              location,
+              typeChecker,
+              deps,
+              typeParams,
+            )
+          } else {
+            const propSignature = prop.declarations?.[0]
+
+            if (!propSignature || !ts.isPropertySignature(propSignature)) {
+              throw new PheroParseError(
+                "Unexpected declaration " + typeNode.kind,
+                typeNode,
+              )
+            }
+
+            if (!propSignature.type) {
+              throw new PheroParseError(
+                "Property must have type",
+                propSignature,
+              )
+            }
+
+            propModel = generateFromTypeNode(
+              propSignature.type,
+              propType,
+              location,
+              typeChecker,
+              deps,
+              typeParams,
             )
           }
-
-          if (!propSignature.type) {
-            throw new PheroParseError("Property must have type", propSignature)
-          }
-
-          const propModel = generateFromTypeNode(
-            ts.isMappedTypeNode(typeNode) ? typeNode : propSignature.type,
-            propType,
-            location,
-            typeChecker,
-            deps,
-            typeParams,
-          )
 
           return {
             models: [
