@@ -4,11 +4,16 @@ import {
   parsePheroApp,
 } from "@phero/core"
 import { ServerCommandExport, ServerExportFlavor } from "@phero/dev"
-import fs from "fs"
 import child_process from "child_process"
+import fs from "fs"
 import path from "path"
 import ts, { CompilerOptions } from "typescript"
-import { Export, MetaExportFiles } from "./domain"
+import {
+  Export,
+  MetaExportFiles,
+  MetaExportFilesBase,
+  MetaExportLockFileName,
+} from "./domain"
 import generateGCloudFunctionsExport from "./gcloud-functions"
 import generateNodeJSExport from "./nodejs"
 import generateVercelExport from "./vercel"
@@ -60,7 +65,6 @@ export default function exportCommand(command: ServerCommandExport) {
       // support for Pick, Omit, and other TS utilities
       ...(hasES5 ? [] : ["lib.es5.d.ts"]),
     ],
-    outDir: path.join(projectPath, "export"),
     // target: ts.ScriptTarget.ES5,
     // module: ts.ModuleKind.CommonJS,
   }
@@ -73,9 +77,18 @@ export default function exportCommand(command: ServerCommandExport) {
     rootNames: [`${projectPath}/src/phero.ts`],
   })
 
-  const exportPath = path.join(projectPath, "export")
+  const tsOutDir = program.getCompilerOptions().outDir
+
+  if (!tsOutDir) {
+    throw new Error(
+      'Please provide a "outDir" option in your tsconfig.json file.',
+    )
+  }
+
+  const exportPath = path.join(projectPath, ".phero")
 
   rimRafExport(exportPath)
+  rimRafExport(tsOutDir)
 
   program.emit()
 
@@ -83,36 +96,60 @@ export default function exportCommand(command: ServerCommandExport) {
   const { content: dts } = generateManifest(app)
   const pheroExecution = generatePheroExecutionFile(app)
 
-  const readFile = (filePath: string): string =>
-    fs.readFileSync(filePath, {
-      encoding: "utf-8",
-    })
+  const lockFile =
+    findLockFileInDir(projectPath) ?? findLockFileForWorkspace(projectPath)
 
-  const metaExportFiles: MetaExportFiles = {
+  if (!lockFile) {
+    throw new Error(
+      "No lockfile ('package-lock.json', 'yarn.lock' or 'pnpm-lock.yaml') found in the current directory or for any workspace",
+    )
+  }
+
+  const metaExportFilesBase: MetaExportFilesBase = {
     "phero-manifest.d.ts": dts,
     "phero-execution.js": pheroExecution.js,
-    "phero.js": readFile(path.join(exportPath, "phero.js")),
+    "phero.js": readFile(path.join(tsOutDir, "phero.js")),
     "package.json": readFile(path.join(projectPath, "package.json")),
-    "package-lock.json": readFile(path.join(projectPath, "package-lock.json")),
+  }
+  let metaExportFiles: MetaExportFiles
+  switch (lockFile.name) {
+    case MetaExportLockFileName.Npm:
+      metaExportFiles = {
+        ...metaExportFilesBase,
+        [lockFile.name]: readFile(lockFile.path),
+      }
+      break
+    case MetaExportLockFileName.Yarn:
+      metaExportFiles = {
+        ...metaExportFilesBase,
+        [lockFile.name]: readFile(lockFile.path),
+      }
+      break
+    case MetaExportLockFileName.Pnpm:
+      metaExportFiles = {
+        ...metaExportFilesBase,
+        [lockFile.name]: readFile(lockFile.path),
+      }
+      break
   }
 
   switch (command.flavor) {
     case ServerExportFlavor.NodeJS: {
       const nodejsExport = generateNodeJSExport(app, metaExportFiles)
 
-      writeToDisk(exportPath, nodejsExport)
-
-      copyExport(
-        exportPath,
+      copyTsOutToBundles(
+        tsOutDir,
         nodejsExport.bundles.map((b) => path.join(exportPath, b.name)),
       )
-      console.log("Done exporting to ./export, to run all your services:")
-      console.log("(cd ./export && npm i && node ./index.js)")
+      writeToDisk(exportPath, nodejsExport)
+
+      console.log("Done exporting to .phero, to run all your services:")
+      console.log("(cd .phero && npm i && node ./index.js)")
       console.log(
         `To run one specific services, e.g. "${app.services[0].name}":`,
       )
       console.log(
-        `(cd ./export && npm i && node ./${app.services[0].name}/index.js)`,
+        `(cd .phero && npm i && node ./${app.services[0].name}/index.js)`,
       )
       break
     }
@@ -122,18 +159,18 @@ export default function exportCommand(command: ServerCommandExport) {
         metaExportFiles,
       )
 
-      writeToDisk(exportPath, gcloudFunctionsExport)
-
-      copyExport(
-        exportPath,
+      copyTsOutToBundles(
+        tsOutDir,
         gcloudFunctionsExport.bundles.map((b) => path.join(exportPath, b.name)),
       )
+      writeToDisk(exportPath, gcloudFunctionsExport)
+
       console.log(
         `Done exporting ${
           gcloudFunctionsExport.bundles.length === 1
             ? "1 service"
             : `${gcloudFunctionsExport.bundles.length} services`
-        } to ./export`,
+        } to .phero`,
       )
       break
     }
@@ -144,8 +181,8 @@ export default function exportCommand(command: ServerCommandExport) {
 
       const vercelExport = generateVercelExport(app, metaExportFiles)
 
-      copyExport(
-        exportPath,
+      copyTsOutToBundles(
+        tsOutDir,
         vercelExport.bundles.map((b) => path.join(projectPath, b.name)),
       )
 
@@ -162,12 +199,79 @@ export default function exportCommand(command: ServerCommandExport) {
           vercelExport.bundles.length === 1
             ? "1 service"
             : `${vercelExport.bundles.length} services`
-        } to ./.vercel`,
+        } to .vercel`,
       )
       console.log(`Now deploy with "npx vercel@latest deploy --prebuilt"`)
       break
     }
   }
+}
+
+function findLockFileInDir(
+  dir: string,
+): { name: MetaExportLockFileName; path: string } | undefined {
+  const lockFilePath = path.join(dir, MetaExportLockFileName.Npm)
+  if (fs.existsSync(lockFilePath)) {
+    return { name: MetaExportLockFileName.Npm, path: lockFilePath }
+  }
+
+  const yarnLockFilePath = path.join(dir, MetaExportLockFileName.Yarn)
+  if (fs.existsSync(yarnLockFilePath)) {
+    return { name: MetaExportLockFileName.Yarn, path: yarnLockFilePath }
+  }
+
+  const pnpmLockFilePath = path.join(dir, MetaExportLockFileName.Pnpm)
+  if (fs.existsSync(pnpmLockFilePath)) {
+    return { name: MetaExportLockFileName.Pnpm, path: pnpmLockFilePath }
+  }
+
+  return undefined
+}
+
+function findLockFileForWorkspace(
+  projectPath: string,
+): { name: MetaExportLockFileName; path: string } | undefined {
+  const maxDepth = 5
+
+  let currentPath = projectPath
+
+  for (let i = 0; i < maxDepth; i++) {
+    if (hasWorkspaceSettingsInDir(currentPath)) {
+      const foundLockFile = findLockFileInDir(currentPath)
+      if (foundLockFile) {
+        return foundLockFile
+      } else {
+        throw new Error(
+          "No lockfile found at the same level of where workspace is defined",
+        )
+      }
+    }
+
+    currentPath = path.join(currentPath, "..")
+  }
+
+  return undefined
+}
+
+function hasWorkspaceSettingsInDir(dir: string): boolean {
+  const packageFilePath = path.join(dir, "package.json")
+  if (fs.existsSync(packageFilePath)) {
+    const packageJson = JSON.parse(readFile(packageFilePath))
+    return !!packageJson.workspaces
+  }
+
+  const pnpmWorkspaceFilePath = path.join(dir, "pnpm-workspace.yaml")
+  if (fs.existsSync(pnpmWorkspaceFilePath)) {
+    return true
+  }
+
+  return false
+}
+
+function readFile(filePath: string): string {
+  return fs.readFileSync(filePath, {
+    encoding: "utf-8",
+  })
 }
 
 function writeToDisk(
@@ -214,7 +318,7 @@ function rimRafExport(exportPath: string): void {
   }
 }
 
-function copyExport(exportPath: string, bundlePaths: string[]) {
+function copyTsOutToBundles(exportPath: string, bundlePaths: string[]) {
   if (!fs.existsSync(exportPath)) {
     return
   }

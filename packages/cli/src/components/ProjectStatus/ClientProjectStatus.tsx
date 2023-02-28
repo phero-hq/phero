@@ -6,7 +6,7 @@ import {
 import { Box, Text } from "ink"
 import path from "path"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { spawnChildProcess } from "../../process"
+import { spawnClientDevEnv } from "../../process"
 import { ClientProject, StyledEvent } from "../../types"
 import ProjectStatus from "../ProjectStatus"
 
@@ -43,7 +43,7 @@ export default function ClientProjectStatus({
         break
 
       case "SERVER_NOT_FOUND":
-        setEvent(["error", "Could not find any phero server to connect too."])
+        setEvent(["error", "Could not find any phero server to connect too"])
         setError(event.errorMessage)
         break
 
@@ -53,7 +53,7 @@ export default function ClientProjectStatus({
         break
 
       case "BUILD_SUCCESS":
-        setEvent(["default", "Client is ready, waiting for changes."])
+        setEvent(["default", "Client is ready, waiting for changes"])
         setError(undefined)
         break
 
@@ -92,11 +92,7 @@ export default function ClientProjectStatus({
       },
     )
 
-    const childProcess = spawnChildProcess(
-      "phero-client",
-      ["watch", "--port", `${command.port}`],
-      path.resolve(project.path),
-    )
+    const childProcess = spawnClientDevEnv(command, path.resolve(project.path))
 
     return () => {
       removeEventListener()

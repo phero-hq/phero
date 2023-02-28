@@ -4,9 +4,8 @@ import { parsePheroCommand, PheroCommandName } from "@phero/dev"
 import devEnv from "./commands/dev-env"
 import help from "./commands/help"
 import init from "./commands/init"
-import redirect from "./commands/redirect"
 import version from "./commands/version"
-import { fatalError } from "./process"
+import { fatalError, redirectToClient, redirectToServer } from "./process"
 import checkAndWarnForVersions from "./utils/checkAndWarnForVersions"
 
 const command = parsePheroCommand(process.argv.slice(2))
@@ -32,14 +31,14 @@ switch (command.name) {
 
   case PheroCommandName.Client:
     checkAndWarnForVersions([process.cwd()], console.warn)
-      .then(() => redirect("./node_modules/.bin/phero-client", command.argv))
+      .then(() => redirectToClient(command.argv))
       .catch(fatalError)
 
     break
 
   case PheroCommandName.Server:
     checkAndWarnForVersions([process.cwd()], console.warn)
-      .then(() => redirect("./node_modules/.bin/phero-server", command.argv))
+      .then(() => redirectToServer(command.argv))
       .catch(fatalError)
     break
 }
