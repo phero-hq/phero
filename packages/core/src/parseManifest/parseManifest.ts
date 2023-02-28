@@ -15,6 +15,7 @@ import {
   generateParserModelForFunction,
   generateParserModelForError,
 } from "../generateModel"
+import { isModel } from "../lib/isModel"
 
 export default function parseManifest(dts: string): {
   result: PheroApp
@@ -72,14 +73,6 @@ function parseManifestSourceFile(
     services,
     deps,
   }
-}
-
-export function isModel(node: ts.Node): node is Model {
-  return (
-    ts.isInterfaceDeclaration(node) ||
-    ts.isTypeAliasDeclaration(node) ||
-    ts.isEnumDeclaration(node)
-  )
 }
 
 function makePheroModel(model: Model): PheroModel {
