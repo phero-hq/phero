@@ -7,7 +7,7 @@ describe("typeLiteral", () => {
     `)
 
     expect(parsers.output).toEqual(
-      `ObjectLiteralParser(["prop", false, StringParser])`,
+      `parser.ObjectLiteral(["prop", false, parser.String])`,
     )
   })
   test(`{ prop1: string, prop2: number  }`, () => {
@@ -16,7 +16,7 @@ describe("typeLiteral", () => {
     `)
 
     expect(parsers.output).toEqual(
-      `ObjectLiteralParser(["prop1", false, StringParser], ["prop2", false, NumberParser])`,
+      `parser.ObjectLiteral(["prop1", false, parser.String], ["prop2", false, parser.Number])`,
     )
   })
   test(`{ prop?: boolean  }`, () => {
@@ -25,7 +25,7 @@ describe("typeLiteral", () => {
     `)
 
     expect(parsers.output).toEqual(
-      `ObjectLiteralParser(["prop", true, BooleanParser])`,
+      `parser.ObjectLiteral(["prop", true, parser.Boolean])`,
     )
   })
   test(`{ prop1: string | 123, prop2?: boolean[] }`, () => {
@@ -34,7 +34,7 @@ describe("typeLiteral", () => {
     `)
 
     expect(parsers.output).toEqual(
-      `ObjectLiteralParser(["prop1", false, UnionParser(StringParser, NumberLiteralParser(123))], ["prop2", true, ArrayParser(BooleanParser)])`,
+      `parser.ObjectLiteral(["prop1", false, parser.Union(parser.String, parser.NumberLiteral(123))], ["prop2", true, parser.Array(parser.Boolean)])`,
     )
   })
   test(`{ prop1: string, prop2: { prop3: boolean, prop4: { prop5: number, prop6?: "prop6" } } }`, () => {
@@ -43,7 +43,7 @@ describe("typeLiteral", () => {
     `)
 
     expect(parsers.output).toEqual(
-      `ObjectLiteralParser(["prop1", false, StringParser], ["prop2", false, ObjectLiteralParser(["prop3", false, BooleanParser], ["prop4", false, ObjectLiteralParser(["prop5", false, NumberParser], ["prop6", true, StringLiteralParser("prop6")])])])`,
+      `parser.ObjectLiteral(["prop1", false, parser.String], ["prop2", false, parser.ObjectLiteral(["prop3", false, parser.Boolean], ["prop4", false, parser.ObjectLiteral(["prop5", false, parser.Number], ["prop6", true, parser.StringLiteral("prop6")])])])`,
     )
   })
 })

@@ -13,10 +13,10 @@ describe("enum", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `StringEnumParser`,
       deps: {
-        StringEnumParser: `EnumParser("aap", "noot", "mies")`,
+        StringEnumParser: `parser.Enum("aap", "noot", "mies")`,
       },
     })
   })
@@ -32,10 +32,10 @@ describe("enum", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `NumberEnumParser`,
       deps: {
-        NumberEnumParser: `EnumParser(0, 1, 2)`,
+        NumberEnumParser: `parser.Enum(0, 1, 2)`,
       },
     })
   })
@@ -51,10 +51,10 @@ describe("enum", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `MixedEnumParser`,
       deps: {
-        MixedEnumParser: `EnumParser("x", 0, 1)`,
+        MixedEnumParser: `parser.Enum("x", 0, 1)`,
       },
     })
   })
@@ -70,10 +70,10 @@ describe("enum", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `ValuelessEnumParser`,
       deps: {
-        ValuelessEnumParser: `EnumParser(0, 1, 2)`,
+        ValuelessEnumParser: `parser.Enum(0, 1, 2)`,
       },
     })
   })
@@ -89,10 +89,10 @@ describe("enum", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `SkipEnumParser`,
       deps: {
-        SkipEnumParser: `EnumParser(3, 4, 5)`,
+        SkipEnumParser: `parser.Enum(3, 4, 5)`,
       },
     })
   })
@@ -108,10 +108,10 @@ describe("enum", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `MixedEnum_AapParser`,
       deps: {
-        MixedEnum_AapParser: `StringLiteralParser("x")`,
+        MixedEnum_AapParser: `parser.StringLiteral("x")`,
       },
     })
   })

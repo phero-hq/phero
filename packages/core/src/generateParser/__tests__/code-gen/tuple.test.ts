@@ -7,7 +7,7 @@ describe("tuple", () => {
     `)
 
     expect(parsers.output).toEqual(
-      `TupleParser([StringParser], [StringParser])`,
+      `parser.Tuple([parser.String], [parser.String])`,
     )
   })
   test(`[string, 123, boolean]`, () => {
@@ -16,7 +16,7 @@ describe("tuple", () => {
     `)
 
     expect(parsers.output).toEqual(
-      `TupleParser([StringParser], [NumberLiteralParser(123)], [BooleanParser])`,
+      `parser.Tuple([parser.String], [parser.NumberLiteral(123)], [parser.Boolean])`,
     )
   })
   test(`["aap"]`, () => {
@@ -24,7 +24,9 @@ describe("tuple", () => {
         function test(): ["aap"] { throw new Error() }
     `)
 
-    expect(parsers.output).toEqual(`TupleParser([StringLiteralParser("aap")])`)
+    expect(parsers.output).toEqual(
+      `parser.Tuple([parser.StringLiteral("aap")])`,
+    )
   })
   test(`[123 | "str", number]`, () => {
     const parsers = generateParsersForFunction(`
@@ -32,7 +34,7 @@ describe("tuple", () => {
     `)
 
     expect(parsers.output).toEqual(
-      `TupleParser([UnionParser(NumberLiteralParser(123), StringLiteralParser("str"))], [NumberParser])`,
+      `parser.Tuple([parser.Union(parser.NumberLiteral(123), parser.StringLiteral("str"))], [parser.Number])`,
     )
   })
   test(`[string, X]`, () => {
@@ -42,7 +44,7 @@ describe("tuple", () => {
       function test(): [string, X] { throw new Error() }
     `)
 
-    expect(parsers.output).toEqual(`TupleParser([StringParser], [XParser])`)
+    expect(parsers.output).toEqual(`parser.Tuple([parser.String], [XParser])`)
   })
   test(`[string, ...number[]]`, () => {
     const parsers = generateParsersForFunction(`
@@ -52,10 +54,10 @@ describe("tuple", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `XParser`,
       deps: {
-        XParser: `TupleParser([StringParser], [NumberParser, true])`,
+        XParser: `parser.Tuple([parser.String], [parser.Number, true])`,
       },
     })
   })
@@ -67,10 +69,10 @@ describe("tuple", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `XParser`,
       deps: {
-        XParser: `TupleParser([StringParser], [NumberParser, true], [BooleanParser])`,
+        XParser: `parser.Tuple([parser.String], [parser.Number, true], [parser.Boolean])`,
       },
     })
   })
@@ -82,10 +84,10 @@ describe("tuple", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `XParser`,
       deps: {
-        XParser: `TupleParser([StringParser], [ArrayParser(NumberParser), true])`,
+        XParser: `parser.Tuple([parser.String], [parser.Array(parser.Number), true])`,
       },
     })
   })
@@ -97,10 +99,10 @@ describe("tuple", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `XParser`,
       deps: {
-        XParser: `TupleParser([StringParser], [NumberParser, true])`,
+        XParser: `parser.Tuple([parser.String], [parser.Number, true])`,
       },
     })
   })
@@ -112,10 +114,10 @@ describe("tuple", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `XParser`,
       deps: {
-        XParser: `TupleParser([StringParser], [NumberParser, true], [BooleanParser])`,
+        XParser: `parser.Tuple([parser.String], [parser.Number, true], [parser.Boolean])`,
       },
     })
   })
@@ -127,10 +129,10 @@ describe("tuple", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `XParser`,
       deps: {
-        XParser: `TupleParser([StringParser], [ArrayParser(NumberParser), true])`,
+        XParser: `parser.Tuple([parser.String], [parser.Array(parser.Number), true])`,
       },
     })
   })
@@ -142,10 +144,10 @@ describe("tuple", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `XParser`,
       deps: {
-        XParser: `TupleParser([StringParser], [StringParser], [NumberParser])`,
+        XParser: `parser.Tuple([parser.String], [parser.String], [parser.Number])`,
       },
     })
   })
@@ -158,11 +160,11 @@ describe("tuple", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `XParser`,
       deps: {
-        XParser: `TupleParser([StringParser], [YParser, true])`,
-        YParser: `TupleParser([NumberParser], [StringParser])`,
+        XParser: `parser.Tuple([parser.String], [YParser, true])`,
+        YParser: `parser.Tuple([parser.Number], [parser.String])`,
       },
     })
   })
@@ -177,11 +179,11 @@ describe("tuple", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "XParser",
       deps: {
-        XParser: "TupleParser([NumberParser], [ref_1, true])",
-        ref_1: "TupleParser([StringParser], [NumberParser])",
+        XParser: "parser.Tuple([parser.Number], [ref_0, true])",
+        ref_0: "parser.Tuple([parser.String], [parser.Number])",
       },
     })
   })
@@ -193,10 +195,10 @@ describe("tuple", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `XParser`,
       deps: {
-        XParser: `TupleParser([NumberParser], [NumberParser])`,
+        XParser: `parser.Tuple([parser.Number], [parser.Number])`,
       },
     })
   })
@@ -208,10 +210,10 @@ describe("tuple", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `XParser`,
       deps: {
-        XParser: `TupleParser([StringParser], [NumberParser, true])`,
+        XParser: `parser.Tuple([parser.String], [parser.Number, true])`,
       },
     })
   })
@@ -223,10 +225,10 @@ describe("tuple", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `XParser`,
       deps: {
-        XParser: `TupleParser([StringParser], [NumberParser, true])`,
+        XParser: `parser.Tuple([parser.String], [parser.Number, true])`,
       },
     })
   })
@@ -239,11 +241,11 @@ describe("tuple", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `XParser`,
       deps: {
-        XParser: `TupleParser([StringParser], [YParser, true])`,
-        YParser: `TupleParser([StringParser], [BooleanParser])`,
+        XParser: `parser.Tuple([parser.String], [YParser, true])`,
+        YParser: `parser.Tuple([parser.String], [parser.Boolean])`,
       },
     })
   })
@@ -256,10 +258,10 @@ describe("tuple", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `XParser`,
       deps: {
-        XParser: `TupleParser([NumberParser], [NumberParser])`,
+        XParser: `parser.Tuple([parser.Number], [parser.Number])`,
       },
     })
   })

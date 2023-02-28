@@ -7,7 +7,7 @@ describe("union", () => {
     `)
 
     expect(parsers.output).toEqual(
-      `UnionParser(StringParser, NumberParser, BooleanParser)`,
+      `parser.Union(parser.String, parser.Number, parser.Boolean)`,
     )
   })
   test(`"str" | 123 | false`, () => {
@@ -16,7 +16,7 @@ describe("union", () => {
     `)
 
     expect(parsers.output).toEqual(
-      `UnionParser(StringLiteralParser("str"), NumberLiteralParser(123), BooleanLiteralParser(false))`,
+      `parser.Union(parser.StringLiteral("str"), parser.NumberLiteral(123), parser.FalseLiteral)`,
     )
   })
   test(`(string | 123)[]`, () => {
@@ -25,7 +25,7 @@ describe("union", () => {
     `)
 
     expect(parsers.output).toEqual(
-      `ArrayParser(UnionParser(StringParser, NumberLiteralParser(123)))`,
+      `parser.Array(parser.Union(parser.String, parser.NumberLiteral(123)))`,
     )
   })
   test(`number[] | "yes"[]`, () => {
@@ -34,7 +34,7 @@ describe("union", () => {
     `)
 
     expect(parsers.output).toEqual(
-      `UnionParser(ArrayParser(NumberParser), ArrayParser(StringLiteralParser("yes")))`,
+      `parser.Union(parser.Array(parser.Number), parser.Array(parser.StringLiteral("yes")))`,
     )
   })
   test(`InterfaceOne | InterfaceTwo[]`, () => {
@@ -49,13 +49,13 @@ describe("union", () => {
     `)
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
-      output: `UnionParser(InterfaceOneParser, ArrayParser(InterfaceTwoParser))`,
+      input: "parser.ObjectLiteral()",
+      output: `parser.Union(InterfaceOneParser, parser.Array(InterfaceTwoParser))`,
       deps: {
         InterfaceOneParser:
-          'ObjectLiteralParser(["prop", false, NumberLiteralParser(1)])',
+          'parser.ObjectLiteral(["prop", false, parser.NumberLiteral(1)])',
         InterfaceTwoParser:
-          'ObjectLiteralParser(["prop", false, NumberLiteralParser(2)])',
+          'parser.ObjectLiteral(["prop", false, parser.NumberLiteral(2)])',
       },
     })
   })

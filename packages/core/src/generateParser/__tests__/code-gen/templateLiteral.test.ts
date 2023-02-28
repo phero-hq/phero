@@ -11,10 +11,10 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "GreetingParser",
       deps: {
-        GreetingParser: 'StringLiteralParser("hello world")',
+        GreetingParser: 'parser.StringLiteral("hello world")',
       },
     })
   })
@@ -29,11 +29,11 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "AllLocaleIDsParser",
       deps: {
         AllLocaleIDsParser:
-          'UnionParser(StringLiteralParser("welcome_email_id"), StringLiteralParser("email_heading_id"), StringLiteralParser("footer_title_id"), StringLiteralParser("footer_sendoff_id"))',
+          'parser.Union(parser.StringLiteral("welcome_email_id"), parser.StringLiteral("email_heading_id"), parser.StringLiteral("footer_title_id"), parser.StringLiteral("footer_sendoff_id"))',
       },
     })
   })
@@ -50,11 +50,11 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "LocaleMessageIDsParser",
       deps: {
         LocaleMessageIDsParser:
-          'UnionParser(StringLiteralParser("en_welcome_email_id"), StringLiteralParser("en_email_heading_id"), StringLiteralParser("en_footer_title_id"), StringLiteralParser("en_footer_sendoff_id"), StringLiteralParser("ja_welcome_email_id"), StringLiteralParser("ja_email_heading_id"), StringLiteralParser("ja_footer_title_id"), StringLiteralParser("ja_footer_sendoff_id"), StringLiteralParser("pt_welcome_email_id"), StringLiteralParser("pt_email_heading_id"), StringLiteralParser("pt_footer_title_id"), StringLiteralParser("pt_footer_sendoff_id"))',
+          'parser.Union(parser.StringLiteral("en_welcome_email_id"), parser.StringLiteral("en_email_heading_id"), parser.StringLiteral("en_footer_title_id"), parser.StringLiteral("en_footer_sendoff_id"), parser.StringLiteral("ja_welcome_email_id"), parser.StringLiteral("ja_email_heading_id"), parser.StringLiteral("ja_footer_title_id"), parser.StringLiteral("ja_footer_sendoff_id"), parser.StringLiteral("pt_welcome_email_id"), parser.StringLiteral("pt_email_heading_id"), parser.StringLiteral("pt_footer_title_id"), parser.StringLiteral("pt_footer_sendoff_id"))',
       },
     })
   })
@@ -67,11 +67,11 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "EventNameParser",
       deps: {
         EventNameParser:
-          'UnionParser(StringLiteralParser("aapChanged"), StringLiteralParser("nootChanged"), StringLiteralParser("miesChanged"))',
+          'parser.Union(parser.StringLiteral("aapChanged"), parser.StringLiteral("nootChanged"), parser.StringLiteral("miesChanged"))',
       },
     })
   })
@@ -84,13 +84,13 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
-      output: "ref_1",
+      input: "parser.ObjectLiteral()",
+      output: "ref_0",
       deps: {
         MyTypeParser:
-          'ObjectLiteralParser(["aap", false, StringParser], ["noot", false, StringParser], ["mies", false, StringParser])',
-        ref_1:
-          'UnionParser(StringLiteralParser("aapChanged"), StringLiteralParser("nootChanged"), StringLiteralParser("miesChanged"))',
+          'parser.ObjectLiteral(["aap", false, parser.String], ["noot", false, parser.String], ["mies", false, parser.String])',
+        ref_0:
+          'parser.Union(parser.StringLiteral("aapChanged"), parser.StringLiteral("nootChanged"), parser.StringLiteral("miesChanged"))',
       },
     })
   })
@@ -103,12 +103,12 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ShoutyGreetingParser",
       deps: {
-        ShoutyGreetingParser: "ref_2",
-        GreetingParser: 'StringLiteralParser("Hello, world")',
-        ref_2: 'StringLiteralParser("HELLO, WORLD")',
+        ShoutyGreetingParser: "ref_0",
+        GreetingParser: 'parser.StringLiteral("Hello, world")',
+        ref_0: 'parser.StringLiteral("HELLO, WORLD")',
       },
     })
   })
@@ -119,10 +119,10 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
-        ref_0: 'StringLiteralParser("hello world")',
+        ref_0: 'parser.StringLiteral("hello world")',
       },
     })
   })
@@ -135,11 +135,11 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MainIDParser",
       deps: {
-        MainIDParser: "ref_1",
-        ref_1: 'StringLiteralParser("id-my_app")',
+        MainIDParser: "ref_0",
+        ref_0: 'parser.StringLiteral("id-my_app")',
       },
     })
   })
@@ -152,11 +152,11 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "EmailParser",
       deps: {
         EmailParser:
-          "UnionParser(TemplateLiteralParser(/^\\d+@.+\\.com$/), TemplateLiteralParser(/^\\d+@.+\\.nl$/))",
+          "parser.Union(parser.TemplateLiteral(/^\\d+@.+\\.com$/), parser.TemplateLiteral(/^\\d+@.+\\.nl$/))",
       },
     })
   })
@@ -169,13 +169,13 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
-      output: "ref_1",
+      input: "parser.ObjectLiteral()",
+      output: "ref_0",
       deps: {
         ExtParser:
-          'ObjectLiteralParser(["com", false, StringParser], ["nl", false, StringParser])',
-        ref_1:
-          "UnionParser(TemplateLiteralParser(/^\\d+@.+\\.com$/), TemplateLiteralParser(/^\\d+@.+\\.nl$/))",
+          'parser.ObjectLiteral(["com", false, parser.String], ["nl", false, parser.String])',
+        ref_0:
+          "parser.Union(parser.TemplateLiteral(/^\\d+@.+\\.com$/), parser.TemplateLiteral(/^\\d+@.+\\.nl$/))",
       },
     })
   })
@@ -188,11 +188,11 @@ describe("templateLiteral", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "EmailParser",
       deps: {
         EmailParser:
-          "UnionParser(TemplateLiteralParser(/^email:\\d+@.+\\.com$/), TemplateLiteralParser(/^email:\\d+@.+\\.nl$/))",
+          "parser.Union(parser.TemplateLiteral(/^email:\\d+@.+\\.com$/), parser.TemplateLiteral(/^email:\\d+@.+\\.nl$/))",
       },
     })
   })
@@ -204,11 +204,11 @@ describe("templateLiteral", () => {
     `)
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
         ref_0:
-          'ObjectLiteralParser(["x", false, TemplateLiteralParser(/^email:\\d+@.+\\.com$/)])',
+          'parser.ObjectLiteral(["x", false, parser.TemplateLiteral(/^email:\\d+@.+\\.com$/)])',
       },
     })
   })
@@ -219,10 +219,10 @@ describe("templateLiteral", () => {
     `)
     // console.log(JSON.stringify(parsers, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "TestParser",
       deps: {
-        TestParser: "TemplateLiteralParser(/^.+@.+x\\d+yyy$/)",
+        TestParser: "parser.TemplateLiteral(/^.+@.+x\\d+yyy$/)",
       },
     })
   })

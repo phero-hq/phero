@@ -7,7 +7,7 @@ describe("intersection", () => {
     `)
 
     expect(parsers.output).toEqual(
-      `IntersectionParser(ObjectLiteralParser(["a", false, StringParser]), ObjectLiteralParser(["b", false, StringParser]))`,
+      `parser.Intersection(parser.ObjectLiteral(["a", false, parser.String]), parser.ObjectLiteral(["b", false, parser.String]))`,
     )
   })
   test(`{ a: string} & { b?: number[] }`, () => {
@@ -15,7 +15,7 @@ describe("intersection", () => {
         function test(): { a: string} & { b?: number[] } { throw new Error() }
     `)
     expect(parsers.output).toEqual(
-      `IntersectionParser(ObjectLiteralParser(["a", false, StringParser]), ObjectLiteralParser(["b", true, ArrayParser(NumberParser)]))`,
+      `parser.Intersection(parser.ObjectLiteral(["a", false, parser.String]), parser.ObjectLiteral(["b", true, parser.Array(parser.Number)]))`,
     )
   })
   test(`InterfaceOne & InterfaceTwo`, () => {
@@ -29,13 +29,13 @@ describe("intersection", () => {
         function test(): InterfaceOne & InterfaceTwo { throw new Error() }
     `)
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
-      output: `IntersectionParser(InterfaceOneParser, InterfaceTwoParser)`,
+      input: "parser.ObjectLiteral()",
+      output: `parser.Intersection(InterfaceOneParser, InterfaceTwoParser)`,
       deps: {
         InterfaceOneParser:
-          'ObjectLiteralParser(["prop1", false, NumberParser])',
+          'parser.ObjectLiteral(["prop1", false, parser.Number])',
         InterfaceTwoParser:
-          'ObjectLiteralParser(["prop2", false, StringParser])',
+          'parser.ObjectLiteral(["prop2", false, parser.String])',
       },
     })
   })

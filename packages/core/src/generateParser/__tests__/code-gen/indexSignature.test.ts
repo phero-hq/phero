@@ -10,7 +10,7 @@ describe("indexSignature", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers.output).toEqual(
-      `ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)])`,
+      `parser.ObjectLiteral([parser.String, false, parser.Union(parser.String, parser.Number)])`,
     )
   })
   test("MyIndexSignature number", () => {
@@ -23,10 +23,10 @@ describe("indexSignature", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `MyIndexSignatureParser`,
       deps: {
-        MyIndexSignatureParser: `ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)])`,
+        MyIndexSignatureParser: `parser.ObjectLiteral([parser.String, false, parser.Union(parser.String, parser.Number)])`,
       },
     })
   })
@@ -40,10 +40,10 @@ describe("indexSignature", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `MyIndexSignatureParser`,
       deps: {
-        MyIndexSignatureParser: `ObjectLiteralParser([NumberKeyParser, false, StringParser])`,
+        MyIndexSignatureParser: `parser.ObjectLiteral([parser.NumberKey, false, parser.String])`,
       },
     })
   })
@@ -58,10 +58,10 @@ describe("indexSignature", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `MyIndexSignatureParser`,
       deps: {
-        MyIndexSignatureParser: `ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)], [NumberKeyParser, false, StringParser])`,
+        MyIndexSignatureParser: `parser.ObjectLiteral([parser.String, false, parser.Union(parser.String, parser.Number)], [parser.NumberKey, false, parser.String])`,
       },
     })
   })
@@ -77,10 +77,10 @@ describe("indexSignature", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `MyIndexSignatureParser`,
       deps: {
-        MyIndexSignatureParser: `ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)], [NumberKeyParser, false, StringParser], ["length", false, NumberParser])`,
+        MyIndexSignatureParser: `parser.ObjectLiteral([parser.String, false, parser.Union(parser.String, parser.Number)], [parser.NumberKey, false, parser.String], ["length", false, parser.Number])`,
       },
     })
   })
@@ -99,11 +99,11 @@ describe("indexSignature", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
         ref_0:
-          'ObjectLiteralParser(["test", false, ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)], [NumberKeyParser, false, NumberParser])])',
+          'parser.ObjectLiteral(["test", false, parser.ObjectLiteral([parser.String, false, parser.Union(parser.String, parser.Number)], [parser.NumberKey, false, parser.Number])])',
       },
     })
   })
@@ -119,10 +119,10 @@ describe("indexSignature", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `MyIndexSignatureParser`,
       deps: {
-        MyIndexSignatureParser: `ObjectLiteralParser([StringParser, false, UnionParser(StringParser, NumberParser)], [NumberKeyParser, false, StringParser], ["length", false, NumberParser])`,
+        MyIndexSignatureParser: `parser.ObjectLiteral([parser.String, false, parser.Union(parser.String, parser.Number)], [parser.NumberKey, false, parser.String], ["length", false, parser.Number])`,
       },
     })
   })

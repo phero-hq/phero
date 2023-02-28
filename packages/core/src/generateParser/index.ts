@@ -141,11 +141,12 @@ export function generateParserFunction(
 }
 
 export function generateDependencyRefs(deps: DependencyMap): DependencyRefs {
+  let refIndex: number = 0
   return [...deps.keys()].reduce<DependencyRefs>(
     (refs, typeName, index) => ({
       ...refs,
       [typeName]: typeName.includes("<")
-        ? tsx.expression.identifier(`ref_${index}`)
+        ? tsx.expression.identifier(`ref_${refIndex++}`)
         : // the replace is necessary for EnumMembers
           tsx.expression.identifier(`${typeName.replace(".", "_")}Parser`),
     }),

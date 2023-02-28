@@ -7,8 +7,8 @@ describe("function", () => {
     `)
 
     expect(parsers).toEqual({
-      input: `ObjectLiteralParser(["a", false, NumberParser], ["b", false, NumberParser])`,
-      output: `NumberParser`,
+      input: `parser.ObjectLiteral(["a", false, parser.Number], ["b", false, parser.Number])`,
+      output: `parser.Number`,
       deps: {},
     })
   })
@@ -20,12 +20,12 @@ describe("function", () => {
     `)
 
     expect(parsers).toEqual({
-      input: 'ObjectLiteralParser(["a", false, ref_1], ["b", false, ref_2])',
+      input: 'parser.ObjectLiteral(["a", false, ref_1], ["b", false, ref_2])',
       output: "ref_0",
       deps: {
-        ref_0: 'ObjectLiteralParser(["t", false, BooleanParser])',
-        ref_1: 'ObjectLiteralParser(["t", false, NumberParser])',
-        ref_2: 'ObjectLiteralParser(["t", false, StringParser])',
+        ref_0: 'parser.ObjectLiteral(["t", false, parser.Boolean])',
+        ref_1: 'parser.ObjectLiteral(["t", false, parser.Number])',
+        ref_2: 'parser.ObjectLiteral(["t", false, parser.String])',
       },
     })
   })

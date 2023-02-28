@@ -11,9 +11,9 @@ describe("mapped", () => {
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
       deps: {
-        MyMappedTypeParser: 'StringLiteralParser("kaas")',
+        MyMappedTypeParser: 'parser.StringLiteral("kaas")',
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyMappedTypeParser",
     })
   })
@@ -33,9 +33,9 @@ describe("mapped", () => {
     expect(parsers).toEqual({
       deps: {
         MyMappedTypeParser:
-          'UnionParser(StringLiteralParser("Aap"), StringLiteralParser("Noot"), StringLiteralParser("Mies"))',
+          'parser.Union(parser.StringLiteral("Aap"), parser.StringLiteral("Noot"), parser.StringLiteral("Mies"))',
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyMappedTypeParser",
     })
   })
@@ -55,9 +55,9 @@ describe("mapped", () => {
     expect(parsers).toEqual({
       deps: {
         MyMappedTypeParser:
-          'UnionParser(StringLiteralParser("aap"), StringLiteralParser("noot"), StringLiteralParser("mies"))',
+          'parser.Union(parser.StringLiteral("aap"), parser.StringLiteral("noot"), parser.StringLiteral("mies"))',
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyMappedTypeParser",
     })
   })
@@ -75,9 +75,10 @@ describe("mapped", () => {
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
       deps: {
-        MyMappedTypeParser: 'StringLiteralParser("kaas")',
+        MyMappedTypeParser: 'parser.StringLiteral("kaas")',
+        AadParser: 'parser.ObjectLiteral(["kaas", false, parser.String])',
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyMappedTypeParser",
     })
   })
@@ -96,9 +97,11 @@ describe("mapped", () => {
     expect(parsers).toEqual({
       deps: {
         MyMappedTypeParser:
-          'UnionParser(StringLiteralParser("kaas"), StringLiteralParser("aap"))',
+          'parser.Union(parser.StringLiteral("kaas"), parser.StringLiteral("aap"))',
+        AadParser:
+          'parser.ObjectLiteral(["kaas", false, parser.String], ["aap", false, parser.String])',
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyMappedTypeParser",
     })
   })
@@ -116,10 +119,11 @@ describe("mapped", () => {
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
       deps: {
-        MyMappedTypeParser: "ref_1",
-        ref_1: 'StringLiteralParser("kaas")',
+        AadParser: 'parser.ObjectLiteral(["kaas", false, parser.String])',
+        MyMappedTypeParser: "ref_0",
+        ref_0: 'parser.StringLiteral("kaas")',
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyMappedTypeParser",
     })
   })
@@ -137,11 +141,12 @@ describe("mapped", () => {
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
       deps: {
-        AadParser: 'ObjectLiteralParser(["kaas", false, StringParser])',
-        MyMappedTypeParser: "ref_2",
-        ref_2: 'ObjectLiteralParser(["y", false, StringLiteralParser("kaas")])',
+        AadParser: 'parser.ObjectLiteral(["kaas", false, parser.String])',
+        MyMappedTypeParser: "ref_0",
+        ref_0:
+          'parser.ObjectLiteral(["y", false, parser.StringLiteral("kaas")])',
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyMappedTypeParser",
     })
   })
@@ -160,9 +165,9 @@ describe("mapped", () => {
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
       deps: {
-        MyMappedTypeParser: 'StringLiteralParser("kaas")',
+        MyMappedTypeParser: 'parser.StringLiteral("kaas")',
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyMappedTypeParser",
     })
   })
@@ -182,9 +187,9 @@ describe("mapped", () => {
     expect(parsers).toEqual({
       deps: {
         MyMappedTypeParser:
-          'ObjectLiteralParser(["kaas", false, StringParser])',
+          'parser.ObjectLiteral(["kaas", false, parser.String])',
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyMappedTypeParser",
     })
   })
@@ -205,9 +210,9 @@ describe("mapped", () => {
     expect(parsers).toEqual({
       deps: {
         MyMappedTypeParser:
-          'ObjectLiteralParser(["kaas", false, StringParser])',
+          'parser.ObjectLiteral(["kaas", false, parser.String])',
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyMappedTypeParser",
     })
   })
@@ -226,9 +231,9 @@ describe("mapped", () => {
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
       deps: {
-        MyMappedTypeParser: 'ObjectLiteralParser(["a", false, StringParser])',
+        MyMappedTypeParser: 'parser.ObjectLiteral(["a", false, parser.String])',
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyMappedTypeParser",
     })
   })
@@ -249,10 +254,10 @@ describe("mapped", () => {
     expect(parsers).toEqual({
       deps: {
         AadParser:
-          'ObjectLiteralParser(["kaas", true, AadParser], ["koos", false, StringParser])',
-        MyMappedTypeParser: 'ObjectLiteralParser(["kaas", true, AadParser])',
+          'parser.ObjectLiteral(["kaas", true, AadParser], ["koos", false, parser.String])',
+        MyMappedTypeParser: 'parser.ObjectLiteral(["kaas", true, AadParser])',
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyMappedTypeParser",
     })
   })
@@ -274,9 +279,9 @@ describe("mapped", () => {
     expect(parsers).toEqual({
       deps: {
         MyMappedTypeParser:
-          'ObjectLiteralParser(["a", false, UnionParser(StringParser, NumberParser)], ["b", false, UnionParser(StringParser, NumberParser)])',
+          'parser.ObjectLiteral(["a", false, parser.Union(parser.String, parser.Number)], ["b", false, parser.Union(parser.String, parser.Number)])',
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyMappedTypeParser",
     })
   })

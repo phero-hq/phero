@@ -12,10 +12,10 @@ describe("conditional", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
-        ref_0: 'ObjectLiteralParser(["prop", false, StringParser])',
+        ref_0: 'parser.ObjectLiteral(["prop", false, parser.String])',
       },
     })
   })
@@ -29,10 +29,10 @@ describe("conditional", () => {
       function test(): MyConditionalType<string> { throw new Error() }
     `)
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
-        ref_0: 'ObjectLiteralParser(["prop", false, NumberParser])',
+        ref_0: 'parser.ObjectLiteral(["prop", false, parser.Number])',
       },
     })
   })
@@ -53,12 +53,12 @@ describe("conditional", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
         ref_0:
-          'ObjectLiteralParser(["t", false, NumberParser], ["deep", false, ref_1])',
-        ref_1: 'ObjectLiteralParser(["prop", false, NumberParser])',
+          'parser.ObjectLiteral(["t", false, parser.Number], ["deep", false, ref_1])',
+        ref_1: 'parser.ObjectLiteral(["prop", false, parser.Number])',
       },
     })
   })
@@ -78,11 +78,11 @@ describe("conditional", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
-        ref_0: 'ObjectLiteralParser(["deep", false, ref_1])',
-        ref_1: 'ObjectLiteralParser(["prop", false, StringParser])',
+        ref_0: 'parser.ObjectLiteral(["deep", false, ref_1])',
+        ref_1: 'parser.ObjectLiteral(["prop", false, parser.String])',
       },
     })
   })
@@ -97,11 +97,11 @@ describe("conditional", () => {
       function test(): MyType<number> { throw new Error() }
     `)
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
-        ref_0: 'ObjectLiteralParser(["prop", false, ref_1])',
-        ref_1: 'ObjectLiteralParser(["inner", false, NumberParser])',
+        ref_0: 'parser.ObjectLiteral(["prop", false, ref_1])',
+        ref_1: 'parser.ObjectLiteral(["inner", false, parser.Number])',
       },
     })
   })
@@ -120,15 +120,15 @@ describe("conditional", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
-        ref_0: 'ObjectLiteralParser(["prop", false, ref_1])',
+        ref_0: 'parser.ObjectLiteral(["prop", false, ref_1])',
         ref_1:
-          'ObjectLiteralParser(["w", false, NumberParser], ["b", false, BooleanParser], ["recursive", true, ref_2])',
-        ref_2: 'ObjectLiteralParser(["prop", false, ref_3])',
+          'parser.ObjectLiteral(["w", false, parser.Number], ["b", false, parser.Boolean], ["recursive", true, ref_2])',
+        ref_2: 'parser.ObjectLiteral(["prop", false, ref_3])',
         ref_3:
-          'ObjectLiteralParser(["w", false, ObjectLiteralParser(["b", false, BooleanParser])], ["b", false, BooleanParser], ["recursive", true, ref_2])',
+          'parser.ObjectLiteral(["w", false, parser.ObjectLiteral(["b", false, parser.Boolean])], ["b", false, parser.Boolean], ["recursive", true, ref_2])',
       },
     })
   })
@@ -148,12 +148,12 @@ describe("conditional", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_1",
       deps: {
-        ref_0: 'ObjectLiteralParser(["h", false, NumberParser])',
+        ref_0: 'parser.ObjectLiteral(["h", false, parser.Number])',
         ref_1:
-          'ObjectLiteralParser(["prop", false, StringParser], ["x", false, ref_0])',
+          'parser.ObjectLiteral(["prop", false, parser.String], ["x", false, ref_0])',
       },
     })
   })

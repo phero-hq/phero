@@ -10,10 +10,10 @@ describe("generics", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
-        ref_0: 'ObjectLiteralParser(["prop", false, NumberParser])',
+        ref_0: 'parser.ObjectLiteral(["prop", false, parser.Number])',
       },
     })
   })
@@ -25,10 +25,10 @@ describe("generics", () => {
       function test(): MyInterface { throw new Error() }
     `)
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
-        ref_0: 'ObjectLiteralParser(["prop", false, NumberParser])',
+        ref_0: 'parser.ObjectLiteral(["prop", false, parser.Number])',
       },
     })
   })
@@ -40,10 +40,10 @@ describe("generics", () => {
       function test(): MyTypeAlias<number> { throw new Error() }
     `)
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
-        ref_0: 'ObjectLiteralParser(["prop", false, NumberParser])',
+        ref_0: 'parser.ObjectLiteral(["prop", false, parser.Number])',
       },
     })
   })
@@ -61,13 +61,13 @@ describe("generics", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
         ref_0:
-          'ObjectLiteralParser(["prop", false, ref_1], ["nonGenericProp", false, BooleanParser])',
+          'parser.ObjectLiteral(["prop", false, ref_1], ["nonGenericProp", false, parser.Boolean])',
         ref_1:
-          'ObjectLiteralParser(["wrap", false, NumberParser], ["nonGenericWrap", false, StringParser])',
+          'parser.ObjectLiteral(["wrap", false, parser.Number], ["nonGenericWrap", false, parser.String])',
       },
     })
   })
@@ -82,11 +82,11 @@ describe("generics", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
         ref_0:
-          'ObjectLiteralParser(["embed", false, ObjectLiteralParser(["prop", false, NumberParser])])',
+          'parser.ObjectLiteral(["embed", false, parser.ObjectLiteral(["prop", false, parser.Number])])',
       },
     })
   })
@@ -100,11 +100,11 @@ describe("generics", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
         ref_0:
-          'ObjectLiteralParser(["prop", false, NumberParser], ["propDef", false, StringParser])',
+          'parser.ObjectLiteral(["prop", false, parser.Number], ["propDef", false, parser.String])',
       },
     })
   })

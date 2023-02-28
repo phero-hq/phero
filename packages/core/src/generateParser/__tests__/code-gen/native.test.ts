@@ -8,7 +8,7 @@ describe("native", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
 
-    expect(parsers.output).toEqual(`StringParser`)
+    expect(parsers.output).toEqual(`parser.String`)
   })
   test("number", () => {
     const parsers = generateParsersForFunction(`
@@ -17,7 +17,7 @@ describe("native", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
 
-    expect(parsers.output).toEqual(`NumberParser`)
+    expect(parsers.output).toEqual(`parser.Number`)
   })
   test("boolean", () => {
     const parsers = generateParsersForFunction(`
@@ -26,6 +26,6 @@ describe("native", () => {
 
     // console.log(JSON.stringify(parsers, null, 4))
 
-    expect(parsers.output).toEqual(`BooleanParser`)
+    expect(parsers.output).toEqual(`parser.Boolean`)
   })
 })

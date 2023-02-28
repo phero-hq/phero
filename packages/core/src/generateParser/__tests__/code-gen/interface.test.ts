@@ -13,10 +13,10 @@ describe("interface", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `SimpleInterfaceParser`,
       deps: {
-        SimpleInterfaceParser: `ObjectLiteralParser(["aap", false, StringParser], ["noot", true, NumberParser], ["mies", false, BooleanParser])`,
+        SimpleInterfaceParser: `parser.ObjectLiteral(["aap", false, parser.String], ["noot", true, parser.Number], ["mies", false, parser.Boolean])`,
       },
     })
   })
@@ -39,13 +39,13 @@ describe("interface", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "InterfaceWithRefParser",
       deps: {
-        AapParser: 'ObjectLiteralParser(["aap", false, NumberParser])',
+        AapParser: 'parser.ObjectLiteral(["aap", false, parser.Number])',
         InterfaceWithRefParser:
-          'ObjectLiteralParser(["aap", false, AapParser], ["noot", true, NootParser])',
-        NootParser: 'ObjectLiteralParser(["noot", false, NumberParser])',
+          'parser.ObjectLiteral(["aap", false, AapParser], ["noot", true, NootParser])',
+        NootParser: 'parser.ObjectLiteral(["noot", false, parser.Number])',
       },
     })
   })
@@ -59,11 +59,11 @@ describe("interface", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "RecursiveInterfaceParser",
       deps: {
         RecursiveInterfaceParser:
-          'ObjectLiteralParser(["recur", true, RecursiveInterfaceParser])',
+          'parser.ObjectLiteral(["recur", true, RecursiveInterfaceParser])',
       },
     })
   })
@@ -80,12 +80,12 @@ describe("interface", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "TheInterfaceParser",
       deps: {
-        BaseParser: 'ObjectLiteralParser(["base", false, StringParser])',
+        BaseParser: 'parser.ObjectLiteral(["base", false, parser.String])',
         TheInterfaceParser:
-          'IntersectionParser(ObjectLiteralParser(["prop", false, StringParser]), BaseParser)',
+          'parser.Intersection(parser.ObjectLiteral(["prop", false, parser.String]), BaseParser)',
       },
     })
   })
@@ -105,14 +105,14 @@ describe("interface", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "TheInterfaceParser",
       deps: {
-        RootParser: 'ObjectLiteralParser(["root", false, StringParser])',
+        RootParser: 'parser.ObjectLiteral(["root", false, parser.String])',
         BaseParser:
-          'IntersectionParser(ObjectLiteralParser(["base", false, StringParser]), RootParser)',
+          'parser.Intersection(parser.ObjectLiteral(["base", false, parser.String]), RootParser)',
         TheInterfaceParser:
-          'IntersectionParser(ObjectLiteralParser(["prop", false, StringParser]), BaseParser)',
+          'parser.Intersection(parser.ObjectLiteral(["prop", false, parser.String]), BaseParser)',
       },
     })
   })
@@ -132,13 +132,13 @@ describe("interface", () => {
     `)
 
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "TheInterfaceParser",
       deps: {
         TheInterfaceParser:
-          'IntersectionParser(ObjectLiteralParser(["prop", false, StringParser]), BaseParser, ref_2)',
-        BaseParser: 'ObjectLiteralParser(["base", false, StringParser])',
-        ref_2: 'ObjectLiteralParser(["other", false, StringParser])',
+          'parser.Intersection(parser.ObjectLiteral(["prop", false, parser.String]), BaseParser, ref_0)',
+        BaseParser: 'parser.ObjectLiteral(["base", false, parser.String])',
+        ref_0: 'parser.ObjectLiteral(["other", false, parser.String])',
       },
     })
   })

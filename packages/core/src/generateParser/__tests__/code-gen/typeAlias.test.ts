@@ -10,9 +10,9 @@ describe("typeAlias", () => {
 
     expect(parsers).toEqual({
       deps: {
-        XParser: "StringParser",
+        XParser: "parser.String",
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "XParser",
     })
   })
@@ -26,10 +26,10 @@ describe("typeAlias", () => {
 
     expect(parsers).toEqual({
       deps: {
-        YParser: "NumberParser",
+        YParser: "parser.Number",
         XParser: "YParser",
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "XParser",
     })
   })
@@ -43,10 +43,10 @@ describe("typeAlias", () => {
 
     expect(parsers).toEqual({
       deps: {
-        XParser: 'ObjectLiteralParser(["y", false, YParser])',
-        YParser: "NumberParser",
+        XParser: 'parser.ObjectLiteral(["y", false, YParser])',
+        YParser: "parser.Number",
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "XParser",
     })
   })
@@ -62,11 +62,11 @@ describe("typeAlias", () => {
     expect(parsers).toEqual({
       deps: {
         XParser:
-          'ObjectLiteralParser(["y", false, UnionParser(YParser, ZParser)])',
-        YParser: "NumberParser",
-        ZParser: "BooleanParser",
+          'parser.ObjectLiteral(["y", false, parser.Union(YParser, ZParser)])',
+        YParser: "parser.Number",
+        ZParser: "parser.Boolean",
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "XParser",
     })
   })
@@ -80,10 +80,10 @@ describe("typeAlias", () => {
 
     expect(parsers).toEqual({
       deps: {
-        XParser: "TupleParser([StringParser], [YParser])",
-        YParser: "NumberParser",
+        XParser: "parser.Tuple([parser.String], [YParser])",
+        YParser: "parser.Number",
       },
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "XParser",
     })
   })

@@ -12,10 +12,10 @@ describe("Date", () => {
 
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `TestParser`,
       deps: {
-        TestParser: `ObjectLiteralParser(["createdAt", false, DateParser])`,
+        TestParser: `parser.ObjectLiteral(["createdAt", false, parser.Date])`,
       },
     })
   })
@@ -28,10 +28,10 @@ describe("Date", () => {
 
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: `TestParser`,
       deps: {
-        TestParser: `TupleParser([StringParser], [DateParser])`,
+        TestParser: `parser.Tuple([parser.String], [parser.Date])`,
       },
     })
   })

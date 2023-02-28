@@ -9,10 +9,10 @@ describe("indexedAccess", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyIndexedAccessParser",
       deps: {
-        MyIndexedAccessParser: "NumberParser",
+        MyIndexedAccessParser: "parser.Number",
       },
     })
   })
@@ -24,10 +24,10 @@ describe("indexedAccess", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyIndexedAccessParser",
       deps: {
-        MyIndexedAccessParser: "UnionParser(StringParser, NumberParser)",
+        MyIndexedAccessParser: "parser.Union(parser.String, parser.Number)",
       },
     })
   })
@@ -39,11 +39,11 @@ describe("indexedAccess", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyIndexedAccessParser",
       deps: {
         MyIndexedAccessParser:
-          "UnionParser(StringParser, NumberParser, BooleanParser)",
+          "parser.Union(parser.String, parser.Number, parser.Boolean)",
       },
     })
   })
@@ -56,10 +56,10 @@ describe("indexedAccess", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyIndexedAccessParser",
       deps: {
-        MyIndexedAccessParser: "UnionParser(StringParser, BooleanParser)",
+        MyIndexedAccessParser: "parser.Union(parser.String, parser.Boolean)",
       },
     })
   })
@@ -79,11 +79,11 @@ describe("indexedAccess", () => {
     `)
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "MyIndexedAccessParser",
       deps: {
         MyIndexedAccessParser:
-          'ObjectLiteralParser(["aap", false, NumberParser], ["noot", false, StringParser], ["mies", false, BooleanParser])',
+          'parser.ObjectLiteral(["aap", false, parser.Number], ["noot", false, parser.String], ["mies", false, parser.Boolean])',
       },
     })
   })

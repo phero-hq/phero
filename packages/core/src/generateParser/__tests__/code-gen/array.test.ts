@@ -6,21 +6,21 @@ describe("array", () => {
       function test(): string[] { throw new Error() }
     `)
 
-    expect(parsers.output).toEqual(`ArrayParser(StringParser)`)
+    expect(parsers.output).toEqual(`parser.Array(parser.String)`)
   })
   test("number[]", () => {
     const parsers = generateParsersForFunction(`
       function test(): number[] { throw new Error() }
     `)
 
-    expect(parsers.output).toEqual(`ArrayParser(NumberParser)`)
+    expect(parsers.output).toEqual(`parser.Array(parser.Number)`)
   })
   test("boolean", () => {
     const parsers = generateParsersForFunction(`
       function test(): boolean[] { throw new Error() }
     `)
 
-    expect(parsers.output).toEqual(`ArrayParser(BooleanParser)`)
+    expect(parsers.output).toEqual(`parser.Array(parser.Boolean)`)
   })
 
   test(`string[][]`, () => {
@@ -28,7 +28,7 @@ describe("array", () => {
       function test(): string[][] { throw new Error() }
     `)
 
-    expect(parsers.output).toEqual(`ArrayParser(ArrayParser(StringParser))`)
+    expect(parsers.output).toEqual(`parser.Array(parser.Array(parser.String))`)
   })
 
   test("number[][]", () => {
@@ -36,28 +36,28 @@ describe("array", () => {
       function test(): number[][] { throw new Error() }
     `)
 
-    expect(parsers.output).toEqual(`ArrayParser(ArrayParser(NumberParser))`)
+    expect(parsers.output).toEqual(`parser.Array(parser.Array(parser.Number))`)
   })
   test("boolean[][]", () => {
     const parsers = generateParsersForFunction(`
       function test(): boolean[][] { throw new Error() }
     `)
 
-    expect(parsers.output).toEqual(`ArrayParser(ArrayParser(BooleanParser))`)
+    expect(parsers.output).toEqual(`parser.Array(parser.Array(parser.Boolean))`)
   })
   test("Array<boolean>", () => {
     const parsers = generateParsersForFunction(`
       function test(): Array<boolean> { throw new Error() }
     `)
 
-    expect(parsers.output).toEqual(`ArrayParser(BooleanParser)`)
+    expect(parsers.output).toEqual(`parser.Array(parser.Boolean)`)
   })
   test("Array<Array<boolean>>", () => {
     const parsers = generateParsersForFunction(`
       function test(): Array<Array<boolean>> { throw new Error() }
     `)
 
-    expect(parsers.output).toEqual(`ArrayParser(ArrayParser(BooleanParser))`)
+    expect(parsers.output).toEqual(`parser.Array(parser.Array(parser.Boolean))`)
   })
   test("SomeGenericArray<boolean>", () => {
     const parsers = generateParsersForFunction(`
@@ -65,10 +65,10 @@ describe("array", () => {
       function test(): SomeGenericArray<boolean> { throw new Error() }
     `)
     expect(parsers).toEqual({
-      input: "ObjectLiteralParser()",
+      input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
-        ref_0: "ArrayParser(ArrayParser(BooleanParser))",
+        ref_0: "parser.Array(parser.Array(parser.Boolean))",
       },
     })
   })
