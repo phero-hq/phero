@@ -1,172 +1,129 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`generateManifest errors should generate common errors in domain 1`] = `
-"export declare namespace domain {
-    namespace v_1_0_0 {
-        class HamburgerError extends Error {
-            constructor(message: string);
-        }
-        class CommonError extends Error {
-            constructor(message: string);
-        }
-        class ArticleError extends Error {
-            constructor(message: string);
-        }
-    }
+"export class HamburgerError extends Error {
+    constructor(message: string);
 }
-export declare namespace hamburgerService {
-    namespace v_1_0_0 {
-        function getHamburger(): Promise<string>;
-        function setHamburger(): Promise<string>;
-    }
+export class CommonError extends Error {
+    constructor(message: string);
 }
-export declare namespace articleService {
-    namespace v_1_0_0 {
-        function getArticle(): Promise<string>;
-        function setArticle(): Promise<string>;
-    }
+export class ArticleError extends Error {
+    constructor(message: string);
+}
+export abstract class PheroService<TContext = {}> {
+}
+export class hamburgerService extends PheroService {
+    getHamburger(): Promise<string>;
+    setHamburger(): Promise<string>;
+}
+export class articleService extends PheroService {
+    getArticle(): Promise<string>;
+    setArticle(): Promise<string>;
 }"
 `;
 
 exports[`generateManifest errors should generate multi-service multi-error 1`] = `
-"export declare namespace domain {
-    namespace v_1_0_0 {
-        class HamburgerError extends Error {
-            constructor(message: string);
-        }
-        class ArticleError extends Error {
-            constructor(message: string);
-        }
-    }
+"export class HamburgerError extends Error {
+    constructor(message: string);
 }
-export declare namespace hamburgerService {
-    namespace v_1_0_0 {
-        function getHamburger(): Promise<string>;
-    }
+export class ArticleError extends Error {
+    constructor(message: string);
 }
-export declare namespace articleService {
-    namespace v_1_0_0 {
-        function getArticle(): Promise<string>;
-    }
+export abstract class PheroService<TContext = {}> {
+}
+export class hamburgerService extends PheroService {
+    getHamburger(): Promise<string>;
+}
+export class articleService extends PheroService {
+    getArticle(): Promise<string>;
 }"
 `;
 
 exports[`generateManifest errors should generate properties on generated error classes 1`] = `
-"export declare namespace domain {
-    namespace v_1_0_0 {
-        class ArticleError extends Error {
-            constructor(message: string, myPublicProp: number, myProp: number);
-        }
-    }
+"export class ArticleError extends Error {
+    constructor(message: string, myPublicProp: number, myProp: number);
 }
-export declare namespace articleService {
-    namespace v_1_0_0 {
-        function getArticle(): Promise<string>;
-    }
+export abstract class PheroService<TContext = {}> {
+}
+export class articleService extends PheroService {
+    getArticle(): Promise<string>;
 }"
 `;
 
 exports[`generateManifest errors should generate service error 1`] = `
-"export declare namespace domain {
-    namespace v_1_0_0 {
-        class ArticleError extends Error {
-            constructor(message: string);
-        }
-    }
+"export class ArticleError extends Error {
+    constructor(message: string);
 }
-export declare namespace articleService {
-    namespace v_1_0_0 {
-        function getArticle(): Promise<string>;
-    }
+export abstract class PheroService<TContext = {}> {
+}
+export class articleService extends PheroService {
+    getArticle(): Promise<string>;
 }"
 `;
 
 exports[`generateManifest middleware should parse middleware 1`] = `
-"export declare namespace domain {
-    namespace v_1_0_0 {
-        interface User {
-            uid: string;
-        }
-    }
+"export interface User {
+    uid: string;
 }
-export declare namespace phero {
-    type PheroContext<T> = T;
+export abstract class PheroService<TContext = {}> {
 }
-export declare namespace articleService {
-    namespace v_1_0_0 {
-        function getArticle(context: phero.PheroContext<{
-            uid: string;
-        }>, aap: string): Promise<string>;
-    }
+export class articleService extends PheroService<{
+    uid: string;
+}> {
+    getArticle(aap: string): Promise<string>;
 }"
 `;
 
 exports[`generateManifest typeAliases jasper 1`] = `
-"export declare namespace domain {
-    namespace v_1_0_0 {
-        interface X {
-            type: \\"x\\";
-        }
-        interface Y {
-            type: \\"y\\";
-        }
-        type Z = X | Y;
-        interface B {
-            [key: string]: Z;
-        }
-        interface A {
-            b: B;
-        }
-    }
+"export interface X {
+    type: "x";
 }
-export declare namespace articleService {
-    namespace v_1_0_0 {
-        function example(a: domain.v_1_0_0.A): Promise<void>;
-    }
+export interface Y {
+    type: "y";
+}
+export type Z = X | Y;
+export interface B {
+    [key: string]: Z;
+}
+export interface A {
+    b: B;
+}
+export abstract class PheroService<TContext = {}> {
+}
+export class articleService extends PheroService {
+    example(a: A): Promise<void>;
 }"
 `;
 
 exports[`generateManifest typeAliases type aliases to native array types 1`] = `
-"export declare namespace domain {
-    namespace v_1_0_0 {
-        type AadReturnType1 = string[];
-    }
+"export type AadReturnType1 = string[];
+export abstract class PheroService<TContext = {}> {
 }
-export declare namespace articleService {
-    namespace v_1_0_0 {
-        function getArticle(): Promise<domain.v_1_0_0.AadReturnType1>;
-    }
+export class articleService extends PheroService {
+    getArticle(): Promise<AadReturnType1>;
 }"
 `;
 
 exports[`generateManifest typeAliases type aliases to native types 1`] = `
-"export declare namespace domain {
-    namespace v_1_0_0 {
-        type AadReturnType2 = boolean;
-    }
+"export type AadReturnType2 = boolean;
+export abstract class PheroService<TContext = {}> {
 }
-export declare namespace articleService {
-    namespace v_1_0_0 {
-        function getArticle(): Promise<{
-            aad: domain.v_1_0_0.AadReturnType2;
-        }>;
-    }
+export class articleService extends PheroService {
+    getArticle(): Promise<{
+        aad: AadReturnType2;
+    }>;
 }"
 `;
 
 exports[`generateManifest typeAliases type aliases which are aliases of aliases 1`] = `
-"export declare namespace domain {
-    namespace v_1_0_0 {
-        type TypeReal = {
-            x: number;
-        };
-        type TypeRef = TypeReal;
-        type Result = TypeRef;
-    }
+"export type TypeReal = {
+    x: number;
+};
+export type TypeRef = TypeReal;
+export type Result = TypeRef;
+export abstract class PheroService<TContext = {}> {
 }
-export declare namespace workoutRoutineService {
-    namespace v_1_0_0 {
-        function getRoutine(versionId: string): Promise<domain.v_1_0_0.Result>;
-    }
+export class workoutRoutineService extends PheroService {
+    getRoutine(versionId: string): Promise<Result>;
 }"
 `;

@@ -25,20 +25,19 @@ describe("generateManifest", () => {
           ? () => Promise<void>
           : (ctx: T) => Promise<void>
         type PheroContext<T = {}> = T
-        type PheroParams<T = {}> = Partial<T>
-
+        
         async function getArticle(ctx: PheroContext<{ user: User }>, aap: string): Promise<string> {
           return "ok"
         }
 
         interface User { uid: string }
 
-        async function requireUID(params: PheroParams, ctx: PheroContext<{ uid: string }>, next: PheroNextFunction<{ uid: string, x: string }>) {
+        async function requireUID(ctx: PheroContext<{ uid: string }>, next: PheroNextFunction<{ uid: string, x: string }>) {
           // valideer id token
           await next({ uid, x })
         }
         
-        async function requireCmsUser(params: PheroParams, ctx: PheroContext<{ uid: string, x: string }>, next: PheroNextFunction<{ user: User }>) {
+        async function requireCmsUser(ctx: PheroContext<{ uid: string, x: string }>, next: PheroNextFunction<{ user: User }>) {
           // zet om naar user, of het cms user is
           await next({ user: { uid } })
         }

@@ -17,32 +17,20 @@ export default function generateManifest(app: PheroApp): PheroManifest {
     content: printCode([
       ...app.models.map((model) => cloneTS(withExportModifier(model.ref))),
       ...app.errors.map(generateErrorDeclaration),
-      ...generatePheroModels(app),
+      tsx.classDeclaration({
+        name: "PheroService",
+        export: true,
+        abstract: true,
+        typeParams: [
+          tsx.typeParam({
+            name: "TContext",
+            default: tsx.literal.type(),
+          }),
+        ],
+      }),
       ...app.services.map(generatePheroService),
     ]),
   }
-}
-
-function generatePheroModels(app: PheroApp): ts.Statement[] {
-  const isUsingPheroContext = app.services.some((s) => !!s.config.contextType)
-
-  if (!isUsingPheroContext) {
-    return []
-  }
-
-  return [
-    tsx.classDeclaration({
-      name: "PheroService",
-      export: true,
-      abstract: true,
-      typeParams: [
-        tsx.typeParam({
-          name: "TContext",
-          default: tsx.literal.type(),
-        }),
-      ],
-    }),
-  ]
 }
 
 function generatePheroService(service: PheroService): ts.ClassDeclaration {

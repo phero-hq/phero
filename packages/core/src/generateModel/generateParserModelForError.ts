@@ -56,7 +56,7 @@ export default function generateParserModelForError(
       if (ts.isConstructorDeclaration(member)) {
         for (const param of member.parameters) {
           if (
-            // hasModifier(param, ts.SyntaxKind.PublicKeyword) &&
+            hasModifier(param, ts.SyntaxKind.PublicKeyword) &&
             !ts.isObjectBindingPattern(param.name) &&
             !ts.isArrayBindingPattern(param.name)
           ) {
