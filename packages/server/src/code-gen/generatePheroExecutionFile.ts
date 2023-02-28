@@ -144,12 +144,6 @@ function defaultErrorMapper<T>(error: unknown): RPCResult<T> {
     file,
   )
 
-  require("fs").writeFileSync(
-    "/Users/kamilafsar/Projects/examples/web/server/src/out.ts",
-    tsPheroExecution,
-    { encoding: "utf8" },
-  )
-
   const vHost = new VirtualCompilerHost({
     declaration: false,
   })
