@@ -147,8 +147,7 @@ describe("parsePheroApp", () => {
           ? () => Promise<void>
           : (ctx: T) => Promise<void>
         type PheroContext<T = {}> = T
-        type PheroParams<T = {}> = Partial<T>
-
+        
         async function getArticle(): Promise<string> {
           return "ok"
         }
@@ -157,7 +156,7 @@ describe("parsePheroApp", () => {
           return "ok"
         }
         
-        async function requireCMSUser(params: PheroParams, ctx: PheroContext, next: PheroNextFunction): Promise<string> {
+        async function requireCMSUser(ctx: PheroContext, next: PheroNextFunction): Promise<string> {
           return "ok"
         }
         
@@ -212,8 +211,7 @@ describe("parsePheroApp", () => {
           ? () => Promise<void>
           : (ctx: T) => Promise<void>
         type PheroContext<T = {}> = T
-        type PheroParams<T = {}> = Partial<T>
-
+        
         async function getArticle(): Promise<string> {
           return "ok"
         }
@@ -222,7 +220,7 @@ describe("parsePheroApp", () => {
           return "ok"
         }
         
-        async function requireCMSUser(params: PheroParams, ctx: PheroContext, next: PheroNextFunction): Promise<string> {
+        async function requireCMSUser(ctx: PheroContext, next: PheroNextFunction): Promise<string> {
           return "ok"
         }
         

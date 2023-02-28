@@ -31,13 +31,12 @@ describe("parsePheroApp middleware", () => {
           : (ctx: T) => Promise<void>
 
         type PheroContext<T = {}> = T
-        type PheroParams<T = {}> = Partial<T>
-
+        
         async function getArticle(ctx: PheroContext<{ x: number }>, aap: string): Promise<string> {
           return "ok"
         }
 
-        async function myMiddleware(params: PheroParams, context: PheroContext, next: PheroNextFunction<{ x: number }) {
+        async function myMiddleware(context: PheroContext, next: PheroNextFunction<{ x: number }) {
           await next({ x: 123 })
         }
 
