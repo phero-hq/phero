@@ -663,15 +663,7 @@ function generateErrorParsingFunction(domainErrors: PheroError[]): ts.Block {
                   ),
                   tsx.property.assignment(
                     "props",
-                    tsx.literal.object(
-                      tsx.property.assignment(
-                        "message",
-                        tsx.expression.propertyAccess("error", "message"),
-                      ),
-                      tsx.property.spreadAssignment(
-                        tsx.expression.propertyAccess("parsedError", "result"),
-                      ),
-                    ),
+                    tsx.expression.propertyAccess("parsedError", "result"),
                   ),
                   tsx.property.assignment(
                     "stack",

@@ -1,8 +1,7 @@
-import { deepEqual } from "assert"
 import ts from "typescript"
 import { PheroParseError } from "../domain/errors"
 
-import { MemberParserModel } from "../domain/ParserModel"
+import { MemberParserModel, ParserModel } from "../domain/ParserModel"
 import {
   PheroFunction,
   PheroMiddlewareConfig,
@@ -44,7 +43,7 @@ export default function parseServiceContextType(
           contextParameterType,
         )
       } else {
-        deepEqual(
+        assertDeepEqual(
           contextParameterTypeModelMember,
           accumulatedMember,
           new PheroParseError(
@@ -96,7 +95,7 @@ function calculateServiceContext(
           )
           accumulatedContext.push(contextTypeModelMember)
         } else {
-          deepEqual(
+          assertDeepEqual(
             contextTypeModelMember,
             accumulatedMember,
             new PheroParseError(
@@ -119,7 +118,7 @@ function calculateServiceContext(
         if (!accumulatedMember) {
           accumulatedContext.push(nextTypeModelMember)
         } else {
-          deepEqual(
+          assertDeepEqual(
             nextTypeModelMember,
             accumulatedMember,
             new PheroParseError(
@@ -160,5 +159,15 @@ function getPropertySignatures(
       return typeNode.types.flatMap(findAllProps)
     }
     return []
+  }
+}
+
+function assertDeepEqual(
+  actualMember: MemberParserModel,
+  expectedMember: MemberParserModel,
+  error: PheroParseError,
+): void {
+  if (JSON.stringify(actualMember) !== JSON.stringify(expectedMember)) {
+    throw error
   }
 }
