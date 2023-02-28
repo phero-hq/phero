@@ -28,6 +28,7 @@ export * as tsx from "./tsx"
 export {
   generateFunctionParsers,
   generateModelParser,
+  generateErrorParser,
   generateParserFunction,
   generateInlineParser,
   generateDependencyRefs,

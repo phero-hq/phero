@@ -4,6 +4,7 @@ import {
   generateDependencyRefs,
   generateInlineParser,
   generateModelParser,
+  generateErrorParser,
   PheroApp,
   PheroError,
   PheroFunction,
@@ -11,7 +12,7 @@ import {
   tsx,
   VirtualCompilerHost,
 } from "@phero/core"
-import { generateErrorParser } from "@phero/core/dist/generateParser"
+
 import ts from "typescript"
 
 export default function generatePheroExecutionFile(app: PheroApp): {
