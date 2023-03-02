@@ -1,8 +1,8 @@
 import ts from "typescript"
 
 interface TypeParamProps {
-  name: string
-  // TODO constraint
+  name: string | ts.Identifier
+  constraint?: ts.TypeNode
   default?: ts.TypeNode
 }
 
@@ -10,7 +10,7 @@ export function typeParam(props: TypeParamProps): ts.TypeParameterDeclaration {
   return ts.factory.createTypeParameterDeclaration(
     undefined,
     props.name,
-    undefined,
+    props.constraint,
     props.default,
   )
 }

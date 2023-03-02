@@ -9,6 +9,7 @@ module.exports = {
     ecmaVersion: "latest",
     sourceType: "module",
     project: "./tsconfig.json", // <-- Point to your project's tsconfig.json or create new one
+    tsconfigRootDir: __dirname,
   },
   // parser: '@typescript-eslint/parser',
   rules: {
@@ -27,6 +28,9 @@ module.exports = {
     "@typescript-eslint/brace-style": "off",
     "@typescript-eslint/restrict-plus-operands": "off",
     "@typescript-eslint/no-extraneous-class": "off",
+    "no-fallthrough": "off",
+    "@typescript-eslint/quotes": "off",
+    "no-template-curly-in-string": "off",
   },
   plugins: ["deprecation"],
 }

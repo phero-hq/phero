@@ -7,7 +7,7 @@ interface FunctionDeclarationProps {
   name: string
   params: ts.ParameterDeclaration[]
   returnType: ts.TypeNode
-  body: ts.Block | ts.Statement[]
+  body?: ts.Block | ts.Statement[]
 }
 
 export function functionDeclaration(
@@ -23,6 +23,8 @@ export function functionDeclaration(
     undefined,
     props.params,
     props.returnType,
-    Array.isArray(props.body) ? ts.factory.createBlock(props.body) : props.body,
+    props.body && Array.isArray(props.body)
+      ? ts.factory.createBlock(props.body)
+      : props.body,
   )
 }

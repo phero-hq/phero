@@ -35,6 +35,7 @@
     "@babel/preset-react": "^7.16.7",
     "@babel/register": "^7.16.9",
     "@tsconfig/recommended": "^1.0.1",
+    "@types/glob": "^8.1.0",
     "@types/react": "^17.0.38",
     "@types/semver": "^7.3.10",
     "chalk": "^4.1.2",

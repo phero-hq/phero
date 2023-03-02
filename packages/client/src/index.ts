@@ -1,2 +1,9 @@
-export * from "./package/BasePheroClient"
-export * from "./package/ParseResult"
+export { parser, Parser, ParseResult } from "@phero/core"
+
+export {
+  PheroRequest,
+  Fetch,
+  NetworkError,
+  ParseError,
+  BasePheroClient,
+} from "./package/BasePheroClient"

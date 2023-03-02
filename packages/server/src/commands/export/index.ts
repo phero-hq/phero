@@ -1,8 +1,6 @@
 import {
-  generateAppDeclarationFile,
-  generateRPCProxy,
-  MissingPheroFileError,
-  MissingTSConfigFile,
+  generateManifest,
+  MissingTSConfigFileError,
   parsePheroApp,
 } from "@phero/core"
 import { ServerCommandExport, ServerExportFlavor } from "@phero/dev"
@@ -19,6 +17,7 @@ import {
 import generateGCloudFunctionsExport from "./gcloud-functions"
 import generateNodeJSExport from "./nodejs"
 import generateVercelExport from "./vercel"
+import generatePheroExecutionFile from "../../code-gen/generatePheroExecutionFile"
 
 export default function exportCommand(command: ServerCommandExport) {
   const projectPath = process.cwd()
@@ -30,7 +29,7 @@ export default function exportCommand(command: ServerCommandExport) {
   )
 
   if (!tsConfigFilePath) {
-    throw new MissingTSConfigFile(projectPath)
+    throw new MissingTSConfigFileError(projectPath)
   }
 
   const tsConfig: ts.ParsedCommandLine | undefined =
@@ -93,16 +92,9 @@ export default function exportCommand(command: ServerCommandExport) {
 
   program.emit()
 
-  const pheroSourceFile = program.getSourceFile(`${projectPath}/src/phero.ts`)
-
-  if (!pheroSourceFile) {
-    throw new MissingPheroFileError(projectPath)
-  }
-
-  const typeChecker = program.getTypeChecker()
-  const app = parsePheroApp(pheroSourceFile, typeChecker)
-  const dts = generateAppDeclarationFile(app, typeChecker)
-  const pheroExecution = generateRPCProxy(app, typeChecker)
+  const app = parsePheroApp(program)
+  const { content: dts } = generateManifest(app)
+  const pheroExecution = generatePheroExecutionFile(app)
 
   const lockFile =
     findLockFileInDir(projectPath) ?? findLockFileForWorkspace(projectPath)

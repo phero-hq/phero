@@ -1,4 +1,4 @@
-import { ParseResult, ValidationError } from "./ParseResult"
+import type { ParseResult, DataParseError } from "@phero/core"
 
 export interface PheroRequest {
   method: "GET" | "POST"
@@ -20,7 +20,7 @@ export type Fetch = (
 export class NetworkError extends Error {}
 
 export class ParseError extends Error {
-  constructor(public readonly errors: ValidationError[]) {
+  constructor(public readonly errors: DataParseError[]) {
     super()
   }
 }

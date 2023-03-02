@@ -1,4 +1,4 @@
-import { ParsedPheroApp, tsx } from "@phero/core"
+import { PheroApp, tsx } from "@phero/core"
 import ts from "typescript"
 import compileExportToJS from "../compileExportToJS"
 import { Export, ExportBundle, ExportFile, MetaExportFiles } from "../domain"
@@ -7,7 +7,7 @@ import { generateServiceHandlerFile } from "./generateServiceHandlerFile"
 import generateServiceIndexFile from "./generateServiceIndexFile"
 
 export default function generateVercelExport(
-  app: ParsedPheroApp,
+  app: PheroApp,
   metaExportFiles: MetaExportFiles,
 ): Export {
   const bundles: ExportBundle[] = app.services.flatMap((service) => ({

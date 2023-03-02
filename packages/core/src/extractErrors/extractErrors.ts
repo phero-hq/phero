@@ -1,28 +1,28 @@
 import ts from "typescript"
-import parseThrowStatement, { ParsedError } from "./parseThrowStatement"
+import parseThrowStatement from "./parseThrowStatement"
 import recursivelyFindThrowStatements from "./recursivelyFindThrowStatements"
 
 export default function extractErrors(
   functions: ts.FunctionLikeDeclarationBase[],
-  typeChecker: ts.TypeChecker,
-): ParsedError[] {
-  const throwStatements = recursivelyFindThrowStatements(functions, typeChecker)
-  const parsedErrors = throwStatements
-    .map((st) => parseThrowStatement(st, typeChecker))
-    .filter((x): x is ParsedError => !!x)
-  return deduplicateErrors(parsedErrors)
+  prog: ts.Program,
+): ts.ClassDeclaration[] {
+  const throwStatements = recursivelyFindThrowStatements(functions, prog)
+  const errors = throwStatements
+    .map((st) => parseThrowStatement(st, prog))
+    .filter((x): x is ts.ClassDeclaration => !!x)
+  return deduplicateErrors(errors)
 }
 
-function deduplicateErrors(parsedErrors: ParsedError[]): ParsedError[] {
-  const result: ParsedError[] = []
-  const done: ts.ClassDeclaration[] = []
-  for (const parsedError of parsedErrors) {
-    if (done.includes(parsedError.ref)) {
+function deduplicateErrors(
+  errors: ts.ClassDeclaration[],
+): ts.ClassDeclaration[] {
+  const result: ts.ClassDeclaration[] = []
+  for (const error of errors) {
+    if (result.includes(error)) {
       continue
     }
 
-    result.push(parsedError)
-    done.push(parsedError.ref)
+    result.push(error)
   }
   return result
 }

@@ -1,5 +1,6 @@
 import { constDeclaration } from "./const"
 import { functionDeclaration } from "./functionDeclaration"
+import { method } from "./method"
 import { importDeclaration } from "./importDeclaration"
 import { interfaceDeclaration } from "./interface"
 import { sourceFile } from "./sourceFile"
@@ -10,6 +11,7 @@ import { classDeclaration } from "./classDeclaration"
 export class Declaration {
   public static const = constDeclaration
   public static function = functionDeclaration
+  public static method = method
   public static typeAlias = typeAlias
   public static interface = interfaceDeclaration
   public static sourceFile = sourceFile

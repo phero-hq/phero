@@ -5,7 +5,7 @@ import findFunctionStatements from "./findFunctionStatements"
 
 export default function recursivelyFindThrowStatements(
   functions: ts.FunctionLikeDeclarationBase | ts.FunctionLikeDeclarationBase[],
-  typeChecker: ts.TypeChecker,
+  prog: ts.Program,
 ): ts.ThrowStatement[] {
   return loop(Array.isArray(functions) ? functions : [functions], [], [])
 
@@ -29,7 +29,7 @@ export default function recursivelyFindThrowStatements(
 
     const dependencies = allStatements
       .flatMap(findCallExpressionsInStatement)
-      .flatMap((callExpr) => findFunctionDeclaration(callExpr, typeChecker))
+      .flatMap((callExpr) => findFunctionDeclaration(callExpr, prog))
 
     return loop(
       [...rest, ...dependencies],

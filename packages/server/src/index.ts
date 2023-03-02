@@ -1,3 +1,11 @@
+export {
+  parser,
+  Parser,
+  ParseResult,
+  RPCResult,
+  DataParseError,
+} from "@phero/core"
+
 export type PheroServiceFunctions = Record<string, Function>
 
 export interface PheroServiceDefinition {
@@ -5,22 +13,19 @@ export interface PheroServiceDefinition {
   config: PheroServiceConfig
 }
 
-export type PheroParams<T = {}> = Partial<T>
-
 export type PheroContext<T = {}> = T
 
 export type PheroNextFunction<T = void> = T extends void
   ? () => Promise<void>
   : (ctx: T) => Promise<void>
 
-export type PheroMiddlewareFunction<P, C, N> = (
-  params: PheroParams<P>,
+export type PheroMiddlewareFunction<C, N> = (
   ctx: PheroContext<C>,
   next: PheroNextFunction<N>,
 ) => Promise<void>
 
 export interface PheroServiceConfig {
-  middleware?: PheroMiddlewareFunction<any, any, void>[]
+  middleware: PheroMiddlewareFunction<any, void>[]
   cors?: PheroCORSConfig
 }
 
@@ -33,7 +38,7 @@ export function createService(
   config?: PheroServiceConfig,
 ): PheroServiceDefinition {
   return {
-    config: config ?? {},
+    config: config ?? { middleware: [] },
     functions,
   }
 }

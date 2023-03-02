@@ -1,17 +1,12 @@
 import { tsx } from "@phero/core"
-import {
-  ParsedPheroFunctionDefinition,
-  ParsedPheroServiceDefinition,
-} from "@phero/core"
+import { PheroFunction, PheroService } from "@phero/core"
 import ts from "typescript"
 import {
   write404ResponseStatement,
   writeResponseStatement,
 } from "../generateExportHelpers"
 
-export function generateServiceHandlerFile(
-  service: ParsedPheroServiceDefinition,
-): ts.Node[] {
+export function generateServiceHandlerFile(service: PheroService): ts.Node[] {
   return [
     tsx.importDeclaration({
       names: ["writeResponse", "parseServiceAndFunction", "readBody"],
@@ -49,18 +44,15 @@ export function generateServiceHandlerFile(
   ]
 }
 
-function serviceCorsConfig(service: ParsedPheroServiceDefinition): string {
+function serviceCorsConfig(service: PheroService): string {
   return `service_cors_config__${service.name}`
 }
 
-function functionExecutor(
-  service: ParsedPheroServiceDefinition,
-  func: ParsedPheroFunctionDefinition,
-): string {
+function functionExecutor(service: PheroService, func: PheroFunction): string {
   return `rpc_executor_${service.name}__${func.name}`
 }
 
-function handleService(service: ParsedPheroServiceDefinition): ts.Statement {
+function handleService(service: PheroService): ts.Statement {
   return tsx.statement.switch({
     expression: tsx.expression.propertyAccess(
       "requestedFunction",
@@ -98,9 +90,7 @@ function handleService(service: ParsedPheroServiceDefinition): ts.Statement {
   })
 }
 
-function switchHttpMethods(
-  service: ParsedPheroServiceDefinition,
-): ts.Statement {
+function switchHttpMethods(service: PheroService): ts.Statement {
   return tsx.statement.switch({
     expression: tsx.expression.propertyAccess("req", "method"),
     cases: [
@@ -127,7 +117,7 @@ function switchHttpMethods(
   })
 }
 
-function switchService(service: ParsedPheroServiceDefinition): ts.Statement {
+function switchService(service: PheroService): ts.Statement {
   return tsx.statement.switch({
     expression: tsx.expression.propertyAccess(
       "requestedFunction",

@@ -5,7 +5,7 @@ interface ParamDeclarationProps {
   private?: boolean
   public?: boolean
   readonly?: boolean
-  name: string
+  name: string | ts.Identifier
   questionToken?: boolean
   type: ts.TypeNode
   children?: undefined

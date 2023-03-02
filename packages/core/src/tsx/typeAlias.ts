@@ -3,7 +3,7 @@ import { generateModifiers } from "./lib"
 
 export interface TypeAliasProps {
   export?: boolean
-  name: string
+  name: string | ts.Identifier
   typeParameters?: ts.TypeParameterDeclaration[]
   type: ts.TypeNode
 }

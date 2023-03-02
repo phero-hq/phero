@@ -1,4 +1,4 @@
-import { ParsedPheroApp } from "@phero/core"
+import { PheroApp } from "@phero/core"
 import compileExportToJS from "../compileExportToJS"
 import { Export, ExportBundle, MetaExportFiles } from "../domain"
 import generateLibFile from "./generateLibFile"
@@ -6,7 +6,7 @@ import { generateServiceHandlerFile } from "./generateServiceHandlerFile"
 import generateServiceIndexFile from "./generateServiceIndexFile"
 
 export default function generateGCloudFunctionsExport(
-  app: ParsedPheroApp,
+  app: PheroApp,
   metaExportFiles: MetaExportFiles,
 ): Export {
   const packageJson = JSON.parse(metaExportFiles["package.json"])

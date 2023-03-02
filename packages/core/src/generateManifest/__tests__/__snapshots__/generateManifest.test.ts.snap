@@ -1,0 +1,129 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateManifest errors should generate common errors in domain 1`] = `
+"export class HamburgerError extends Error {
+    constructor(message: string);
+}
+export class CommonError extends Error {
+    constructor(message: string);
+}
+export class ArticleError extends Error {
+    constructor(message: string);
+}
+export abstract class PheroService<TContext = {}> {
+}
+export class hamburgerService extends PheroService {
+    getHamburger(): Promise<string>;
+    setHamburger(): Promise<string>;
+}
+export class articleService extends PheroService {
+    getArticle(): Promise<string>;
+    setArticle(): Promise<string>;
+}"
+`;
+
+exports[`generateManifest errors should generate multi-service multi-error 1`] = `
+"export class HamburgerError extends Error {
+    constructor(message: string);
+}
+export class ArticleError extends Error {
+    constructor(message: string);
+}
+export abstract class PheroService<TContext = {}> {
+}
+export class hamburgerService extends PheroService {
+    getHamburger(): Promise<string>;
+}
+export class articleService extends PheroService {
+    getArticle(): Promise<string>;
+}"
+`;
+
+exports[`generateManifest errors should generate properties on generated error classes 1`] = `
+"export class ArticleError extends Error {
+    constructor(message: string, myPublicProp: number, myProp: number);
+}
+export abstract class PheroService<TContext = {}> {
+}
+export class articleService extends PheroService {
+    getArticle(): Promise<string>;
+}"
+`;
+
+exports[`generateManifest errors should generate service error 1`] = `
+"export class ArticleError extends Error {
+    constructor(message: string);
+}
+export abstract class PheroService<TContext = {}> {
+}
+export class articleService extends PheroService {
+    getArticle(): Promise<string>;
+}"
+`;
+
+exports[`generateManifest middleware should parse middleware 1`] = `
+"export interface User {
+    uid: string;
+}
+export abstract class PheroService<TContext = {}> {
+}
+export class articleService extends PheroService<{
+    uid: string;
+}> {
+    getArticle(aap: string): Promise<string>;
+}"
+`;
+
+exports[`generateManifest typeAliases jasper 1`] = `
+"export interface X {
+    type: "x";
+}
+export interface Y {
+    type: "y";
+}
+export type Z = X | Y;
+export interface B {
+    [key: string]: Z;
+}
+export interface A {
+    b: B;
+}
+export abstract class PheroService<TContext = {}> {
+}
+export class articleService extends PheroService {
+    example(a: A): Promise<void>;
+}"
+`;
+
+exports[`generateManifest typeAliases type aliases to native array types 1`] = `
+"export type AadReturnType1 = string[];
+export abstract class PheroService<TContext = {}> {
+}
+export class articleService extends PheroService {
+    getArticle(): Promise<AadReturnType1>;
+}"
+`;
+
+exports[`generateManifest typeAliases type aliases to native types 1`] = `
+"export type AadReturnType2 = boolean;
+export abstract class PheroService<TContext = {}> {
+}
+export class articleService extends PheroService {
+    getArticle(): Promise<{
+        aad: AadReturnType2;
+    }>;
+}"
+`;
+
+exports[`generateManifest typeAliases type aliases which are aliases of aliases 1`] = `
+"export type TypeReal = {
+    x: number;
+};
+export type TypeRef = TypeReal;
+export type Result = TypeRef;
+export abstract class PheroService<TContext = {}> {
+}
+export class workoutRoutineService extends PheroService {
+    getRoutine(versionId: string): Promise<Result>;
+}"
+`;

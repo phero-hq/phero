@@ -52,6 +52,27 @@ export class Statement {
 
   public static const = constDeclaration
 
+  public static let(props: {
+    name: string
+    type?: ts.TypeNode
+    init?: ts.Expression
+  }): ts.VariableStatement {
+    return ts.factory.createVariableStatement(
+      undefined,
+      ts.factory.createVariableDeclarationList(
+        [
+          ts.factory.createVariableDeclaration(
+            ts.factory.createIdentifier(props.name),
+            undefined,
+            props.type,
+            props.init,
+          ),
+        ],
+        ts.NodeFlags.Let,
+      ),
+    )
+  }
+
   public static return(expression?: ts.Expression): ts.ReturnStatement {
     return ts.factory.createReturnStatement(expression)
   }

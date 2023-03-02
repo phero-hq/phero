@@ -1,151 +1,131 @@
 import ts from "typescript"
-import { isExternalDeclaration, isExternalSymbol } from "../tsUtils"
-import { Model, ParsedPheroFunctionDefinition } from "./parsePheroApp"
+import { PheroParseError } from "../domain/errors"
+import {
+  Model,
+  PheroError,
+  PheroFunction,
+  PheroMiddlewareConfig,
+  PheroModel,
+} from "../domain/PheroApp"
+import { isModel } from "../lib/isModel"
+import { getNameAsString, isExternal } from "../lib/tsUtils"
 
-const IGNORE_SYNTAX_KIND = [
-  ts.SyntaxKind.StringKeyword,
-  ts.SyntaxKind.BooleanKeyword,
-  ts.SyntaxKind.NumberKeyword,
-  ts.SyntaxKind.LiteralType,
-  ts.SyntaxKind.ImportSpecifier,
-  ts.SyntaxKind.VoidKeyword,
-  ts.SyntaxKind.AnyKeyword,
-  ts.SyntaxKind.UndefinedKeyword,
-]
+export function parseFunctionModels(
+  func: PheroFunction,
+  prog: ts.Program,
+): PheroModel[] {
+  const modelMap = new Map<ts.Symbol, Model>()
 
-export default function parseModels(
-  funcs: ParsedPheroFunctionDefinition[],
-  typeChecker: ts.TypeChecker,
-): Model[] {
-  const models: Model[] = []
-  const addedSymbols: ts.Symbol[] = []
-
-  for (const param of funcs.flatMap((func) => func.parameters)) {
-    doType(param.type)
+  for (const param of func.parameters) {
+    extractModels(param.type, prog, modelMap)
   }
 
-  for (const returnType of funcs.flatMap((func) => func.returnType)) {
-    doType(returnType)
-  }
+  extractModels(func.returnType, prog, modelMap)
 
-  function doType(typeNode: ts.TypeNode | undefined): void {
-    if (!typeNode) {
-      return
+  return modelMapToModels(modelMap)
+}
+
+export function parseMiddlewareModels(
+  middlewareConfigs: PheroMiddlewareConfig[],
+  prog: ts.Program,
+): PheroModel[] {
+  const modelMap = new Map<ts.Symbol, Model>()
+
+  for (const config of middlewareConfigs) {
+    if (config.contextType) {
+      extractModels(config.contextType, prog, modelMap)
     }
+    if (config.nextType) {
+      extractModels(config.nextType, prog, modelMap)
+    }
+  }
 
-    if (ts.isTypeReferenceNode(typeNode)) {
-      for (const typeArgument of typeNode.typeArguments ?? []) {
-        doType(typeArgument)
-      }
+  return modelMapToModels(modelMap)
+}
 
-      // this is the best way to get the actual declaration of a TypeReferenceNode
-      // this works for interfaces and type aliases
-      const symbol = typeChecker.getSymbolAtLocation(typeNode.typeName)
+export function parseErrorModels(
+  errors: PheroError[],
+  prog: ts.Program,
+): PheroModel[] {
+  const modelMap = new Map<ts.Symbol, Model>()
 
-      if (!symbol || isExternalSymbol(symbol)) {
-        return
-      }
+  for (const error of errors) {
+    for (const prop of error.properties) {
+      extractModels(prop.type, prog, modelMap)
+    }
+  }
 
-      addedSymbols.push(symbol)
+  return modelMapToModels(modelMap)
+}
 
-      for (const declaration of symbol.declarations ?? []) {
-        doDeclaration(declaration)
-      }
+function modelMapToModels(modelMap: Map<ts.Symbol, Model>): PheroModel[] {
+  return [...modelMap.values()].map((m) => ({
+    name: getNameAsString(m.name),
+    ref: m,
+  }))
+}
 
-      if ((symbol.flags & ts.SymbolFlags.Alias) === ts.SymbolFlags.Alias) {
-        const aliasSymbol = typeChecker.getAliasedSymbol(symbol)
-        if (aliasSymbol && !addedSymbols.includes(aliasSymbol)) {
-          addedSymbols.push(aliasSymbol)
-          for (const d of aliasSymbol.declarations ?? []) {
-            doDeclaration(d)
+function extractModels(
+  rootNode: ts.Node,
+  prog: ts.Program,
+  accum: Map<ts.Symbol, Model>,
+): Map<ts.Symbol, Model> {
+  const typeChecker = prog.getTypeChecker()
+
+  const transformer =
+    <T extends ts.Node>(context: ts.TransformationContext) =>
+    (rootNode: T) => {
+      function visit(node: ts.Node): ts.Node {
+        if (
+          ts.isTypeReferenceNode(node) ||
+          ts.isExpressionWithTypeArguments(node)
+        ) {
+          const { symbol, declaration } = getDeclaration(node, typeChecker)
+          if (
+            !accum.has(symbol) &&
+            isModel(declaration) &&
+            !isExternal(declaration, prog)
+          ) {
+            accum.set(symbol, declaration)
+            extractModels(declaration, prog, accum)
           }
         }
+
+        return ts.visitEachChild(node, visit, context)
       }
-    } else if (ts.isTypeLiteralNode(typeNode)) {
-      doMembers(typeNode.members)
-    } else if (ts.isUnionTypeNode(typeNode)) {
-      for (const unionElementType of typeNode.types) {
-        doType(unionElementType)
-      }
-    } else if (ts.isIntersectionTypeNode(typeNode)) {
-      for (const intersectionElementType of typeNode.types) {
-        doType(intersectionElementType)
-      }
-    } else if (ts.isArrayTypeNode(typeNode)) {
-      doType(typeNode.elementType)
-    } else if (ts.isExpressionWithTypeArguments(typeNode)) {
-      const extendedType = typeChecker.getTypeFromTypeNode(typeNode)
-      for (const declr of extendedType.symbol.declarations ?? []) {
-        doDeclaration(declr)
-      }
-    } else if (ts.isIndexedAccessTypeNode(typeNode)) {
-      doType(typeNode.objectType)
-      doType(typeNode.indexType)
-    } else if (ts.isTupleTypeNode(typeNode)) {
-      for (const el of typeNode.elements) {
-        doType(el)
-      }
-    } else if (ts.isParenthesizedTypeNode(typeNode)) {
-      doType(typeNode.type)
-    } else if (!IGNORE_SYNTAX_KIND.includes(typeNode.kind)) {
-      console.warn("Model extracting not possible for node " + typeNode.kind)
+      return ts.visitNode(rootNode, visit)
     }
+
+  ts.transform(rootNode, [transformer])
+
+  return accum
+}
+
+function getDeclaration(
+  typeNode: ts.TypeReferenceType,
+  typeChecker: ts.TypeChecker,
+): { symbol: ts.Symbol; declaration: ts.Declaration } {
+  const symbol = typeChecker.getSymbolAtLocation(
+    ts.isTypeReferenceNode(typeNode) ? typeNode.typeName : typeNode.expression,
+  )
+  if (!symbol) {
+    throw new PheroParseError("Entity must have symbol", typeNode)
   }
 
-  function doDeclaration(declaration: ts.Declaration | undefined): void {
-    if (!declaration) {
-      return
-    }
-    if (isExternalDeclaration(declaration)) {
-      return
-    }
-
-    if (ts.isInterfaceDeclaration(declaration)) {
-      doMembers(declaration.members)
-      for (const heritageClause of declaration.heritageClauses ?? []) {
-        for (const type of heritageClause.types) {
-          doType(type)
-        }
-      }
-      for (const typeParam of declaration.typeParameters ?? []) {
-        doDeclaration(typeParam)
-      }
-
-      models.push(declaration)
-    } else if (ts.isTypeAliasDeclaration(declaration)) {
-      doType(declaration.type)
-
-      for (const typeParam of declaration.typeParameters ?? []) {
-        doDeclaration(typeParam)
-      }
-
-      models.push(declaration)
-    } else if (ts.isEnumDeclaration(declaration)) {
-      models.push(declaration)
-    } else if (ts.isEnumMember(declaration)) {
-      doDeclaration(declaration.parent)
-    } else if (ts.isTypeParameterDeclaration(declaration)) {
-      doType(declaration.constraint)
-      doType(declaration.default)
-    } else if (ts.isTypeLiteralNode(declaration)) {
-      doMembers(declaration.members)
-    } else if (!IGNORE_SYNTAX_KIND.includes(declaration.kind)) {
-      console.warn(
-        "Model extracting not possible for declaration " + declaration.kind,
-      )
-    }
-  }
-
-  function doMembers(members: ts.NodeArray<ts.TypeElement>): void {
-    for (const member of members) {
-      if (ts.isPropertySignature(member)) {
-        doType(member.type)
-      } else if (ts.isIndexSignatureDeclaration(member)) {
-        // TODO name, but could be computed property
-        doType(member.type)
+  if ((symbol.flags & ts.SymbolFlags.Alias) === ts.SymbolFlags.Alias) {
+    const aliasSymbol = typeChecker.getAliasedSymbol(symbol)
+    if (aliasSymbol?.declarations?.[0]) {
+      return {
+        symbol: aliasSymbol,
+        declaration: aliasSymbol.declarations?.[0],
       }
     }
   }
 
-  return models
+  const declaration = symbol?.declarations?.[0]
+  if (!declaration) {
+    throw new PheroParseError("Entity must have declaration", typeNode)
+  }
+
+  return { symbol, declaration }
 }

@@ -1,37 +1,40 @@
 import ts from "typescript"
-import { ParseError } from "../errors"
+import { PheroParseError } from "../domain/errors"
+import { PheroServiceConfig } from "../domain/PheroApp"
+import { DependencyMap } from "../generateModel"
+import { resolveSymbol } from "../lib/tsUtils"
 import parseServiceMiddlewareConfig from "./parseServiceMiddlewareConfig"
-import { ParsedPheroServiceConfig } from "./parsePheroApp"
-import { resolveSymbol } from "../tsUtils"
 
 export default function parseServiceConfig(
   node: ts.Node | undefined,
-  typeChecker: ts.TypeChecker,
-): ParsedPheroServiceConfig {
+  prog: ts.Program,
+  deps: DependencyMap,
+): PheroServiceConfig {
   if (!node) {
-    return {}
+    return { middleware: [] }
   }
 
   if (ts.isObjectLiteralExpression(node)) {
     const middleware = parseServiceMiddlewareConfig(
       node,
       "middleware",
-      typeChecker,
+      prog.getTypeChecker(),
+      deps,
     )
 
-    return { middleware }
+    return { middleware: middleware ?? [] }
   }
 
   if (ts.isIdentifier(node)) {
-    const symbol = resolveSymbol(node, typeChecker)
+    const symbol = resolveSymbol(node, prog.getTypeChecker())
     if (symbol) {
-      return parseServiceConfig(symbol.valueDeclaration, typeChecker)
+      return parseServiceConfig(symbol.valueDeclaration, prog, deps)
     }
   }
 
   if (ts.isVariableDeclaration(node)) {
-    return parseServiceConfig(node.initializer, typeChecker)
+    return parseServiceConfig(node.initializer, prog, deps)
   }
 
-  throw new ParseError("S126: Unsupport syntax for function config", node)
+  throw new PheroParseError("S126: Unsupport syntax for function config", node)
 }

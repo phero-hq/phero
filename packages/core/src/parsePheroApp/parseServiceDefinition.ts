@@ -1,52 +1,90 @@
 import ts from "typescript"
-import { ParseError } from "../errors"
-import extractErrors from "../extractErrors/extractErrors"
-import parseModels from "./parseModels"
-import getCreateServiceCallExpression from "./getCreateServiceCallExpression"
-import { parseContext } from "./parseContext"
+import { tsx } from ".."
+import { PheroParseError } from "../domain/errors"
+import { PheroService, PheroServiceConfig } from "../domain/PheroApp"
+import {
+  DependencyMap,
+  generateParserModelForServiceContext,
+} from "../generateModel"
+import parseCreateServiceCallExpression from "./parseCreateServiceCallExpression"
 import parseFunctionDefinitions from "./parseFunctionDefinitions"
-import { ParsedPheroServiceDefinition } from "./parsePheroApp"
 import parseServiceConfig from "./parseServiceConfig"
+import parseServiceContextType, {
+  ServiceContext,
+} from "./parseServiceContextType"
 
 export default function parseServiceDefinition(
   serviceExport: ts.VariableDeclaration | ts.ExportSpecifier,
-  typeChecker: ts.TypeChecker,
-): ParsedPheroServiceDefinition {
+  prog: ts.Program,
+  deps: DependencyMap,
+): PheroService {
+  const typeChecker = prog.getTypeChecker()
   const serviceName = serviceExport.name.getText()
 
   // check if the value of the export is a function call to "creatService"
-  const createServiceCallExpr = getCreateServiceCallExpression(
+  const createServiceCallExpr = parseCreateServiceCallExpression(
     serviceExport,
-    typeChecker,
+    prog,
   )
 
   if (!createServiceCallExpr) {
-    throw new ParseError("S127: Cant find service export", serviceExport)
+    throw new PheroParseError("S127: Cant find service export", serviceExport)
   }
 
   // parsing arguments of createService
-  const [functionDefs, serviceConfig] = createServiceCallExpr.arguments
-  const [parsedServiceConfig, functionDefinitions] = parseContext(
-    parseServiceConfig(serviceConfig, typeChecker),
-    parseFunctionDefinitions(functionDefs, typeChecker),
+  const [functionDefsArg, serviceConfigArg] = createServiceCallExpr.arguments
+
+  const serviceConfig = parseServiceConfig(serviceConfigArg, prog, deps)
+  const pheroFunctions = parseFunctionDefinitions(
+    functionDefsArg,
     typeChecker,
+    deps,
   )
 
-  if (functionDefinitions.length === 0) {
-    throw new ParseError("S128: Can't find function definitions", functionDefs)
+  if (pheroFunctions.length === 0) {
+    throw new PheroParseError(
+      "S128: Can't find function definitions",
+      createServiceCallExpr,
+    )
   }
+
+  const serviceContextConfig = parseServiceContextType(
+    serviceConfig,
+    pheroFunctions,
+  )
 
   return {
     name: serviceName,
-    funcs: functionDefinitions,
-    models: parseModels(functionDefinitions, typeChecker),
-    errors: extractErrors(
-      [
-        ...functionDefinitions.map((f) => f.actualFunction),
-        ...(parsedServiceConfig.middleware?.map((m) => m.middleware) ?? []),
-      ],
-      typeChecker,
-    ),
-    config: parsedServiceConfig,
+    funcs: pheroFunctions,
+    config: {
+      ...serviceConfig,
+      ...generateServiceContextProps(serviceContextConfig, typeChecker, deps),
+    },
+    ref: serviceExport,
+  }
+}
+
+function generateServiceContextProps(
+  serviceContext: ServiceContext | undefined,
+  typeChecker: ts.TypeChecker,
+  deps: DependencyMap,
+): Pick<PheroServiceConfig, "contextType" | "contextTypeModel"> {
+  if (!serviceContext) {
+    return {}
+  }
+
+  const contextType = tsx.literal.type(
+    ...serviceContext.properties.map((p) => p.signature),
+  )
+
+  const { root: contextTypeModel } = generateParserModelForServiceContext(
+    serviceContext,
+    typeChecker,
+    deps,
+  )
+
+  return {
+    contextType,
+    contextTypeModel,
   }
 }

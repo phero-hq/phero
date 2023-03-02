@@ -1,7 +1,6 @@
 import {
-  generateAppDeclarationFile,
-  MissingPheroFileError,
-  MissingTSConfigFile,
+  generateManifest,
+  MissingTSConfigFileError,
   parsePheroApp,
 } from "@phero/core"
 import { ServerCommandBuild } from "@phero/dev"
@@ -19,7 +18,7 @@ export default function buildCommand(command: ServerCommandBuild) {
   )
 
   if (!tsConfigFilePath) {
-    throw new MissingTSConfigFile(projectPath)
+    throw new MissingTSConfigFileError(projectPath)
   }
 
   const tsConfig: ts.ParsedCommandLine | undefined =
@@ -68,15 +67,8 @@ export default function buildCommand(command: ServerCommandBuild) {
     rootNames: [`${projectPath}/src/phero.ts`],
   })
 
-  const pheroSourceFile = program.getSourceFile(`${projectPath}/src/phero.ts`)
-
-  if (!pheroSourceFile) {
-    throw new MissingPheroFileError(projectPath)
-  }
-
-  const typeChecker = program.getTypeChecker()
-  const app = parsePheroApp(pheroSourceFile, typeChecker)
-  const dts = generateAppDeclarationFile(app, typeChecker)
+  const app = parsePheroApp(program)
+  const { content: dts } = generateManifest(app)
   const manifestPath = path.join(projectPath, "phero-manifest.d.ts")
   fs.writeFileSync(manifestPath, dts)
 }

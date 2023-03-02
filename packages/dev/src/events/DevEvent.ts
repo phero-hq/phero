@@ -43,12 +43,12 @@ export interface ValidationError {
 export interface RuntimeError {
   name: string
   props: Record<string, any>
-  stack: string
+  stack?: string
 }
 
 export interface ServerError {
   message: string
-  stack: string
+  stack?: string
 }
 
 export type ServerDevEventRPCFailedValidationError = {

@@ -13,6 +13,10 @@ export class Literal {
     return ts.factory.createNumericLiteral(value)
   }
 
+  public static bigint(value: string | ts.PseudoBigInt): ts.BigIntLiteral {
+    return ts.factory.createBigIntLiteral(value)
+  }
+
   public static string(value: string): ts.StringLiteral {
     return ts.factory.createStringLiteral(value)
   }
@@ -43,20 +47,8 @@ export class Literal {
     return ts.factory.createArrayLiteralExpression(elements)
   }
 
-  public static type(...members: ts.PropertySignature[]): ts.TypeLiteralNode {
+  public static type(...members: ts.TypeElement[]): ts.TypeLiteralNode {
     return ts.factory.createTypeLiteralNode(members)
-  }
-
-  public static function(props: {
-    params: ts.ParameterDeclaration[]
-    type: ts.TypeNode
-    typeParams?: ts.TypeParameterDeclaration[]
-  }): ts.FunctionTypeNode {
-    return ts.factory.createFunctionTypeNode(
-      props.typeParams,
-      props.params,
-      props.type,
-    )
   }
 
   public static regularExpression(text: string): ts.RegularExpressionLiteral {

@@ -16,8 +16,8 @@ export default async function writeClientSource(
   const hasSourceDir = await fileExists(path.join("src"))
   await fs.writeFile(
     hasSourceDir
-      ? path.join("./src/phero.generated.ts")
-      : path.join("./phero.generated.ts"),
+      ? path.join(`./src/phero.generated.ts`)
+      : path.join(`./phero.generated.ts`),
     printSourceFile(clientPheroSourceFile),
     {
       encoding: "utf-8",

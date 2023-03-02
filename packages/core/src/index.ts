@@ -1,27 +1,48 @@
-export { parseAppDeclarationFileContent, isModel } from "./parseAppDeclaration"
 export {
-  ParsedAppDeclarationVersion,
-  getDeclarationForVersion,
-} from "./ParsedAppDeclarationVersion"
+  PheroApp,
+  PheroError,
+  PheroFunction,
+  PheroService,
+  PheroServiceConfig,
+} from "./domain/PheroApp"
 export {
-  generateClientFunction,
-  generateModel,
-  generateNamespace,
-  ReferenceMaker,
-} from "./code-gen-lib"
-export { default as generateAppDeclarationFile } from "./generateAppDeclarationFile"
-export { default as generateRPCProxy } from "./code-gen/generateRPCProxy"
+  MissingTSConfigFileError,
+  MissingPheroFileError,
+  PheroParseError,
+  PortInUseError,
+  hasErrorCode,
+} from "./domain/errors"
 export {
-  default as generateModelParser,
-  generateNonModelParser,
-} from "./code-gen/parsers/generateParser"
-export {
-  parsePheroApp,
-  ParsedPheroApp,
-  ParsedPheroFunctionDefinition,
-  ParsedPheroServiceDefinition,
-} from "./parsePheroApp"
-export * from "./errors"
-export * from "./RPCResult"
+  RPCResult,
+  RPCOkResult,
+  RPCBadRequestResult,
+  RPCInternalServerErrorResult,
+} from "./domain/RPCResult"
+
+export { parsePheroApp } from "./parsePheroApp"
+export { default as parseManifest } from "./parseManifest/parseManifest"
+export { default as generateManifest } from "./generateManifest/generateManifest"
+
 export * as tsx from "./tsx"
-export { VirtualCompilerHost } from "./VirtualCompilerHost"
+
+export {
+  generateFunctionParsers,
+  generateModelParser,
+  generateErrorParser,
+  generateParserFunction,
+  generateInlineParser,
+  generateDependencyRefs,
+  DependencyRefs,
+} from "./generateParser"
+
+export { VirtualCompilerHost } from "./lib/VirtualCompilerHost"
+export { default as cloneTS } from "./lib/cloneTS"
+
+export * as parser from "./generateParser/static"
+export {
+  Parser,
+  ParseResult,
+  DataParseSuccess,
+  DataParseFailure,
+  DataParseError,
+} from "./domain/Parser"

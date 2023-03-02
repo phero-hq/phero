@@ -1,8 +1,7 @@
 import {
-  generateAppDeclarationFile,
-  generateRPCProxy,
+  generateManifest,
   hasErrorCode,
-  ParsedPheroApp,
+  PheroApp,
   parsePheroApp,
   PortInUseError,
   RPCResult,
@@ -13,6 +12,7 @@ import { promises as fs } from "fs"
 import http from "http"
 import path from "path"
 import ts from "typescript"
+import generatePheroExecutionFile from "../../code-gen/generatePheroExecutionFile"
 import WatchProgram from "./WatchProgram"
 
 export interface PrintedClientCode {
@@ -96,17 +96,14 @@ export default class DevServer {
     this.eventEmitter.emit({ type: "BUILD_PROJECT_START" })
   }
 
-  private async buildProjectSuccess(
-    pheroSourceFile: ts.SourceFile,
-    typeChecker: ts.TypeChecker,
-  ): Promise<void> {
+  private async buildProjectSuccess(prog: ts.Program): Promise<void> {
     this.eventEmitter.emit({ type: "BUILD_PROJECT_SUCCESS" })
 
-    let app: ParsedPheroApp
+    let app: PheroApp
     try {
       this.eventEmitter.emit({ type: "BUILD_MANIFEST_START" })
-      app = parsePheroApp(pheroSourceFile, typeChecker)
-      const dts = generateAppDeclarationFile(app, typeChecker)
+      app = parsePheroApp(prog)
+      const { content: dts } = generateManifest(app)
       await fs.writeFile(this.manifestPath, dts)
       this.eventEmitter.emit({ type: "BUILD_MANIFEST_SUCCESS" })
     } catch (error) {
@@ -123,11 +120,12 @@ export default class DevServer {
     try {
       this.eventEmitter.emit({ type: "BUILD_RPCS_START" })
       this.routes = this.generateRoutes(app)
-      const output = generateRPCProxy(app, typeChecker)
+      const output = generatePheroExecutionFile(app)
       await fs.writeFile(this.pheroExecutionJS, output.js)
       this.clearRequireCache()
       this.eventEmitter.emit({ type: "BUILD_RPCS_SUCCESS" })
     } catch (error) {
+      console.error("err", error)
       this.eventEmitter.emit({
         type: "BUILD_RPCS_FAILED",
         errorMessage: error instanceof Error ? error.message : "Unknown error",
@@ -220,7 +218,13 @@ export default class DevServer {
                 ms: Date.now() - startTime,
                 requestId,
                 dateTime: new Date().toISOString(),
-                errors: rpcResult.errors,
+                // TODO lets send all data we have
+                errors: rpcResult.errors.map((err) => {
+                  return {
+                    path: err.path ?? ".",
+                    message: err.message,
+                  }
+                }),
                 input: rpcResult.input,
               })
             } else if (rpcResult.status === 500) {
@@ -276,7 +280,7 @@ export default class DevServer {
     })
   }
 
-  private generateRoutes(app: ParsedPheroApp): RPCRoutes {
+  private generateRoutes(app: PheroApp): RPCRoutes {
     const routes: RPCRoutes = {}
     for (const service of app.services) {
       for (const func of service.funcs) {

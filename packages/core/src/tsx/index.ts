@@ -13,6 +13,7 @@ export { importDeclaration } from "./importDeclaration"
 export { exportDeclaration } from "./exportDeclaration"
 export { exportNamespaceDeclaration } from "./exportNamespaceDeclaration"
 export { classDeclaration } from "./classDeclaration"
+export { method } from "./method"
 export { constructor } from "./constructor"
 
 export { Type as type } from "./Type"
