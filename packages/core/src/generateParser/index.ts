@@ -1,8 +1,4 @@
-import {
-  ObjectParserModel,
-  ParserModel,
-  ParserModelType,
-} from "../domain/ParserModel"
+import { ParserModel, ParserModelType } from "../domain/ParserModel"
 
 import ts from "typescript"
 import { PheroError, tsx } from ".."
@@ -147,8 +143,7 @@ export function generateDependencyRefs(deps: DependencyMap): DependencyRefs {
       ...refs,
       [typeName]: typeName.includes("<")
         ? tsx.expression.identifier(`ref_${refIndex++}`)
-        : // the replace is necessary for EnumMembers
-          tsx.expression.identifier(`${typeName.replace(".", "_")}Parser`),
+        : tsx.expression.identifier(`${typeName.replace(".", "_")}Parser`), // the replace is necessary for EnumMembers
     }),
     {},
   )

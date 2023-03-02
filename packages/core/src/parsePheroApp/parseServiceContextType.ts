@@ -1,7 +1,7 @@
 import ts from "typescript"
 import { PheroParseError } from "../domain/errors"
 
-import { MemberParserModel, ParserModel } from "../domain/ParserModel"
+import { MemberParserModel } from "../domain/ParserModel"
 import {
   PheroFunction,
   PheroMiddlewareConfig,
