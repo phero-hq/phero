@@ -13,15 +13,16 @@
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "tsc",
     "test": "jest src",
     "prepublish": "npm run clean && npm run build",
     "start": "node ./dist/index.js",
     "prestart": "npm run build",
-    "postbuild": "cp package.json ./dist/package.json && cp ../../README.md README.md"
+    "dev": "tsc-watch --onSuccess \"yarn build\"",
+    "build": "tsup src/index.tsx --format esm,cjs --dts",
+    "postbuild": "cp package.json ./dist/package.json"
   },
   "dependencies": {
-    "@phero/dev": "^0.10.0-alpha.0",
+    "@phero/dev": "*",
     "@types/node": "^18.11.9",
     "glob": "^8.1.0",
     "ink": "^3.2.0",
@@ -40,7 +41,9 @@
     "@types/semver": "^7.3.10",
     "chalk": "^4.1.2",
     "ink-testing-library": "^2.1.0",
-    "typescript": "^4.8.4"
+    "typescript": "^4.8.4",
+    "tsc-watch": "^5.0.3",
+    "tsup": "^6.5.0"
   },
   "babel": {
     "presets": [

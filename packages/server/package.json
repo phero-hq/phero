@@ -1,7 +1,9 @@
 {
   "name": "@phero/server",
   "version": "0.10.0-alpha.0",
-  "main": "dist/index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "description": "Server library for Phero",
   "homepage": "https://phero.dev",
   "repository": "phero-hq/phero",
@@ -17,14 +19,15 @@
   },
   "scripts": {
     "clean": "rm -rf dist && rm -rf generated",
-    "build": "tsc",
     "test": "jest src",
     "prepublish": "npm run clean && npm run build",
+    "dev": "tsc-watch --onSuccess \"yarn build\"",
+    "build": "tsup src/index.ts --format esm,cjs --dts",
     "postbuild": "cp package.json ./dist/package.json"
   },
   "dependencies": {
-    "@phero/core": "^0.10.0-alpha.0",
-    "@phero/dev": "^0.10.0-alpha.0"
+    "@phero/core": "*",
+    "@phero/dev": "*"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
@@ -32,7 +35,9 @@
     "@types/node": "^16.11.7",
     "jest": "^27.3.1",
     "ts-jest": "^27.0.7",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "tsc-watch": "^5.0.3",
+    "tsup": "^6.5.0"
   },
   "license": "Apache-2.0",
   "author": {

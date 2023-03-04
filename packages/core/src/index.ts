@@ -46,3 +46,5 @@ export {
   DataParseFailure,
   DataParseError,
 } from "./domain/Parser"
+
+export type Aad = string
