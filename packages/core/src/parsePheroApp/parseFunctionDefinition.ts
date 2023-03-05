@@ -74,7 +74,7 @@ function parseActualFunction(
   if (ts.isShorthandPropertyAssignment(node)) {
     const symbol = typeChecker.getShorthandAssignmentValueSymbol(node)
 
-    if (!symbol || !symbol.declarations?.[0]) {
+    if (!symbol?.declarations?.[0]) {
       throw new PheroParseError(
         `S118: Can't find function (${node.kind})`,
         node,

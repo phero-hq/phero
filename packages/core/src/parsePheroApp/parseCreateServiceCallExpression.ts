@@ -47,7 +47,7 @@ export default function parseCreateServiceCallExpression(
 
   if (ts.isShorthandPropertyAssignment(node)) {
     const symbol = typeChecker.getShorthandAssignmentValueSymbol(node)
-    if (!symbol || !symbol.valueDeclaration) {
+    if (!symbol?.valueDeclaration) {
       return undefined
     }
     return parseCreateServiceCallExpression(symbol.valueDeclaration, prog)
