@@ -7,6 +7,15 @@
     },
     "dev": {
       "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {},
+    "lint:fix": {},
+    "test": {
+      "dependsOn": ["build"]
+    },
+    "clean": {
       "cache": false
     }
   }

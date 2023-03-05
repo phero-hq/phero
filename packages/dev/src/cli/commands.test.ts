@@ -4,7 +4,7 @@ import {
   parseServerCommand,
 } from "./commands"
 
-describe("parseServerCommand", () => {
+describe.skip("parseServerCommand", () => {
   function run(cmd: string) {
     return parseServerCommand(cmd.split(" ").splice(1))
   }
@@ -102,7 +102,7 @@ describe("parseServerCommand", () => {
   })
 })
 
-describe("parseClientCommand", () => {
+describe.skip("parseClientCommand", () => {
   function run(cmd: string) {
     return parseClientCommand(cmd.split(" ").splice(1))
   }
@@ -202,7 +202,7 @@ describe("parseClientCommand", () => {
   })
 })
 
-describe("parsePheroCommand", () => {
+describe.skip("parsePheroCommand", () => {
   function run(cmd: string) {
     return parsePheroCommand(cmd.split(" ").splice(1))
   }

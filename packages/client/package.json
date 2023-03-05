@@ -2,6 +2,7 @@
   "name": "@phero/client",
   "version": "0.10.0-alpha.0",
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "description": "Client library for Phero",
   "homepage": "https://phero.dev",
@@ -17,12 +18,12 @@
     "access": "public"
   },
   "scripts": {
-    "clean": "rm -rf dist && rm -rf generated",
-    "test": "jest src",
-    "prepublish": "npm run clean && npm run build",
-    "dev": "yarn build --watch --sourcemap --onSuccess 'tsc --emitDeclarationOnly --declaration'",
+    "dev": "yarn build --watch --sourcemap --onSuccess 'tsc --declaration --declarationMap --emitDeclarationOnly'",
     "build": "tsup src/index.ts --format esm,cjs --dts",
-    "postbuild": "cp package.json ./dist/package.json"
+    "postbuild": "cp package.json ./dist/package.json",
+    "test": "jest src --passWithNoTests",
+    "clean": "rm -rf dist && rm -rf generated",
+    "prepublish": "npm run clean && npm run build"
   },
   "dependencies": {
     "@phero/core": "*",

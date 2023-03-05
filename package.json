@@ -15,7 +15,10 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "dev": "turbo run dev",
-    "build": "turbo run build"
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo run clean"
   },
   "devDependencies": {
     "lerna": "^3.22.1",

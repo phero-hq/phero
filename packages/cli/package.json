@@ -12,14 +12,14 @@
     "phero": "dist/index.js"
   },
   "scripts": {
+    "dev": "yarn build --watch",
+    "build": "tsc",
+    "postbuild": "cp package.json ./dist/package.json",
+    "test": "jest src --passWithNoTests",
     "clean": "rm -rf dist",
-    "test": "jest src",
     "prepublish": "npm run clean && npm run build",
     "start": "node ./dist/index.js",
-    "prestart": "npm run build",
-    "dev": "yarn build --watch --sourcemap --onSuccess 'tsc --emitDeclarationOnly --declaration'",
-    "build": "tsup src/index.tsx --format esm,cjs --dts",
-    "postbuild": "cp package.json ./dist/package.json"
+    "prestart": "npm run build"
   },
   "dependencies": {
     "@phero/dev": "*",

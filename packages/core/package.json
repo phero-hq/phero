@@ -2,6 +2,7 @@
   "name": "@phero/core",
   "version": "0.10.0-alpha.0",
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "homepage": "https://phero.dev",
   "repository": "phero-hq/phero",
@@ -13,12 +14,13 @@
     "access": "public"
   },
   "scripts": {
-    "clean": "rm -rf dist",
+    "dev": "yarn build --watch --sourcemap --onSuccess 'tsc --declaration --declarationMap --emitDeclarationOnly'",
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "test": "jest src",
-    "eslint": "eslint src",
-    "prepublish": "npm run clean && npm run build",
-    "dev": "yarn build --watch --sourcemap --onSuccess 'tsc --emitDeclarationOnly --declaration'",
-    "build": "tsup src/index.ts --format esm,cjs --dts"
+    "clean": "rm -rf dist",
+    "prepublish": "npm run clean && npm run build"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

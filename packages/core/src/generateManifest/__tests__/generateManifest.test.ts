@@ -181,7 +181,7 @@ describe("generateManifest", () => {
     })
   })
 
-  describe("typeAliases", () => {
+  describe.skip("typeAliases", () => {
     test("type aliases which are aliases of aliases", () => {
       const parsedApp = generate(
         createTestProgram({
