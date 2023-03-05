@@ -18,7 +18,8 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "publish-packages": "turbo run build lint test && changeset version"
   },
   "devDependencies": {
     "lerna": "^3.22.1",
@@ -26,5 +27,8 @@
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@changesets/cli": "^2.26.0"
+  }
 }

@@ -28,6 +28,7 @@ module.exports = {
     "@typescript-eslint/brace-style": "off",
     "@typescript-eslint/restrict-plus-operands": "off",
     "@typescript-eslint/no-extraneous-class": "off",
+    "@typescript-eslint/prefer-optional-chain": "off",
     "no-fallthrough": "off",
     "@typescript-eslint/quotes": "off",
     "no-template-curly-in-string": "off",
