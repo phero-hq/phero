@@ -1,8 +1,8 @@
 import ts from "typescript"
 import parseFunctionDefinition from "./parseFunctionDefinition"
-import { PheroFunction } from "../domain/PheroApp"
+import { type PheroFunction } from "../domain/PheroApp"
 import { hasModifier, resolveSymbol } from "../lib/tsUtils"
-import { DependencyMap } from "../generateModel"
+import { type DependencyMap } from "../generateModel"
 
 export default function parseFunctionDefinitions(
   node: ts.Node | undefined,

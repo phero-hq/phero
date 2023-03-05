@@ -1,5 +1,5 @@
-import ts from "typescript"
-import { DependencyMap, InternalParserModelMap, TypeParamMap } from ".."
+import type ts from "typescript"
+import { type DependencyMap, type InternalParserModelMap, type TypeParamMap } from ".."
 import { ParserModelType } from "../../domain/ParserModel"
 import generateFromTypeNode from "./generateFromTypeNode"
 

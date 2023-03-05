@@ -1,4 +1,4 @@
-import { Parser, ParseResult } from "../../domain/Parser"
+import { type Parser, type ParseResult } from "../../domain/Parser"
 
 export default function TemplateLiteralParser<T extends string>(
   pattern: RegExp,

@@ -1,4 +1,4 @@
-import { ParseResult } from "../../domain/Parser"
+import { type ParseResult } from "../../domain/Parser"
 
 export default function NumberKeyParser(data: unknown): ParseResult<number> {
   if (typeof data === "string") {

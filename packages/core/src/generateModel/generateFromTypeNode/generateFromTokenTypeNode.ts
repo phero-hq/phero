@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { PheroParseError } from "../../domain/errors"
-import { ParserModel, ParserModelType } from "../../domain/ParserModel"
+import { type ParserModel, ParserModelType } from "../../domain/ParserModel"
 
 export default function generateFromTokenTypeNode(
   typeNode: ts.TypeNode,

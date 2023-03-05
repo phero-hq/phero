@@ -1,4 +1,4 @@
-import { ParseResult } from "../../domain/Parser"
+import { type ParseResult } from "../../domain/Parser"
 
 export default function DateParser(data: unknown): ParseResult<Date> {
   if (

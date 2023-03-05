@@ -1,7 +1,7 @@
-import ts from "typescript"
+import type ts from "typescript"
 import generateFromTypeNode from "."
-import { DependencyMap, InternalParserModelMap, TypeParamMap } from ".."
-import { ParserModel, ParserModelType } from "../../domain/ParserModel"
+import { type DependencyMap, type InternalParserModelMap, type TypeParamMap } from ".."
+import { type ParserModel, ParserModelType } from "../../domain/ParserModel"
 
 export default function generateFromIntersectionTypeNode(
   typeNode: ts.IntersectionTypeNode,

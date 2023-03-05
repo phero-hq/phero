@@ -1,6 +1,6 @@
 import ts from "typescript"
 import { PheroParseError } from "../domain/errors"
-import { Model, PheroApp, PheroService } from "../domain/PheroApp"
+import { type Model, type PheroApp, type PheroService } from "../domain/PheroApp"
 import cloneTS from "../lib/cloneTS"
 import { printCode } from "../lib/tsTestUtils"
 import { hasModifier } from "../lib/tsUtils"

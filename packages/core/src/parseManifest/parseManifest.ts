@@ -1,17 +1,17 @@
 import ts from "typescript"
 import {
-  Model,
-  PheroApp,
-  PheroError,
-  PheroFunction,
-  PheroModel,
-  PheroService,
+  type Model,
+  type PheroApp,
+  type PheroError,
+  type PheroFunction,
+  type PheroModel,
+  type PheroService,
 } from "../domain/PheroApp"
 import parseReturnType from "../parsePheroApp/parseReturnType"
 import { getNameAsString } from "../lib/tsUtils"
 import { VirtualCompilerHost } from "../lib/VirtualCompilerHost"
 import {
-  DependencyMap,
+  type DependencyMap,
   generateParserModelForFunction,
   generateParserModelForError,
 } from "../generateModel"

@@ -1,4 +1,4 @@
-export {
+export type {
   PheroApp,
   PheroError,
   PheroFunction,
@@ -12,7 +12,7 @@ export {
   PortInUseError,
   hasErrorCode,
 } from "./domain/errors"
-export {
+export type {
   RPCResult,
   RPCOkResult,
   RPCBadRequestResult,
@@ -32,14 +32,14 @@ export {
   generateParserFunction,
   generateInlineParser,
   generateDependencyRefs,
-  DependencyRefs,
+  type DependencyRefs,
 } from "./generateParser"
 
 export { VirtualCompilerHost } from "./lib/VirtualCompilerHost"
 export { default as cloneTS } from "./lib/cloneTS"
 
 export * as parser from "./generateParser/static"
-export {
+export type {
   Parser,
   ParseResult,
   DataParseSuccess,

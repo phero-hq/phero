@@ -1,13 +1,13 @@
 import ts from "typescript"
-import { DependencyMap } from "."
+import { type DependencyMap } from "."
 import { tsx } from ".."
 import { PheroParseError } from "../domain/errors"
 import {
-  MemberParserModel,
+  type MemberParserModel,
   ParserModelType,
-  ObjectParserModel,
+  type ObjectParserModel,
 } from "../domain/ParserModel"
-import { PheroErrorProperty } from "../domain/PheroApp"
+import { type PheroErrorProperty } from "../domain/PheroApp"
 import getSuperClassesForError from "../lib/getSuperClassesForError"
 import { hasModifier, getNameAsString } from "../lib/tsUtils"
 import generateFromTypeNode from "./generateFromTypeNode"

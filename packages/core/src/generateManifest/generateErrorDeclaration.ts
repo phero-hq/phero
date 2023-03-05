@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { PheroError } from "../domain/PheroApp"
+import { type PheroError } from "../domain/PheroApp"
 import * as tsx from "../tsx"
 
 export default function generateErrorDeclaration(

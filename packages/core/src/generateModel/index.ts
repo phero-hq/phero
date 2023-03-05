@@ -1,20 +1,20 @@
-import { ParserModel } from "../domain/ParserModel"
+import { type ParserModel } from "../domain/ParserModel"
 
 export {
   default as generateParserModelForError,
-  ErrorParserModel,
+  type ErrorParserModel,
 } from "./generateParserModelForError"
 export {
   default as generateParserModelForFunction,
-  FunctionParserModel,
+  type FunctionParserModel,
 } from "./generateParserModelForFunction"
 export {
   default as generateParserModelForMiddleware,
-  MiddlewareParserModel,
+  type MiddlewareParserModel,
 } from "./generateParserModelForMiddleware"
 export {
   default as generateParserModelForServiceContext,
-  ServiceContextParserModel,
+  type ServiceContextParserModel,
 } from "./generateParserModelForServiceContext"
 
 export interface ParserModelMap {

@@ -1,7 +1,7 @@
 import ts from "typescript"
 import { PheroParseError } from "../../domain/errors"
 import {
-  EnumMemberParserModel,
+  type EnumMemberParserModel,
   ParserModelType,
 } from "../../domain/ParserModel"
 import propertyNameAsString from "../lib/propertyNameAsString"

@@ -1,5 +1,5 @@
-import ts from "typescript"
-import { PheroFunction } from "../domain/PheroApp"
+import type ts from "typescript"
+import { type PheroFunction } from "../domain/PheroApp"
 import cloneTS from "../lib/cloneTS"
 import * as tsx from "../tsx"
 

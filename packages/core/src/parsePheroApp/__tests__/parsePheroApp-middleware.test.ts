@@ -3,7 +3,7 @@
 import ts from "typescript"
 
 import { parsePheroApp } from "../parsePheroApp"
-import { PheroApp } from "../../domain/PheroApp"
+import { type PheroApp } from "../../domain/PheroApp"
 import { createTestProgram } from "../../lib/tsTestUtils"
 
 function parseProgram(prog: ts.Program): PheroApp {
