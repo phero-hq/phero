@@ -143,4 +143,47 @@ describe("union", () => {
       },
     })
   })
+  test("InterfaceOne | null", () => {
+    try {
+      const modelMap = generateParserModelForReturnType(`
+        interface InterfaceOne {
+          prop: 1
+        }
+        function test(): InterfaceOne | null { throw new Error() }
+    `)
+
+      expect(modelMap).toEqual({
+        root: {
+          type: "union",
+          oneOf: [
+            {
+              type: "reference",
+              typeName: "InterfaceOne",
+            },
+            {
+              type: "null",
+            },
+          ],
+        },
+        deps: {
+          InterfaceOne: {
+            type: "object",
+            members: [
+              {
+                type: "member",
+                name: "prop",
+                optional: false,
+                parser: { type: "number-literal", literal: 1 },
+              },
+            ],
+          },
+        },
+      })
+    } catch (e) {
+      console.error(
+        typeof e === "object" && e !== null && "stack" in e ? e.stack : "",
+      )
+      throw e
+    }
+  })
 })
