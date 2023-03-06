@@ -14,7 +14,10 @@ import {
   parseMiddlewareModels,
 } from "./parseModels"
 import parseServiceDefinition from "./parseServiceDefinition"
-import { type DependencyMap, generateParserModelForError } from "../generateModel"
+import {
+  type DependencyMap,
+  generateParserModelForError,
+} from "../generateModel"
 
 export function parsePheroApp(prog: ts.Program): PheroApp {
   const pheroSourceFiles = prog

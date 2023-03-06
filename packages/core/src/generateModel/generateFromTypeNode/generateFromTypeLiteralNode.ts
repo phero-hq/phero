@@ -1,5 +1,9 @@
 import type ts from "typescript"
-import { type DependencyMap, type InternalParserModelMap, type TypeParamMap } from ".."
+import {
+  type DependencyMap,
+  type InternalParserModelMap,
+  type TypeParamMap,
+} from ".."
 import {
   type IndexMemberParserModel,
   type MemberParserModel,

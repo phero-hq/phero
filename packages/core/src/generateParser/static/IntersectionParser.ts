@@ -1,4 +1,8 @@
-import { type DataParseError, type Parser, type ParseResult } from "../../domain/Parser"
+import {
+  type DataParseError,
+  type Parser,
+  type ParseResult,
+} from "../../domain/Parser"
 
 export default function IntersectionParser<T>(
   ...typeParsers: Parser<any>[]

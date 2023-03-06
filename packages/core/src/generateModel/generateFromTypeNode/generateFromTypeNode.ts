@@ -1,5 +1,9 @@
 import ts from "typescript"
-import { type DependencyMap, type InternalParserModelMap, type TypeParamMap } from ".."
+import {
+  type DependencyMap,
+  type InternalParserModelMap,
+  type TypeParamMap,
+} from ".."
 import { PheroParseError } from "../../domain/errors"
 import { ParserModelType } from "../../domain/ParserModel"
 import generateFromType from "../generateFromType"

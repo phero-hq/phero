@@ -1,4 +1,8 @@
-import { type Parser, type ParseResult, type DataParseError } from "../../domain/Parser"
+import {
+  type Parser,
+  type ParseResult,
+  type DataParseError,
+} from "../../domain/Parser"
 
 export default function ArrayParser<T>(elementParser: Parser<T>): Parser<T[]> {
   return (data: unknown): ParseResult<T[]> => {

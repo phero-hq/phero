@@ -1,4 +1,8 @@
-import { type DataParseError, type Parser, type ParseResult } from "../../domain/Parser"
+import {
+  type DataParseError,
+  type Parser,
+  type ParseResult,
+} from "../../domain/Parser"
 
 type PropParser = [name: string, optional: boolean, parser: Parser<any>]
 type KeyParser = [key: Parser<any>, optional: boolean, parser: Parser<any>]

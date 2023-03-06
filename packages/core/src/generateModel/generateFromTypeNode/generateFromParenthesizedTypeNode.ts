@@ -1,6 +1,10 @@
 import type ts from "typescript"
 import generateFromTypeNode from "."
-import { type DependencyMap, type InternalParserModelMap, type TypeParamMap } from ".."
+import {
+  type DependencyMap,
+  type InternalParserModelMap,
+  type TypeParamMap,
+} from ".."
 
 export default function generateFromParenthesizedTypeNode(
   typeNode: ts.ParenthesizedTypeNode,
