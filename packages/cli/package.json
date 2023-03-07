@@ -12,8 +12,8 @@
     "phero": "dist/index.js"
   },
   "scripts": {
-    "dev": "yarn build --watch",
-    "build": "tsc",
+    "dev": "tsup src/index.tsx --format esm,cjs --dts --watch",
+    "build": "tsup src/index.tsx --format esm,cjs --dts",
     "postbuild": "cp package.json ./dist/package.json",
     "test": "jest src --passWithNoTests",
     "clean": "rm -rf dist",

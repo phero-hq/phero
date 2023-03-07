@@ -14,7 +14,7 @@
     "access": "public"
   },
   "scripts": {
-    "dev": "yarn build --watch --onSuccess 'tsc --declaration --declarationMap --emitDeclarationOnly'",
+    "dev": "tsup src/index.ts --format esm,cjs --dts --watch --onSuccess 'tsc --declaration --declarationMap --emitDeclarationOnly'",
     "build": "tsup src/index.ts --format esm,cjs --dts",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
