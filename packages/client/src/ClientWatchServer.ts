@@ -4,7 +4,7 @@ import {
   ClientCommandWatch,
   ClientDevEventEmitter,
   ServerDevEvent,
-} from "@phero/dev"
+} from "lib"
 import http from "http"
 import buildClient from "./utils/buildClient"
 

@@ -3,7 +3,7 @@ import {
   MissingTSConfigFileError,
   parsePheroApp,
 } from "@phero/core"
-import { ServerCommandBuild } from "@phero/dev"
+import { ServerCommandBuild } from "lib"
 import fs from "fs"
 import path from "path"
 import ts, { CompilerOptions } from "typescript"

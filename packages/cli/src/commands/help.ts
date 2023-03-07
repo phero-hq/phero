@@ -3,7 +3,7 @@ import {
   PheroCommandName,
   pheroHelp,
   pheroHelpInit,
-} from "@phero/dev"
+} from "lib"
 
 export default function help(command: PheroCommandHelp) {
   switch (command.command) {

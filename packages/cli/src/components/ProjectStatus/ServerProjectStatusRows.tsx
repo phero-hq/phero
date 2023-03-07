@@ -1,4 +1,4 @@
-import { ServerDevEventRPC } from "@phero/dev"
+import { ServerDevEventRPC } from "lib"
 import { Box, Text } from "ink"
 import maxLength from "../../utils/maxLength"
 

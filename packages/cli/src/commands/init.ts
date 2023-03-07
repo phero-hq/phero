@@ -1,4 +1,4 @@
-import { PheroCommandInit } from "@phero/dev"
+import { PheroCommandInit } from "lib"
 import { render } from "ink"
 import React from "react"
 import Init from "../components/Init"

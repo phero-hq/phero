@@ -6,7 +6,7 @@ import {
   PortInUseError,
   RPCResult,
 } from "@phero/core"
-import { ServerCommandServe, ServerDevEventEmitter } from "@phero/dev"
+import { ServerCommandServe, ServerDevEventEmitter } from "lib"
 import crypto from "crypto"
 import { promises as fs } from "fs"
 import http from "http"

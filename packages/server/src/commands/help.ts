@@ -5,7 +5,7 @@ import {
   serverHelpExport,
   serverHelpBuild,
   serverHelpServe,
-} from "@phero/dev"
+} from "lib"
 
 export default function help(command: ServerCommandHelp) {
   switch (command.command) {

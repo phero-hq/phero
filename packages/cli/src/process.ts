@@ -1,4 +1,4 @@
-import { ClientCommandWatch, ServerCommandServe } from "@phero/dev"
+import { ClientCommandWatch, ServerCommandServe } from "lib"
 import { ChildProcessWithoutNullStreams, spawn } from "child_process"
 
 type ExecutableName = "phero-server" | "phero-client"

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { ClientCommandName, parseClientCommand } from "@phero/dev"
+import { ClientCommandName, parseClientCommand } from "lib"
 import build from "./commands/build"
 import help from "./commands/help"
 import version from "./commands/version"

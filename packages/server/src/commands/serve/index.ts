@@ -1,4 +1,4 @@
-import { addDevEventListener, ServerCommandServe } from "@phero/dev"
+import { addDevEventListener, ServerCommandServe } from "lib"
 import DevServer from "./DevServer"
 
 export default function serve(command: ServerCommandServe) {

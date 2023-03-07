@@ -1,4 +1,4 @@
-import { PheroCommandDevEnv } from "@phero/dev"
+import { PheroCommandDevEnv } from "lib"
 import { render } from "ink"
 import React from "react"
 import DevEnv from "../components/DevEnv"

@@ -2,7 +2,7 @@ import {
   addDevEventListener,
   ServerCommandServe,
   ServerDevEvent,
-} from "@phero/dev"
+} from "lib"
 import { Box, Text } from "ink"
 import path from "path"
 import { useCallback, useEffect, useRef, useState } from "react"

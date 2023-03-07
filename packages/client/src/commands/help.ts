@@ -4,7 +4,7 @@ import {
   clientHelp,
   clientHelpBuild,
   clientHelpWatch,
-} from "@phero/dev"
+} from "lib"
 
 export default function help(command: ClientCommandHelp) {
   switch (command.command) {

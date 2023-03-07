@@ -27,11 +27,10 @@
   },
   "dependencies": {
     "@phero/core": "*",
-    "@phero/dev": "*"
+    "lib": "*"
   },
   "peerDependencies": {
-    "@phero/core": "*",
-    "@phero/dev": "*"
+    "@phero/core": "*"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

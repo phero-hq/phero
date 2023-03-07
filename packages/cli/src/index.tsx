@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { parsePheroCommand, PheroCommandName } from "@phero/dev"
+import { parsePheroCommand, PheroCommandName } from "lib"
 import devEnv from "./commands/dev-env"
 import help from "./commands/help"
 import init from "./commands/init"

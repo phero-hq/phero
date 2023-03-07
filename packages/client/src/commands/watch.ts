@@ -1,4 +1,4 @@
-import { addDevEventListener, ClientCommandWatch } from "@phero/dev"
+import { addDevEventListener, ClientCommandWatch } from "lib"
 import ClientWatchServer from "../ClientWatchServer"
 
 export default function watch(command: ClientCommandWatch) {

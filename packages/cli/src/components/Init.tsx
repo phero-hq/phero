@@ -7,7 +7,7 @@ import { Box, Text } from "ink"
 import SelectInput from "ink-select-input/build"
 import { useCallback, useEffect, useState } from "react"
 import ActivityIndicator from "./ActivityIndicator"
-import { PheroCommandInit } from "@phero/dev"
+import { PheroCommandInit } from "lib"
 
 const serverPheroFile = `import { createService } from '@phero/server'
 

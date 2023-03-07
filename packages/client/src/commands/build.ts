@@ -1,4 +1,4 @@
-import { ClientCommandBuild } from "@phero/dev"
+import { ClientCommandBuild } from "lib"
 import buildClient from "../utils/buildClient"
 
 export default function build(command: ClientCommandBuild) {

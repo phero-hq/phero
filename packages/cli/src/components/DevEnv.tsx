@@ -5,7 +5,7 @@ import {
   DEFAULT_SERVER_URL,
   PheroCommandDevEnv,
   ServerCommandName,
-} from "@phero/dev"
+} from "lib"
 import { Box, Spacer, Static, Text } from "ink"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { fatalError } from "../process"

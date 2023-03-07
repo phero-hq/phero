@@ -3,7 +3,7 @@ import {
   MissingTSConfigFileError,
   parsePheroApp,
 } from "@phero/core"
-import { ServerCommandExport, ServerExportFlavor } from "@phero/dev"
+import { ServerCommandExport, ServerExportFlavor } from "lib"
 import child_process from "child_process"
 import fs from "fs"
 import path from "path"

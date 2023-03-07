@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@phero/dev",
+  "name": "lib",
   "version": "0.10.0-alpha.0",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

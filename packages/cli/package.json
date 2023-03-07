@@ -22,7 +22,7 @@
     "prestart": "npm run build"
   },
   "dependencies": {
-    "@phero/dev": "*",
+    "lib": "*",
     "@types/node": "^18.11.9",
     "glob": "^8.1.0",
     "ink": "^3.2.0",
@@ -30,9 +30,6 @@
     "ink-spinner": "^4.0.3",
     "react": "^17.0.2",
     "semver": "^7.3.7"
-  },
-  "peerDependencies": {
-    "@phero/dev": "*"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.8",

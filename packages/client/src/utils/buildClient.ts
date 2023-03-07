@@ -1,5 +1,5 @@
 import { parseManifest } from "@phero/core"
-import { ClientCommandBuild, ClientServerLocation } from "@phero/dev"
+import { ClientCommandBuild, ClientServerLocation } from "lib"
 import { promises as fs } from "fs"
 import http from "http"
 import https from "https"
