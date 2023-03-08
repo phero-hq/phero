@@ -1,6 +1,6 @@
 import ts from "typescript"
 import {
-  ErrorParserModel,
+  type ErrorParserModel,
   generateParserModelForError,
 } from "../../generateModel"
 import { compileStatements } from "../../lib/tsTestUtils"

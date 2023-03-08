@@ -3,10 +3,10 @@ import { MissingPheroFileError, PheroParseError } from "../domain/errors"
 import extractErrors from "../extractErrors/extractErrors"
 import { hasModifier } from "../lib/tsUtils"
 import {
-  PheroApp,
-  PheroError,
-  PheroModel,
-  PheroService,
+  type PheroApp,
+  type PheroError,
+  type PheroModel,
+  type PheroService,
 } from "../domain/PheroApp"
 import {
   parseErrorModels,
@@ -14,7 +14,10 @@ import {
   parseMiddlewareModels,
 } from "./parseModels"
 import parseServiceDefinition from "./parseServiceDefinition"
-import { DependencyMap, generateParserModelForError } from "../generateModel"
+import {
+  type DependencyMap,
+  generateParserModelForError,
+} from "../generateModel"
 
 export function parsePheroApp(prog: ts.Program): PheroApp {
   const pheroSourceFiles = prog

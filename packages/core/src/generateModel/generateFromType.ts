@@ -1,13 +1,17 @@
 import ts from "typescript"
-import { DependencyMap, InternalParserModelMap, TypeParamMap } from "."
+import {
+  type DependencyMap,
+  type InternalParserModelMap,
+  type TypeParamMap,
+} from "."
 import { PheroParseError } from "../domain/errors"
 import { getTypeFlags } from "./generateParserModelUtils"
 import {
-  IndexMemberParserModel,
-  MemberParserModel,
-  ParserModel,
+  type IndexMemberParserModel,
+  type MemberParserModel,
+  type ParserModel,
   ParserModelType,
-  TupleElementParserModel,
+  type TupleElementParserModel,
 } from "../domain/ParserModel"
 import generateFromTypeNode from "./generateFromTypeNode"
 

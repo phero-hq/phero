@@ -1,8 +1,6 @@
 import ts from "typescript"
 
-export interface TSFiles {
-  [fileName: string]: string
-}
+export type TSFiles = Record<string, string>
 
 export class VirtualCompilerHost {
   private readonly compilerOpts: ts.CompilerOptions

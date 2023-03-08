@@ -1,7 +1,7 @@
 import ts from "typescript"
-import { PheroMiddlewareConfig } from "../domain/PheroApp"
+import { type PheroMiddlewareConfig } from "../domain/PheroApp"
 import {
-  DependencyMap,
+  type DependencyMap,
   generateParserModelForMiddleware,
 } from "../generateModel"
 

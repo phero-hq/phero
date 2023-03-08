@@ -1,16 +1,16 @@
-import ts from "typescript"
+import type ts from "typescript"
 import { tsx } from ".."
 import { PheroParseError } from "../domain/errors"
-import { PheroService, PheroServiceConfig } from "../domain/PheroApp"
+import { type PheroService, type PheroServiceConfig } from "../domain/PheroApp"
 import {
-  DependencyMap,
+  type DependencyMap,
   generateParserModelForServiceContext,
 } from "../generateModel"
 import parseCreateServiceCallExpression from "./parseCreateServiceCallExpression"
 import parseFunctionDefinitions from "./parseFunctionDefinitions"
 import parseServiceConfig from "./parseServiceConfig"
 import parseServiceContextType, {
-  ServiceContext,
+  type ServiceContext,
 } from "./parseServiceContextType"
 
 export default function parseServiceDefinition(

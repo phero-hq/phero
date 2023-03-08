@@ -1,11 +1,11 @@
 import ts from "typescript"
 import { PheroParseError } from "../domain/errors"
 
-import { MemberParserModel } from "../domain/ParserModel"
+import { type MemberParserModel } from "../domain/ParserModel"
 import {
-  PheroFunction,
-  PheroMiddlewareConfig,
-  PheroServiceConfig,
+  type PheroFunction,
+  type PheroMiddlewareConfig,
+  type PheroServiceConfig,
 } from "../domain/PheroApp"
 import { getNameAsString } from "../lib/tsUtils"
 

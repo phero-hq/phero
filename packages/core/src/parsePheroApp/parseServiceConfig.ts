@@ -1,7 +1,7 @@
 import ts from "typescript"
 import { PheroParseError } from "../domain/errors"
-import { PheroServiceConfig } from "../domain/PheroApp"
-import { DependencyMap } from "../generateModel"
+import { type PheroServiceConfig } from "../domain/PheroApp"
+import { type DependencyMap } from "../generateModel"
 import { resolveSymbol } from "../lib/tsUtils"
 import parseServiceMiddlewareConfig from "./parseServiceMiddlewareConfig"
 

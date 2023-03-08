@@ -1,10 +1,14 @@
 import ts from "typescript"
-import { DependencyMap, TypeParamMap, InternalParserModelMap } from ".."
 import {
-  MemberParserModel,
-  IndexMemberParserModel,
+  type DependencyMap,
+  type TypeParamMap,
+  type InternalParserModelMap,
+} from ".."
+import {
+  type MemberParserModel,
+  type IndexMemberParserModel,
   ParserModelType,
-  ParserModel,
+  type ParserModel,
 } from "../../domain/ParserModel"
 import generateFromTypeReferenceNode from "../generateFromTypeNode/generateFromTypeReferenceNode"
 import generateFromTypeElementDeclaration from "./generateFromTypeElementDeclaration"

@@ -1,10 +1,14 @@
 import ts from "typescript"
 import generateFromTypeNode from "."
-import { DependencyMap, InternalParserModelMap, TypeParamMap } from ".."
 import {
-  ParserModel,
+  type DependencyMap,
+  type InternalParserModelMap,
+  type TypeParamMap,
+} from ".."
+import {
+  type ParserModel,
   ParserModelType,
-  TupleElementParserModel,
+  type TupleElementParserModel,
 } from "../../domain/ParserModel"
 
 export default function generateFromTupleTypeNode(

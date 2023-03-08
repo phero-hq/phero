@@ -1,13 +1,13 @@
-import ts from "typescript"
-import { DependencyMap } from "."
+import type ts from "typescript"
+import { type DependencyMap } from "."
 import { PheroParseError } from "../domain/errors"
 import {
-  MemberParserModel,
-  ObjectParserModel,
+  type MemberParserModel,
+  type ObjectParserModel,
   ParserModelType,
 } from "../domain/ParserModel"
 import { getNameAsString } from "../lib/tsUtils"
-import { ServiceContext } from "../parsePheroApp/parseServiceContextType"
+import { type ServiceContext } from "../parsePheroApp/parseServiceContextType"
 import generateFromTypeNode from "./generateFromTypeNode"
 
 export interface ServiceContextParserModel {

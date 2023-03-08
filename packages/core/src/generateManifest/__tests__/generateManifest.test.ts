@@ -1,4 +1,4 @@
-import ts from "typescript"
+import type ts from "typescript"
 import generateManifest from "../generateManifest"
 
 import { parsePheroApp } from "../../parsePheroApp"

@@ -1,9 +1,15 @@
 import ts from "typescript"
 import { PheroParseError } from "../domain/errors"
 import parseReturnType from "./parseReturnType"
-import { PheroFunction, PheroFunctionParameter } from "../domain/PheroApp"
+import {
+  type PheroFunction,
+  type PheroFunctionParameter,
+} from "../domain/PheroApp"
 import { getNameAsString, resolveSymbol } from "../lib/tsUtils"
-import { DependencyMap, generateParserModelForFunction } from "../generateModel"
+import {
+  type DependencyMap,
+  generateParserModelForFunction,
+} from "../generateModel"
 
 export default function parseFunctionDefinition(
   node: ts.ObjectLiteralElementLike | ts.VariableDeclaration,
@@ -68,7 +74,7 @@ function parseActualFunction(
   if (ts.isShorthandPropertyAssignment(node)) {
     const symbol = typeChecker.getShorthandAssignmentValueSymbol(node)
 
-    if (!symbol || !symbol.declarations?.[0]) {
+    if (!symbol?.declarations?.[0]) {
       throw new PheroParseError(
         `S118: Can't find function (${node.kind})`,
         node,

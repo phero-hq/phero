@@ -1,8 +1,8 @@
-import { ParserModel, ParserModelType } from "../domain/ParserModel"
+import { type ParserModel, ParserModelType } from "../domain/ParserModel"
 
-import ts from "typescript"
-import { PheroError, tsx } from ".."
-import { DependencyMap, FunctionParserModel } from "../generateModel"
+import type ts from "typescript"
+import { type PheroError, tsx } from ".."
+import { type DependencyMap, type FunctionParserModel } from "../generateModel"
 
 export type ParserFuncRef = ts.Identifier | ts.CallExpression
 export type DependencyParserMap = Map<ts.Identifier, ParserFuncRef>

@@ -1,10 +1,10 @@
 import ts from "typescript"
-import { PheroApp } from "../domain/PheroApp"
+import { type PheroApp } from "../domain/PheroApp"
 import { generateParserModelForFunction as actualGenerateParserModelForFunction } from "../generateModel"
-import { ObjectParserModel, ParserModel } from "../domain/ParserModel"
+import { type ObjectParserModel, type ParserModel } from "../domain/ParserModel"
 import { generateFunctionParsers } from "../generateParser"
-import { KindToNodeMappings } from "./tsUtils"
-import { TSFiles, VirtualCompilerHost } from "./VirtualCompilerHost"
+import { type KindToNodeMappings } from "./tsUtils"
+import { type TSFiles, VirtualCompilerHost } from "./VirtualCompilerHost"
 
 export function printPheroApp(app: PheroApp): string {
   return JSON.stringify(

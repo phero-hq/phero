@@ -1,4 +1,4 @@
-import { DataParseError } from "./Parser"
+import { type DataParseError } from "./Parser"
 
 export type RPCResult<T> =
   | RPCOkResult<T>

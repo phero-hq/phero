@@ -1,5 +1,5 @@
-import ts from "typescript"
-import { EnumParserModel, ParserModelType } from "../../domain/ParserModel"
+import type ts from "typescript"
+import { type EnumParserModel, ParserModelType } from "../../domain/ParserModel"
 import generateFromEnumMemberDeclaration from "./generateFromEnumMemberDeclaration"
 
 export default function generateFromEnumDeclaration(

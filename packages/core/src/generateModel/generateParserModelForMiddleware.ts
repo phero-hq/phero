@@ -1,10 +1,10 @@
 import ts from "typescript"
-import { DependencyMap } from "."
+import { type DependencyMap } from "."
 import { PheroParseError } from "../domain/errors"
 import {
-  MemberParserModel,
-  ObjectParserModel,
-  ParserModel,
+  type MemberParserModel,
+  type ObjectParserModel,
+  type ParserModel,
   ParserModelType,
 } from "../domain/ParserModel"
 import { getTypeName } from "../lib/tsUtils"

@@ -1,6 +1,6 @@
 import ts from "typescript"
 
-import { Model } from "../domain/PheroApp"
+import { type Model } from "../domain/PheroApp"
 
 export function isModel(node: ts.Node): node is Model {
   return (
