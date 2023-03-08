@@ -13,7 +13,7 @@ function generate(prog: ts.Program): string {
 
   const parsedApp = parsePheroApp(prog)
 
-  return generateManifest(parsedApp).content
+  return generateManifest(parsedApp, prog.getTypeChecker()).content
 }
 
 describe("generateManifest", () => {

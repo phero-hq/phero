@@ -68,7 +68,7 @@ export default function buildCommand(command: ServerCommandBuild) {
   })
 
   const app = parsePheroApp(program)
-  const { content: dts } = generateManifest(app)
+  const { content: dts } = generateManifest(app, program.getTypeChecker())
   const manifestPath = path.join(projectPath, "phero-manifest.d.ts")
   fs.writeFileSync(manifestPath, dts)
 }

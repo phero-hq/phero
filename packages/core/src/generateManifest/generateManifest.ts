@@ -5,6 +5,7 @@ import {
   type PheroApp,
   type PheroService,
 } from "../domain/PheroApp"
+import cleanTypeReferences from "../lib/cleanTypeReferences"
 import cloneTS from "../lib/cloneTS"
 import { printCode } from "../lib/tsTestUtils"
 import { hasModifier } from "../lib/tsUtils"
@@ -16,10 +17,18 @@ interface PheroManifest {
   content: string
 }
 
-export default function generateManifest(app: PheroApp): PheroManifest {
+export default function generateManifest(
+  app: PheroApp,
+  typeChecker: ts.TypeChecker,
+): PheroManifest {
   return {
     content: printCode([
-      ...app.models.map((model) => cloneTS(withExportModifier(model.ref))),
+      ...app.models.map((model) =>
+        cleanTypeReferences(
+          cloneTS(withExportModifier(model.ref)),
+          typeChecker,
+        ),
+      ),
       ...app.errors.map(generateErrorDeclaration),
       tsx.classDeclaration({
         name: "PheroService",
@@ -32,19 +41,33 @@ export default function generateManifest(app: PheroApp): PheroManifest {
           }),
         ],
       }),
-      ...app.services.map(generatePheroService),
+      ...app.services.map((service) =>
+        generatePheroService(service, typeChecker),
+      ),
     ]),
   }
 }
 
-function generatePheroService(service: PheroService): ts.ClassDeclaration {
+function generatePheroService(
+  service: PheroService,
+  typeChecker: ts.TypeChecker,
+): ts.ClassDeclaration {
   return tsx.classDeclaration({
     name: service.name,
     export: true,
-    elements: service.funcs.map(generateFunctionDeclaration),
+    elements: service.funcs.map((func) =>
+      generateFunctionDeclaration(func, typeChecker),
+    ),
     extendsType: ts.factory.createExpressionWithTypeArguments(
       tsx.expression.identifier("PheroService"),
-      service.config.contextType ? [cloneTS(service.config.contextType)] : [],
+      service.config.contextType
+        ? [
+            cleanTypeReferences(
+              cloneTS(service.config.contextType),
+              typeChecker,
+            ),
+          ]
+        : [],
     ),
   })
 }

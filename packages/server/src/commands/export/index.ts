@@ -93,7 +93,7 @@ export default function exportCommand(command: ServerCommandExport) {
   program.emit()
 
   const app = parsePheroApp(program)
-  const { content: dts } = generateManifest(app)
+  const { content: dts } = generateManifest(app, program.getTypeChecker())
   const pheroExecution = generatePheroExecutionFile(app)
 
   const lockFile =
