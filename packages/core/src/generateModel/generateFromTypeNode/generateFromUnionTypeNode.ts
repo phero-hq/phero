@@ -18,7 +18,7 @@ export default function generateFromUnionTypeNode(
     ({ oneOf, deps }, subtype, index) => {
       const subtypeModel = generateFromTypeNode(
         subtype,
-        type.types[index],
+        typeChecker.getTypeAtLocation(subtype),
         location,
         typeChecker,
         deps,
