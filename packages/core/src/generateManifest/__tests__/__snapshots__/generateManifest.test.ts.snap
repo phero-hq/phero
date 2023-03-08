@@ -62,10 +62,7 @@ export class articleService extends PheroService {
 `;
 
 exports[`generateManifest middleware should parse middleware 1`] = `
-"export interface User {
-    uid: string;
-}
-export abstract class PheroService<TContext = {}> {
+"export abstract class PheroService<TContext = {}> {
 }
 export class articleService extends PheroService<{
     uid: string;

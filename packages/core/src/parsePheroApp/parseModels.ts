@@ -1,14 +1,14 @@
 import ts from "typescript"
 import { PheroParseError } from "../domain/errors"
 import {
+  type PheroServiceConfig,
   type Model,
   type PheroError,
   type PheroFunction,
-  type PheroMiddlewareConfig,
   type PheroModel,
 } from "../domain/PheroApp"
 import { isModel } from "../lib/isModel"
-import { getNameAsString, isExternal } from "../lib/tsUtils"
+import { getNameAsString } from "../lib/tsUtils"
 
 export function parseFunctionModels(
   func: PheroFunction,
@@ -26,18 +26,13 @@ export function parseFunctionModels(
 }
 
 export function parseMiddlewareModels(
-  middlewareConfigs: PheroMiddlewareConfig[],
+  serviceConfig: PheroServiceConfig,
   prog: ts.Program,
 ): PheroModel[] {
   const modelMap = new Map<ts.Symbol, Model>()
 
-  for (const config of middlewareConfigs) {
-    if (config.contextType) {
-      extractModels(config.contextType, prog, modelMap)
-    }
-    if (config.nextType) {
-      extractModels(config.nextType, prog, modelMap)
-    }
+  if (serviceConfig.contextType) {
+    extractModels(serviceConfig.contextType, prog, modelMap)
   }
 
   return modelMapToModels(modelMap)
@@ -81,11 +76,8 @@ function extractModels(
           ts.isExpressionWithTypeArguments(node)
         ) {
           const { symbol, declaration } = getDeclaration(node, typeChecker)
-          if (
-            !accum.has(symbol) &&
-            isModel(declaration) &&
-            !isExternal(declaration, prog)
-          ) {
+
+          if (!accum.has(symbol) && isModel(declaration)) {
             accum.set(symbol, declaration)
             extractModels(declaration, prog, accum)
           }

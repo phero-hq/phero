@@ -80,7 +80,7 @@ export function parsePheroApp(prog: ts.Program): PheroApp {
     ...pheroServices.flatMap((service) => [
       ...service.funcs.flatMap((func) => parseFunctionModels(func, prog)),
       ...(service.config.middleware
-        ? parseMiddlewareModels(service.config.middleware, prog)
+        ? parseMiddlewareModels(service.config, prog)
         : []),
     ]),
     ...parseErrorModels([...errorMap.values()], prog),
