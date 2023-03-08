@@ -188,9 +188,9 @@ function generateParserRef(
         model.literal ? "parser.TrueLiteral" : "parser.FalseLiteral",
       )
     case ParserModelType.Null:
-      return tsx.expression.identifier("parser.Null")
+      return tsx.expression.identifier("parser.NullLiteral")
     case ParserModelType.Undefined:
-      return tsx.expression.identifier("parser.Undefined")
+      return tsx.expression.identifier("parser.UndefinedLiteral")
     case ParserModelType.Date:
       return tsx.expression.identifier("parser.Date")
     case ParserModelType.BigInt:
