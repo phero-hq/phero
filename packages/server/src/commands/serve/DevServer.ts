@@ -103,7 +103,7 @@ export default class DevServer {
     try {
       this.eventEmitter.emit({ type: "BUILD_MANIFEST_START" })
       app = parsePheroApp(prog)
-      const { content: dts } = generateManifest(app)
+      const { content: dts } = generateManifest(app, prog.getTypeChecker())
       await fs.writeFile(this.manifestPath, dts)
       this.eventEmitter.emit({ type: "BUILD_MANIFEST_SUCCESS" })
     } catch (error) {
