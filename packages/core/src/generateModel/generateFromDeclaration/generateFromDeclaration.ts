@@ -6,8 +6,8 @@ import {
 } from ".."
 import { PheroParseError } from "../../domain/errors"
 import {
-  type ParserModel,
   ParserModelType,
+  type ParserModel,
   type ReferenceParserModel,
 } from "../../domain/ParserModel"
 import generateFromType from "../generateFromType"
@@ -195,26 +195,45 @@ function generateFromDeclarationWithDeclaration(
       updatedDeps,
       ref,
       (updatedDeps) => {
-        return isEventuallyMappedOrConditionalTypeNode(
-          declaration.type,
-          typeChecker,
-        )
-          ? generateFromType(
-              type,
-              declaration.type,
-              location,
-              typeChecker,
-              updatedDeps,
-              updatedTypeParams,
-            )
-          : generateFromTypeNode(
-              declaration.type,
-              type,
-              location,
-              typeChecker,
-              updatedDeps,
-              updatedTypeParams,
-            )
+        if (ts.isConditionalTypeNode(declaration.type)) {
+          const conditionalTypeParams = rewriteTypeParamsForConditionalType(
+            declaration.type,
+            type,
+            location,
+            typeChecker,
+            updatedTypeParams,
+            updatedDeps,
+          )
+
+          return generateFromTypeNode(
+            declaration.type,
+            type,
+            location,
+            typeChecker,
+            conditionalTypeParams.deps,
+            conditionalTypeParams.typeParams,
+          )
+        } else if (
+          isEventuallyMappedOrConditionalTypeNode(declaration.type, typeChecker)
+        ) {
+          return generateFromType(
+            type,
+            declaration.type,
+            location,
+            typeChecker,
+            updatedDeps,
+            updatedTypeParams,
+          )
+        } else {
+          return generateFromTypeNode(
+            declaration.type,
+            type,
+            location,
+            typeChecker,
+            updatedDeps,
+            updatedTypeParams,
+          )
+        }
       },
     )
 
@@ -299,14 +318,20 @@ function getUpdatedTypeParams(
     type.aliasTypeArguments ?? typeChecker.getTypeArguments(type)
   const typeArguments = typeNode.typeArguments ?? []
 
+  const isTypeNodeConditionalType = isEventuallyConditionalTypeNode(
+    typeNode,
+    typeChecker,
+  )
+
   for (let i = 0; i < declaration.typeParameters.length; i++) {
     const typeParam = declaration.typeParameters[i]
     const typeArgument = typeArguments[i]
 
     // type parameter has an argument
     if (typeArgument) {
-      const typeArgumentType =
-        typeArgumentTypes[i] ?? typeChecker.getTypeAtLocation(typeArgument)
+      const typeArgumentType = isTypeNodeConditionalType
+        ? typeChecker.getTypeAtLocation(typeArgument)
+        : typeArgumentTypes[i] ?? typeChecker.getTypeAtLocation(typeArgument)
 
       // argument refers to another type parameter
       if (typeArgumentType.isTypeParameter()) {
@@ -475,4 +500,105 @@ function isEventuallyMappedOrConditionalTypeNode(
   }
 
   return false
+}
+
+function isEventuallyConditionalTypeNode(
+  node: ts.Node,
+  typeChecker: ts.TypeChecker,
+): boolean {
+  if (ts.isConditionalTypeNode(node)) {
+    return true
+  }
+
+  if (ts.isTypeAliasDeclaration(node)) {
+    return isEventuallyConditionalTypeNode(node.type, typeChecker)
+  }
+
+  if (ts.isTypeReferenceNode(node)) {
+    const d = getDeclaration(node, typeChecker)
+    return isEventuallyConditionalTypeNode(d, typeChecker)
+  }
+
+  return false
+}
+
+/**
+ * We need this extra function for conditional types to generate the model for
+ * type parameters of the conditional type.
+ *
+ * Example:
+ * ```
+ *   type MyConditionalType<A> = A extends string ? B : never
+ *   type B<T = string> = { prop: T }
+ * ```
+ * In this case B has a type parameter which is by default string. The TS compiler
+ * returns the type of B when we acquire the type of MyConditionalType. When we then try
+ * to generate the model of prop with type T, we don't have it yet because the conditional
+ * TypeNode step was skipped.
+ * @returns The correct TypeParamMap for a ConditionalTypeNode
+ */
+function rewriteTypeParamsForConditionalType(
+  conditionalTypeNode: ts.ConditionalTypeNode,
+  type: ts.TypeReference,
+  location: ts.TypeNode,
+  typeChecker: ts.TypeChecker,
+  typeParams: TypeParamMap,
+  deps: DependencyMap,
+): { typeParams: TypeParamMap; deps: DependencyMap } {
+  const typeParameterDeclarations =
+    typeChecker.symbolToTypeParameterDeclarations(
+      type.aliasSymbol ?? type.symbol,
+      conditionalTypeNode,
+      undefined,
+    )
+
+  if (!typeParameterDeclarations || typeParameterDeclarations.length === 0) {
+    return { typeParams, deps }
+  }
+
+  const updatedTypeParams: TypeParamMap = new Map([...typeParams])
+  let updatedDeps: DependencyMap = deps
+
+  const typeArguments =
+    type.aliasTypeArguments ?? typeChecker.getTypeArguments(type)
+  for (let i = 0; i < typeParameterDeclarations.length; i++) {
+    const typeParamDeclr = typeParameterDeclarations[i]
+    const typeArgument = typeArguments[i]
+    const typeArgString = typeChecker.typeToString(typeArgument)
+    const existingDep = updatedDeps.get(typeArgString)
+    if (existingDep) {
+      if (existingDep.type === ParserModelType.Generic) {
+        updatedTypeParams.set(typeParamDeclr.name.text, {
+          name: typeArgString,
+          model: {
+            type: ParserModelType.Reference,
+            typeName: existingDep.typeName,
+            typeArguments: existingDep.typeArguments,
+          },
+        })
+      } else {
+        updatedTypeParams.set(typeParamDeclr.name.text, {
+          name: typeArgString,
+          model: existingDep,
+        })
+      }
+    } else {
+      const typeModel = generateFromType(
+        typeArgument,
+        conditionalTypeNode,
+        location,
+        typeChecker,
+        deps,
+        updatedTypeParams,
+      )
+
+      updatedTypeParams.set(typeParamDeclr.name.text, {
+        name: typeArgString,
+        model: typeModel.root,
+      })
+      updatedDeps = typeModel.deps
+    }
+  }
+
+  return { typeParams: updatedTypeParams, deps: updatedDeps }
 }
