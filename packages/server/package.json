@@ -1,6 +1,6 @@
 {
   "name": "@phero/server",
-  "version": "0.10.0-alpha.0",
+  "version": "0.10.0-alpha.1",
   "main": "dist/index.js",
   "description": "Server library for Phero",
   "homepage": "https://phero.dev",
@@ -23,7 +23,7 @@
     "postbuild": "cp package.json ./dist/package.json"
   },
   "dependencies": {
-    "@phero/core": "^0.10.0-alpha.0",
+    "@phero/core": "^0.10.0-alpha.1",
     "@phero/dev": "^0.10.0-alpha.0"
   },
   "devDependencies": {
