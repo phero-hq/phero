@@ -229,19 +229,15 @@ export function resolveSymbol(
   return symbol
 }
 
-export function isExternalSymbol(symbol: ts.Symbol, prog: ts.Program): boolean {
-  return !!symbol?.getDeclarations()?.some((declr) => isExternal(declr, prog))
-}
-
-export function isExternalType(type: ts.Type, prog: ts.Program): boolean {
-  return isExternalSymbol(type.symbol, prog)
-}
-
 export function isExternal(node: ts.Declaration, prog: ts.Program): boolean {
   return (
     prog.isSourceFileDefaultLibrary(node.getSourceFile()) ||
     prog.isSourceFileFromExternalLibrary(node.getSourceFile())
   )
+}
+
+export function isLib(node: ts.Declaration, prog: ts.Program): boolean {
+  return prog.isSourceFileDefaultLibrary(node.getSourceFile())
 }
 
 export function getNameAsString(
