@@ -1,14 +1,14 @@
 import ts from "typescript"
 import { PheroParseError } from "../domain/errors"
 import {
-  type PheroServiceConfig,
   type Model,
   type PheroError,
   type PheroFunction,
   type PheroModel,
+  type PheroServiceConfig,
 } from "../domain/PheroApp"
 import { isModel } from "../lib/isModel"
-import { getNameAsString } from "../lib/tsUtils"
+import { getNameAsString, isLib } from "../lib/tsUtils"
 
 export function parseFunctionModels(
   func: PheroFunction,
@@ -77,7 +77,11 @@ function extractModels(
         ) {
           const { symbol, declaration } = getDeclaration(node, typeChecker)
 
-          if (!accum.has(symbol) && isModel(declaration)) {
+          if (
+            !accum.has(symbol) &&
+            isModel(declaration) &&
+            !isLib(declaration, prog)
+          ) {
             accum.set(symbol, declaration)
             extractModels(declaration, prog, accum)
           }

@@ -236,6 +236,10 @@ export function isExternal(node: ts.Declaration, prog: ts.Program): boolean {
   )
 }
 
+export function isLib(node: ts.Declaration, prog: ts.Program): boolean {
+  return prog.isSourceFileDefaultLibrary(node.getSourceFile())
+}
+
 export function getNameAsString(
   name: ts.PropertyName | ts.EntityName | ts.BindingName | ts.Identifier,
 ): string {
