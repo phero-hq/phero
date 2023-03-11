@@ -13,10 +13,8 @@ describe("conditional", () => {
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
       input: "parser.ObjectLiteral()",
-      output: "ref_0",
-      deps: {
-        ref_0: 'parser.ObjectLiteral(["prop", false, parser.String])',
-      },
+      output: `parser.ObjectLiteral(["prop", false, parser.String])`,
+      deps: {},
     })
   })
   test("MyConditionalType<string>", () => {
@@ -30,10 +28,8 @@ describe("conditional", () => {
     `)
     expect(parsers).toEqual({
       input: "parser.ObjectLiteral()",
-      output: "ref_0",
-      deps: {
-        ref_0: 'parser.ObjectLiteral(["prop", false, parser.Number])',
-      },
+      output: `parser.ObjectLiteral(["prop", false, parser.Number])`,
+      deps: {},
     })
   })
   test("MyDeepConditionalType<number>", () => {
@@ -57,8 +53,7 @@ describe("conditional", () => {
       output: "ref_0",
       deps: {
         ref_0:
-          'parser.ObjectLiteral(["t", false, parser.Number], ["deep", false, ref_1])',
-        ref_1: 'parser.ObjectLiteral(["prop", false, parser.Number])',
+          'parser.ObjectLiteral(["t", false, parser.Number], ["deep", false, parser.ObjectLiteral(["prop", false, parser.Number])])',
       },
     })
   })
@@ -81,8 +76,8 @@ describe("conditional", () => {
       input: "parser.ObjectLiteral()",
       output: "ref_0",
       deps: {
-        ref_0: 'parser.ObjectLiteral(["deep", false, ref_1])',
-        ref_1: 'parser.ObjectLiteral(["prop", false, parser.String])',
+        ref_0:
+          'parser.ObjectLiteral(["deep", false, parser.ObjectLiteral(["prop", false, parser.String])])',
       },
     })
   })
@@ -105,7 +100,6 @@ describe("conditional", () => {
       },
     })
   })
-
   test("MyDeepConditionalRecursiveType<number>", () => {
     const parsers = generateParsersForFunction(`
       interface MyDeepConditionalRecursiveType<T> {
@@ -149,12 +143,9 @@ describe("conditional", () => {
 
     expect(parsers).toEqual({
       input: "parser.ObjectLiteral()",
-      output: "ref_1",
-      deps: {
-        ref_0: 'parser.ObjectLiteral(["h", false, parser.Number])',
-        ref_1:
-          'parser.ObjectLiteral(["prop", false, parser.String], ["x", false, ref_0])',
-      },
+      output:
+        'parser.ObjectLiteral(["prop", false, parser.String], ["x", false, parser.ObjectLiteral(["h", false, parser.Number])])',
+      deps: {},
     })
   })
 })

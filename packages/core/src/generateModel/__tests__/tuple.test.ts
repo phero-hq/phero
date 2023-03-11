@@ -716,30 +716,25 @@ describe("tuple", () => {
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
-        type: "reference",
-        typeName: "X",
-      },
-      deps: {
-        X: {
-          type: "tuple",
-          elements: [
-            {
-              type: "tupleElement",
-              position: 0,
-              parser: {
-                type: "number",
-              },
+        type: "tuple",
+        elements: [
+          {
+            type: "tupleElement",
+            position: 0,
+            parser: {
+              type: "number",
             },
-            {
-              type: "tupleElement",
-              position: 1,
-              parser: {
-                type: "number",
-              },
+          },
+          {
+            type: "tupleElement",
+            position: 1,
+            parser: {
+              type: "number",
             },
-          ],
-        },
+          },
+        ],
       },
+      deps: {},
     })
   })
 })

@@ -164,11 +164,9 @@ describe("mapped", () => {
 
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
-      deps: {
-        MyMappedTypeParser: 'parser.StringLiteral("kaas")',
-      },
+      deps: {},
       input: "parser.ObjectLiteral()",
-      output: "MyMappedTypeParser",
+      output: `parser.StringLiteral("kaas")`,
     })
   })
   test("Pick", () => {
