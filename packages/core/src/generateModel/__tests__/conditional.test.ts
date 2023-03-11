@@ -13,34 +13,19 @@ describe("conditional", () => {
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
-        type: "reference",
-        typeName: "MyConditionalType<number>",
-        typeArguments: [{ type: "number" }],
-      },
-      deps: {
-        "MyConditionalType<number>": {
-          type: "generic",
-          typeName: "MyConditionalType<number>",
-          typeArguments: [
-            {
-              type: "number",
+        type: "object",
+        members: [
+          {
+            type: "member",
+            name: "prop",
+            optional: false,
+            parser: {
+              type: "string",
             },
-          ],
-          parser: {
-            type: "object",
-            members: [
-              {
-                type: "member",
-                name: "prop",
-                optional: false,
-                parser: {
-                  type: "string",
-                },
-              },
-            ],
           },
-        },
+        ],
       },
+      deps: {},
     })
   })
   test("MyConditionalType<string>", () => {
@@ -52,36 +37,22 @@ describe("conditional", () => {
       }
       function test(): MyConditionalType<string> { throw new Error() }
     `)
+    // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
-        type: "reference",
-        typeName: "MyConditionalType<string>",
-        typeArguments: [{ type: "string" }],
-      },
-      deps: {
-        "MyConditionalType<string>": {
-          type: "generic",
-          typeName: "MyConditionalType<string>",
-          typeArguments: [
-            {
-              type: "string",
+        type: "object",
+        members: [
+          {
+            type: "member",
+            name: "prop",
+            optional: false,
+            parser: {
+              type: "number",
             },
-          ],
-          parser: {
-            type: "object",
-            members: [
-              {
-                type: "member",
-                name: "prop",
-                optional: false,
-                parser: {
-                  type: "number",
-                },
-              },
-            ],
           },
-        },
+        ],
       },
+      deps: {},
     })
   })
   test("MyDeepConditionalType<number>", () => {
@@ -99,7 +70,7 @@ describe("conditional", () => {
 
       function test(): MyDeepConditionalType<number> { throw new Error() }
     `)
-
+    // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
         type: "reference",
@@ -131,31 +102,17 @@ describe("conditional", () => {
                 name: "deep",
                 optional: false,
                 parser: {
-                  type: "reference",
-                  typeName: "DeepCondition<string>",
-                  typeArguments: [{ type: "string" }],
-                },
-              },
-            ],
-          },
-        },
-        "DeepCondition<string>": {
-          type: "generic",
-          typeName: "DeepCondition<string>",
-          typeArguments: [
-            {
-              type: "string",
-            },
-          ],
-          parser: {
-            type: "object",
-            members: [
-              {
-                type: "member",
-                name: "prop",
-                optional: false,
-                parser: {
-                  type: "number",
+                  type: "object",
+                  members: [
+                    {
+                      type: "member",
+                      name: "prop",
+                      optional: false,
+                      parser: {
+                        type: "number",
+                      },
+                    },
+                  ],
                 },
               },
             ],
@@ -202,31 +159,17 @@ describe("conditional", () => {
                 name: "deep",
                 optional: false,
                 parser: {
-                  type: "reference",
-                  typeName: "DeepCondition<number>",
-                  typeArguments: [{ type: "number" }],
-                },
-              },
-            ],
-          },
-        },
-        "DeepCondition<number>": {
-          type: "generic",
-          typeName: "DeepCondition<number>",
-          typeArguments: [
-            {
-              type: "number",
-            },
-          ],
-          parser: {
-            type: "object",
-            members: [
-              {
-                type: "member",
-                name: "prop",
-                optional: false,
-                parser: {
-                  type: "string",
+                  type: "object",
+                  members: [
+                    {
+                      type: "member",
+                      name: "prop",
+                      optional: false,
+                      parser: {
+                        type: "string",
+                      },
+                    },
+                  ],
                 },
               },
             ],
@@ -301,7 +244,6 @@ describe("conditional", () => {
       },
     })
   })
-
   test("MyDeepConditionalRecursiveType<number>", () => {
     const modelMap = generateParserModelForReturnType(`
       interface MyDeepConditionalRecursiveType<T> {
@@ -562,92 +504,37 @@ describe("conditional", () => {
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
-        type: "reference",
-        typeName: "MyConditionalType<number, Hop<number>>",
-        typeArguments: [
+        type: "object",
+        members: [
           {
-            type: "number",
+            type: "member",
+            name: "prop",
+            optional: false,
+            parser: {
+              type: "string",
+            },
           },
           {
-            type: "reference",
-            typeName: "Hop<number>",
-            typeArguments: [
-              {
-                type: "number",
-              },
-            ],
-          },
-        ],
-      },
-      deps: {
-        "Hop<number>": {
-          type: "generic",
-          typeName: "Hop<number>",
-          typeArguments: [
-            {
-              type: "number",
-            },
-          ],
-          parser: {
-            type: "object",
-            members: [
-              {
-                type: "member",
-                name: "h",
-                optional: false,
-                parser: {
-                  type: "number",
-                },
-              },
-            ],
-          },
-        },
-        "MyConditionalType<number, Hop<number>>": {
-          type: "generic",
-          typeName: "MyConditionalType<number, Hop<number>>",
-          typeArguments: [
-            {
-              type: "number",
-            },
-            {
-              type: "reference",
-              typeName: "Hop<number>",
-              typeArguments: [
+            type: "member",
+            name: "x",
+            optional: false,
+            parser: {
+              type: "object",
+              members: [
                 {
-                  type: "number",
+                  type: "member",
+                  name: "h",
+                  optional: false,
+                  parser: {
+                    type: "number",
+                  },
                 },
               ],
             },
-          ],
-          parser: {
-            type: "object",
-            members: [
-              {
-                type: "member",
-                name: "prop",
-                optional: false,
-                parser: {
-                  type: "string",
-                },
-              },
-              {
-                type: "member",
-                name: "x",
-                optional: false,
-                parser: {
-                  type: "reference",
-                  typeName: "Hop<number>",
-                  typeArguments: [
-                    {
-                      type: "number",
-                    },
-                  ],
-                },
-              },
-            ],
           },
-        },
+        ],
       },
+      deps: {},
     })
   })
   test("MyConditionalType<boolean>", () => {
@@ -667,92 +554,37 @@ describe("conditional", () => {
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
-        type: "reference",
-        typeName: "MyConditionalType<boolean, Hop<number>>",
-        typeArguments: [
+        type: "object",
+        members: [
           {
-            type: "boolean",
+            type: "member",
+            name: "prop",
+            optional: false,
+            parser: {
+              type: "string",
+            },
           },
           {
-            type: "reference",
-            typeName: "Hop<number>",
-            typeArguments: [
-              {
-                type: "number",
-              },
-            ],
-          },
-        ],
-      },
-      deps: {
-        "Hop<number>": {
-          type: "generic",
-          typeName: "Hop<number>",
-          typeArguments: [
-            {
-              type: "number",
-            },
-          ],
-          parser: {
-            type: "object",
-            members: [
-              {
-                type: "member",
-                name: "h",
-                optional: false,
-                parser: {
-                  type: "number",
-                },
-              },
-            ],
-          },
-        },
-        "MyConditionalType<boolean, Hop<number>>": {
-          type: "generic",
-          typeName: "MyConditionalType<boolean, Hop<number>>",
-          typeArguments: [
-            {
-              type: "boolean",
-            },
-            {
-              type: "reference",
-              typeName: "Hop<number>",
-              typeArguments: [
+            type: "member",
+            name: "x",
+            optional: false,
+            parser: {
+              type: "object",
+              members: [
                 {
-                  type: "number",
+                  type: "member",
+                  name: "h",
+                  optional: false,
+                  parser: {
+                    type: "number",
+                  },
                 },
               ],
             },
-          ],
-          parser: {
-            type: "object",
-            members: [
-              {
-                type: "member",
-                name: "prop",
-                optional: false,
-                parser: {
-                  type: "string",
-                },
-              },
-              {
-                type: "member",
-                name: "x",
-                optional: false,
-                parser: {
-                  type: "reference",
-                  typeName: "Hop<number>",
-                  typeArguments: [
-                    {
-                      type: "number",
-                    },
-                  ],
-                },
-              },
-            ],
           },
-        },
+        ],
       },
+      deps: {},
     })
   })
   test("a conditional type with or without a declared type should work the same", () => {
@@ -799,38 +631,19 @@ describe("conditional", () => {
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
-        type: "reference",
-        typeName: "MyConditionalType<string>",
-        typeArguments: [
+        type: "object",
+        members: [
           {
-            type: "string",
+            type: "member",
+            name: "prop",
+            optional: false,
+            parser: {
+              type: "boolean",
+            },
           },
         ],
       },
-      deps: {
-        "MyConditionalType<string>": {
-          type: "generic",
-          typeArguments: [
-            {
-              type: "string",
-            },
-          ],
-          typeName: "MyConditionalType<string>",
-          parser: {
-            type: "object",
-            members: [
-              {
-                type: "member",
-                name: "prop",
-                optional: false,
-                parser: {
-                  type: "boolean",
-                },
-              },
-            ],
-          },
-        },
-      },
+      deps: {},
     })
   })
   test("ConditionalType with reference with given param", () => {
@@ -847,41 +660,21 @@ describe("conditional", () => {
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
-        type: "reference",
-        typeName: "MyConditionalType<string>",
-        typeArguments: [
+        type: "object",
+        members: [
           {
-            type: "string",
+            type: "member",
+            name: "prop",
+            optional: false,
+            parser: {
+              type: "number",
+            },
           },
         ],
       },
-      deps: {
-        "MyConditionalType<string>": {
-          type: "generic",
-          typeArguments: [
-            {
-              type: "string",
-            },
-          ],
-          typeName: "MyConditionalType<string>",
-          parser: {
-            type: "object",
-            members: [
-              {
-                type: "member",
-                name: "prop",
-                optional: false,
-                parser: {
-                  type: "number",
-                },
-              },
-            ],
-          },
-        },
-      },
+      deps: {},
     })
   })
-
   test("ConditionalType with reference with given param", () => {
     const modelMap = generateParserModelForReturnType(`
       type MyConditional<K, P = K extends string ? number : never> = {
@@ -938,7 +731,6 @@ describe("conditional", () => {
       },
     })
   })
-
   test("ConditionalType with reference with given param", () => {
     const modelMap = generateParserModelForReturnType(`
       type MyConditional<K> = K extends string ? TheInterface<number> : never
@@ -953,24 +745,38 @@ describe("conditional", () => {
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
-        type: "reference",
-        typeName: "MyConditional<string>",
-        typeArguments: [
+        type: "object",
+        members: [
           {
-            type: "string",
+            type: "member",
+            name: "prop",
+            optional: false,
+            parser: {
+              type: "number",
+            },
           },
         ],
       },
-      deps: {
-        "MyConditional<string>": {
-          type: "generic",
-          typeArguments: [
-            {
-              type: "string",
-            },
-          ],
-          typeName: "MyConditional<string>",
-          parser: {
+      deps: {},
+    })
+  })
+  test("ConditionalType with reference with given param", () => {
+    const modelMap = generateParserModelForReturnType(`
+      type MyConditional<K> = K extends string ? TheInterface<number> | number : never
+
+      interface TheInterface<X = boolean> {
+        prop: X
+      }
+
+      function test(): MyConditional<string> { throw new Error() }
+    `)
+
+    // console.log(JSON.stringify(modelMap, null, 4))
+    expect(modelMap).toEqual({
+      root: {
+        type: "union",
+        oneOf: expect.arrayContaining([
+          {
             type: "object",
             members: [
               {
@@ -983,8 +789,12 @@ describe("conditional", () => {
               },
             ],
           },
-        },
+          {
+            type: "number",
+          },
+        ]),
       },
+      deps: {},
     })
   })
 })

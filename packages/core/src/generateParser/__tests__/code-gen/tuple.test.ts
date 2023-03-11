@@ -259,10 +259,8 @@ describe("tuple", () => {
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(parsers).toEqual({
       input: "parser.ObjectLiteral()",
-      output: `XParser`,
-      deps: {
-        XParser: `parser.Tuple([parser.Number], [parser.Number])`,
-      },
+      output: `parser.Tuple([parser.Number], [parser.Number])`,
+      deps: {},
     })
   })
 })

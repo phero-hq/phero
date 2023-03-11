@@ -342,15 +342,10 @@ describe("mapped", () => {
     // console.log(JSON.stringify(modelMap, null, 4))
     expect(modelMap).toEqual({
       root: {
-        type: "reference",
-        typeName: "MyMappedType",
+        type: "string-literal",
+        literal: "kaas",
       },
-      deps: {
-        MyMappedType: {
-          type: "string-literal",
-          literal: "kaas",
-        },
-      },
+      deps: {},
     })
   })
   test("Pick", () => {
