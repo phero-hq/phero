@@ -212,6 +212,17 @@ export default function generateFromTypeNode(
     throw new PheroParseError("Function types are not supported", typeNode)
   }
 
+  if (ts.isTypeQueryNode(typeNode)) {
+    return generateFromType(
+      type,
+      typeNode,
+      location,
+      typeChecker,
+      deps,
+      typeParams,
+    )
+  }
+
   throw new PheroParseError(
     "TypeNode not implemented " + typeNode.kind,
     typeNode,
