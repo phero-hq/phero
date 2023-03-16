@@ -74,7 +74,8 @@ function extractModels(
       function visit(node: ts.Node): ts.Node {
         if (
           ts.isTypeReferenceNode(node) ||
-          ts.isExpressionWithTypeArguments(node)
+          ts.isExpressionWithTypeArguments(node) ||
+          ts.isIdentifier(node)
         ) {
           const { symbol, declaration } = getDeclaration(node, typeChecker)
 
@@ -99,14 +100,18 @@ function extractModels(
 }
 
 function getDeclaration(
-  typeNode: ts.TypeReferenceType,
+  node: ts.TypeReferenceType | ts.Identifier,
   typeChecker: ts.TypeChecker,
 ): { symbol: ts.Symbol; declaration: ts.Declaration } {
   const symbol = typeChecker.getSymbolAtLocation(
-    ts.isTypeReferenceNode(typeNode) ? typeNode.typeName : typeNode.expression,
+    ts.isIdentifier(node)
+      ? node
+      : ts.isTypeReferenceNode(node)
+      ? node.typeName
+      : node.expression,
   )
   if (!symbol) {
-    throw new PheroParseError("Entity must have symbol", typeNode)
+    throw new PheroParseError("Entity must have symbol", node)
   }
 
   if ((symbol.flags & ts.SymbolFlags.Alias) === ts.SymbolFlags.Alias) {
@@ -121,7 +126,7 @@ function getDeclaration(
 
   const declaration = symbol?.declarations?.[0]
   if (!declaration) {
-    throw new PheroParseError("Entity must have declaration", typeNode)
+    throw new PheroParseError("Entity must have declaration", node)
   }
 
   return {
