@@ -79,7 +79,7 @@ function withExportModifier(ref: Model): Model {
 
   const modifiersWithExport: ts.Modifier[] = [
     ...(ref.modifiers ?? []).filter(
-      (m) => m.kind === ts.SyntaxKind.DeclareKeyword,
+      (m) => m.kind !== ts.SyntaxKind.DeclareKeyword,
     ),
     ts.factory.createModifier(ts.SyntaxKind.ExportKeyword),
   ]
