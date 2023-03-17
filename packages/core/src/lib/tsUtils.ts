@@ -237,7 +237,8 @@ export function isExternal(node: ts.Declaration, prog: ts.Program): boolean {
 }
 
 export function isLib(node: ts.Declaration, prog: ts.Program): boolean {
-  return prog.isSourceFileDefaultLibrary(node.getSourceFile())
+  const sf = node.getSourceFile()
+  return !!sf && prog.isSourceFileDefaultLibrary(sf)
 }
 
 export function getNameAsString(

@@ -5,7 +5,11 @@ import {
   type TypeParamMap,
 } from "."
 import { PheroParseError } from "../domain/errors"
-import { getTypeFlags } from "./generateParserModelUtils"
+import {
+  getObjectFlags,
+  getSymbolFlags,
+  getTypeFlags,
+} from "./generateParserModelUtils"
 import {
   type IndexMemberParserModel,
   type MemberParserModel,
@@ -72,8 +76,9 @@ export default function generateFromType(
       deps,
     }
   } else if (type.flags & ts.TypeFlags.Object) {
+    const objectFlags: ts.ObjectFlags = (type as ts.ObjectType).objectFlags
     if (
-      (type as ts.ObjectType).objectFlags & ts.ObjectFlags.Reference &&
+      objectFlags & ts.ObjectFlags.Reference &&
       (type as ts.TypeReference).target.objectFlags & ts.ObjectFlags.Tuple
     ) {
       const elements = typeChecker
@@ -109,6 +114,41 @@ export default function generateFromType(
         },
         deps,
       }
+    } else if (
+      objectFlags & ts.ObjectFlags.ArrayLiteral ||
+      (objectFlags & ts.ObjectFlags.Reference && type.symbol.name === "Array")
+    ) {
+      const elements = typeChecker.getTypeArguments(type as ts.TypeReference)
+      if (elements.length !== 1) {
+        throw new PheroParseError(
+          "Expected one type argument for ArrayLiteral",
+          typeNode,
+        )
+      }
+
+      const elementModel = generateFromType(
+        elements[0],
+        typeNode,
+        location,
+        typeChecker,
+        deps,
+        typeParams,
+      )
+      return {
+        root: {
+          type: ParserModelType.Array,
+          element: {
+            type: ParserModelType.ArrayElement,
+            parser: elementModel.root,
+          },
+        },
+        deps: elementModel.deps,
+      }
+    } else if (type?.symbol.flags & ts.SymbolFlags.Function) {
+      throw new PheroParseError(
+        "Can't make a parser for a function type",
+        typeNode,
+      )
     } else {
       const memberModels = type.getProperties().reduce<{
         models: (IndexMemberParserModel | MemberParserModel)[]
@@ -131,28 +171,51 @@ export default function generateFromType(
           } else {
             const propSignature = prop.declarations?.[0]
 
-            if (!propSignature || !ts.isPropertySignature(propSignature)) {
+            if (propSignature && ts.isPropertySignature(propSignature)) {
+              if (!propSignature.type) {
+                throw new PheroParseError(
+                  "Property must have type",
+                  propSignature,
+                )
+              }
+
+              propModel = generateFromTypeNode(
+                propSignature.type,
+                propType,
+                location,
+                typeChecker,
+                deps,
+                typeParams,
+              )
+            } else if (
+              propSignature &&
+              ts.isPropertyAssignment(propSignature)
+            ) {
+              const type = typeChecker.getTypeAtLocation(
+                propSignature.initializer,
+              )
+
+              if (!type) {
+                throw new PheroParseError(
+                  "Property assignment type not inferable",
+                  propSignature,
+                )
+              }
+
+              propModel = generateFromType(
+                type,
+                typeNode,
+                location,
+                typeChecker,
+                deps,
+                typeParams,
+              )
+            } else {
               throw new PheroParseError(
-                "Unexpected declaration " + typeNode.kind,
+                "Unexpected declaration " + typeNode.kind + " >> " + prop.name,
                 typeNode,
               )
             }
-
-            if (!propSignature.type) {
-              throw new PheroParseError(
-                "Property must have type",
-                propSignature,
-              )
-            }
-
-            propModel = generateFromTypeNode(
-              propSignature.type,
-              propType,
-              location,
-              typeChecker,
-              deps,
-              typeParams,
-            )
           }
 
           return {
