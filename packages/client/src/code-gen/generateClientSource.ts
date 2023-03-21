@@ -103,7 +103,7 @@ export default function generateClientSource(
         generateParserFunction(
           `${service.name}__${func.name}__parser`,
           func.returnTypeModel,
-          func.returnType,
+          cloneTS(func.returnType),
           depRef,
         ),
       ),
