@@ -1,6 +1,6 @@
 {
   "name": "@phero/client",
-  "version": "0.10.0-alpha.4",
+  "version": "0.10.0-alpha.5",
   "main": "dist/index.js",
   "description": "Client library for Phero",
   "homepage": "https://phero.dev",

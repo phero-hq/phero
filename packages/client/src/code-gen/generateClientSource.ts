@@ -103,7 +103,7 @@ export default function generateClientSource(
         generateParserFunction(
           `${service.name}__${func.name}__parser`,
           func.returnTypeModel,
-          func.returnType,
+          cloneTS(func.returnType),
           depRef,
         ),
       ),
@@ -187,13 +187,19 @@ function generateError(parsedError: PheroError): ts.ClassDeclaration {
     elements: [
       tsx.constructor({
         params: parsedError.properties.map((prop) =>
-          tsx.param({
-            public: true,
-            readonly: true,
-            name: prop.name,
-            type: cloneTS(prop.type),
-            questionToken: prop.optional,
-          }),
+          prop.name === "message"
+            ? tsx.param({
+                name: prop.name,
+                type: cloneTS(prop.type),
+                questionToken: prop.optional,
+              })
+            : tsx.param({
+                public: true,
+                readonly: true,
+                name: prop.name,
+                type: cloneTS(prop.type),
+                questionToken: prop.optional,
+              }),
         ),
         block: tsx.block(
           tsx.statement.expression(
