@@ -99,7 +99,7 @@ function extractModels(
             isModel(declaration) &&
             !isLib(declaration, prog)
           ) {
-            accum.set(symbol, fixTypeQueryNodes(declaration, prog))
+            accum.set(symbol, rewriteTypeQueryNodes(declaration, prog))
             extractModels(declaration, prog, accum)
           }
         }
@@ -172,7 +172,7 @@ function createTypeQueryType(
 /**
  * Rewrites "typeof" expressions to the generated types because we don't want constants in our manifest.
  **/
-function fixTypeQueryNodes(declaration: Model, prog: ts.Program): Model {
+function rewriteTypeQueryNodes(declaration: Model, prog: ts.Program): Model {
   const typeChecker = prog.getTypeChecker()
 
   const transformer =
