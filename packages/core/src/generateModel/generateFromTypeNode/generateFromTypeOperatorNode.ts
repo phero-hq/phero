@@ -21,8 +21,18 @@ export default function generateFromTypeOperatorNode(
   deps: DependencyMap,
   typeParams: TypeParamMap,
 ): InternalParserModelMap {
-  if (typeNode.operator !== ts.SyntaxKind.KeyOfKeyword) {
-    throw new PheroParseError("Operator not supported", typeNode)
+  if (
+    typeNode.operator === ts.SyntaxKind.UniqueKeyword ||
+    typeNode.operator === ts.SyntaxKind.ReadonlyKeyword
+  ) {
+    return generateFromTypeNode(
+      typeNode.type,
+      type,
+      location,
+      typeChecker,
+      deps,
+      typeParams,
+    )
   }
 
   if (ts.isTypeQueryNode(typeNode.type)) {
