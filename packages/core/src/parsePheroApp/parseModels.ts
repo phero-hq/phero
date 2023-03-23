@@ -1,5 +1,4 @@
 import ts from "typescript"
-import { tsx } from ".."
 import { PheroParseError } from "../domain/errors"
 import {
   type Model,
@@ -8,6 +7,7 @@ import {
   type PheroModel,
   type PheroServiceConfig,
 } from "../domain/PheroApp"
+import getDeclaration from "../lib/getDeclaration"
 import { isModel } from "../lib/isModel"
 import { getNameAsString, isLib } from "../lib/tsUtils"
 
@@ -72,10 +72,25 @@ function extractModels(
     <T extends ts.Node>(context: ts.TransformationContext) =>
     (rootNode: T) => {
       function visit(node: ts.Node): ts.Node {
+        if (ts.isTypeQueryNode(node)) {
+          const { declaration } = getDeclaration(node.exprName, typeChecker)
+          extractModels(declaration, prog, accum)
+        }
+
+        // fixes "as const" expression (it has no declaration)
+        if (
+          node.parent &&
+          ts.isAsExpression(node.parent) &&
+          ts.isTypeReferenceNode(node) &&
+          getNameAsString(node.typeName) === "const"
+        ) {
+          return node
+        }
         if (
           ts.isTypeReferenceNode(node) ||
           ts.isExpressionWithTypeArguments(node) ||
-          ts.isIdentifier(node)
+          ts.isIdentifier(node) ||
+          ts.isQualifiedName(node)
         ) {
           const { symbol, declaration } = getDeclaration(node, typeChecker)
 
@@ -84,7 +99,7 @@ function extractModels(
             isModel(declaration) &&
             !isLib(declaration, prog)
           ) {
-            accum.set(symbol, declaration)
+            accum.set(symbol, rewriteTypeQueryNodes(declaration, prog))
             extractModels(declaration, prog, accum)
           }
         }
@@ -99,67 +114,15 @@ function extractModels(
   return accum
 }
 
-function getDeclaration(
-  node: ts.TypeReferenceType | ts.Identifier,
-  typeChecker: ts.TypeChecker,
-): { symbol: ts.Symbol; declaration: ts.Declaration } {
-  const symbol = typeChecker.getSymbolAtLocation(
-    ts.isIdentifier(node)
-      ? node
-      : ts.isTypeReferenceNode(node)
-      ? node.typeName
-      : node.expression,
-  )
-  if (!symbol) {
-    throw new PheroParseError("Entity must have symbol", node)
-  }
-
-  if ((symbol.flags & ts.SymbolFlags.Alias) === ts.SymbolFlags.Alias) {
-    const aliasSymbol = typeChecker.getAliasedSymbol(symbol)
-    if (aliasSymbol?.declarations?.[0]) {
-      return {
-        symbol: aliasSymbol,
-        declaration: aliasSymbol.declarations?.[0],
-      }
-    }
-  }
-
-  const declaration = symbol?.declarations?.[0]
-  if (!declaration) {
-    throw new PheroParseError("Entity must have declaration", node)
-  }
-
-  return {
-    symbol,
-    declaration: handleTypeQueryDeclaration(declaration, typeChecker),
-  }
-}
-
-function handleTypeQueryDeclaration(
-  declr: ts.Declaration,
-  typeChecker: ts.TypeChecker,
-): ts.Declaration {
-  if (
-    !ts.isTypeAliasDeclaration(declr) ||
-    !declr.type ||
-    !ts.isTypeQueryNode(declr.type)
-  ) {
-    return declr
-  }
-
-  return tsx.typeAlias({
-    name: declr.name,
-    typeParameters: declr.typeParameters?.map((p) => p),
-    type: createTypeQueryType(declr.type.exprName, typeChecker),
-  })
-}
-
 function createTypeQueryType(
   expr: ts.EntityName,
   typeChecker: ts.TypeChecker,
 ): ts.TypeNode {
   return loop(expr)
   function loop(n: ts.Node): ts.TypeNode {
+    if (ts.isAsExpression(n)) {
+      return loop(n.expression)
+    }
     if (ts.isLiteralExpression(n)) {
       return ts.factory.createLiteralTypeNode(n)
     }
@@ -204,4 +167,28 @@ function createTypeQueryType(
       }.`,
     )
   }
+}
+
+/**
+ * Rewrites "typeof" expressions to the generated types because we don't want constants in our manifest.
+ **/
+function rewriteTypeQueryNodes(declaration: Model, prog: ts.Program): Model {
+  const typeChecker = prog.getTypeChecker()
+
+  const transformer =
+    <T extends ts.Node>(context: ts.TransformationContext) =>
+    (rootNode: T) => {
+      function visit(node: ts.Node): ts.Node {
+        if (ts.isTypeQueryNode(node)) {
+          return createTypeQueryType(node.exprName, typeChecker)
+        }
+
+        return ts.visitEachChild(node, visit, context)
+      }
+      return ts.visitNode(rootNode, visit)
+    }
+
+  const result = ts.transform<Model>(declaration, [transformer])
+
+  return result.transformed[0]
 }

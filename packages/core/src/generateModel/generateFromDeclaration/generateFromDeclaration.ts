@@ -10,6 +10,7 @@ import {
   type ParserModel,
   type ReferenceParserModel,
 } from "../../domain/ParserModel"
+import getDeclaration from "../../lib/getDeclaration"
 import generateFromType from "../generateFromType"
 import generateFromTypeNode from "../generateFromTypeNode"
 import propertyNameAsString from "../lib/propertyNameAsString"
@@ -25,8 +26,9 @@ export default function generateFromDeclaration(
   deps: DependencyMap,
   typeParams: TypeParamMap,
 ): InternalParserModelMap {
+  const { declaration } = getDeclaration(typeNode, typeChecker)
   return generateFromDeclarationWithDeclaration(
-    getDeclaration(typeNode, typeChecker),
+    declaration,
     typeNode,
     type,
     location,
@@ -282,25 +284,6 @@ function generateFromDeclarationWithDeclaration(
   )
 }
 
-function getDeclaration(
-  typeNode: ts.TypeReferenceType,
-  typeChecker: ts.TypeChecker,
-): ts.Declaration {
-  const symbol = typeChecker.getSymbolAtLocation(
-    ts.isTypeReferenceNode(typeNode) ? typeNode.typeName : typeNode.expression,
-  )
-  if (!symbol) {
-    throw new PheroParseError("Entity must have symbol", typeNode)
-  }
-
-  const declaration = symbol?.declarations?.[0]
-  if (!declaration) {
-    throw new PheroParseError("Entity must have declaration", typeNode)
-  }
-
-  return declaration
-}
-
 function getUpdatedTypeParams(
   typeNode: ts.TypeReferenceType,
   location: ts.TypeNode,
@@ -491,8 +474,8 @@ function isEventuallyMappedTypeNode(
   }
 
   if (ts.isTypeReferenceNode(node)) {
-    const d = getDeclaration(node, typeChecker)
-    return isEventuallyMappedTypeNode(d, typeChecker)
+    const { declaration } = getDeclaration(node, typeChecker)
+    return isEventuallyMappedTypeNode(declaration, typeChecker)
   }
 
   return false
@@ -511,8 +494,8 @@ function isEventuallyConditionalTypeNode(
   }
 
   if (ts.isTypeReferenceNode(node)) {
-    const d = getDeclaration(node, typeChecker)
-    return isEventuallyConditionalTypeNode(d, typeChecker)
+    const { declaration } = getDeclaration(node, typeChecker)
+    return isEventuallyConditionalTypeNode(declaration, typeChecker)
   }
 
   return false

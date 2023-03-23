@@ -14,6 +14,13 @@ export default function propertyNameAsString(
     return propertyName.text
   }
   if (ts.isComputedPropertyName(propertyName)) {
+    const expr = propertyName.expression
+    if (ts.isPropertyAccessExpression(expr)) {
+      return propertyNameAsString(expr.name)
+    } else if (ts.isStringLiteral(expr) || ts.isNumericLiteral(expr)) {
+      return propertyNameAsString(expr)
+    }
+
     throw new PheroParseError(
       "Member name must not be computed property",
       propertyName,
