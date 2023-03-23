@@ -11,9 +11,6 @@
     "type": "git",
     "url": "git+https://github.com/phero-hq/phero.git"
   },
-  "scripts": {
-    "bootstrap": "lerna bootstrap"
-  },
   "devDependencies": {
     "lerna": "^3.22.1"
   }
