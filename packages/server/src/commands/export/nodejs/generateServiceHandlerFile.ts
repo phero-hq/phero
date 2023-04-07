@@ -72,10 +72,7 @@ function handleService(service: PheroService): ts.Statement {
             name: "originWhitelist",
             init: tsx.expression.ternary(
               tsx.expression.identifier("serviceCorsConfig"),
-              tsx.expression.propertyAccess(
-                "serviceCorsConfig",
-                "originWhitelist",
-              ),
+              tsx.expression.identifier("serviceCorsConfig"),
               tsx.literal.undefined,
             ),
           }),
