@@ -10,6 +10,7 @@ import path from "path"
 import ts, { CompilerOptions } from "typescript"
 import {
   Export,
+  ExportFile,
   MetaExportFiles,
   MetaExportFilesBase,
   MetaExportLockFileName,
@@ -18,6 +19,9 @@ import generateGCloudFunctionsExport from "./gcloud-functions"
 import generateNodeJSExport from "./nodejs"
 import generateVercelExport from "./vercel"
 import generatePheroExecutionFile from "../../code-gen/generatePheroExecutionFile"
+import generateRootIndexFile from "./nodejs/generateRootIndexFile"
+import compileExportToJS from "./compileExportToJS"
+import generateLibFile from "./nodejs/generateLibFile"
 
 export default function exportCommand(command: ServerCommandExport) {
   const projectPath = process.cwd()
@@ -136,12 +140,25 @@ export default function exportCommand(command: ServerCommandExport) {
   switch (command.flavor) {
     case ServerExportFlavor.NodeJS: {
       const nodejsExport = generateNodeJSExport(app, metaExportFiles)
+      const rootIndexExport: ExportFile[] = compileExportToJS([
+        {
+          name: "index.ts",
+          nodes: generateRootIndexFile(app),
+          isRoot: true,
+        },
+        {
+          name: "lib.ts",
+          nodes: generateLibFile(),
+          isRoot: true,
+        },
+      ])
 
       copyTsOutToBundles(
         tsOutDir,
         nodejsExport.bundles.map((b) => path.join(exportPath, b.name)),
       )
       writeToDisk(exportPath, nodejsExport)
+      writeToDisk(exportPath, { bundles: [], otherFiles: rootIndexExport })
 
       console.log("Done exporting to .phero, to run all your services:")
       console.log("(cd .phero && npm i && node ./index.js)")
