@@ -60,7 +60,7 @@ function generateRequestListener(app: PheroApp): ts.Node {
       tsx.const({
         name: "requestedFunction",
         init: tsx.expression.call("parseServiceAndFunction", {
-          args: [tsx.expression.propertyAccess("req", "url")],
+          args: ["req"],
         }),
       }),
       switchServices(app),
