@@ -211,7 +211,7 @@ export default class DevServer {
               })
             } else if (rpcResult.status === 400) {
               // Validation error(s)
-              res.write(JSON.stringify(rpcResult.errors, null, 4))
+              res.write(JSON.stringify({ errors: rpcResult.errors }, null, 4))
               this.eventEmitter.emit({
                 type: "RPC_FAILED_VALIDATION_ERROR",
                 url: req.url,
@@ -229,7 +229,7 @@ export default class DevServer {
               })
             } else if (rpcResult.status === 500) {
               // Error is thrown
-              res.write(JSON.stringify(rpcResult.error))
+              res.write(JSON.stringify({ error: rpcResult.error }))
               this.eventEmitter.emit({
                 type: "RPC_FAILED_FUNCTION_ERROR",
                 url: req.url,

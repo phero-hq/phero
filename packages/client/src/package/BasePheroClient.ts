@@ -59,7 +59,20 @@ export class BasePheroClient {
           `Result of RPC ${serviceName}.${functionName} has incorrect output.`,
         )
       } else {
-        throw errorParser(data)
+        const isValidError =
+          typeof data === "object" &&
+          data !== null &&
+          "error" in data &&
+          typeof data.error === "object" &&
+          data.error !== null
+
+        if (!isValidError) {
+          throw new Error(
+            `Error response of RPC ${serviceName}.${functionName} is invalid.`,
+          )
+        }
+
+        throw errorParser(data.error)
       }
     }
 
