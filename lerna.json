@@ -6,5 +6,5 @@
     "packages/dev",
     "packages/cli"
   ],
-  "version": "0.10.4"
+  "version": "0.10.5-alpha.0"
 }

@@ -1,6 +1,6 @@
 {
   "name": "@phero/server",
-  "version": "0.10.4",
+  "version": "0.10.5-alpha.0",
   "main": "dist/index.js",
   "description": "Server library for Phero",
   "homepage": "https://phero.dev",
