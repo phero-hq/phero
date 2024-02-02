@@ -7,34 +7,35 @@ export default function recursivelyFindThrowStatements(
   functions: ts.FunctionLikeDeclarationBase | ts.FunctionLikeDeclarationBase[],
   prog: ts.Program,
 ): ts.ThrowStatement[] {
-  return loop(Array.isArray(functions) ? functions : [functions], [], [])
+  // This function would be prettier when using tail recursion, but that would
+  // cause a stack overflow when processing large codebases since v8 does not
+  // implement tail-call optimization.
 
-  function loop(
-    todos: ts.FunctionLikeDeclarationBase[],
-    done: ts.FunctionLikeDeclarationBase[],
-    accum: ts.ThrowStatement[],
-  ): ts.ThrowStatement[] {
-    if (todos.length === 0) {
-      return accum
-    }
+  let todos: ts.FunctionLikeDeclarationBase[] = Array.isArray(functions)
+    ? functions
+    : [functions]
+  let done: ts.FunctionLikeDeclarationBase[] = []
+  let accum: ts.ThrowStatement[] = []
 
+  while (todos.length > 0) {
     const [func, ...rest] = todos
 
     if (done.includes(func)) {
-      return loop(rest, done, accum)
+      todos = rest
+      continue
     }
 
-    const allStatements = findFunctionStatements(func)
-    const throwStatements = allStatements.filter(ts.isThrowStatement)
+    const statements = findFunctionStatements(func)
+    const throwStatements = statements.filter(ts.isThrowStatement)
 
-    const dependencies = allStatements
+    const dependencies = statements
       .flatMap(findCallExpressionsInStatement)
       .flatMap((callExpr) => findFunctionDeclaration(callExpr, prog))
 
-    return loop(
-      [...rest, ...dependencies],
-      [...done, func],
-      [...accum, ...throwStatements],
-    )
+    todos = [...rest, ...dependencies]
+    done = [...done, func]
+    accum = [...accum, ...throwStatements]
   }
+
+  return accum
 }
