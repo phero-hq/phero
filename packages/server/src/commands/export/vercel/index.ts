@@ -6,12 +6,14 @@ import generateLibFile from "./generateLibFile"
 import { generateServiceHandlerFile } from "./generateServiceHandlerFile"
 import generateServiceIndexFile from "./generateServiceIndexFile"
 
+const vercelExportPath = 'dist/.phero-vercel';
+
 export default function generateVercelExport(
   app: PheroApp,
   metaExportFiles: MetaExportFiles,
 ): Export {
   const bundles: ExportBundle[] = app.services.flatMap((service) => ({
-    name: `.vercel/output/functions/${service.name}/[func].func`,
+    name: `${vercelExportPath}/${service.name}`,
     files: [
       ...compileExportToJS([
         {
@@ -30,17 +32,6 @@ export default function generateVercelExport(
           isRoot: true,
         },
       ]),
-      {
-        name: ".vc-config.json",
-        content: `{
-    "runtime": "nodejs16.x",
-    "handler": "index.js",
-    "maxDuration": 3,
-    "launcherType": "Nodejs",
-    "shouldAddHelpers": true,
-    "shouldAddSourcemapSupport": true
-}`,
-      },
       ...Object.entries(metaExportFiles).map(
         ([name, content]: [string, string]) => ({ name, content }),
       ),
@@ -49,12 +40,16 @@ export default function generateVercelExport(
 
   const otherFiles: ExportFile[] = [
     {
-      name: ".vercel/output/config.json",
+      name: `${vercelExportPath}/vercel.json`,
       content: JSON.stringify({
-        version: 3,
+        // version: 3,
         routes: app.services.map((service) => ({
           src: `^/${service.name}/(?<func>[^/]+?)(?:/)?$`,
-          dest: `/${service.name}/[func]?func=$func`,
+          dest: `/${vercelExportPath}/${service.name}/index.js?func=$func`,
+        })),
+        builds: app.services.map((service) => ({
+          src: `/${vercelExportPath}/${service.name}/index.js`,
+          use: '@vercel/node'
         })),
       }),
     },

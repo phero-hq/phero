@@ -192,9 +192,10 @@ export default function exportCommand(command: ServerCommandExport) {
       break
     }
     case ServerExportFlavor.Vercel: {
-      const vercelPath = path.join(projectPath, ".vercel")
+      const distPath = path.join(projectPath, "dist")
+      const vercelPath = path.join(distPath, ".phero-vercel")
 
-      rimRafExport(path.join(vercelPath, "output"))
+      rimRafExport(vercelPath)
 
       const vercelExport = generateVercelExport(app, metaExportFiles)
 
@@ -216,9 +217,11 @@ export default function exportCommand(command: ServerCommandExport) {
           vercelExport.bundles.length === 1
             ? "1 service"
             : `${vercelExport.bundles.length} services`
-        } to .vercel`,
+        } to dist/.phero-vercel`,
       )
-      console.log(`Now deploy with "npx vercel@latest deploy --prebuilt"`)
+
+      console.log('Generating routes and builds config in dist/.phero-vercel/vercel.json')
+      console.log(`Now deploy with "npx vercel@latest deploy --local-config ./dist/.phero-vercel/vercel.json"`)
       break
     }
   }

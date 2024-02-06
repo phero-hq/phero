@@ -17,7 +17,7 @@ export function generateServiceHandlerFile(service: PheroService): ts.Node[] {
         serviceCorsConfig(service),
         ...service.funcs.map((func) => functionExecutor(service, func)),
       ],
-      module: "./phero-execution",
+      module: "../../phero-execution",
     }),
     tsx.function({
       name: "requestListener",
