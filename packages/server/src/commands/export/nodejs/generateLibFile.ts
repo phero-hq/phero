@@ -58,6 +58,9 @@ export async function writeResponse(
         case 200:
             res.end(JSON.stringify(response.result));
             break;
+        case 204:
+            res.end();
+            break;
         case 400:
             res.end(JSON.stringify({ errors: response.errors }));
             break;
