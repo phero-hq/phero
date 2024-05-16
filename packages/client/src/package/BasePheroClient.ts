@@ -51,14 +51,14 @@ export class BasePheroClient {
       throw new NetworkError()
     }
 
-    const data = await result.json()
-
     if (!result.ok) {
       if (result.status === 400) {
         throw new Error(
           `Result of RPC ${serviceName}.${functionName} has incorrect output.`,
         )
       } else {
+        const data = await result.json()
+
         const isValidError =
           typeof data === "object" &&
           data !== null &&
@@ -74,6 +74,11 @@ export class BasePheroClient {
 
         throw errorParser(data.error)
       }
+    }
+
+    let data = undefined
+    if (result.status !== 204) {
+      data = await result.json()
     }
 
     const parseResult = resultParser(data)
