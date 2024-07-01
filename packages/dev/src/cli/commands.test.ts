@@ -92,12 +92,16 @@ describe("parseServerCommand", () => {
       expect(run("phero-server export -h")).toMatchSnapshot()
     })
 
-    test("cmd:   'phero-server export'", () => {
-      expect(run("phero-server export")).toMatchSnapshot()
+    test("cmd:   'phero-server export --flavor gcloud-functions'", () => {
+      expect(
+        run("phero-server export --flavor gcloud-functions"),
+      ).toMatchSnapshot()
     })
 
-    test("cmd:   'phero-server export --verbose'", () => {
-      expect(run("phero-server export --verbose")).toMatchSnapshot()
+    test("cmd:   'phero-server export --flavor gcloud-functions --verbose'", () => {
+      expect(
+        run("phero-server export --flavor gcloud-functions --verbose"),
+      ).toMatchSnapshot()
     })
   })
 })

@@ -2,8 +2,7 @@ import ts from "typescript"
 
 export default function cloneTS<TNode extends ts.Node>(rootNode: TNode): TNode {
   const transformer =
-    <T extends ts.Node>(context: ts.TransformationContext) =>
-    (rootNode: T) => {
+    (context: ts.TransformationContext) => (rootNode: ts.Node) => {
       function visit(node: ts.Node): ts.Node {
         if (ts.isStringLiteral(node)) {
           return ts.factory.createStringLiteral(node.text)
@@ -17,5 +16,5 @@ export default function cloneTS<TNode extends ts.Node>(rootNode: TNode): TNode {
       return ts.visitNode(rootNode, visit)
     }
 
-  return ts.transform<TNode>(rootNode, [transformer]).transformed[0]
+  return ts.transform(rootNode, [transformer]).transformed[0] as TNode
 }

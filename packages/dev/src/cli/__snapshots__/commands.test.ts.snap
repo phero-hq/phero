@@ -287,6 +287,22 @@ Object {
 }
 `;
 
+exports[`parseServerCommand export cmd:   'phero-server export --flavor gcloud-functions --verbose' 1`] = `
+Object {
+  "flavor": "gcloud-functions",
+  "name": "export",
+  "verbose": true,
+}
+`;
+
+exports[`parseServerCommand export cmd:   'phero-server export --flavor gcloud-functions' 1`] = `
+Object {
+  "flavor": "gcloud-functions",
+  "name": "export",
+  "verbose": false,
+}
+`;
+
 exports[`parseServerCommand export cmd:   'phero-server export --help' 1`] = `
 Object {
   "command": "export",
@@ -294,24 +310,10 @@ Object {
 }
 `;
 
-exports[`parseServerCommand export cmd:   'phero-server export --verbose' 1`] = `
-Object {
-  "name": "export",
-  "verbose": true,
-}
-`;
-
 exports[`parseServerCommand export cmd:   'phero-server export -h' 1`] = `
 Object {
   "command": "export",
   "name": "help",
-}
-`;
-
-exports[`parseServerCommand export cmd:   'phero-server export' 1`] = `
-Object {
-  "name": "export",
-  "verbose": false,
 }
 `;
 

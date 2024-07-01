@@ -39,7 +39,8 @@ function parseFunctionName(
     | ts.ComputedPropertyName
     | ts.PrivateIdentifier
     | ts.ObjectBindingPattern
-    | ts.ArrayBindingPattern,
+    | ts.ArrayBindingPattern
+    | ts.NoSubstitutionTemplateLiteral,
 ): string {
   if (
     ts.isNumericLiteral(functionName) ||
