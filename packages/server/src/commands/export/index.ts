@@ -212,6 +212,46 @@ export default function exportCommand(command: ServerCommandExport) {
         })
       }
 
+      // Clean up each service folder
+      vercelExport.bundles.forEach((bundle) => {
+        const serviceName = bundle.name;
+
+        console.log(`Cleaning folder: ${serviceName}`)
+
+        // remove unwanted folders
+        const unwantedFolders = ts.sys.getDirectories(serviceName);
+        unwantedFolders.forEach((folder) => {
+            fs.rm(`${serviceName}/${folder}`,{
+              recursive: true
+            },() => { });          
+        })
+
+        // copy phero-execution to dist folder it not already done
+        const pheroExecution = 'phero-execution.js';
+        if(!ts.sys.fileExists(`${distPath}/pheroExecution`)) {
+          fs.copyFile(`${serviceName}/${pheroExecution}` , `${distPath}/${pheroExecution}` , () => {});
+        }
+
+        // remove unwanted files
+        const whiteList = [
+          'index.js',
+          'handler.js',
+          'lib.js'
+        ]
+        fs.readdir(serviceName,(err, files) => {
+          if(!err) {
+            files.forEach((file) => {
+              const found = whiteList.find(x => x === file)
+              if(!found) {
+                const deletefilename = `${serviceName}/${file}`
+                fs.rm(deletefilename, () => {})
+              }
+            })
+          }
+        })
+
+      })
+
       console.log(
         `Done exporting ${
           vercelExport.bundles.length === 1
