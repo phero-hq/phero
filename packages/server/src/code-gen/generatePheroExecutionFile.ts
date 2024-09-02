@@ -237,6 +237,19 @@ function generateRPCExecutor(
           ),
         }),
 
+        tsx.statement.if({
+          expression: tsx.expression.binary(
+            tsx.expression.identifier("result"),
+            "===",
+            tsx.literal.undefined,
+          ),
+          then: tsx.statement.return(
+            tsx.literal.object(
+              tsx.property.assignment("status", tsx.literal.number(204)),
+            ),
+          ),
+        }),
+
         tsx.statement.return(
           tsx.literal.object(
             tsx.property.assignment("status", tsx.literal.number(200)),

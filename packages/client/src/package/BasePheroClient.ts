@@ -51,29 +51,13 @@ export class BasePheroClient {
       throw new NetworkError()
     }
 
-    const data = await result.json()
-
     if (!result.ok) {
-      if (result.status === 400) {
-        throw new Error(
-          `Result of RPC ${serviceName}.${functionName} has incorrect output.`,
-        )
-      } else {
-        const isValidError =
-          typeof data === "object" &&
-          data !== null &&
-          "error" in data &&
-          typeof data.error === "object" &&
-          data.error !== null
+      await handleErrorResult(serviceName, functionName, errorParser, result)
+    }
 
-        if (!isValidError) {
-          throw new Error(
-            `Error response of RPC ${serviceName}.${functionName} is invalid.`,
-          )
-        }
-
-        throw errorParser(data.error)
-      }
+    let data = undefined
+    if (result.status !== 204) {
+      data = await result.json()
     }
 
     const parseResult = resultParser(data)
@@ -107,8 +91,37 @@ export class BasePheroClient {
     }
 
     if (!result.ok) {
-      const data = await result.json()
-      throw errorParser(data)
+      await handleErrorResult(serviceName, functionName, errorParser, result)
     }
+  }
+}
+
+async function handleErrorResult(
+  serviceName: string,
+  functionName: string,
+  errorParser: (error: any) => Error,
+  result: Awaited<ReturnType<Fetch>>,
+): Promise<never> {
+  if (result.status === 400) {
+    throw new Error(
+      `RPC ${serviceName}.${functionName} was called with incorrect parameters.`,
+    )
+  } else {
+    const data = await result.json()
+
+    const isValidError =
+      typeof data === "object" &&
+      data !== null &&
+      "error" in data &&
+      typeof data.error === "object" &&
+      data.error !== null
+
+    if (!isValidError) {
+      throw new Error(
+        `Error response of RPC ${serviceName}.${functionName} is invalid.`,
+      )
+    }
+
+    throw errorParser(data.error)
   }
 }

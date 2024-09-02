@@ -196,10 +196,8 @@ export default class DevServer {
 
             res.statusCode = rpcResult.status
 
-            if (rpcResult.status === 200) {
-              if (rpcResult.result === undefined) {
-                res.statusCode = 204
-              } else {
+            if (rpcResult.status === 200 || rpcResult.status === 204) {
+              if (rpcResult.status !== 204) {
                 res.write(JSON.stringify(rpcResult.result))
               }
               this.eventEmitter.emit({
