@@ -1,7 +1,6 @@
 {
   "name": "@phero/core",
   "version": "0.10.6",
-  "main": "dist/index.js",
   "homepage": "https://phero.dev",
   "repository": "phero-hq/phero",
   "bugs": "https://github.com/phero-hq/phero/issues",
@@ -10,6 +9,16 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./runtime": "./dist/runtime.js"
+  },
+  "typesVersions": {
+    "*": {
+      "index": ["./dist/index.d.ts"],
+      "runtime": ["./dist/runtime.d.ts"]
+    }
   },
   "scripts": {
     "clean": "rm -rf dist",

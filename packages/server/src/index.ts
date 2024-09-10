@@ -4,7 +4,7 @@ export {
   ParseResult,
   RPCResult,
   DataParseError,
-} from "@phero/core"
+} from "@phero/core/runtime"
 
 export type PheroServiceFunctions = Record<string, Function>
 
