@@ -1,6 +1,6 @@
 {
   "name": "@phero/core",
-  "version": "0.10.6",
+  "version": "0.10.7",
   "homepage": "https://phero.dev",
   "repository": "phero-hq/phero",
   "bugs": "https://github.com/phero-hq/phero/issues",
@@ -16,8 +16,12 @@
   },
   "typesVersions": {
     "*": {
-      "index": ["./dist/index.d.ts"],
-      "runtime": ["./dist/runtime.d.ts"]
+      "index": [
+        "./dist/index.d.ts"
+      ],
+      "runtime": [
+        "./dist/runtime.d.ts"
+      ]
     }
   },
   "scripts": {
