@@ -4,8 +4,8 @@ import {
   PheroApp,
   parsePheroApp,
   PortInUseError,
-  RPCResult,
 } from "@phero/core"
+import { RPCResult } from "@phero/core/runtime"
 import { ServerCommandServe, ServerDevEventEmitter } from "@phero/dev"
 import crypto from "crypto"
 import { promises as fs } from "fs"

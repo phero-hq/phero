@@ -1,4 +1,4 @@
-export { parser, Parser, ParseResult } from "@phero/core"
+export { parser, Parser, ParseResult } from "@phero/core/runtime"
 
 export {
   PheroRequest,

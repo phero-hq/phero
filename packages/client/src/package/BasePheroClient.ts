@@ -1,4 +1,4 @@
-import type { ParseResult, DataParseError } from "@phero/core"
+import type { ParseResult, DataParseError } from "@phero/core/runtime"
 
 export interface PheroRequest {
   method: "GET" | "POST"
