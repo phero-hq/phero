@@ -36,10 +36,12 @@ function parseFunctionName(
     | ts.Identifier
     | ts.StringLiteral
     | ts.NumericLiteral
+    | ts.BigIntLiteral
     | ts.ComputedPropertyName
     | ts.PrivateIdentifier
     | ts.ObjectBindingPattern
-    | ts.ArrayBindingPattern,
+    | ts.ArrayBindingPattern
+    | ts.NoSubstitutionTemplateLiteral,
 ): string {
   if (
     ts.isNumericLiteral(functionName) ||
