@@ -27,6 +27,7 @@ export enum ParserModelType {
   BigIntLiteral = "bigint-literal",
   Generic = "generic",
   TemplateLiteral = "template-literal",
+  Unchecked = "unchecked",
 }
 
 export type ParserModel =
@@ -56,6 +57,7 @@ export type ParserModel =
   | BigIntLiteralParserModel
   | GenericParserModel
   | TemplateLiteralParserModel
+  | UncheckedParserModel
 
 export interface StringParserModel {
   type: ParserModelType.String
@@ -166,4 +168,8 @@ export interface BigIntParserModel {
 export interface BigIntLiteralParserModel {
   type: ParserModelType.BigIntLiteral
   literal: ts.PseudoBigInt
+}
+
+export interface UncheckedParserModel {
+  type: ParserModelType.Unchecked
 }

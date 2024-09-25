@@ -15,6 +15,8 @@ export interface PheroServiceDefinition {
 
 export type PheroContext<T = {}> = T
 
+export type PheroUnchecked<T> = T
+
 export type PheroNextFunction<T = void> = T extends void
   ? () => Promise<void>
   : (ctx: T) => Promise<void>

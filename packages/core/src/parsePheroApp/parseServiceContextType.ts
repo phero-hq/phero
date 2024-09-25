@@ -1,12 +1,17 @@
 import ts from "typescript"
 import { PheroParseError } from "../domain/errors"
 
-import { type MemberParserModel } from "../domain/ParserModel"
+import {
+  ParserModel,
+  ParserModelType,
+  type MemberParserModel,
+} from "../domain/ParserModel"
 import {
   type PheroFunction,
   type PheroMiddlewareConfig,
   type PheroServiceConfig,
 } from "../domain/PheroApp"
+import { DependencyMap } from "../generateModel"
 import { getNameAsString } from "../lib/tsUtils"
 
 export interface ServiceContext {
@@ -21,9 +26,10 @@ interface ContextProperty {
 export default function parseServiceContextType(
   serviceConfig: PheroServiceConfig,
   pheroFunctions: PheroFunction[],
+  deps: DependencyMap,
 ): ServiceContext | undefined {
   const { accumulatedContext, serviceContextProperties } =
-    calculateServiceContext(serviceConfig.middleware ?? [])
+    calculateServiceContext(serviceConfig.middleware ?? [], deps)
 
   for (const {
     contextType: contextParameterType,
@@ -69,6 +75,7 @@ interface MiddlewareContext {
 
 function calculateServiceContext(
   middlewares: PheroMiddlewareConfig[],
+  deps: DependencyMap,
 ): MiddlewareContext {
   const accumulatedContext: MemberParserModel[] = []
   const serviceContextProperties: ContextProperty[] = []
@@ -90,9 +97,18 @@ function calculateServiceContext(
           (m) => m.name === contextTypeModelMember.name,
         )
         if (!accumulatedMember) {
+          if (
+            containsPheroUnchecked(contextTypeModelMember, contextType, deps)
+          ) {
+            throw new PheroParseError(
+              "PheroUnchecked can't be service context",
+              contextType,
+            )
+          }
           serviceContextProperties.push(
             contextTypeProps[contextTypeModelMember.name],
           )
+
           accumulatedContext.push(contextTypeModelMember)
         } else {
           assertDeepEqual(
@@ -169,5 +185,60 @@ function assertDeepEqual(
 ): void {
   if (JSON.stringify(actualMember) !== JSON.stringify(expectedMember)) {
     throw error
+  }
+}
+
+function containsPheroUnchecked(
+  parserModel: ParserModel,
+  contextType: ts.TypeNode,
+  deps: DependencyMap,
+): boolean {
+  switch (parserModel.type) {
+    case ParserModelType.Object:
+      return parserModel.members.some((member) =>
+        containsPheroUnchecked(member, contextType, deps),
+      )
+    case ParserModelType.Member:
+      return containsPheroUnchecked(parserModel.parser, contextType, deps)
+    case ParserModelType.IndexMember:
+      return (
+        containsPheroUnchecked(parserModel.keyParser, contextType, deps) ||
+        containsPheroUnchecked(parserModel.parser, contextType, deps)
+      )
+    case ParserModelType.Array:
+      return containsPheroUnchecked(parserModel.element, contextType, deps)
+    case ParserModelType.ArrayElement:
+      return containsPheroUnchecked(parserModel.parser, contextType, deps)
+    case ParserModelType.Tuple:
+      return parserModel.elements.some((element) =>
+        containsPheroUnchecked(element, contextType, deps),
+      )
+    case ParserModelType.TupleElement:
+      return containsPheroUnchecked(parserModel.parser, contextType, deps)
+    case ParserModelType.Union:
+      return parserModel.oneOf.some((element) =>
+        containsPheroUnchecked(element, contextType, deps),
+      )
+    case ParserModelType.Intersection:
+      return parserModel.parsers.some((parser) =>
+        containsPheroUnchecked(parser, contextType, deps),
+      )
+    case ParserModelType.Reference:
+    case ParserModelType.Generic: {
+      const parser = deps.get(parserModel.typeName)
+      if (!parser) {
+        throw new PheroParseError(
+          `Can't find parser with name ${parserModel.typeName}`,
+          contextType,
+        )
+      }
+      return containsPheroUnchecked(parser, contextType, deps)
+    }
+
+    case ParserModelType.Unchecked:
+      return true
+
+    default:
+      return false
   }
 }

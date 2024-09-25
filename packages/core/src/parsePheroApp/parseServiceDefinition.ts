@@ -51,6 +51,7 @@ export default function parseServiceDefinition(
   const serviceContextConfig = parseServiceContextType(
     serviceConfig,
     pheroFunctions,
+    deps,
   )
 
   return {
