@@ -261,12 +261,18 @@ function generateFromDeclarationWithDeclaration(
   if (ts.isImportSpecifier(declaration)) {
     const symbol = typeChecker.getSymbolAtLocation(declaration.name)
     if (!symbol) {
-      throw new PheroParseError("HUWEWE 1", declaration)
+      throw new PheroParseError(
+        "No symbol found (generateFromDeclaration)",
+        declaration,
+      )
     }
 
     const aliasSymbol = typeChecker.getAliasedSymbol(symbol)
     if (!aliasSymbol.declarations?.[0]) {
-      throw new PheroParseError("HUWEWE 2", declaration)
+      throw new PheroParseError(
+        "No declaration found (generateFromDeclaration)",
+        declaration,
+      )
     }
 
     return generateFromDeclarationWithDeclaration(
