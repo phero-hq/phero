@@ -6,11 +6,6 @@ import {
 } from "."
 import { PheroParseError } from "../domain/errors"
 import {
-  getObjectFlags,
-  getSymbolFlags,
-  getTypeFlags,
-} from "./generateParserModelUtils"
-import {
   type IndexMemberParserModel,
   type MemberParserModel,
   type ParserModel,
@@ -18,6 +13,7 @@ import {
   type TupleElementParserModel,
 } from "../domain/ParserModel"
 import generateFromTypeNode from "./generateFromTypeNode"
+import { getTypeFlags } from "./generateParserModelUtils"
 
 export default function generateFromType(
   type: ts.Type,
