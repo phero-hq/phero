@@ -269,7 +269,7 @@ describe("parsePheroApp middleware", () => {
     )
   })
 
-  test.only("PheroUnchecked can't be used for service context", () => {
+  test("PheroUnchecked can't be used for service context", () => {
     expect(() =>
       parseProgram(
         createTestProgram(`
