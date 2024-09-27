@@ -14,7 +14,7 @@ export class MissingPheroFileError extends Error {
 }
 
 export class PheroParseError extends Error {
-  constructor(message: string, public readonly node: ts.Node) {
+  constructor(message: string, node: ts.Node) {
     super(generateErrorMessage(message, node))
   }
 }
