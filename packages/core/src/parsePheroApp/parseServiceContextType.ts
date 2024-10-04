@@ -13,6 +13,7 @@ import {
 } from "../domain/PheroApp"
 import { DependencyMap } from "../generateModel"
 import { getNameAsString } from "../lib/tsUtils"
+import assert from "assert"
 
 export interface ServiceContext {
   properties: ContextProperty[]
@@ -101,7 +102,7 @@ function calculateServiceContext(
             containsPheroUnchecked(contextTypeModelMember, contextType, deps)
           ) {
             throw new PheroParseError(
-              "PheroUnchecked can't be service context",
+              "Contexts containing PheroUnchecked must be provided by a middleware",
               contextType,
             )
           }
@@ -226,19 +227,28 @@ function containsPheroUnchecked(
     case ParserModelType.Reference:
     case ParserModelType.Generic: {
       const parser = deps.get(parserModel.typeName)
-      if (!parser) {
-        throw new PheroParseError(
-          `Can't find parser with name ${parserModel.typeName}`,
-          contextType,
-        )
-      }
+      assert(parser, `Can't find parser with name ${parserModel.typeName}`)
       return containsPheroUnchecked(parser, contextType, deps)
     }
 
     case ParserModelType.Unchecked:
       return true
 
-    default:
+    case ParserModelType.String:
+    case ParserModelType.StringLiteral:
+    case ParserModelType.Number:
+    case ParserModelType.NumberLiteral:
+    case ParserModelType.Boolean:
+    case ParserModelType.BooleanLiteral:
+    case ParserModelType.Null:
+    case ParserModelType.Undefined:
+    case ParserModelType.Enum:
+    case ParserModelType.EnumMember:
+    case ParserModelType.Date:
+    case ParserModelType.Any:
+    case ParserModelType.BigInt:
+    case ParserModelType.BigIntLiteral:
+    case ParserModelType.TemplateLiteral:
       return false
   }
 }
