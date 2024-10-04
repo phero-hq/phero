@@ -9,7 +9,7 @@ import {
 export function generateServiceHandlerFile(service: PheroService): ts.Node[] {
   return [
     tsx.importDeclaration({
-      names: ["writeResponse", "parseServiceAndFunction", "readBody"],
+      names: ["writeResponse", "parseServiceAndFunction", "createInput"],
       module: "./lib",
     }),
     tsx.importDeclaration({
@@ -128,8 +128,13 @@ function switchService(service: PheroService): ts.Statement {
             tsx.expression.call(functionExecutor(service, func), {
               args: [
                 tsx.expression.await(
-                  tsx.expression.call("readBody", {
-                    args: ["req"],
+                  tsx.expression.call("createInput", {
+                    args: [
+                      "req",
+                      service.config.isRequestPopulated
+                        ? tsx.literal.true
+                        : tsx.literal.false,
+                    ],
                   }),
                 ),
               ],

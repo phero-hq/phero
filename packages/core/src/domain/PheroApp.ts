@@ -61,12 +61,14 @@ export interface PheroFunctionParameter {
 
 export interface PheroServiceConfig {
   middleware: PheroMiddlewareConfig[]
+  isRequestPopulated?: boolean
   contextType?: ts.TypeLiteralNode
   contextTypeModel?: ObjectParserModel
 }
 
 export interface PheroMiddlewareConfig {
   middleware: ts.FunctionLikeDeclarationBase
+  isRequestPopulated?: boolean
   contextType?: ts.TypeNode
   contextTypeModel: ObjectParserModel
   nextType?: ts.TypeNode

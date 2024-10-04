@@ -11,8 +11,23 @@ export default function generateLibFile(): ts.Node[] {
     return { serviceName, functionName };
 }
 
-export async function readBody(request: any) {
+function readBody(request: any) {
     return request.body ?? {}
+}
+
+export async function createInput(req: any, isRequestPopulated: boolean): any {
+    const body = readBody(req)
+    if (!isRequestPopulated) {
+        return body
+    }
+    const { context, ...props } = body
+    return {
+        context: {
+            ...context,
+            req,
+        },
+        ...props,
+    }
 }
 
 export async function writeResponse(
