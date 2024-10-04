@@ -1,16 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`parseClientCommand build cmd:   'phero-client build --help' 1`] = `
-Object {
+{
   "command": "build",
   "name": "help",
 }
 `;
 
 exports[`parseClientCommand build cmd:   'phero-client build --verbose' 1`] = `
-Object {
+{
   "name": "build",
-  "server": Object {
+  "server": {
     "url": "http://localhost:3030",
   },
   "verbose": true,
@@ -18,16 +18,16 @@ Object {
 `;
 
 exports[`parseClientCommand build cmd:   'phero-client build -h' 1`] = `
-Object {
+{
   "command": "build",
   "name": "help",
 }
 `;
 
 exports[`parseClientCommand build cmd:   'phero-client build http://localhost:1234 --verbose' 1`] = `
-Object {
+{
   "name": "build",
-  "server": Object {
+  "server": {
     "url": "http://localhost:1234",
   },
   "verbose": true,
@@ -35,9 +35,9 @@ Object {
 `;
 
 exports[`parseClientCommand build cmd:   'phero-client build http://localhost:1234' 1`] = `
-Object {
+{
   "name": "build",
-  "server": Object {
+  "server": {
     "url": "http://localhost:1234",
   },
   "verbose": false,
@@ -45,9 +45,9 @@ Object {
 `;
 
 exports[`parseClientCommand build cmd:   'phero-client build' 1`] = `
-Object {
+{
   "name": "build",
-  "server": Object {
+  "server": {
     "url": "http://localhost:3030",
   },
   "verbose": false,
@@ -55,43 +55,43 @@ Object {
 `;
 
 exports[`parseClientCommand common cmd:   'phero-client --help' 1`] = `
-Object {
+{
   "command": undefined,
   "name": "help",
 }
 `;
 
 exports[`parseClientCommand common cmd:   'phero-client --version' 1`] = `
-Object {
+{
   "name": "version",
 }
 `;
 
 exports[`parseClientCommand common cmd:   'phero-client -h' 1`] = `
-Object {
+{
   "command": undefined,
   "name": "help",
 }
 `;
 
 exports[`parseClientCommand common cmd:   'phero-client -v' 1`] = `
-Object {
+{
   "name": "version",
 }
 `;
 
 exports[`parseClientCommand watch cmd:   'phero-client watch --help' 1`] = `
-Object {
+{
   "command": "watch",
   "name": "help",
 }
 `;
 
 exports[`parseClientCommand watch cmd:   'phero-client watch --port 1234' 1`] = `
-Object {
+{
   "name": "watch",
   "port": 1234,
-  "server": Object {
+  "server": {
     "url": "http://localhost:3030",
   },
   "verbose": false,
@@ -99,10 +99,10 @@ Object {
 `;
 
 exports[`parseClientCommand watch cmd:   'phero-client watch --verbose' 1`] = `
-Object {
+{
   "name": "watch",
   "port": 4040,
-  "server": Object {
+  "server": {
     "url": "http://localhost:3030",
   },
   "verbose": true,
@@ -110,17 +110,17 @@ Object {
 `;
 
 exports[`parseClientCommand watch cmd:   'phero-client watch -h' 1`] = `
-Object {
+{
   "command": "watch",
   "name": "help",
 }
 `;
 
 exports[`parseClientCommand watch cmd:   'phero-client watch -p 1234' 1`] = `
-Object {
+{
   "name": "watch",
   "port": 1234,
-  "server": Object {
+  "server": {
     "url": "http://localhost:3030",
   },
   "verbose": false,
@@ -128,10 +128,10 @@ Object {
 `;
 
 exports[`parseClientCommand watch cmd:   'phero-client watch http://localhost:1234 --verbose --port 4321' 1`] = `
-Object {
+{
   "name": "watch",
   "port": 4321,
-  "server": Object {
+  "server": {
     "url": "http://localhost:1234",
   },
   "verbose": true,
@@ -139,10 +139,10 @@ Object {
 `;
 
 exports[`parseClientCommand watch cmd:   'phero-client watch http://localhost:1234' 1`] = `
-Object {
+{
   "name": "watch",
   "port": 4040,
-  "server": Object {
+  "server": {
     "url": "http://localhost:1234",
   },
   "verbose": false,
@@ -150,10 +150,10 @@ Object {
 `;
 
 exports[`parseClientCommand watch cmd:   'phero-client watch' 1`] = `
-Object {
+{
   "name": "watch",
   "port": 4040,
-  "server": Object {
+  "server": {
     "url": "http://localhost:3030",
   },
   "verbose": false,
@@ -161,8 +161,8 @@ Object {
 `;
 
 exports[`parsePheroCommand client cmd:   'phero client watch --port 1234' 1`] = `
-Object {
-  "argv": Array [
+{
+  "argv": [
     "watch",
     "--port",
     "1234",
@@ -172,8 +172,8 @@ Object {
 `;
 
 exports[`parsePheroCommand client cmd:   'phero client watch' 1`] = `
-Object {
-  "argv": Array [
+{
+  "argv": [
     "watch",
   ],
   "name": "client",
@@ -181,41 +181,41 @@ Object {
 `;
 
 exports[`parsePheroCommand common cmd:   'phero --help' 1`] = `
-Object {
+{
   "command": undefined,
   "name": "help",
 }
 `;
 
 exports[`parsePheroCommand common cmd:   'phero --version' 1`] = `
-Object {
+{
   "name": "version",
 }
 `;
 
 exports[`parsePheroCommand common cmd:   'phero -h' 1`] = `
-Object {
+{
   "command": undefined,
   "name": "help",
 }
 `;
 
 exports[`parsePheroCommand common cmd:   'phero -v' 1`] = `
-Object {
+{
   "name": "version",
 }
 `;
 
 exports[`parsePheroCommand dev-env cmd:   'phero' 1`] = `
-Object {
+{
   "name": "dev-env",
   "verbose": false,
 }
 `;
 
 exports[`parsePheroCommand server cmd:   'phero server serve --port 1234' 1`] = `
-Object {
-  "argv": Array [
+{
+  "argv": [
     "serve",
     "--port",
     "1234",
@@ -225,8 +225,8 @@ Object {
 `;
 
 exports[`parsePheroCommand server cmd:   'phero server serve' 1`] = `
-Object {
-  "argv": Array [
+{
+  "argv": [
     "serve",
   ],
   "name": "server",
@@ -234,61 +234,61 @@ Object {
 `;
 
 exports[`parseServerCommand build cmd:   'phero-server build --help' 1`] = `
-Object {
+{
   "command": "build",
   "name": "help",
 }
 `;
 
 exports[`parseServerCommand build cmd:   'phero-server build --verbose' 1`] = `
-Object {
+{
   "name": "build",
   "verbose": true,
 }
 `;
 
 exports[`parseServerCommand build cmd:   'phero-server build -h' 1`] = `
-Object {
+{
   "command": "build",
   "name": "help",
 }
 `;
 
 exports[`parseServerCommand build cmd:   'phero-server build' 1`] = `
-Object {
+{
   "name": "build",
   "verbose": false,
 }
 `;
 
 exports[`parseServerCommand common cmd:   'phero-server --help' 1`] = `
-Object {
+{
   "command": undefined,
   "name": "help",
 }
 `;
 
 exports[`parseServerCommand common cmd:   'phero-server --version' 1`] = `
-Object {
+{
   "name": "version",
 }
 `;
 
 exports[`parseServerCommand common cmd:   'phero-server -h' 1`] = `
-Object {
+{
   "command": undefined,
   "name": "help",
 }
 `;
 
 exports[`parseServerCommand common cmd:   'phero-server -v' 1`] = `
-Object {
+{
   "name": "version",
 }
 `;
 
 exports[`parseServerCommand export cmd:   'phero-server export --flavor gcloud-functions' 1`] = `
-Object {
+{
   "flavor": "gcloud-functions",
   "name": "export",
   "verbose": false,
@@ -296,7 +296,7 @@ Object {
 `;
 
 exports[`parseServerCommand export cmd:   'phero-server export --flavor nodejs --verbose' 1`] = `
-Object {
+{
   "flavor": "nodejs",
   "name": "export",
   "verbose": true,
@@ -304,7 +304,7 @@ Object {
 `;
 
 exports[`parseServerCommand export cmd:   'phero-server export --flavor nodejs' 1`] = `
-Object {
+{
   "flavor": "nodejs",
   "name": "export",
   "verbose": false,
@@ -312,7 +312,7 @@ Object {
 `;
 
 exports[`parseServerCommand export cmd:   'phero-server export --flavor vercel' 1`] = `
-Object {
+{
   "flavor": "vercel",
   "name": "export",
   "verbose": false,
@@ -320,28 +320,28 @@ Object {
 `;
 
 exports[`parseServerCommand export cmd:   'phero-server export --help' 1`] = `
-Object {
+{
   "command": "export",
   "name": "help",
 }
 `;
 
 exports[`parseServerCommand export cmd:   'phero-server export -h' 1`] = `
-Object {
+{
   "command": "export",
   "name": "help",
 }
 `;
 
 exports[`parseServerCommand serve cmd:   'phero-server serve --help' 1`] = `
-Object {
+{
   "command": "serve",
   "name": "help",
 }
 `;
 
 exports[`parseServerCommand serve cmd:   'phero-server serve --port 1234' 1`] = `
-Object {
+{
   "name": "serve",
   "port": 1234,
   "verbose": false,
@@ -349,7 +349,7 @@ Object {
 `;
 
 exports[`parseServerCommand serve cmd:   'phero-server serve --verbose' 1`] = `
-Object {
+{
   "name": "serve",
   "port": 3030,
   "verbose": true,
@@ -357,14 +357,14 @@ Object {
 `;
 
 exports[`parseServerCommand serve cmd:   'phero-server serve -h' 1`] = `
-Object {
+{
   "command": "serve",
   "name": "help",
 }
 `;
 
 exports[`parseServerCommand serve cmd:   'phero-server serve -p 1234 --verbose' 1`] = `
-Object {
+{
   "name": "serve",
   "port": 1234,
   "verbose": true,
@@ -372,7 +372,7 @@ Object {
 `;
 
 exports[`parseServerCommand serve cmd:   'phero-server serve -p 1234' 1`] = `
-Object {
+{
   "name": "serve",
   "port": 1234,
   "verbose": false,
@@ -380,7 +380,7 @@ Object {
 `;
 
 exports[`parseServerCommand serve cmd:   'phero-server serve' 1`] = `
-Object {
+{
   "name": "serve",
   "port": 3030,
   "verbose": false,
