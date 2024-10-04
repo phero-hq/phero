@@ -69,7 +69,10 @@ function generateServiceContextProps(
   serviceContext: ServiceContext | undefined,
   typeChecker: ts.TypeChecker,
   deps: DependencyMap,
-): Pick<PheroServiceConfig, "contextType" | "contextTypeModel"> {
+): Pick<
+  PheroServiceConfig,
+  "isRequestPopulated" | "contextType" | "contextTypeModel"
+> {
   if (!serviceContext) {
     return {}
   }
@@ -85,6 +88,7 @@ function generateServiceContextProps(
   )
 
   return {
+    isRequestPopulated: serviceContext.isRequestPopulated,
     contextType,
     contextTypeModel,
   }

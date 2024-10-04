@@ -15,6 +15,7 @@ import { DependencyMap } from "../generateModel"
 import { getNameAsString } from "../lib/tsUtils"
 
 export interface ServiceContext {
+  isRequestPopulated: boolean
   properties: ContextProperty[]
 }
 
@@ -28,7 +29,7 @@ export default function parseServiceContextType(
   pheroFunctions: PheroFunction[],
   deps: DependencyMap,
 ): ServiceContext | undefined {
-  const { accumulatedContext, serviceContextProperties } =
+  const { isRequestPopulated, accumulatedContext, serviceContextProperties } =
     calculateServiceContext(serviceConfig.middleware ?? [], deps)
 
   for (const {
@@ -65,10 +66,11 @@ export default function parseServiceContextType(
     return undefined
   }
 
-  return { properties: serviceContextProperties }
+  return { isRequestPopulated, properties: serviceContextProperties }
 }
 
 interface MiddlewareContext {
+  isRequestPopulated: boolean
   accumulatedContext: MemberParserModel[]
   serviceContextProperties: ContextProperty[]
 }
@@ -77,6 +79,7 @@ function calculateServiceContext(
   middlewares: PheroMiddlewareConfig[],
   deps: DependencyMap,
 ): MiddlewareContext {
+  let isRequestPopulated = false
   const accumulatedContext: MemberParserModel[] = []
   const serviceContextProperties: ContextProperty[] = []
 
@@ -97,17 +100,27 @@ function calculateServiceContext(
           (m) => m.name === contextTypeModelMember.name,
         )
         if (!accumulatedMember) {
+          const contextProp = contextTypeProps[contextTypeModelMember.name]
           if (
             containsPheroUnchecked(contextTypeModelMember, contextType, deps)
           ) {
-            throw new PheroParseError(
-              "PheroUnchecked can't be service context",
-              contextType,
-            )
+            if (isPheroRequestProp(contextProp)) {
+              if (!isPheroRequestPropNameCorrect(contextProp.signature)) {
+                throw new PheroParseError(
+                  `PheroRequest can only be set on a property "req", like: "req: PheroRequest".`,
+                  contextProp.signature,
+                )
+              }
+              isRequestPopulated = true
+            } else {
+              throw new PheroParseError(
+                "PheroUnchecked can't be service context",
+                contextType,
+              )
+            }
           }
-          serviceContextProperties.push(
-            contextTypeProps[contextTypeModelMember.name],
-          )
+
+          serviceContextProperties.push(contextProp)
 
           accumulatedContext.push(contextTypeModelMember)
         } else {
@@ -147,7 +160,20 @@ function calculateServiceContext(
     }
   }
 
-  return { accumulatedContext, serviceContextProperties }
+  return { isRequestPopulated, accumulatedContext, serviceContextProperties }
+}
+
+function isPheroRequestProp(contextProp: ContextProperty): boolean {
+  return (
+    !!contextProp.signature.type &&
+    ts.isTypeReferenceNode(contextProp.signature.type) &&
+    ts.isIdentifier(contextProp.signature.type.typeName) &&
+    contextProp.signature.type.typeName.text === "PheroRequest" &&
+    ts.isIdentifier(contextProp.signature.name)
+  )
+}
+function isPheroRequestPropNameCorrect(prop: ts.PropertySignature): boolean {
+  return ts.isIdentifier(prop.name) && prop.name.text === "req"
 }
 
 function getPropertySignatures(

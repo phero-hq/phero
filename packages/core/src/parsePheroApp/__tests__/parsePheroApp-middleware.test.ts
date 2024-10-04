@@ -304,4 +304,171 @@ describe("parsePheroApp middleware", () => {
       ),
     ).toThrow("PheroUnchecked can't be service context")
   })
+
+  test("PheroRequest should populate context with the NodeJS request object", () => {
+    const parsedApp = parseProgram(
+      createTestProgram(`
+        type PheroNextFunction<T = void> = T extends void
+          ? () => Promise<void>
+          : (ctx: T) => Promise<void>
+
+        type PheroContext<T = {}> = T
+
+        type PheroUnchecked<T> = T
+
+        class NodeJSIncomingMessage {
+          headers = {
+            "x-forwarded-for": "0.1.2.3"
+          }
+        }
+
+        type PheroRequest = PheroUnchecked<NodeJSIncomingMessage>
+        
+        async function getArticle(ctx: PheroContext<{ ip: string }>): Promise<string> {
+          return ctx.ip
+        }
+
+        async function myMiddleware(ctx: PheroContext<{ req: PheroRequest }>, next: PheroNextFunction<{ ip: string }>) {
+          const ip = ctx.req.headers["x-forwarded-for"]
+
+          if (typeof ip !== "string") {
+            throw new Error("IP should be a string")
+          }
+
+          await next({ ip })
+        }
+
+        export const articleService = createService({
+          getArticle,
+        }, {
+          middleware: [myMiddleware]
+        })
+      `),
+    )
+
+    expect(parsedApp).toMatchObject({
+      services: [
+        expect.objectContaining({
+          name: "articleService",
+          funcs: [
+            expect.objectContaining({
+              name: "getArticle",
+              contextTypeModel: {
+                type: "object",
+                members: [
+                  {
+                    type: "member",
+                    name: "ip",
+                    optional: false,
+                    parser: {
+                      type: "string",
+                    },
+                  },
+                ],
+              },
+            }),
+          ],
+          config: expect.objectContaining({
+            middleware: [
+              expect.objectContaining({
+                contextTypeModel: {
+                  type: "object",
+                  members: [
+                    {
+                      type: "member",
+                      name: "req",
+                      optional: false,
+                      parser: {
+                        type: "unchecked",
+                      },
+                    },
+                  ],
+                },
+              }),
+            ],
+          }),
+        }),
+      ],
+    })
+  })
+
+  test("PheroRequest can only be populated in middleware", () => {
+    expect(() =>
+      parseProgram(
+        createTestProgram(`
+        type PheroNextFunction<T = void> = T extends void
+          ? () => Promise<void>
+          : (ctx: T) => Promise<void>
+
+        type PheroContext<T = {}> = T
+
+        type PheroUnchecked<T> = T
+
+        class NodeJSIncomingMessage {
+          headers = {
+            "x-forwarded-for": "0.1.2.3"
+          }
+        }
+
+        type PheroRequest = PheroUnchecked<NodeJSIncomingMessage>
+        
+        async function getArticle(ctx: PheroContext<{ req: PheroRequest }>): Promise<string> {
+          return ctx.req.headers["x-forwarded-for"]
+        }
+
+        export const articleService = createService({
+          getArticle,
+        }, {
+          middleware: []
+        })
+      `),
+      ),
+    ).toThrowError(`Context member "req" is not accumulated in middlewares`)
+  })
+
+  test('PheroRequest can only be set on a prop named "req"', () => {
+    expect(() =>
+      parseProgram(
+        createTestProgram(`
+        type PheroNextFunction<T = void> = T extends void
+          ? () => Promise<void>
+          : (ctx: T) => Promise<void>
+
+        type PheroContext<T = {}> = T
+
+        type PheroUnchecked<T> = T
+
+        class NodeJSIncomingMessage {
+          headers = {
+            "x-forwarded-for": "0.1.2.3"
+          }
+        }
+
+        type PheroRequest = PheroUnchecked<NodeJSIncomingMessage>
+        
+        async function getArticle(ctx: PheroContext<{ ip: string }>): Promise<string> {
+          return ctx.ip
+        }
+
+        async function myMiddleware(ctx: PheroContext<{ request: PheroRequest }>, next: PheroNextFunction<{ ip: string }>) {
+          const ip = ctx.req.headers["x-forwarded-for"]
+
+          if (typeof ip !== "string") {
+            throw new Error("IP should be a string")
+          }
+
+          await next({ ip })
+        }
+
+        export const articleService = createService({
+          getArticle,
+        }, {
+          middleware: [myMiddleware]
+        })
+      `),
+      ),
+    ).toThrowError(
+      'PheroRequest can only be set on a property "req", like: "req: PheroRequest".',
+    )
+  })
 })

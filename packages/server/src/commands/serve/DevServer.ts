@@ -21,15 +21,9 @@ export interface PrintedClientCode {
   pheroClientSource: string
 }
 
-interface Headers {
-  [header: string]: string | string[] | undefined
-}
-
+type RCPRoute = (req: http.IncomingMessage) => Promise<RPCResult<any>>
 interface RPCRoutes {
-  [name: string]: (request: {
-    headers: Headers
-    body: any
-  }) => Promise<RPCResult<any>>
+  [name: string]: RCPRoute
 }
 
 export default class DevServer {
@@ -190,9 +184,7 @@ export default class DevServer {
         const route = this.routes[req.url]
         if (route) {
           try {
-            const { headers } = req
-            const body = await readBody(req)
-            const rpcResult = await route({ headers, body })
+            const rpcResult = await route(req)
 
             res.statusCode = rpcResult.status
 
@@ -282,9 +274,15 @@ export default class DevServer {
     const routes: RPCRoutes = {}
     for (const service of app.services) {
       for (const func of service.funcs) {
-        routes[`/${service.name}/${func.name}`] = async (input: any) => {
+        routes[`/${service.name}/${func.name}`] = async (
+          req: http.IncomingMessage,
+        ) => {
           const api = require(this.pheroExecutionJS)
-          return api[`rpc_executor_${service.name}__${func.name}`](input.body)
+          const input = await createInput(
+            req,
+            service.config.isRequestPopulated ?? false,
+          )
+          return api[`rpc_executor_${service.name}__${func.name}`](input)
         }
       }
     }
@@ -299,7 +297,7 @@ export default class DevServer {
   }
 }
 
-function readBody(request: http.IncomingMessage): Promise<object> {
+function readBody(request: http.IncomingMessage): Promise<any> {
   return new Promise<object>((resolve, reject) => {
     const chunks: Buffer[] = []
     request
@@ -314,6 +312,24 @@ function readBody(request: http.IncomingMessage): Promise<object> {
         reject(err)
       })
   })
+}
+
+async function createInput(
+  req: http.IncomingMessage,
+  isRequestPopulated: boolean,
+): Promise<any> {
+  const body = await readBody(req)
+  if (!isRequestPopulated) {
+    return body
+  }
+  const { context, ...props } = body
+  return {
+    ...props,
+    context: {
+      ...context,
+      req,
+    },
+  }
 }
 
 function computeClientCodeHash(clientCode: PrintedClientCode): string {

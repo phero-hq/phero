@@ -11,7 +11,7 @@ export default function generateLibFile(): ts.Node[] {
     return { serviceName, functionName };
 }
 
-export async function readBody(request: any) {
+async function readBody(request: any) {
     return new Promise((resolve, reject) => {
         const chunks = []
         request
@@ -25,6 +25,21 @@ export async function readBody(request: any) {
             reject(err)
             })
         })
+}
+
+export async function createInput(req: any, isRequestPopulated: boolean): any {
+    const body = await readBody(req)
+    if (!isRequestPopulated) {
+        return body
+    }
+    const { context, ...props } = body
+    return {
+        context: {
+            ...context,
+            req,
+        },
+        ...props,
+    }
 }
 
 export async function writeResponse(

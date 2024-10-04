@@ -5,6 +5,7 @@ export {
   RPCResult,
   DataParseError,
 } from "@phero/core/runtime"
+import { IncomingMessage } from "http"
 
 export type PheroServiceFunctions = Record<string, Function>
 
@@ -25,6 +26,8 @@ export type PheroMiddlewareFunction<C, N> = (
   ctx: PheroContext<C>,
   next: PheroNextFunction<N>,
 ) => Promise<void>
+
+export type PheroRequest = PheroUnchecked<IncomingMessage>
 
 export interface PheroServiceConfig {
   middleware: PheroMiddlewareFunction<any, void>[]

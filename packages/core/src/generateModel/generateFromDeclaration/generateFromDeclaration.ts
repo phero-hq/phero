@@ -187,6 +187,9 @@ function generateFromDeclarationWithDeclaration(
   }
 
   if (ts.isTypeAliasDeclaration(declaration)) {
+    if (isPheroRequestReference(typeNode)) {
+      return { root: { type: ParserModelType.Unchecked }, deps }
+    }
     if (isPheroUncheckedReference(typeNode)) {
       if (!isPheroUncheckedAllowed(typeNode)) {
         throw new PheroParseError(
@@ -194,7 +197,6 @@ function generateFromDeclarationWithDeclaration(
           typeNode,
         )
       }
-
       return { root: { type: ParserModelType.Unchecked }, deps }
     }
 
@@ -523,6 +525,14 @@ function isPheroUncheckedReference(typeNode: ts.TypeNode): boolean {
     ts.isTypeReferenceNode(typeNode) &&
     ts.isIdentifier(typeNode.typeName) &&
     typeNode.typeName.text === "PheroUnchecked"
+  )
+}
+
+function isPheroRequestReference(typeNode: ts.TypeNode): boolean {
+  return (
+    ts.isTypeReferenceNode(typeNode) &&
+    ts.isIdentifier(typeNode.typeName) &&
+    typeNode.typeName.text === "PheroRequest"
   )
 }
 
