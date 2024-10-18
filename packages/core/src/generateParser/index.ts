@@ -168,6 +168,7 @@ function generateParserRef(
 ): ParserFuncRef {
   switch (model.type) {
     case ParserModelType.Any:
+    case ParserModelType.Unchecked:
       return tsx.expression.identifier("parser.Any")
     case ParserModelType.String:
       return tsx.expression.identifier("parser.String")
@@ -338,6 +339,7 @@ function generateRegExpSegmentForParser(parser: ParserModel): string {
     case ParserModelType.Tuple:
     case ParserModelType.TupleElement:
     case ParserModelType.Date:
+    case ParserModelType.Unchecked:
       throw new Error("Template literal segment is not supported")
   }
 }

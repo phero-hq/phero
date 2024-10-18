@@ -187,6 +187,17 @@ function generateFromDeclarationWithDeclaration(
   }
 
   if (ts.isTypeAliasDeclaration(declaration)) {
+    if (isPheroUncheckedReference(typeNode)) {
+      if (!isPheroUncheckedAllowed(typeNode)) {
+        throw new PheroParseError(
+          "PheroUnchecked is only allowed within PheroContext and PheroNextFunction, like this: PheroContext<{ dbClient: PheroUnchecked<MyDBClient> }>",
+          typeNode,
+        )
+      }
+
+      return { root: { type: ParserModelType.Unchecked }, deps }
+    }
+
     if (isEventuallyConditionalTypeNode(typeNode, typeChecker)) {
       return generateFromType(
         type,
@@ -250,12 +261,18 @@ function generateFromDeclarationWithDeclaration(
   if (ts.isImportSpecifier(declaration)) {
     const symbol = typeChecker.getSymbolAtLocation(declaration.name)
     if (!symbol) {
-      throw new PheroParseError("HUWEWE 1", declaration)
+      throw new PheroParseError(
+        "No symbol found (generateFromDeclaration)",
+        declaration,
+      )
     }
 
     const aliasSymbol = typeChecker.getAliasedSymbol(symbol)
     if (!aliasSymbol.declarations?.[0]) {
-      throw new PheroParseError("HUWEWE 2", declaration)
+      throw new PheroParseError(
+        "No declaration found (generateFromDeclaration)",
+        declaration,
+      )
     }
 
     return generateFromDeclarationWithDeclaration(
@@ -499,4 +516,29 @@ function isEventuallyConditionalTypeNode(
   }
 
   return false
+}
+
+function isPheroUncheckedReference(typeNode: ts.TypeNode): boolean {
+  return (
+    ts.isTypeReferenceNode(typeNode) &&
+    ts.isIdentifier(typeNode.typeName) &&
+    typeNode.typeName.text === "PheroUnchecked"
+  )
+}
+
+function isPheroUncheckedAllowed(node: ts.Node): boolean {
+  if (ts.isSourceFile(node)) {
+    return false
+  }
+
+  if (
+    ts.isParameter(node.parent) &&
+    ts.isTypeReferenceNode(node) &&
+    ts.isIdentifier(node.typeName) &&
+    ["PheroContext", "PheroNextFunction"].includes(node.typeName.text)
+  ) {
+    return true
+  }
+
+  return isPheroUncheckedAllowed(node.parent)
 }
