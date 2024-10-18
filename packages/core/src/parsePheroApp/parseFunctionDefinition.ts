@@ -45,13 +45,15 @@ function parseFunctionName(
 ): string {
   if (
     ts.isNumericLiteral(functionName) ||
+    ts.isBigIntLiteral(functionName) ||
     ts.isComputedPropertyName(functionName) ||
     ts.isPrivateIdentifier(functionName) ||
     ts.isObjectBindingPattern(functionName) ||
-    ts.isArrayBindingPattern(functionName)
+    ts.isArrayBindingPattern(functionName) ||
+    ts.isNoSubstitutionTemplateLiteral(functionName)
   ) {
     throw new PheroParseError(
-      "S117: Function name should have a clear identifier, no support for computed names or binding patterns" +
+      "S117: Function name should have a clear identifier, no support for computed names or binding patterns " +
         functionName.kind,
       functionName,
     )
