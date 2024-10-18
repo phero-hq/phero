@@ -77,7 +77,7 @@ function withExportModifier(ref: Model): Model {
     return ref
   }
 
-  const modifiersWithExport: ts.Modifier[] = [
+  const modifiersWithExport: ts.ModifierLike[] = [
     ...(ref.modifiers ?? []).filter(
       (m) => m.kind !== ts.SyntaxKind.DeclareKeyword,
     ),

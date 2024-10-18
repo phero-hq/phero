@@ -176,8 +176,7 @@ function rewriteTypeQueryNodes(declaration: Model, prog: ts.Program): Model {
   const typeChecker = prog.getTypeChecker()
 
   const transformer =
-    <T extends ts.Node>(context: ts.TransformationContext) =>
-    (rootNode: T) => {
+    (context: ts.TransformationContext) => (rootNode: ts.Node) => {
       function visit(node: ts.Node): ts.Node {
         if (ts.isTypeQueryNode(node)) {
           return createTypeQueryType(node.exprName, typeChecker)
@@ -188,7 +187,5 @@ function rewriteTypeQueryNodes(declaration: Model, prog: ts.Program): Model {
       return ts.visitNode(rootNode, visit)
     }
 
-  const result = ts.transform<Model>(declaration, [transformer])
-
-  return result.transformed[0]
+  return ts.transform(declaration, [transformer]).transformed[0] as Model
 }
